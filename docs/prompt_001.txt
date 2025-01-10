@@ -1,0 +1,19 @@
+I am making a 2D game using the Pygame framework.
+There is no camera. The entire playable area is visible on the screen at all times.
+There is only a single level. There is no main menu or scene switching.
+Player movement is clamped such that moving off the screen is impossible.
+Inside the playable area there are no walls or obstacles.
+The player is a blue colored circle that can be moved using WASD.
+To support all screen sizes, the player can move from -1 to 1 in x and y (floats).
+At the top of the screen is a red colored circle which is the enemy.
+The player can cast one of three abilities by pressing Q, E and R.
+There is a 1-second global cooldown before another ability can be cast.
+The player can press Q to cast their ability and damage the enemy.
+The size of the player and the enemy is proportional to their HP.
+When the player or enemy takes damage, their circle should get smaller.
+Similarly, when HP is gained, their circle should get bigger.
+Any HP loss should spawn several tiny circles proportional to the damage taken.
+Walking over these tiny circles causes the player to consume them and gain HP.
+An example: The player presses Q, dealing 10 damage to the (stationary) enemy.
+Now, the enemy shrinks and spawn 5 tiny circles, each of which restores 2 hp.
+The player walks over these tiny circles, consuming them and growing 10 hp.

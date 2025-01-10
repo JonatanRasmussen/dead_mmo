@@ -33,7 +33,7 @@ class GameObj:
         obj.obj_id = 1
         obj.size = 0.02
         obj.movespeed = 0.01
-        obj.color = Color.GREEN
+        obj.color = Color.BLUE
         return obj
 
     @classmethod
@@ -174,8 +174,8 @@ class Launcher:
 
     def draw_object(self, game_obj: GameObj) -> None:
         # Convert from unit coordinates (0-1) to screen coordinates
-        screen_x = (self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.pos_x * self.PLAY_WIDTH)
-        screen_y = (self.BORDER_TOP * self.WINDOW_HEIGHT + game_obj.pos_y * self.PLAY_HEIGHT)
+        screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.pos_x * self.PLAY_WIDTH
+        screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + game_obj.pos_y * self.PLAY_HEIGHT
         pos = (int(screen_x), int(screen_y))
         size = int(game_obj.size * self.PLAY_HEIGHT)
         pygame.draw.circle(self.screen, game_obj.color, pos, size)
