@@ -1,0 +1,113 @@
+[2024-03-09 18:50:03] {BudoB}: Today, Godots built-in deltaTime ran my code.
+[2024-03-09 18:53:19] {BudoB}: Godot also rendered and updated each combatObject as a circle.
+[2024-03-09 18:53:45] {BudoB}: I am very happy! ^^
+[2024-03-09 19:04:16] {BudoB}: Code Time = 5h 28m.
+
+[2024-03-11 04:04:38] {BudoB}: Late night programming. Productivity levels are lackluser but acceptable.
+[2024-03-11 04:06:17] {BudoB}: But I am having fun, and I'm doing progress. That's the important part.
+[2024-03-11 04:05:29] {BudoB}: I've been working on removing ISpell, ITargeting and ISpellEffect.
+[2024-03-11 04:06:54] {BudoB}: This should greatly simplify the code.
+[2024-03-11 04:07:24] {BudoB}: Code Time = 5h roughly (midnight reset).
+[2024-03-11 04:08:36] {BudoB}: Cheers! And goodnight...
+
+[2024-03-11 15:14:13] {BudoB}: I also went ahead and reworked CombatPacket.
+[2024-03-11 15:14:47] {BudoB}: Such a big refactor is a lot of work...
+[2024-03-11 15:15:38] {BudoB}: Imma take a break now. Cook some food and stuff.
+
+[2024-03-11 17:08:17] {BudoB}: Okay, I went shopping (snacking), did't cook food yet. Unlucky.
+
+[2024-03-12 04:10:05] {BudoB}: Code time = 4h roughly.
+
+[2024-03-13 18:23:40] {BudoB}: I've done it! HahahaHAHAHAH! The new processCombat() is working!!!111
+[2024-03-13 18:24:11] {BudoB}: There is so much code I can now D E L E T E .
+[2024-03-13 18:24:40] {BudoB}: But, I have gotten a truly scandalous idea.
+[2024-03-13 18:25:36] {BudoB}: What if CombatObj and CombatPacket became... One? o.O
+[2024-03-13 18:25:55] {BudoB}: Is it possible? One data unit to rule it all?
+[2024-03-13 18:26:24] {BudoB}: It would get rid of lots of code duplication.
+[2024-03-13 18:27:11] {BudoB}: I am either 200 IQ or 0 IQ right now. Only time will tell.
+[2024-03-13 18:27:18] {BudoB}: Code time today = 3h (but might work again later).
+
+[2024-03-14 02:28:03] {BudoB}: I have deleted 95% of the old code! It took 5 minutes.
+[2024-03-14 02:28:43] {BudoB}: I have also deleted the remaining 5%. It took 3 hours of bug fixing.
+[2024-03-14 02:29:02] {BudoB}: But it works now. And that is what matters!
+[2024-03-14 02:29:40] {BudoB}: Sometimes it's good to be made humble by the software overlords.
+[2024-03-14 02:30:07] {BudoB}: Also, I have finally decided to use dots at the end of my diary entries.
+[2024-03-14 02:29:12] {BudoB}: Work time = 3h additional work (6h total).
+
+[2024-03-15 19:54:26] {BudoB}: Research makes the dream work.
+[2024-03-15 20:54:31] {BudoB}: Huuuge refactor. It makes my brain hurt.
+[2024-03-15 20:54:47] {BudoB}: But hopefully the new PacketDispatcher approach is way more clean.
+[2024-03-15 20:55:08] {BudoB}: It also integrates the log better.
+[2024-03-15 20:55:16] {BudoB}: Code time = 6 hours.
+
+[2024-03-16 03:46:21] {BudoB}: I feel hope. Coding is fun. This is a good implementation.
+[2024-03-16 03:46:32] {BudoB}: I wonder if this project will amount to anything?
+[2024-03-16 03:46:49] {BudoB}: I am sacrificing both sleep and my education.
+[2024-03-16 03:47:03] {BudoB}: Regardless, I am having fun and I'm learning a lot.
+[2024-03-16 03:47:18] {BudoB}: Life is good. But right now, sleep is better.
+[2024-03-16 03:47:50] {BudoB}: Coding time = 2.5 hours (but will continue tomorrow)!
+
+[2024-03-18 03:16:35] {BudoB}: This has been a very long day.
+[2024-03-18 03:16:54] {BudoB}: I feel this was a bit too much.
+[2024-03-18 03:17:11] {BudoB}: My new code is better but progress is slow.
+[2024-03-18 03:17:22] {BudoB}: Fandersay was curious about screenshots of my game.
+[2024-03-18 03:17:52] {BudoB}: I told him that creating a combat engine from scrath is tedious.
+[2024-03-18 03:18:04] {BudoB}: I want something to show him soon.
+[2024-03-18 03:18:30] {BudoB}: Maybe my lack of progress is a skill issue.
+[2024-03-18 03:18:40] {BudoB}: Maybe it is an OOP issue.
+[2024-03-18 03:18:46] {BudoB}: Maybe it is a perfectionism issue.
+[2024-03-18 03:18:53] {BudoB}: Writing good software is hard.
+[2024-03-18 03:19:00] {BudoB}: Cooking spaghetti is easy.
+[2024-03-18 03:19:06] {BudoB}: Maybe I should have been a chef.
+[2024-03-18 03:19:38] {BudoB}: What I have so far is a good fundament (famous last words).
+[2024-03-18 03:20:01] {BudoB}: I hope this will amount to something.
+[2024-03-18 03:20:21] {BudoB}: Coding time = 10 hours.
+
+[2024-03-19 23:59:37] {BudoB}: I'm not feeling too chatty.
+[2024-03-20 00:00:00] {BudoB}: This refactor is no longer a fun and exciting challenge.
+[2024-03-20 00:00:12] {BudoB}: I now know how much shit I don't know.
+[2024-03-20 00:00:27] {BudoB}: It's overwhelming. My optimism is cracking.
+[2024-03-20 00:00:44] {BudoB}: Coding time = 8.5 hours.
+
+[2024-03-21 04:36:56] {BudoB}: Thank god I recovered. The amount of bugs were not pretty.
+[2024-03-21 04:37:19] {BudoB}: The project is back on track. Hope has recovered.
+[2024-03-21 04:37:41] {BudoB}: I now have an awesome log to print the encounter! ^-^
+[2024-03-21 04:38:07] {BudoB}: Code time = 9 hours.
+
+[2024-03-21 20:28:07] {BudoB}: I've coded a lot. And things are improving.
+[2024-03-21 20:28:30] {BudoB}: That is very vague, I know. I am tired. Very tired.
+[2024-03-21 20:28:48] {BudoB}: Code time = 5 hours.
+
+[2024-03-27 23:29:44] {BudoB}: Got sick for a few days. But I am ready to get back in the saddle.
+[2024-03-27 23:30:05] {BudoB}: Code time = 3.5 hours.
+
+[2024-03-28 23:43:21] {BudoB}: Many many bugs in code.
+[2024-03-28 23:43:33] {BudoB}: But I can now move up/down/left/right.
+[2024-03-28 23:43:52] {BudoB}: AND, I can fire abilities! This is so freakin awesome.
+[2024-03-28 23:45:03] {BudoB}: I have a huge smile right now! (>^-^>)
+[2024-03-28 23:45:58] {BudoB}: The small moments of progress and success are important to celebrate.
+[2024-03-28 23:46:26] {BudoB}: I read this pdf about the early days of World of Warcraft development.
+[2024-03-28 23:46:46] {BudoB}: It took YEARS of development to have ANYTHING playable.
+[2024-03-28 23:48:03] {BudoB}: The first half of development, WoW was just code on a screen.
+[2024-03-28 23:48:14] {BudoB}: Nothing graphical outside of the third-party modeling software used.
+[2024-03-28 23:58:59] {BudoB}: Wanted to find the sauce, it is The WoW Diary by John Staats.
+[2024-03-28 23:59:59] {BudoB}: Code time = 5.5 hours.
+
+[2024-04-04 04:21:32] {BudoB}: Good progress. My architecture seems scalable.
+[2024-04-04 04:21:52] {BudoB}: It is straight spaghetti, like cable management done right.
+[2024-04-04 04:22:21] {BudoB}: However it is very late at night and my brain is deep fried.
+[2024-04-04 04:22:33] {BudoB}: Code time = 7 hours.
+
+[2025-01-04 16:00:46] {BudoB}: Hello, long time no see.
+
+[2025-01-10 23:25:22] {BudoB}: I COPY-PASTED THIS DEVDIARY.TXT OVER INTO MY NEW PYTHON CODEBASE
+[2025-01-10 23:23:12] {BudoB}: Well, well, well. That other code base was some stinking garbage.
+[2025-01-10 23:23:28] {BudoB}: Who wrote that, hah? Silly person.
+[2025-01-10 23:23:40] {BudoB}: No for real, it is scary to see my days of work rot away this fast.
+[2025-01-10 23:24:13] {BudoB}: This is a fresh start, learning from my mistakes.
+[2025-01-10 23:25:11] {BudoB}: And this time, it's in python. Hopefully we will not get stuck now.
+[2025-01-10 23:26:45] {BudoB}: I am happy. This is the start of something great. Hope is sweet.
+[2025-01-10 23:27:09] {BudoB}: It is what keeps us going in life. Dare I say, it is life itself.
+[2025-01-10 23:27:51] {BudoB}: Hope and cope is only a single letter apart. Interesting indeed.
+[2025-01-10 23:28:20] {BudoB}: Anyway, I am rambling. Off to bed I go.
+[2025-01-10 23:28:30] {BudoB}: Code time = 6 hours.
