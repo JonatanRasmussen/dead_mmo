@@ -1,24 +1,21 @@
-from typing import Dict, List, Tuple, Final, Optional
+from typing import Dict, Set, List, Tuple, Final, Optional
+from enum import Enum
 
 class IdGen:
     EMPTY_ID = 0
 
     def __init__(self) -> None:
-        self._aura_next_id: int = 0
-        self._combat_event_next_id: int = 0
-        self._game_obj_next_id: int = 0
+        self._next_id: int = 0
+        self._reserved_ids: Set[int] = set()
 
-    def new_aura_id(self) -> int:
-        self._aura_next_id += 1
-        return self._aura_next_id
+    def new_id(self) -> int:
+        self._next_id += 1
+        while self._next_id in self._reserved_ids:
+            self._next_id += 1
+        return self._next_id
 
-    def new_combat_event_id(self) -> int:
-        self._combat_event_next_id += 1
-        return self._combat_event_next_id
-
-    def new_game_obj_id(self) -> int:
-        self._game_obj_next_id += 1
-        return self._game_obj_next_id
+    def reserve_id(self, reserved_id: int) -> None:
+        self._reserved_ids.add(reserved_id)
 
 
 class Spell:
@@ -97,7 +94,7 @@ class Aura:
             self.tick_interval = 0.0
             self.time_since_last_tick = 0.0
 
-    def process_tick_if_ready(self) -> bool:
+    def try_process_tick(self) -> bool:
         if self.ticks_awaiting_processing > 0:
             self.ticks_awaiting_processing -= 1
             return True
@@ -133,11 +130,26 @@ class GameObj:
         self.obj_id: Final[int] = obj_id
         self.npc: Npc = Npc.create_empty()
         self.position: Pos = Pos()
+        self.hp: float = 0.0
 
     @classmethod
     def create_empty(cls) -> 'GameObj':
         return GameObj(IdGen.EMPTY_ID)
 
+    def get_spell_modifier(self) -> float:
+        #calculation not yet implemented
+        return 1.0
+
+    def suffer_damage(self, spell_power: float) -> None:
+        self.hp -= spell_power
+
+
+class EventOutcome(Enum):
+    EMPTY = 0
+    PENDING = 1
+    SUCCESS = 2
+    FAILED = 3
+    MISSED = 4
 
 class CombatEvent:
     def __init__(self, event_id: int, timestamp: float, source: GameObj, act: Spell, dest: Pos) -> None:
@@ -146,10 +158,20 @@ class CombatEvent:
         self.source: GameObj = source
         self.spell: Spell = act
         self.dest: Pos = dest
+        self.targeted_obj: GameObj = GameObj.create_empty()
+        self.outcome: EventOutcome = EventOutcome.EMPTY
+
 
     @classmethod
     def create_empty(cls) -> 'CombatEvent':
         return CombatEvent(IdGen.EMPTY_ID, 0.0, GameObj.create_empty(), Spell.create_empty(), Pos.create_empty())
+
+    def is_empty(self) -> bool:
+        return self.event_id == IdGen.EMPTY_ID
+
+    def decide_outcome(self) -> None:
+        #not implemented
+        self.outcome = EventOutcome.SUCCESS
 
 
 class Zone:
@@ -198,29 +220,42 @@ class Ruleset:
 
 class Manager:
     def __init__(self) -> None:
-        self.delta_time: float = 0.0
-        self.world: World = World.create_empty()
-        self.combat_events: List[CombatEvent] = []
-        self.id_generator: IdGen = IdGen()
+        self.aura_id_generator: IdGen = IdGen()
+        self.event_id_generator: IdGen = IdGen()
+        self.game_obj_id_generator: IdGen = IdGen()
         self.ruleset: Ruleset = Ruleset()
+        self.world: World = World.create_empty()
+        self.current_events: List[CombatEvent] = []
+        self.combat_event_log: Dict[int, str] = {}
+
 
     def execute_combat_for_next_timestamp(self, delta_time: float) -> None:
-        self.update_timers_and_fetch_events(delta_time)
-        self.handle_combat_events()
+        self.update_auras(delta_time)
+        self.validate_combat_events()
 
-    def update_timers_and_fetch_events(self, delta_time: float) -> None:
+    def update_auras(self, delta_time: float) -> None:
         aura_ids: List[int] = sorted(self.world.auras.keys())
         for aura_id in aura_ids:
             aura = self.world.get_aura(aura_id)
             aura.update_timers(delta_time)
-            if aura.process_tick_if_ready():
-                event_id = self.id_generator.new_combat_event_id()
-                timestamp = self.world.timestamp
-                source = self.world.get_game_obj(aura.source_id)
-                act = self.ruleset.get_spell(aura.spell_id)
-                dest = self.world.get_game_obj(aura.target_id).position
-                self.combat_events.append(CombatEvent(event_id, timestamp, source, act, dest))
+            if aura.try_process_tick():
+                self.create_combat_event_for_aura_tick(aura)
 
-    def handle_combat_events(self) -> None:
-        # this is todo (finish tomorrow)
-        pass
+    def create_combat_event_for_aura_tick(self, aura: Aura) -> None:
+        event_id = self.event_id_generator.new_id()
+        timestamp = self.world.timestamp
+        source = self.world.get_game_obj(aura.source_id)
+        act = self.ruleset.get_spell(aura.spell_id)
+        dest = self.world.get_game_obj(aura.target_id).position
+        event = CombatEvent(event_id, timestamp, source, act, dest)
+        event.targeted_obj = self.world.get_game_obj(dest.target_obj_id)
+        event.outcome = EventOutcome.PENDING
+        self.current_events.append(event)
+
+    def validate_combat_events(self) -> None:
+        for event in self.current_events:
+            event.decide_outcome()
+            if event.outcome == EventOutcome.SUCCESS:
+                spell_power = event.spell.power * event.source.get_spell_modifier()
+                event.targeted_obj.suffer_damage(spell_power)
+        self.current_events.clear()
