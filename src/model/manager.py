@@ -1,23 +1,6 @@
 from typing import Dict, Set, List, Tuple, Final, Optional
 from enum import Enum
 
-class IdGen:
-    EMPTY_ID = 0
-
-    def __init__(self) -> None:
-        self._next_id: int = 0
-        self._reserved_ids: Set[int] = set()
-
-    def new_id(self) -> int:
-        self._next_id += 1
-        while self._next_id in self._reserved_ids:
-            self._next_id += 1
-        return self._next_id
-
-    def reserve_id(self, reserved_id: int) -> None:
-        self._reserved_ids.add(reserved_id)
-
-
 class Spell:
     def __init__(self, spell_id: int) -> None:
         self.spell_id: Final[int] = spell_id
@@ -26,6 +9,7 @@ class Spell:
         self.finish_spell_id: int = 0
 
         self.power: float = 0
+        self.variance: float = 0
 
         self.range_limit: float = 0
         self.cost: float = 0
@@ -35,7 +19,6 @@ class Spell:
         self.cooldown: float = 0
         self.max_stacks: int = 0
         self.gcd_mod: float = 0
-        self.knockback: float = 0
 
         self.flag_is_channel: bool = False
         self.flag_spawn_npc: bool = False
@@ -43,9 +26,11 @@ class Spell:
         self.flag_try_move: bool = False
         self.flag_force_move: bool = False
 
+        self.flag_player_movement: bool = False
+
     @classmethod
     def create_empty(cls) -> 'Spell':
-        return Spell(IdGen.EMPTY_ID)
+        return Spell(IdGenerator.EMPTY_ID)
 
 
 class Aura:
@@ -67,7 +52,10 @@ class Aura:
 
     @classmethod
     def create_empty(cls) -> 'Aura':
-        return Aura(IdGen.EMPTY_ID, IdGen.EMPTY_ID, IdGen.EMPTY_ID, Spell.create_empty())
+        return Aura(IdGenerator.EMPTY_ID, IdGenerator.EMPTY_ID, IdGenerator.EMPTY_ID, Spell.create_empty())
+
+    def is_empty(self) -> bool:
+        return self.aura_id == IdGenerator.EMPTY_ID
 
     def apply_stack(self) -> None:
         new_time_remaining = self.spell_duration
@@ -122,7 +110,10 @@ class Npc:
 
     @classmethod
     def create_empty(cls) -> 'Npc':
-        return Npc(IdGen.EMPTY_ID)
+        return Npc(IdGenerator.EMPTY_ID)
+
+    def is_empty(self) -> bool:
+        return self.npc_id == IdGenerator.EMPTY_ID
 
 
 class GameObj:
@@ -134,7 +125,10 @@ class GameObj:
 
     @classmethod
     def create_empty(cls) -> 'GameObj':
-        return GameObj(IdGen.EMPTY_ID)
+        return GameObj(IdGenerator.EMPTY_ID)
+
+    def is_empty(self) -> bool:
+        return self.obj_id == IdGenerator.EMPTY_ID
 
     def get_spell_modifier(self) -> float:
         #calculation not yet implemented
@@ -164,10 +158,10 @@ class CombatEvent:
 
     @classmethod
     def create_empty(cls) -> 'CombatEvent':
-        return CombatEvent(IdGen.EMPTY_ID, 0.0, GameObj.create_empty(), Spell.create_empty(), Pos.create_empty())
+        return CombatEvent(IdGenerator.EMPTY_ID, 0.0, GameObj.create_empty(), Spell.create_empty(), Pos.create_empty())
 
     def is_empty(self) -> bool:
-        return self.event_id == IdGen.EMPTY_ID
+        return self.event_id == IdGenerator.EMPTY_ID
 
     def decide_outcome(self) -> None:
         #not implemented
@@ -180,7 +174,11 @@ class Zone:
 
     @classmethod
     def create_empty(cls) -> 'Zone':
-        return Zone(IdGen.EMPTY_ID)
+        return Zone(IdGenerator.EMPTY_ID)
+
+    def is_empty(self) -> bool:
+        return self.zone_id == IdGenerator.EMPTY_ID
+
 
 
 class World:
@@ -193,13 +191,32 @@ class World:
 
     @classmethod
     def create_empty(cls) -> 'World':
-        return World(IdGen.EMPTY_ID)
+        return World(IdGenerator.EMPTY_ID)
 
     def get_game_obj(self, obj_id: int) -> GameObj:
+        assert obj_id in self.game_objs
         return self.game_objs.get(obj_id, GameObj.create_empty())
 
     def get_aura(self, aura_id: int) -> Aura:
+        assert aura_id in self.auras
         return self.auras.get(aura_id, Aura.create_empty())
+
+
+class IdGenerator:
+    EMPTY_ID = 0
+
+    def __init__(self) -> None:
+        self._next_id: int = 0
+        self._reserved_ids: Set[int] = set()
+
+    def new_id(self) -> int:
+        self._next_id += 1
+        while self._next_id in self._reserved_ids:
+            self._next_id += 1
+        return self._next_id
+
+    def reserve_id(self, reserved_id: int) -> None:
+        self._reserved_ids.add(reserved_id)
 
 
 class Ruleset:
@@ -207,31 +224,99 @@ class Ruleset:
         self.npcs: Dict[int, Npc] = {}
         self.spells: Dict[int, Spell] = {}
         self.zones: Dict[int, Zone] = {}
+        self.populate_ruleset()
 
     def get_npc(self, npc_id: int) -> Npc:
+        assert npc_id in self.npcs
         return self.npcs.get(npc_id, Npc.create_empty())
 
+    def add_npc(self, npc: Npc) -> None:
+        assert npc.npc_id not in self.npcs
+        self.npcs[npc.npc_id] = npc
+
     def get_spell(self, spell_id: int) -> Spell:
+        assert spell_id in self.spells
         return self.spells.get(spell_id, Spell.create_empty())
 
+    def add_spell(self, spell: Spell) -> None:
+        assert spell.spell_id not in self.spells
+        self.spells[spell.spell_id] = spell
+
     def get_zone(self, zone_id: int) -> Zone:
+        assert zone_id in self.zones
         return self.zones.get(zone_id, Zone.create_empty())
 
+    def add_zone(self, zone: Zone) -> None:
+        assert zone.zone_id not in self.zones
+        self.zones[zone.zone_id] = zone
+
+    def populate_ruleset(self) -> None:
+        templates = Database()
+        for npc in templates.npcs:
+            self.add_npc(npc)
+        for spell in templates.spells:
+            self.add_spell(spell)
+        for zone in templates.zones:
+            self.add_zone(zone)
+
+
+class PlayerInput:
+    def __init__(self) -> None:
+        self.event_id_gen: IdGenerator = IdGenerator()
+        self.combat_events: List[CombatEvent] = []
+        self.is_pressing_move_up: bool = False
+        self.is_pressing_move_down: bool = False
+        self.is_pressing_move_left: bool = False
+        self.is_pressing_move_right: bool = False
+        self.is_pressing_ability_1: bool = False
+        self.is_pressing_ability_2: bool = False
+        self.is_pressing_ability_3: bool = False
+        self.is_pressing_ability_4: bool = False
+
+    def reset_to_empty_input(self) -> None:
+        self.is_pressing_move_up = False
+        self.is_pressing_move_down = False
+        self.is_pressing_move_left = False
+        self.is_pressing_move_right = False
+        self.is_pressing_ability_1 = False
+        self.is_pressing_ability_2 = False
+        self.is_pressing_ability_3 = False
+        self.is_pressing_ability_4 = False
+
+    def create_combat_events(self) -> None:
+        if self.is_moving():
+            pos: Pos = Pos()
+            if self.is_pressing_move_up:
+                pos.pos_y += 1.0
+            if self.is_pressing_move_left:
+                pos.pos_x -= 1.0
+            if self.is_pressing_move_down:
+                pos.pos_y -= 1.0
+            if self.is_pressing_move_right:
+                pos.pos_x += 1.0
+            event_id = self.event_id_gen.new_id()
+            #to be done: implement serialized combat event
+
+
+    def is_moving(self) -> bool:
+        return (self.is_pressing_move_up or
+                self.is_pressing_move_down or
+                self.is_pressing_move_left or
+                self.is_pressing_move_right)
 
 class Manager:
     def __init__(self) -> None:
-        self.aura_id_generator: IdGen = IdGen()
-        self.event_id_generator: IdGen = IdGen()
-        self.game_obj_id_generator: IdGen = IdGen()
+        self.aura_id_gen: IdGenerator = IdGenerator()
+        self.event_id_gen: IdGenerator = IdGenerator()
+        self.game_obj_id_gen: IdGenerator = IdGenerator()
         self.ruleset: Ruleset = Ruleset()
         self.world: World = World.create_empty()
+        self.player_input: PlayerInput = PlayerInput()
         self.current_events: List[CombatEvent] = []
-        self.combat_event_log: Dict[int, str] = {}
-
 
     def execute_combat_for_next_timestamp(self, delta_time: float) -> None:
         self.update_auras(delta_time)
-        self.validate_combat_events()
+        self.process_combat_events()
 
     def update_auras(self, delta_time: float) -> None:
         aura_ids: List[int] = sorted(self.world.auras.keys())
@@ -242,7 +327,7 @@ class Manager:
                 self.create_combat_event_for_aura_tick(aura)
 
     def create_combat_event_for_aura_tick(self, aura: Aura) -> None:
-        event_id = self.event_id_generator.new_id()
+        event_id = self.event_id_gen.new_id()
         timestamp = self.world.timestamp
         source = self.world.get_game_obj(aura.source_id)
         act = self.ruleset.get_spell(aura.spell_id)
@@ -252,10 +337,41 @@ class Manager:
         event.outcome = EventOutcome.PENDING
         self.current_events.append(event)
 
-    def validate_combat_events(self) -> None:
+    def process_combat_events(self) -> None:
         for event in self.current_events:
             event.decide_outcome()
             if event.outcome == EventOutcome.SUCCESS:
                 spell_power = event.spell.power * event.source.get_spell_modifier()
                 event.targeted_obj.suffer_damage(spell_power)
         self.current_events.clear()
+
+
+class Database:
+    def __init__(self) -> None:
+        self.npcs: List[Npc] = [
+
+        ]
+        self.spells: List[Spell] = [
+            Database.empty_spell(),
+            Database.player_movement(),
+        ]
+        self.zones: List[Zone] = [
+
+        ]
+
+    @staticmethod
+    def empty_spell() -> Spell:
+        return Spell(0)
+
+    @staticmethod
+    def player_movement() -> Spell:
+        spell = Spell(1)
+        spell.flag_player_movement = True
+        return spell
+
+    @staticmethod
+    def test_st_insta() -> Spell:
+        spell = Spell(2)
+        spell.range_limit = 99999.0
+        spell.power = 10.0
+        return spell
