@@ -1,5 +1,5 @@
-from launcher import Launcher
+from src.model.pygame_launcher import PygameLauncher
 
 #%%
 if __name__ == "__main__":
-    Launcher().run_game()
+    PygameLauncher().run_game()

@@ -1,8 +1,18 @@
-from typing import Dict, Set, List, Deque, Tuple, Final, Optional
+from typing import Dict, Set, List, Any, Deque, Tuple, Final, Optional
 from collections import deque
 from enum import Enum, Flag, auto
+import math
 import json
-from copy import deepcopy
+from copy import copy, deepcopy
+
+class Color:
+    BLACK: Tuple[int, int, int] = (0, 0, 0)
+    WHITE: Tuple[int, int, int] = (255, 255, 255)
+    GREY: Tuple[int, int, int] = (128, 128, 128)
+    RED: Tuple[int, int, int] = (255, 0, 0)
+    GREEN: Tuple[int, int, int] = (0, 255, 0)
+    BLUE: Tuple[int, int, int] = (0, 0, 255)
+
 
 class SpellFlag(Flag):
     NONE = 0
@@ -16,6 +26,7 @@ class SpellFlag(Flag):
     WARP_TO_POSITION = auto()
     TRY_MOVE = auto()
     FORCE_MOVE = auto()
+
 
 class Spell:
     def __init__(self, spell_id: int) -> None:
@@ -44,15 +55,15 @@ class Spell:
         return Spell(IdGenerator.EMPTY_ID)
     @classmethod
     def from_json(cls, json_str: str) -> 'Spell':
-        return cls(**json.loads(json_str))
+        return cls(**{k: v for k, v in json.loads(json_str).items() if k in cls.__init__.__code__.co_varnames})
     def to_json(self) -> str:
-        return json.dumps(self.__dict__)
+        return json.dumps({key: value for key, value in self.__dict__.items() if value != Spell.create_empty().__dict__[key]})
+    def copy(self) -> 'Spell':
+        return copy(self)
     def is_equal(self, other) -> bool:
         if not isinstance(other, Spell):
             return False
         return self.__dict__ == other.__dict__
-    def copy(self) -> 'Spell':
-        return deepcopy(self)
 
     def has_pre_spell(self) -> bool:
         return self.setup_spell_id != IdGenerator.EMPTY_ID
@@ -102,7 +113,7 @@ class Aura:
             return False
         return self.__dict__ == other.__dict__
     def copy(self) -> 'Aura':
-        return deepcopy(self)
+        return copy(self)
     def is_empty(self) -> bool:
         return self.aura_id == IdGenerator.EMPTY_ID
 
@@ -156,7 +167,11 @@ class Pos:
         pos.pos_y = pos_y
         return pos
     def copy(self) -> 'Pos':
-        return deepcopy(self)
+        return copy(self)
+
+    def move_in_direction(self, direction: 'Pos', movement_speed: float, delta_time: float) -> None:
+        self.pos_x += direction.pos_x * movement_speed * delta_time
+        self.pos_y += direction.pos_y * movement_speed * delta_time
 
 
 class Dest:
@@ -177,15 +192,16 @@ class Dest:
         return Dest(target_obj_id, Pos.create_empty())
 
     def copy(self) -> 'Dest':
-        return deepcopy(self)
+        return Dest(self.target_obj_id, self.target_position.copy())
 
 class Npc:
     def __init__(self, npc_id: int) -> None:
         self.npc_id: Final[int] = npc_id
         self.spawn_spell_id: int = 0
         self.hp: float = 0.0
-        self.is_attackable: bool = True
-        self.is_enemy: bool = True
+        self.movement_speed: float = 1.0
+        self.is_attackable: bool = False
+        self.is_player: bool = False
 
     @classmethod
     def create_empty(cls) -> 'Npc':
@@ -206,8 +222,9 @@ class GameObj:
         self.position: Pos = position
         self.destination: Dest = Dest.create_empty()
         self.hp: float = 0.0
-        self.is_attackable: bool = True
-        self.is_enemy: bool = True
+        self.movement_speed: float = 1.0
+        self.is_attackable: bool = False
+        self.is_player: bool = False
 
     @classmethod
     def create_empty(cls) -> 'GameObj':
@@ -220,10 +237,10 @@ class GameObj:
         self.npc_properties = npc
         self.hp = npc.hp
         self.is_attackable = npc.is_attackable
-        self.is_enemy = npc.is_enemy
+        self.is_player = npc.is_player
 
     def get_size(self) -> float:
-        return 1.0 + abs(self.hp)
+        return 0.01 + math.sqrt(0.0001*abs(self.hp))
 
     def get_spell_modifier(self) -> float:
         #calculation not yet implemented
@@ -261,7 +278,7 @@ class CombatEvent:
         return self.event_id == IdGenerator.EMPTY_ID
 
     def get_event_summary(self) -> str:
-        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] {self.source_id:04d} uses {self.spell_id:04d} on {self.dest.target_obj_id:04d} at {self.dest.target_position.pos_x:.3f}, {self.dest.target_position.pos_y:.3f}"
+        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] obj_{self.source_id:04d} uses spell_{self.spell_id:04d} on obj_{self.dest.target_obj_id:04d} at (x={self.dest.target_position.pos_x:.3f}, y={self.dest.target_position.pos_y:.3f})"
 
     def decide_outcome(self) -> None:
         #not implemented
@@ -271,8 +288,8 @@ class CombatEvent:
 class Zone:
     def __init__(self, zone_id: int) -> None:
         self.zone_id: Final[int] = zone_id
-        self.player: Tuple[int, Pos] = (IdGenerator.EMPTY_ID, Pos.create_empty())
-        self.enemies: List[Tuple[int, Pos]] = []
+        self.player_spawn: Tuple[int, Pos] = (IdGenerator.EMPTY_ID, Pos.create_empty())
+        self.enemy_spawns: List[Tuple[int, Pos]] = []
 
     @classmethod
     def create_empty(cls) -> 'Zone':
@@ -282,19 +299,19 @@ class Zone:
         return self.zone_id == IdGenerator.EMPTY_ID
 
     def fetch_player(self) -> Tuple[int, Pos]:
-        return (self.player[0], self.player[1].copy())
+        return (self.player_spawn[0], self.player_spawn[1].copy())
 
     def fetch_enemies(self) -> List[Tuple[int, Pos]]:
         enemies_copy = []
-        for element in self.enemies:
+        for element in self.enemy_spawns:
             enemies_copy.append((element[0], element[1].copy()))
         return enemies_copy
 
-    def set_player(self, npc_id: int, pos_x: float, pos_y: float) -> None:
-        self.player = (npc_id, Pos.create_at(self.zone_id, pos_x, pos_y))
+    def set_player(self, spell_id: int, pos_x: float, pos_y: float) -> None:
+        self.player_spawn = (spell_id, Pos.create_at(self.zone_id, pos_x, pos_y))
 
-    def set_enemy(self, npc_id: int, pos_x: float, pos_y: float) -> None:
-        self.enemies.append((npc_id, Pos.create_at(self.zone_id, pos_x, pos_y)))
+    def set_enemy(self, spell_id: int, pos_x: float, pos_y: float) -> None:
+        self.enemy_spawns.append((spell_id, Pos.create_at(self.zone_id, pos_x, pos_y)))
 
 
 class Ruleset:
@@ -350,14 +367,23 @@ class EventLog:
 class World:
     def __init__(self) -> None:
         self.timestamp: float = 0.0
+        self.delta_time: float = 0.0
         self.ruleset: Ruleset = Ruleset()
         self.auras: Dict[int, Aura] = {}
-        self.game_objs: Dict[int, GameObj] = {IdGenerator.EMPTY_ID: GameObj.create_empty()}
+        self.game_objs: Dict[int, GameObj] = {}
+        self.root_obj_id: int = IdGenerator.EMPTY_ID
         self.combat_event_log: EventLog = EventLog()
 
     @classmethod
     def create_empty(cls) -> 'World':
         return World()
+
+    @classmethod
+    def create_with_root_obj(cls, root_obj_id: int) -> 'World':
+        world = World()
+        world.add_game_obj(GameObj(root_obj_id, Pos.create_empty()))
+        world.root_obj_id = root_obj_id
+        return world
 
     def add_game_obj(self, game_obj: GameObj) -> None:
         assert game_obj.obj_id not in self.game_objs, f"Game object with ID {game_obj.obj_id} already exists."
@@ -379,10 +405,10 @@ class World:
 class IdGenerator:
     EMPTY_ID = 0
 
-    def __init__(self) -> None:
+    def __init__(self, assigned_id_start: int, assigned_id_stop: int) -> None:
         self._reserved_ids: Set[int] = set()
         self._assigned_ids: Deque[int] = deque()
-        self.assign_id_range(1, 10_000)
+        self.assign_id_range(assigned_id_start, assigned_id_stop)
 
     def assign_id_range(self, start: int, stop: int) -> None:
         for id_num in range(start, stop):
@@ -402,7 +428,7 @@ class IdGenerator:
 
 class PlayerInputHandler:
     def __init__(self) -> None:
-        self.event_id_gen: IdGenerator = IdGenerator()
+        self.event_id_gen: IdGenerator = IdGenerator(1000, 10_000)
         self.combat_events: List[CombatEvent] = []
         self.player_obj: GameObj = GameObj.create_empty()
         self.movement_spell_id: int = Database.player_movement().spell_id #hardcoded for now
@@ -436,6 +462,9 @@ class PlayerInputHandler:
         combat_events = self.combat_events.copy()
         self.combat_events.clear()
         return combat_events
+
+    def set_player_obj(self, player_obj: GameObj) -> None:
+        self.player_obj = player_obj
 
     def _process_input(self) -> None:
         if self._is_moving():
@@ -473,47 +502,26 @@ class PlayerInputHandler:
         self.combat_events.append(CombatEvent(event_id, timestamp, source_id, spell_id, dest))
 
 
-class GameManager:
-    def __init__(self) -> None:
-        self.combat_handler: CombatHandler = CombatHandler()
-        self.player_input_handler: PlayerInputHandler = PlayerInputHandler()
-
-    def simulate_game_in_console(self) -> None:
-        self.setup_game(1)
-        SIMULATION_DURATION = 2
-        UPDATES_PER_SECOND = 5
-        for _ in range(0, SIMULATION_DURATION * UPDATES_PER_SECOND):
-            self.process_server_tick(1 / UPDATES_PER_SECOND, True, False, False, False, True, False, False, False)
-
-    def setup_game(self, zone_id: int) -> None:
-        self.combat_handler.load_zone(zone_id)
-
-    def process_server_tick(self, delta_time: float, move_up: bool, move_left: bool, move_down: bool, move_right: bool, ability_1: bool, ability_2: bool, ability_3: bool, ability_4: bool) -> None:
-        self.player_input_handler.update_input(delta_time, move_up, move_left, move_down, move_right, ability_1, ability_2, ability_3, ability_4)
-        self.combat_handler.read_player_input_events(self.player_input_handler.fetch_combat_events())
-        self.combat_handler.update_aura_timers_and_create_aura_events(delta_time)
-        self.combat_handler.process_combat()
-
-
 class CombatHandler:
     def __init__(self) -> None:
-        self.aura_id_gen: IdGenerator = IdGenerator()
-        self.event_id_gen: IdGenerator = IdGenerator()
-        self.game_obj_id_gen: IdGenerator = IdGenerator()
-        self.world: World = World.create_empty()
+        self.aura_id_gen: IdGenerator = IdGenerator(1, 10_000)
+        self.event_id_gen: IdGenerator = IdGenerator(1, 1000)
+        self.game_obj_id_gen: IdGenerator = IdGenerator(1, 10_000)
+        self.world: World = World.create_with_root_obj(self.game_obj_id_gen.new_id())
         self.current_events: Deque[CombatEvent] = deque()
 
     def load_zone(self, zone_id: int) -> None:
         zone = self.world.ruleset.get_zone(zone_id)
-        player_obj_id, player_pos = zone.fetch_player()
-        player_spawn_event = CombatEvent(self.event_id_gen.new_id(), self.world.timestamp, IdGenerator.EMPTY_ID, Database.spawn_player().spell_id, Dest.create_positional(player_pos))
+        player_spawn_spell_id, player_pos = zone.fetch_player()
+        player_spawn_event = CombatEvent(self.event_id_gen.new_id(), self.world.timestamp, self.world.root_obj_id, player_spawn_spell_id, Dest.create_positional(player_pos))
         self.current_events.append(player_spawn_event)
-        for enemy_obj_id, enemy_pos in zone.fetch_enemies():
-            enemy_spawn_event = CombatEvent(self.event_id_gen.new_id(), self.world.timestamp, IdGenerator.EMPTY_ID, Database.spawn_player().spell_id, Dest.create_positional(enemy_pos))
+        for enemy_spawn_spell_id, enemy_pos in zone.fetch_enemies():
+            enemy_spawn_event = CombatEvent(self.event_id_gen.new_id(), self.world.timestamp, self.world.root_obj_id, enemy_spawn_spell_id, Dest.create_positional(enemy_pos))
             self.current_events.append(enemy_spawn_event)
         self.process_combat()
 
     def update_aura_timers_and_create_aura_events(self, delta_time: float) -> None:
+        self.world.delta_time = delta_time
         aura_ids: List[int] = sorted(self.world.auras.keys())
         for aura_id in aura_ids:
             aura = self.world.get_aura(aura_id)
@@ -544,29 +552,90 @@ class CombatHandler:
             event = self.current_events.popleft()
             source_obj = self.world.get_game_obj(event.source_id)
             spell = self.world.ruleset.get_spell(event.spell_id)
-            target_obj = self.world.get_game_obj(event.dest.target_obj_id)
+            target_obj = source_obj
+            if event.dest.target_obj_id != IdGenerator.EMPTY_ID:
+                target_obj = self.world.get_game_obj(event.dest.target_obj_id)
             event.decide_outcome()
             if event.outcome == EventOutcome.SUCCESS:
                 if spell.flags & SpellFlag.SPAWN_NPC:
                     new_obj = GameObj(self.game_obj_id_gen.new_id(), event.dest.target_position.copy())
                     new_obj.load_npc_data(self.world.ruleset.get_npc(spell.spawn_npc_id))
+                    self.world.add_game_obj(new_obj)
                     if new_obj.npc_properties.has_spawn_spell():
                         npc_spell = self.world.ruleset.get_spell(new_obj.npc_properties.spawn_spell_id)
                         aura = Aura(self.game_obj_id_gen.new_id(), new_obj.obj_id, new_obj.obj_id, npc_spell)
                         self.world.game_objs[new_obj.obj_id] = new_obj
                         self.world.auras[aura.aura_id] = aura
                 if spell.flags & SpellFlag.MOVEMENT:
-                    source_obj.teleport_to(event.dest.target_position) #not correctly implemented yet
+                    direction = event.dest.target_position.copy()
+                    print(f"{direction.pos_x}, {direction.pos_y}")
+                    source_obj.position.move_in_direction(direction, target_obj.movement_speed, self.world.delta_time)
                 if spell.flags & SpellFlag.DAMAGE:
                     spell_power = spell.power * source_obj.get_spell_modifier()
                     target_obj.suffer_damage(spell_power)
                 if spell.flags & SpellFlag.FIND_TARGET:
-                    for random_obj in self.world.game_objs.values():
-                        if random_obj.is_attackable and (random_obj.is_enemy != source_obj.is_enemy):
-                            source_obj.destination.target_obj_id = random_obj.obj_id
+                    for game_obj in self.world.game_objs.values():
+                        if game_obj.is_attackable and (game_obj.is_player != source_obj.is_player):
+                            source_obj.destination.target_obj_id = game_obj.obj_id
             self.world.combat_event_log.add_event(event)
 
+    def get_player_obj(self) -> GameObj:
+        for game_obj in self.world.game_objs.values():
+            if game_obj.is_player is True:
+                return game_obj
+        return GameObj.create_empty()
 
+
+class GameManager:
+    def __init__(self) -> None:
+        self.combat_handler: CombatHandler = CombatHandler()
+        self.player_input_handler: PlayerInputHandler = PlayerInputHandler()
+
+    def simulate_game_in_console(self) -> None:
+        self.setup_game(1)
+        SIMULATION_DURATION = 2
+        UPDATES_PER_SECOND = 5
+        for _ in range(0, SIMULATION_DURATION * UPDATES_PER_SECOND):
+            # example of player input
+            self.process_server_tick(1 / UPDATES_PER_SECOND, True, False, False, False, True, False, False, False)
+
+    def setup_game(self, zone_id: int) -> None:
+        self.combat_handler.load_zone(zone_id)
+        player_obj = self.combat_handler.get_player_obj()
+        self.player_input_handler.set_player_obj(player_obj)
+
+    def process_server_tick(self, delta_time: float, move_up: bool, move_left: bool, move_down: bool, move_right: bool, ability_1: bool, ability_2: bool, ability_3: bool, ability_4: bool) -> None:
+        self.player_input_handler.update_input(delta_time, move_up, move_left, move_down, move_right, ability_1, ability_2, ability_3, ability_4)
+        events_from_player = self.player_input_handler.fetch_combat_events()
+        self.combat_handler.read_player_input_events(events_from_player)
+        self.combat_handler.update_aura_timers_and_create_aura_events(delta_time)
+        self.combat_handler.process_combat()
+
+    def get_all_game_objs_to_draw(self) -> List[GameObj]:
+        return self.combat_handler.world.game_objs.values()
+
+
+class Serializer:
+    @staticmethod
+    def to_json(instance: Any) -> str:
+        """ Creates a json string, ignoring properties with default values."""
+        default_instance = instance.__class__.create_empty()
+        diff_dict = {
+            key: value
+            for key, value in instance.__dict__.items()
+            if value != default_instance.__dict__[key]
+        }
+        return json.dumps(diff_dict)
+
+    @staticmethod
+    def from_json(serialized_cls: type, json_str: str) -> Any:
+        """ Creates an instance from json string, ignoring mismatching properties. """
+        default_instance = serialized_cls.create_empty()
+        json_data = json.loads(json_str)
+        for key, value in json_data.items():
+            if hasattr(default_instance, key):
+                setattr(default_instance, key, value)
+        return default_instance
 
 
 class Database:
@@ -598,14 +667,14 @@ class Database:
     def test_player() -> Npc:
         npc = Npc(1)
         npc.hp = 30.0
-        npc.is_enemy = False
+        npc.is_player = True
         return npc
 
     @staticmethod
     def test_enemy() -> Npc:
         npc = Npc(2)
         npc.hp = 30.0
-        npc.is_enemy = False
+        npc.is_player = False
         return npc
 
     # Spells
@@ -655,8 +724,8 @@ class Database:
     @staticmethod
     def test_zone() -> Zone:
         zone = Zone(1)
-        zone.set_player(Database.test_player().npc_id, 0.3, 0.3)
-        zone.set_enemy(Database.test_enemy().npc_id, 0.7, 0.7)
+        zone.set_player(Database.spawn_player().spell_id, 0.3, 0.3)
+        zone.set_enemy(Database.spawn_enemy().spell_id, 0.7, 0.7)
         return zone
 
 #%%

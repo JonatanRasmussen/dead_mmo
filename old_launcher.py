@@ -3,14 +3,14 @@ import pygame
 import sys
 from typing import List, Tuple
 
-class Color:
+class OldColor:
     BLACK: Tuple[int, int, int] = (0, 0, 0)
     WHITE: Tuple[int, int, int] = (255, 255, 255)
     RED: Tuple[int, int, int] = (255, 0, 0)
     GREEN: Tuple[int, int, int] = (0, 255, 0)
     BLUE: Tuple[int, int, int] = (0, 0, 255)
 
-class GameObj:
+class OldGameObj:
     def __init__(self) -> None:
         self.obj_id: int = 0
 
@@ -21,28 +21,28 @@ class GameObj:
         self.power: float = 1.0
         self.movespeed: float = 0.01
 
-        self.color: Tuple[int, int, int] = Color.BLUE
+        self.color: Tuple[int, int, int] = OldColor.BLUE
 
     @classmethod
-    def create_empty(cls) -> 'GameObj':
-        return GameObj()
+    def create_empty(cls) -> 'OldGameObj':
+        return OldGameObj()
 
     @classmethod
-    def create_player(cls) -> 'GameObj':
-        obj = GameObj()
+    def create_player(cls) -> 'OldGameObj':
+        obj = OldGameObj()
         obj.obj_id = 1
         obj.size = 0.02
         obj.movespeed = 0.01
-        obj.color = Color.BLUE
+        obj.color = OldColor.BLUE
         return obj
 
     @classmethod
-    def create_enemy(cls) -> 'GameObj':
-        obj = GameObj()
+    def create_enemy(cls) -> 'OldGameObj':
+        obj = OldGameObj()
         obj.obj_id = 2
         obj.size = 0.1
         obj.movespeed = 0.005
-        obj.color = Color.RED
+        obj.color = OldColor.RED
         return obj
 
     def reposition(self, rel_x: float, rel_y: float) -> None:
@@ -51,26 +51,26 @@ class GameObj:
 
 
 
-class Encounter:
+class OldEncounter:
     def __init__(self) -> None:
-        self.player: GameObj = GameObj.create_player()
-        self.enemy: GameObj = GameObj.create_enemy()
-        self.all_game_objs: List[GameObj] = [self.player, self.enemy]
+        self.player: OldGameObj = OldGameObj.create_player()
+        self.enemy: OldGameObj = OldGameObj.create_enemy()
+        self.all_game_objs: List[OldGameObj] = [self.player, self.enemy]
 
         self.player.reposition(0.5, 0.75)
         self.enemy.reposition(0.5, 0.25)
 
     @classmethod
-    def create_test_encounter(cls) -> 'Encounter':
-        return Encounter()
+    def create_test_encounter(cls) -> 'OldEncounter':
+        return OldEncounter()
 
-class Utils:
+class OldUtils:
     @staticmethod
-    def clamp_position(obj: GameObj) -> None:
+    def clamp_position(obj: OldGameObj) -> None:
         obj.pos_x = max(0, min(1.0, obj.pos_x))
         obj.pos_y = max(0, min(1.0, obj.pos_y))
 
-class Launcher:
+class OldLauncher:
     def __init__(self) -> None:
         pygame.init()
         pygame.display.set_caption("placeholder")
@@ -83,7 +83,7 @@ class Launcher:
         self.PLAY_RATIO = 1/1
 
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        self.encounter = Encounter.create_test_encounter()
+        self.encounter = OldEncounter.create_test_encounter()
         self.running = True
 
         # Calculate play area dimensions and adjusted borders
@@ -158,21 +158,21 @@ class Launcher:
                 self.running = False
 
     def draw_screen(self) -> None:
-        self.screen.fill(Color.WHITE)
+        self.screen.fill(OldColor.WHITE)
         top = int(self.WINDOW_HEIGHT * self.BORDER_TOP)
         bot = int(self.WINDOW_HEIGHT * self.BORDER_BOT)
         sides = int(self.WINDOW_WIDTH * self.BORDER_SIDES)
-        pygame.draw.rect(self.screen, Color.BLACK, (0, 0, self.WINDOW_WIDTH, top))
-        pygame.draw.rect(self.screen, Color.BLACK, (0, self.WINDOW_HEIGHT - bot, self.WINDOW_WIDTH, bot))
-        pygame.draw.rect(self.screen, Color.BLACK, (0, 0, sides, self.WINDOW_HEIGHT))
-        pygame.draw.rect(self.screen, Color.BLACK, (self.WINDOW_WIDTH - sides, 0, sides, self.WINDOW_HEIGHT))
+        pygame.draw.rect(self.screen, OldColor.BLACK, (0, 0, self.WINDOW_WIDTH, top))
+        pygame.draw.rect(self.screen, OldColor.BLACK, (0, self.WINDOW_HEIGHT - bot, self.WINDOW_WIDTH, bot))
+        pygame.draw.rect(self.screen, OldColor.BLACK, (0, 0, sides, self.WINDOW_HEIGHT))
+        pygame.draw.rect(self.screen, OldColor.BLACK, (self.WINDOW_WIDTH - sides, 0, sides, self.WINDOW_HEIGHT))
 
         for game_obj in self.encounter.all_game_objs:
-            Utils.clamp_position(game_obj)
+            OldUtils.clamp_position(game_obj)
             self.draw_object(game_obj)
         pygame.display.flip()
 
-    def draw_object(self, game_obj: GameObj) -> None:
+    def draw_object(self, game_obj: OldGameObj) -> None:
         # Convert from unit coordinates (0-1) to screen coordinates
         screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.pos_x * self.PLAY_WIDTH
         screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + game_obj.pos_y * self.PLAY_HEIGHT
@@ -180,4 +180,4 @@ class Launcher:
         size = int(game_obj.size * self.PLAY_HEIGHT)
         pygame.draw.circle(self.screen, game_obj.color, pos, size)
 if __name__ == "__main__":
-    Launcher().run_game()
+    OldLauncher().run_game()
