@@ -141,3 +141,13 @@
 [2025-01-20 02:31:59] {BudoB}: Maybe people are actually okay with playing poor-looking games.
 [2025-01-20 02:32:09] {BudoB}: I must hope that is the case.
 [2025-01-20 02:32:16] {BudoB}: Code time: 4 hours.
+
+[2025-01-25 01:25:57] {BudoB}: Wauw there can be so many bugs in so little code!
+[2025-01-25 01:26:06] {BudoB}: Amazin. Tried refactoring to dataclass.
+[2025-01-25 01:45:51] {BudoB}: Got distracted, whoops. Anyway...
+[2025-01-25 01:46:05] {BudoB}: Code time: 5 hours.
+
+[2025-01-26 03:17:22] {BudoB}: Refactoring took small 8 hours...
+[2025-01-26 03:17:36] {BudoB}: Dunno if ADHD or just writer's block.
+[2025-01-26 03:17:54] {BudoB}: Less code is better.
+[2025-01-26 03:18:17] {BudoB}: Code time: 8 hours
