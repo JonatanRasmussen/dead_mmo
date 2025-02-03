@@ -8,13 +8,17 @@ import math
 import json
 
 
+@dataclass
 class IdGen: #IdGenerator
-    EMPTY_ID = 0
+    EMPTY_ID: ClassVar = 0
+    _reserved_ids: Set[int] = set()
+    _assigned_ids: Deque[int] = deque()
 
-    def __init__(self, assigned_id_start: int, assigned_id_stop: int) -> None:
-        self._reserved_ids: Set[int] = set()
-        self._assigned_ids: Deque[int] = deque()
-        self.assign_id_range(assigned_id_start, assigned_id_stop)
+    @classmethod
+    def preassign_id_range(cls, assigned_id_start: int, assigned_id_stop: int) -> 'IdGen':
+        id_gen = IdGen()
+        id_gen.assign_id_range(assigned_id_start, assigned_id_stop)
+        return id_gen
 
     @staticmethod
     def is_empty_id(id_num: int) -> bool:
@@ -85,6 +89,7 @@ class Spell(NamedTuple):
 class Aura(NamedTuple):
     source_id: int = IdGen.EMPTY_ID
     spell_id: int = IdGen.EMPTY_ID
+    target_id: int = IdGen.EMPTY_ID
     start: float = 0.0
     end: float = 0.0
     ticks: int = 0
@@ -98,6 +103,9 @@ class Aura(NamedTuple):
             end=timestamp + spell.duration,
             ticks=spell.ticks,
         )
+
+    def get_aura_id(self) -> Tuple[int, int, int]:
+        return self.source_id, self.spell_id, self.target_id
 
     def get_duration(self) -> float:
         return self.end - self.start
@@ -115,7 +123,7 @@ class Aura(NamedTuple):
         return (last_visit < next_tick <= now) and (next_tick <= self.end)
 
 
-class RawInput(NamedTuple):
+class GameInput(NamedTuple):
     move_up: bool = False
     move_left: bool = False
     move_down: bool = False
@@ -125,6 +133,8 @@ class RawInput(NamedTuple):
     ability_3: bool = False
     ability_4: bool = False
 
+    def is_happening_now(self, last_visit: float, now: float) -> bool:
+        return self.timestamp > last_visit and self.timestamp <= now
 
 @dataclass
 class Pos:
@@ -137,6 +147,7 @@ class Pos:
     def is_area(self) -> bool:
         return self.angle > 0.0 or self.size > 0.0
 
+
 @dataclass
 class Event:
     event_id: int = IdGen.EMPTY_ID
@@ -144,6 +155,26 @@ class Event:
     source_id: int = IdGen.EMPTY_ID
     spell_id: int = IdGen.EMPTY_ID
     dest: Pos = Pos()
+
+    @classmethod
+    def create_combat_init(cls, event_id: int, timestamp: float, spell_id: int) -> 'Event':
+        return Event(
+            event_id=event_id,
+            timestamp=timestamp,
+            source_id=IdGen.EMPTY_ID,
+            spell_id=spell_id,
+            dest=Pos(target_id=IdGen.EMPTY_ID),
+        )
+
+    @classmethod
+    def create_from_aura_tick(cls, event_id: int, timestamp: float, aura: Aura) -> 'Event':
+        return Event(
+            event_id=event_id,
+            timestamp=timestamp,
+            source_id=aura.source_id,
+            spell_id=aura.spell_id,
+            dest=Pos(target_id=aura.target_id),
+        )
 
     def is_aoe(self) -> bool:
         return self.dest.is_area()
@@ -169,14 +200,18 @@ class Obj:
     move_speed: float = 1.0
     is_attackable: bool = False
 
-    move_id: int = IdGen.EMPTY_ID
+    custom_move_id: int = IdGen.EMPTY_ID
+    move_up_id: int = IdGen.EMPTY_ID
+    move_left_id: int = IdGen.EMPTY_ID
+    move_down_id: int = IdGen.EMPTY_ID
+    move_right_id: int = IdGen.EMPTY_ID
     slot_1_id: int = IdGen.EMPTY_ID
     slot_2_id: int = IdGen.EMPTY_ID
     slot_3_id: int = IdGen.EMPTY_ID
     slot_4_id: int = IdGen.EMPTY_ID
 
     pos: Pos = Pos()
-    game_inputs: Dict[float, RawInput] = {}
+    game_inputs: Dict[float, GameInput] = {}
     auras: Dict[int, Aura] = {}
 
     @classmethod
@@ -185,11 +220,18 @@ class Obj:
         new_obj.obj_id = unique_obj_id
         return new_obj
 
-    def fetch_events(self) -> List[Event]:
-        #implement later
-        return []
+    def fetch_events(self, id_gen: IdGen, t_previous: float, t_next: float) -> List[Event]:
+        events: List[Event] = []
+        for aura in self.auras.values():
+            if aura.has_tick(t_previous, t_next):
+                assert aura.target_id == self.obj_id
+                events.append(Event.create_from_aura_tick(id_gen.new_id(), t_next, aura))
+        for game_input in self.game_inputs.values():
+            if game_input.is_happening_now(t_previous, t_next):
+                events += InputHandler.convert_to_events(id_gen, t_next, self, game_input)
+        return events
 
-    def add_input(self, timestamp: float, new_input: RawInput) -> None:
+    def add_input(self, timestamp: float, new_input: GameInput) -> None:
         assert timestamp not in self.game_inputs, \
             f"Input for timestamp={timestamp} already exists in obj_id={self.obj_id}"
         self.game_inputs[timestamp] = new_input
@@ -219,57 +261,99 @@ class Obj:
 @dataclass
 class CombatInstance:
     instance_id: int = IdGen.EMPTY_ID
-    timestamp: float = 0.0
+    prev_timestamp: float = 0.0
+    next_timestamp: float = 0.0
     update_interval: float = 1/30 #seconds between each update
+    update_accumulator: float = 0.0 #accumulated time since last update
+
+    event_id_gen: IdGen = IdGen.preassign_id_range(1, 10_000)
+    obj_id_gen: IdGen = IdGen.preassign_id_range(1, 10_000)
+
+    player_obj: Obj = Obj()
+    queued_input: GameInput = GameInput()
 
     objs: Dict[int, Obj] = {}
     event_log: Dict[int, Event] = {}
 
-    def register_input(self, obj_id: int, timestamp: float, game_input: RawInput) -> None:
-        obj = self.objs[obj_id]
-        obj.add_input(timestamp, game_input)
-
     def get_all_objs_to_draw(self) -> List[Obj]:
         return self.objs.values()
 
-    def update(self) -> None:
+    def initialize_obj(self, spawn_id: int) -> None:
+        event = Event.create_combat_init(self.event_id_gen.new_id(), self.next_timestamp, spawn_id)
+        self._handle_event(event)
+
+    def update(self, delta_time: float, game_input: GameInput) -> None:
+        self.update_accumulator += delta_time
+        self.queued_input = game_input
+        while self.update_accumulator >= self.update_interval:
+            self.player_obj.add_input(self.next_timestamp, self.queued_input)
+            self.advance_combat()
+            self.update_accumulator -= self.update_interval
+
+    def advance_combat(self) -> None:
         events: List[Event] = []
         for obj in self.objs.values():
-            events += obj.fetch_events(self.timestamp, self.timestamp + self.update_interval)
+            events += obj.fetch_events(self.event_id_gen, self.prev_timestamp, self.next_timestamp)
         for event in events:
             self._handle_event(event)
-        self.timestamp += self.update_interval
+        self.prev_timestamp = self.next_timestamp
+        self.next_timestamp += self.update_interval
 
     def _handle_event(self, event: Event) -> None:
         if event.is_spawn_event():
             new_obj = SpawnHandler.spawn_obj(event)
-            new_obj.obj_id = 123 #fix later
-            self._add_game_obj(new_obj)
+            new_obj.obj_id = self.obj_id_gen.new_id()
+            self._add_obj(new_obj)
         elif event.is_aoe():
             objs = AreaHandler.get_objs_in_area(event)
             for obj in objs:
-                new_event = event.also_target(obj.obj_id)
+                new_event = event.also_target(self.event_id_gen.new_id(), obj.obj_id)
                 self._handle_event(new_event)
         else:
-            source_obj = self._get_game_obj(event.source_id)
+            source_obj = self._get_obj(event.source_id)
             target_obj = source_obj
             if event.has_target():
-                target_obj = self._get_game_obj(event.dest.target_id)
+                target_obj = self._get_obj(event.dest.target_id)
             SpellHandler.handle_spell(event, source_obj, target_obj)
         self._log_event(event)
 
-
-    def _add_game_obj(self, obj: Obj) -> None:
+    def _add_obj(self, obj: Obj) -> None:
         assert obj.obj_id not in self.objs, f"Game object with ID {obj.obj_id} already exists."
         self.objs[obj.obj_id] = obj
 
-    def _get_game_obj(self, obj_id: int) -> Obj:
+    def _get_obj(self, obj_id: int) -> Obj:
         assert obj_id in self.objs, f"Game object with ID {obj_id} does not exist."
         return self.objs.get(obj_id, Obj())
 
     def _log_event(self, event: Event) -> None:
         assert event.event_id not in self.event_log, f"Game object with ID {event.event_id} already exists."
         self.event_log[event.event_id] = event
+
+
+class InputHandler:
+
+    @staticmethod
+    def convert_to_events(id_gen: IdGen, timestamp: float, obj: Obj, game_input: GameInput) -> List[Event]:
+        spell_ids: List[int] = []
+        spell_ids += [obj.move_up_id] if game_input.move_up else []
+        spell_ids += [obj.move_left_id] if game_input.move_left else []
+        spell_ids += [obj.move_down_id] if game_input.move_down else []
+        spell_ids += [obj.move_right_id] if game_input.move_right else []
+        spell_ids += [obj.slot_1_id] if game_input.ability_1 else []
+        spell_ids += [obj.slot_2_id] if game_input.ability_2 else []
+        spell_ids += [obj.slot_3_id] if game_input.ability_3 else []
+        spell_ids += [obj.slot_4_id] if game_input.ability_4 else []
+        assert IdGen.EMPTY_ID not in spell_ids
+        events: List[Event] = []
+        for spell_id in spell_ids:
+            events.append(Event(
+                event_id=id_gen.new_id(),
+                timestamp=timestamp,
+                source_id=obj.obj_id,
+                spell_id=spell_id,
+                dest=obj.pos.copy(),
+            ))
+        return events
 
 
 class SpawnHandler:
