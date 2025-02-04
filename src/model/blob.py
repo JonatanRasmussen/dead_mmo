@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict, field
+from sortedcontainers import SortedDict  # type: ignore
 from typing import Any, Dict, List, Tuple, Optional, FrozenSet, Literal, Final, TypedDict, ClassVar, Set, Deque, NamedTuple
 from collections import deque
 from enum import Enum, Flag, auto
@@ -124,6 +125,7 @@ class Aura(NamedTuple):
 
 
 class GameInput(NamedTuple):
+    timestamp: float = 0.0
     move_up: bool = False
     move_left: bool = False
     move_down: bool = False
@@ -133,16 +135,20 @@ class GameInput(NamedTuple):
     ability_3: bool = False
     ability_4: bool = False
 
+    @classmethod
+    def create_new_timestamp(cls, new_timestamp: float, other: 'GameInput') -> 'GameInput':
+        return other._replace(timestamp=new_timestamp)
+
     def is_happening_now(self, last_visit: float, now: float) -> bool:
         return self.timestamp > last_visit and self.timestamp <= now
 
 @dataclass
 class Pos:
+    target_id: int = IdGen.EMPTY_ID
     x: float = 0.0
     y: float = 0.0
     angle: float = 0.0
     size: float = 0.0
-    target_id: int = IdGen.EMPTY_ID
 
     def is_area(self) -> bool:
         return self.angle > 0.0 or self.size > 0.0
@@ -154,7 +160,7 @@ class Event:
     timestamp: float = 0.0
     source_id: int = IdGen.EMPTY_ID
     spell_id: int = IdGen.EMPTY_ID
-    dest: Pos = Pos()
+    dest: Pos = field(default_factory=Pos)
 
     @classmethod
     def create_combat_init(cls, event_id: int, timestamp: float, spell_id: int) -> 'Event':
@@ -210,9 +216,9 @@ class Obj:
     slot_3_id: int = IdGen.EMPTY_ID
     slot_4_id: int = IdGen.EMPTY_ID
 
-    pos: Pos = Pos()
-    game_inputs: Dict[float, GameInput] = {}
-    auras: Dict[int, Aura] = {}
+    pos: Pos = field(default_factory=Pos)
+    game_inputs: SortedDict = field(default_factory=SortedDict)
+    auras: Dict[int, Aura] = field(default_factory=dict)
 
     @classmethod
     def embody_npc(cls, unique_obj_id: int, other: 'Obj') -> 'Obj':
@@ -226,6 +232,9 @@ class Obj:
             if aura.has_tick(t_previous, t_next):
                 assert aura.target_id == self.obj_id
                 events.append(Event.create_from_aura_tick(id_gen.new_id(), t_next, aura))
+        for timestamp in self.game_inputs.irange(t_previous, t_next, inclusive=(False, True)):
+            game_input: GameInput = self.game_inputs[timestamp]
+            events += InputHandler.convert_to_events(id_gen, t_next, self, game_input)
         for game_input in self.game_inputs.values():
             if game_input.is_happening_now(t_previous, t_next):
                 events += InputHandler.convert_to_events(id_gen, t_next, self, game_input)

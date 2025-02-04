@@ -81,8 +81,8 @@ class PygameLauncher:
         game_objs: List[GameObj] = self.game_manager.get_all_game_objs_to_draw()
         for game_obj in game_objs:
             # Convert from unit coordinates (0-1) to screen coordinates
-            screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.position.pos_x * self.PLAY_WIDTH
-            screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - game_obj.position.pos_y) * self.PLAY_HEIGHT
+            screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.position.x * self.PLAY_WIDTH
+            screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - game_obj.position.y) * self.PLAY_HEIGHT
             pos = (int(screen_x), int(screen_y))
 
             # Using a default size and color since they're not provided in the tuple
