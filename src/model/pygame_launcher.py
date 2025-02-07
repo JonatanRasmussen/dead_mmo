@@ -9,6 +9,11 @@ class PygameLauncher:
         self.WINDOW_WIDTH = 1920
         self.WINDOW_HEIGHT = 1080
 
+        self.PLAY_WIDTH = 0.0
+        self.PLAY_HEIGHT = 0.0
+        self.movement_adjustment_x = 0.0
+        self.movement_adjustment_y = 0.0
+
         self.BORDER_TOP = 0.1
         self.BORDER_BOT = 0.2
         self.BORDER_SIDES = 0.05

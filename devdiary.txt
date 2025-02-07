@@ -157,3 +157,10 @@
 [2025-01-27 14:48:48] {BudoB}: Less code is always the way.
 [2025-01-27 14:48:56] {BudoB}: How could so much code become so little with just a rewrite?
 [2025-01-27 14:49:13] {BudoB}: Lovely, truly lovely.
+
+[2025-02-07 18:51:14] {BudoB}: I sweat to god... That refactor has taken 5 months.
+[2025-02-07 18:51:28] {BudoB}: What I have now is way better though. This is good.
+[2025-02-07 18:51:37] {BudoB}: Over the next week I should progress deeper into development.
+[2025-02-07 18:51:51] {BudoB}: Hooray for me. This might be getting somewhere.
+[2025-02-07 18:52:36] {BudoB}: It is easy to forget that I grow as a programmer from all this.
+[2025-02-07 18:52:53] {BudoB}: Code time: 6 hours.
