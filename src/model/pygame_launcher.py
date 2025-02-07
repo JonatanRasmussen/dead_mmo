@@ -6,8 +6,6 @@ from src.model.manager import GameManager, GameObj, Color
 
 class PygameLauncher:
     def __init__(self) -> None:
-        pygame.init()
-        pygame.display.set_caption("placeholder")
         self.WINDOW_WIDTH = 1920
         self.WINDOW_HEIGHT = 1080
 
@@ -16,25 +14,31 @@ class PygameLauncher:
         self.BORDER_SIDES = 0.05
         self.PLAY_RATIO = 1/1
 
-        self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+        self.screen = None
         self.running = True
-
-        # Initialize GameManager
         self.game_manager = GameManager()
-        self.game_manager.setup_game(1)
 
-        # Calculate play area dimensions and adjusted borders
-        self.calculate_play_area()
+    @staticmethod
+    def run_game() -> None:
+        # setup pygame
+        game = PygameLauncher()
+        pygame.init()
+        pygame.display.set_caption("placeholder")
+        game.screen = pygame.display.set_mode((game.WINDOW_WIDTH, game.WINDOW_HEIGHT))
+        game.calculate_play_area() # Calculate play area dimensions and adjusted borders
 
-    def run_game(self) -> None:
+        # setup game manager
+        game.game_manager.setup_game(10)
+
+        # run game loop
         last_time = pygame.time.get_ticks()
-        while self.running:
+        while game.running:
             current_time = pygame.time.get_ticks()
             delta_time = (current_time - last_time) / 1000.0  # Convert to seconds
             last_time = current_time
 
-            self.process_game_tick(delta_time)
-            self.draw_screen()
+            game.process_game_tick(delta_time)
+            game.draw_screen()
             pygame.time.Clock().tick(60)
         pygame.quit()
         sys.exit()
@@ -81,8 +85,8 @@ class PygameLauncher:
         game_objs: List[GameObj] = self.game_manager.get_all_game_objs_to_draw()
         for game_obj in game_objs:
             # Convert from unit coordinates (0-1) to screen coordinates
-            screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.position.x * self.PLAY_WIDTH
-            screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - game_obj.position.y) * self.PLAY_HEIGHT
+            screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.x * self.PLAY_WIDTH
+            screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - game_obj.y) * self.PLAY_HEIGHT
             pos = (int(screen_x), int(screen_y))
 
             # Using a default size and color since they're not provided in the tuple
