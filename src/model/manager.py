@@ -1,6 +1,6 @@
 from dataclasses import dataclass, asdict, field
 from sortedcontainers import SortedDict  # type: ignore
-from typing import Any, Dict, List, Tuple, Optional, FrozenSet, Literal, Final, TypedDict, ClassVar, Set, Deque, NamedTuple
+from typing import Any, Dict, List, Tuple, Type, Optional, FrozenSet, Literal, Final, TypedDict, ClassVar, Set, Deque, NamedTuple
 from collections import deque
 from enum import Enum, Flag, auto
 from types import MappingProxyType
@@ -24,7 +24,7 @@ class IdGen:
     EMPTY_ID = 0
 
     def __init__(self) -> None:
-        self._reserved_ids: Set[int] = set({0})
+        self._reserved_ids: Set[int] = set({IdGen.EMPTY_ID})
         self._assigned_ids: Deque[int] = deque()
 
     @classmethod
@@ -57,12 +57,15 @@ class SpellFlag(Flag):
     """ Flags for how spells should be handled. """
     NONE = 0
     MOVE_UP = auto()
+    MOVE_LEFT = auto()
+    MOVE_DOWN = auto()
+    MOVE_RIGHT = auto()
     TELEPORT = auto()
     FIND_TARGET = auto()
     GCD = auto()
     DAMAGE = auto()
     HEAL = auto()
-    STOP_CAST = auto()
+    DENY_IF_CASTING = auto()
     IS_CHANNEL = auto()
     WARP_TO_POSITION = auto()
     TRY_MOVE = auto()
@@ -133,7 +136,6 @@ class Aura(NamedTuple):
 
 
 class EventOutcome(Enum):
-
     EMPTY = 0
     SUCCESS = 1
     FAILED = 2
@@ -198,12 +200,25 @@ class PlayerInput(NamedTuple):
         return self.local_timestamp > last_visit and self.local_timestamp <= now
 
 
+class GameObjStatus(Flag):
+    """ Flags for various status effects of game objects. """
+    NONE = 0
+    CASTING = auto()
+    CHANNELING = auto()
+    STUNNED = auto()
+    ATTACKABLE = auto()
+    ALLIED = auto()
+    BANISHED = auto()
+
+
 @dataclass
 class GameObj:
     """ Combat units. Controlled by the player or NPCs. """
     obj_id: Final[int] = IdGen.EMPTY_ID
     parent_id: Final[int] = IdGen.EMPTY_ID
     npc_id: Final[int] = IdGen.EMPTY_ID
+
+    statuses: GameObjStatus = GameObjStatus.NONE
 
     # Targeting
     current_target: int = IdGen.EMPTY_ID
@@ -365,7 +380,8 @@ class World:
         self._handle_event(setup_event)
 
     def advance_combat(self, delta_time: float, player_input: PlayerInput) -> None:
-        self.current_timestamp = self.previous_timestamp + delta_time
+        self.previous_timestamp = self.current_timestamp
+        self.current_timestamp += delta_time
         if self.player is not None:
             self.player.add_input(self.current_timestamp, player_input)
         events: List[CombatEvent] = []
@@ -373,7 +389,6 @@ class World:
             events += obj.fetch_events(self.event_id_gen, self.previous_timestamp, self.current_timestamp)
         for event in events:
             self._handle_event(event)
-        self.previous_timestamp = self.current_timestamp
 
     def _handle_event(self, event: CombatEvent) -> None:
         source_obj = self.get_game_obj(event.source)
@@ -421,10 +436,16 @@ class SpellHandler:
         # Handle spell flags
         if spell.flags & SpellFlag.FIND_TARGET:
             for game_obj in world.game_objs.values():
-                if game_obj.is_attackable and (game_obj.is_player != source_obj.is_player):
+                if game_obj.statuses & GameObjStatus.ALLIED != source_obj.statuses & GameObjStatus.ALLIED:
                     source_obj.target_id = game_obj.obj_id
         if spell.flags & SpellFlag.MOVE_UP:
             source_obj.move_in_direction(0.0, 1.0, target_obj.movement_speed, world.get_delta_time())
+        if spell.flags & SpellFlag.MOVE_LEFT:
+            source_obj.move_in_direction(-1.0, 0.0, target_obj.movement_speed, world.get_delta_time())
+        if spell.flags & SpellFlag.MOVE_DOWN:
+            source_obj.move_in_direction(0.0, -1.0, target_obj.movement_speed, world.get_delta_time())
+        if spell.flags & SpellFlag.MOVE_RIGHT:
+            source_obj.move_in_direction(1.0, 0.0, target_obj.movement_speed, world.get_delta_time())
         if spell.flags & SpellFlag.DAMAGE:
             spell_power = spell.power * source_obj.get_spell_modifier()
             target_obj.suffer_damage(spell_power)
@@ -432,6 +453,12 @@ class SpellHandler:
             spell_power = spell.power * source_obj.get_spell_modifier()
             target_obj.restore_health(spell_power)
 
+
+class SpellValidator:
+    @staticmethod
+    def validate_spell(source_obj: GameObj, spell: Spell, target_obj: GameObj, world: World) -> EventOutcome:
+        if spell.flags & (SpellFlag.MOVE_UP | SpellFlag.MOVE_LEFT | SpellFlag.MOVE_DOWN | SpellFlag.MOVE_RIGHT):
+            return EventOutcome.SUCCESS
 
 class InputHandler:
 
@@ -504,42 +531,54 @@ class Serializer:
         return default_instance
 
 
+class Utils:
+
+    @staticmethod
+    def load_collection(class_with_methods: Type[Any]) -> List[Any]:
+        static_methods = [name for name, attr in class_with_methods.__dict__.items() if isinstance(attr, staticmethod)]
+        return [getattr(class_with_methods, method)() for method in static_methods]
+
 class Database:
     def __init__(self) -> None:
-        self.npcs: List[GameObj] = [
-            Database.empty_npc(),
-            Database.test_player(),
-            Database.test_enemy(),
-        ]
-        self.spells: List[Spell] = [
-            Database.empty_spell(),
-            Database.player_move_up(),
-            Database.fireblast(),
-            Database.humble_heal(),
-            Database.blessed_aura(),
-            Database.spawn_player(),
-            Database.spawn_enemy(),
-            Database.setup_test_zone(),
-        ]
+        self.spells: List[Spell] = Database.load_spell_collections()
+        self.npcs: List[GameObj] = Database.load_npc_collections()
 
-    # Spells
+    @staticmethod
+    def load_spell_collections() -> List[Spell]:
+        spells: List[Spell] = []
+        spells += Utils.load_collection(SpellCollectionCore)
+        return spells
+
+    @staticmethod
+    def load_npc_collections() -> List[GameObj]:
+        npcs: List[GameObj] = []
+        npcs += Utils.load_collection(NpcCollectionCore)
+        return npcs
+
+
+
+class SpellCollectionCore:
     @staticmethod
     def empty_spell() -> Spell:
-        return Spell(
-            spell_id=0,
-        )
+        return Spell(spell_id=0)
 
     @staticmethod
     def player_move_up() -> Spell:
-        return Spell(
-            spell_id=1,
-            flags=SpellFlag.MOVE_UP | SpellFlag.STOP_CAST
-        )
+        return Spell(spell_id=1, flags=SpellFlag.MOVE_UP | SpellFlag.DENY_IF_CASTING)
+    @staticmethod
+    def player_move_left() -> Spell:
+        return Spell(spell_id=2, flags=SpellFlag.MOVE_LEFT | SpellFlag.DENY_IF_CASTING)
+    @staticmethod
+    def player_move_down() -> Spell:
+        return Spell(spell_id=3, flags=SpellFlag.MOVE_DOWN | SpellFlag.DENY_IF_CASTING)
+    @staticmethod
+    def player_move_right() -> Spell:
+        return Spell(spell_id=4, flags=SpellFlag.MOVE_RIGHT | SpellFlag.DENY_IF_CASTING)
 
     @staticmethod
     def fireblast() -> Spell:
         return Spell(
-            spell_id=2,
+            spell_id=5,
             power=3.0,
             flags=SpellFlag.DAMAGE | SpellFlag.FIND_TARGET,
         )
@@ -547,34 +586,33 @@ class Database:
     @staticmethod
     def humble_heal() -> Spell:
         return Spell(
-            spell_id=3,
+            spell_id=6,
             duration=30.0,
             ticks=50,
             power=200.0,
             flags=SpellFlag.HEAL,
         )
 
-
     @staticmethod
     def blessed_aura() -> Spell:
         return Spell(
-            spell_id=4,
-            next_spell=Database.humble_heal().spell_id,
+            spell_id=7,
+            next_spell=SpellCollectionCore.humble_heal().spell_id,
             flags=SpellFlag.AURA,
         )
 
     @staticmethod
     def spawn_player() -> Spell:
         return Spell(
-            spell_id=5,
-            next_spell=Database.spawn_enemy().spell_id,
+            spell_id=8,
+            next_spell=SpellCollectionCore.spawn_enemy().spell_id,
             flags=SpellFlag.SPAWN_PLAYER,
         )
 
     @staticmethod
     def spawn_enemy() -> Spell:
         return Spell(
-            spell_id=6,
+            spell_id=9,
             flags=SpellFlag.SPAWN_NPC,
         )
 
@@ -582,10 +620,11 @@ class Database:
     def setup_test_zone() -> Spell:
         return Spell(
             spell_id=10,
-            next_spell=Database.spawn_player().spell_id,
+            next_spell=SpellCollectionCore.spawn_player().spell_id,
         )
 
-    # Npcs
+
+class NpcCollectionCore:
     @staticmethod
     def empty_npc() -> GameObj:
         return GameObj(
@@ -595,19 +634,19 @@ class Database:
     @staticmethod
     def test_player() -> GameObj:
         return GameObj(
-            npc_id=Database.spawn_player().spell_id,
+            npc_id=SpellCollectionCore.spawn_player().spell_id,
             hp=30.0,
-            is_player=True,
+            statuses=GameObjStatus.ALLIED,
             x=0.3,
             y=0.3,
-            move_up_id=Database.player_move_up().spell_id,
-            move_left_id=Database.player_move_up().spell_id,
-            move_down_id=Database.player_move_up().spell_id,
-            move_right_id=Database.player_move_up().spell_id,
-            ability_1_id=Database.fireblast().spell_id,
-            ability_2_id=Database.fireblast().spell_id,
-            ability_3_id=Database.fireblast().spell_id,
-            ability_4_id=Database.fireblast().spell_id,
+            move_up_id=SpellCollectionCore.player_move_up().spell_id,
+            move_left_id=SpellCollectionCore.player_move_left().spell_id,
+            move_down_id=SpellCollectionCore.player_move_down().spell_id,
+            move_right_id=SpellCollectionCore.player_move_right().spell_id,
+            ability_1_id=SpellCollectionCore.fireblast().spell_id,
+            ability_2_id=SpellCollectionCore.fireblast().spell_id,
+            ability_3_id=SpellCollectionCore.fireblast().spell_id,
+            ability_4_id=SpellCollectionCore.fireblast().spell_id,
         )
 
     @staticmethod
@@ -618,13 +657,12 @@ class Database:
         game_inputs[input_1.local_timestamp] = input_1
         game_inputs[input_2.local_timestamp] = input_2
         return GameObj(
-            npc_id=Database.spawn_enemy().spell_id,
+            npc_id=SpellCollectionCore.spawn_enemy().spell_id,
             hp=30.0,
-            is_player=False,
             x=0.7,
             y=0.7,
-            ability_1_id=Database.humble_heal().spell_id,
-            ability_2_id=Database.blessed_aura().spell_id,
+            ability_1_id=SpellCollectionCore.humble_heal().spell_id,
+            ability_2_id=SpellCollectionCore.blessed_aura().spell_id,
             inputs=game_inputs,
         )
 
