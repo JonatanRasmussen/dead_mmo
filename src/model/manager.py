@@ -60,8 +60,9 @@ class SpellFlag(Flag):
     MOVE_LEFT = auto()
     MOVE_DOWN = auto()
     MOVE_RIGHT = auto()
+    SELF_CAST = auto()
+    TAB_TARGET = auto()
     TELEPORT = auto()
-    FIND_TARGET = auto()
     GCD = auto()
     DAMAGE = auto()
     HEAL = auto()
@@ -80,6 +81,7 @@ class SpellFlag(Flag):
 class Spell(NamedTuple):
     """ An action that can be performed by a game object. """
     spell_id: int = IdGen.EMPTY_ID
+    alias_id: int = IdGen.EMPTY_ID
     next_spell: int = IdGen.EMPTY_ID  # Next link in spell sequence (if this spell is part of one)
 
     power: float = 1.0
@@ -95,15 +97,27 @@ class Spell(NamedTuple):
 
     flags: SpellFlag = SpellFlag.NONE
 
+    @property
+    def template_id(self) -> int:
+        if IdGen.is_empty_id(self.alias_id):
+            return self.spell_id
+        return self.alias_id
+
+    @property
+    def is_spell_sequence(self) -> bool:
+        return not IdGen.is_empty_id(self.next_spell)
+
 
 class Aura(NamedTuple):
-    """ The effect of a spell that periodically ticks over a time span. """
+    """ The effect of a previously cast spell that periodically ticks over a time span. """
     source_id: int = IdGen.EMPTY_ID
     spell_id: int = IdGen.EMPTY_ID
     target_id: int = IdGen.EMPTY_ID
     start_time: float = 0.0
     end_time: float = 0.0
     ticks: int = 1
+    is_debuff: bool = False
+    is_hidden: bool = False
 
     @classmethod
     def create_aura(cls, timestamp: float, source_id: int, spell: Spell, target_id: int) -> None:
@@ -116,23 +130,50 @@ class Aura(NamedTuple):
             ticks=spell.ticks,
         )
 
-    def get_aura_id(self) -> Tuple[int, int, int]:
+    @property
+    def aura_id(self) -> Tuple[int, int, int]:
         return self.source_id, self.spell_id, self.target_id
 
     def has_tick_this_frame(self, last_frame: float, now: float) -> bool:
         """ Ticks happen every tick_interval seconds, excluding t=start, including t=end. """
         if self.ticks == 0 or last_frame >= self.end_time or now <= self.start_time:
             return False
-        tick_interval = self._get_tick_interval()
+        tick_interval = self._tick_interval
         ticks_elapsed = max(0, (last_frame - self.start_time) / tick_interval)
         next_tick = self.start_time + (math.ceil(ticks_elapsed) * tick_interval)
         return (last_frame < next_tick <= now) and (next_tick <= self.end_time)
 
-    def _get_tick_interval(self) -> float:
-        return float('inf') if self.ticks == 0 else self._get_duration() / self.ticks
+    @property
+    def _tick_interval(self) -> float:
+        return float('inf') if self.ticks == 0 else self._duration / self.ticks
 
-    def _get_duration(self) -> float:
+    @property
+    def _duration(self) -> float:
         return self.end_time - self.start_time
+
+
+class PlayerInput(NamedTuple):
+    """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
+    local_timestamp: float = 0.0
+    move_up: bool = False
+    move_left: bool = False
+    move_down: bool = False
+    move_right: bool = False
+    next_target: bool = False
+    ability_1: bool = False
+    ability_2: bool = False
+    ability_3: bool = False
+    ability_4: bool = False
+
+    def is_happening_now(self, last_visit: float, now: float) -> bool:
+        return self.local_timestamp > last_visit and self.local_timestamp <= now
+
+
+class EventTrigger(Enum):
+    EMPTY = 0
+    PLAYER_INPUT = 1
+    CAST_FINISH = 2
+    AURA_TICK = 3
 
 
 class EventOutcome(Enum):
@@ -144,60 +185,59 @@ class EventOutcome(Enum):
 
 class CombatEvent(NamedTuple):
     event_id: int = IdGen.EMPTY_ID
-    parent_event: int = IdGen.EMPTY_ID
+    base_event: int = IdGen.EMPTY_ID
     timestamp: float = 0.0
+    trigger: EventTrigger = EventTrigger.EMPTY
     source: int = IdGen.EMPTY_ID
     spell: int = IdGen.EMPTY_ID
-    dest: int = IdGen.EMPTY_ID  # Target object
-    outcome: EventOutcome = EventOutcome.SUCCESS
+    target: int = IdGen.EMPTY_ID  # Target object
+    outcome: EventOutcome = EventOutcome.EMPTY
 
     @classmethod
     def create_from_aura_tick(cls, event_id: int, timestamp: float, aura: Aura) -> 'CombatEvent':
         return CombatEvent(
             event_id=event_id,
             timestamp=timestamp,
+            trigger=EventTrigger.AURA_TICK,
             source=aura.source_id,
             spell=aura.spell_id,
-            dest=aura.target_id,
+            target=aura.target_id,
         )
 
-    def get_event_summary(self) -> str:
-        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] obj_{self.source:04d} uses spell_{self.spell:04d} on obj_{self.dest:04d}.)"
+    @classmethod
+    def create_from_input(cls, event_id: int, timestamp: float, source_id: int, spell_id: int, target_id: int) -> 'CombatEvent':
+        return CombatEvent(
+            event_id=event_id,
+            timestamp=timestamp,
+            trigger=EventTrigger.PLAYER_INPUT,
+            source=source_id,
+            spell=spell_id,
+            target=target_id,
+        )
 
-    def decide_outcome(self) -> None:
-        #not implemented
-        pass
+    @property
+    def event_summary(self) -> str:
+        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] obj_{self.source:04d} uses spell_{self.spell:04d} on obj_{self.target:04d}.)"
 
+    @property
     def is_aoe(self) -> bool:
         return False #fix later
 
-    def is_spawn_event(self) -> bool:
-        return IdGen.is_empty_id(self.source)
-
+    @property
     def has_target(self) -> bool:
-        return not IdGen.is_empty_id(self.dest)
+        return not IdGen.is_empty_id(self.target)
+
+    def new_target(self, new_target: int) -> 'CombatEvent':
+        return self._replace(target=new_target)
+
+    def finalize_outcome(self, new_outcome: EventOutcome) -> 'CombatEvent':
+        return self._replace(outcome=new_outcome)
 
     def continue_spell_sequence(self, new_event_id: int, new_spell_id: int) -> 'CombatEvent':
         return self._replace(event_id=new_event_id, spell=new_spell_id)
 
     def also_target(self, new_event_id: int, new_target_id: int) -> 'CombatEvent':
         return self._replace(event_id=new_event_id, dest=new_target_id)
-
-
-class PlayerInput(NamedTuple):
-    """ Keypresses for a given timestamp. Is used to make game objects cast spells. """
-    local_timestamp: float = 0.0
-    move_up: bool = False
-    move_left: bool = False
-    move_down: bool = False
-    move_right: bool = False
-    ability_1: bool = False
-    ability_2: bool = False
-    ability_3: bool = False
-    ability_4: bool = False
-
-    def is_happening_now(self, last_visit: float, now: float) -> bool:
-        return self.local_timestamp > last_visit and self.local_timestamp <= now
 
 
 class GameObjStatus(Flag):
@@ -207,7 +247,6 @@ class GameObjStatus(Flag):
     CHANNELING = auto()
     STUNNED = auto()
     ATTACKABLE = auto()
-    ALLIED = auto()
     BANISHED = auto()
 
 
@@ -216,11 +255,13 @@ class GameObj:
     """ Combat units. Controlled by the player or NPCs. """
     obj_id: Final[int] = IdGen.EMPTY_ID
     parent_id: Final[int] = IdGen.EMPTY_ID
-    npc_id: Final[int] = IdGen.EMPTY_ID
+    template_id: Final[int] = IdGen.EMPTY_ID
 
+    # Status effects
     statuses: GameObjStatus = GameObjStatus.NONE
 
     # Targeting
+    is_allied: bool = False
     current_target: int = IdGen.EMPTY_ID
     selected_spell: int = IdGen.EMPTY_ID
 
@@ -235,13 +276,13 @@ class GameObj:
     x: float = 0.0
     y: float = 0.0
     angle: float = 0.0
-    size: float = 0.0
 
     # Ability slots
     move_up_id: int = IdGen.EMPTY_ID
     move_left_id: int = IdGen.EMPTY_ID
     move_down_id: int = IdGen.EMPTY_ID
     move_right_id: int = IdGen.EMPTY_ID
+    next_target: int = IdGen.EMPTY_ID
     ability_1_id: int = IdGen.EMPTY_ID
     ability_2_id: int = IdGen.EMPTY_ID
     ability_3_id: int = IdGen.EMPTY_ID
@@ -255,8 +296,17 @@ class GameObj:
     inputs: SortedDict[float, PlayerInput] = field(default_factory=SortedDict)
     auras: Dict[int, Aura] = field(default_factory=dict)
 
+    @property
+    def size(self) -> float:
+        return 0.01 + math.sqrt(0.0001*abs(self.hp))
+
+    @property
+    def spell_modifier(self) -> float:
+        #calculation not yet implemented
+        return 1.0
+
     @classmethod
-    def embody_npc(cls, unique_obj_id: int, parent_id: int, other: 'GameObj') -> 'GameObj':
+    def create_from_template(cls, unique_obj_id: int, parent_id: int, other: 'GameObj') -> 'GameObj':
         new_obj: GameObj = other.copy()
         new_obj.obj_id = unique_obj_id
         new_obj.parent_id = parent_id
@@ -266,7 +316,7 @@ class GameObj:
         events: List[CombatEvent] = []
         for aura in self.auras.values():
             if aura.has_tick_this_frame(t_previous, t_current):
-                assert aura.target_id == self.obj_id
+                assert aura.target_id == self.obj_id, f"Aura sitting on {self.obj_id} is targeting {aura.target_id}."
                 events.append(CombatEvent.create_from_aura_tick(event_id_gen.new_id(), t_current, aura))
         for timestamp in self.inputs.irange(t_previous-self.spawn_timestamp, t_current-self.spawn_timestamp, inclusive=(False, True)):
             player_input: PlayerInput = self.inputs[timestamp]
@@ -274,13 +324,12 @@ class GameObj:
         return events
 
     def add_input(self, timestamp: float, new_input: PlayerInput) -> None:
-        assert timestamp not in self.inputs, \
-            f"Input for timestamp={timestamp} already exists in obj_id={self.obj_id}"
+        assert timestamp not in self.inputs, f"Input for timestamp={timestamp} already exists in obj_id={self.obj_id}"
         self.inputs[timestamp] = new_input
 
     def add_aura(self, aura: Aura) -> None:
-        assert aura.get_aura_id() not in self.auras, f"Aura with ID ({aura.get_aura_id()}) already exists."
-        self.auras[aura.get_aura_id()] = aura
+        assert aura.aura_id not in self.auras, f"Aura with ID ({aura.aura_id}) already exists."
+        self.auras[aura.aura_id] = aura
 
     def get_aura(self, aura_id: Tuple[int, int, int]) -> Aura:
         assert aura_id in self.auras, f"Aura with ID ({aura_id}) does not exist."
@@ -289,13 +338,6 @@ class GameObj:
     def copy(self) -> 'GameObj':
         return copy(self)
 
-    def get_size(self) -> float:
-        return 0.01 + math.sqrt(0.0001*abs(self.hp))
-
-    def get_spell_modifier(self) -> float:
-        #calculation not yet implemented
-        return 1.0
-
     def teleport_to(self, new_x: float, new_y: float) -> None:
         self.x = new_x
         self.y = new_y
@@ -303,6 +345,9 @@ class GameObj:
     def move_in_direction(self, x: float, y: float, move_speed: float, delta_t: float) -> None:
         self.x += x * move_speed * delta_t
         self.y += y * move_speed * delta_t
+
+    def switch_target(self, new_target: int) -> None:
+        self.current_target = new_target
 
     def suffer_damage(self, spell_power: float) -> None:
         self.hp -= spell_power
@@ -314,17 +359,17 @@ class GameObj:
 class Ruleset:
     """ Static game configuration that should not be changed after combat has started. """
     def __init__(self) -> None:
-        self.npcs: Dict[int, GameObj] = {}
+        self.obj_templates: Dict[int, GameObj] = {}
         self.spells: Dict[int, Spell] = {}
         self.populate_ruleset()
 
-    def get_npc(self, npc_id: int) -> GameObj:
-        assert npc_id in self.npcs, f"Npc with ID {npc_id} not found."
-        return self.npcs.get(npc_id, GameObj())
+    def get_obj_template(self, template_id: int) -> GameObj:
+        assert template_id in self.obj_templates, f"Obj template with ID {template_id} not found."
+        return self.obj_templates.get(template_id, GameObj())
 
-    def add_npc(self, npc: GameObj) -> None:
-        assert npc.npc_id not in self.npcs, f"Npc with ID {npc.npc_id} already exists."
-        self.npcs[npc.npc_id] = npc
+    def add_obj_template(self, template: GameObj) -> None:
+        assert template.template_id not in self.obj_templates, f"Obj template with ID {template.template_id} already exists."
+        self.obj_templates[template.template_id] = template
 
     def get_spell(self, spell_id: int) -> Spell:
         assert spell_id in self.spells, f"Spell with ID {spell_id} not found."
@@ -336,8 +381,8 @@ class Ruleset:
 
     def populate_ruleset(self) -> None:
         database = Database()
-        for npc in database.npcs:
-            self.add_npc(npc)
+        for template in database.obj_templates:
+            self.add_obj_template(template)
         for spell in database.spells:
             self.add_spell(spell)
 
@@ -349,7 +394,7 @@ class EventLog:
 
     def add_event(self, combat_event: CombatEvent):
         self._combat_event_log[combat_event.event_id] = combat_event
-        print(combat_event.get_event_summary())
+        print(combat_event.event_summary)
 
 
 class World:
@@ -362,13 +407,19 @@ class World:
         self.game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
 
         self.environment: GameObj = GameObj(obj_id=self.game_obj_id_gen.new_id())
-        self.boss: Optional[GameObj] = None
         self.player: Optional[GameObj] = None
+        self.boss1: Optional[GameObj] = None
+        self.boss2: Optional[GameObj] = None
 
         self.ruleset: Ruleset = Ruleset()
         self.auras: Dict[Tuple[int, int, int], Aura] = {}
         self.game_objs: Dict[int, GameObj] = {self.environment.obj_id: self.environment}
         self.combat_event_log: EventLog = EventLog()
+
+    @property
+    def delta_time(self) -> float:
+        return self.current_timestamp - self.previous_timestamp
+
 
     def setup_game_obj(self, setup_spell_id: int) -> None:
         setup_event = CombatEvent(
@@ -390,75 +441,112 @@ class World:
         for event in events:
             self._handle_event(event)
 
-    def _handle_event(self, event: CombatEvent) -> None:
+    def _handle_event(self, event: CombatEvent) -> EventOutcome:
         source_obj = self.get_game_obj(event.source)
         spell = self.ruleset.get_spell(event.spell)
-        target_obj = source_obj
-        if not IdGen.is_empty_id(event.dest):
-            target_obj = self.get_game_obj(event.dest)
-        event.decide_outcome()
-        if event.outcome == EventOutcome.SUCCESS:
-            if not IdGen.is_empty_id(spell.next_spell):
-                new_event = event.continue_spell_sequence(self.event_id_gen.new_id(), spell.next_spell)
-                self._handle_event(new_event)
+        target_obj = TargetHandler.select_target(event, source_obj, spell, self)
+        if not event.has_target:
+            event = event.new_target(target_obj.obj_id)
+        outcome = SpellValidator.decide_outcome(source_obj, spell, target_obj)
+        if outcome == EventOutcome.SUCCESS:
             SpellHandler.handle_spell(source_obj, spell, target_obj, self)
-        self.combat_event_log.add_event(event)
+            self.combat_event_log.add_event(event.finalize_outcome(outcome))
+            if spell.is_spell_sequence:
+                sequenced_event = event.continue_spell_sequence(self.event_id_gen.new_id(), spell.next_spell)
+                self._handle_event(sequenced_event)
 
     def add_game_obj(self, game_obj: GameObj) -> None:
-        assert game_obj.obj_id not in self.game_objs, f"Game object with ID {game_obj.obj_id} already exists."
+        assert game_obj.obj_id not in self.game_objs, f"GameObj with ID {game_obj.obj_id} already exists."
         self.game_objs[game_obj.obj_id] = game_obj
 
     def get_game_obj(self, obj_id: int) -> GameObj:
-        assert obj_id in self.game_objs, f"Game object with ID {obj_id} does not exist."
+        assert obj_id in self.game_objs, f"GameObj with ID {obj_id} does not exist."
         return self.game_objs.get(obj_id, GameObj())
-
-    def get_delta_time(self) -> float:
-        return self.current_timestamp - self.previous_timestamp
 
 
 class SpellHandler:
     @staticmethod
     def handle_spell(source_obj: GameObj, spell: Spell, target_obj: GameObj, world: World) -> None:
-        if spell.flags & SpellFlag.SPAWN_NPC or spell.flags & SpellFlag.SPAWN_PLAYER or spell.flags & SpellFlag.SPAWN_PLAYER:
-            obj_id = world.game_obj_id_gen.new_id()
-            npc_template = world.ruleset.get_npc(spell.spell_id)
-            new_obj = GameObj.embody_npc(obj_id, source_obj.obj_id, npc_template)
-            world.add_game_obj(new_obj)
-            if spell.flags & SpellFlag.SPAWN_BOSS:
-                world.boss = new_obj
-            if spell.flags & SpellFlag.SPAWN_PLAYER:
-                world.player = new_obj
+        if spell.flags & (SpellFlag.SPAWN_NPC | SpellFlag.SPAWN_PLAYER | SpellFlag.SPAWN_BOSS):
+            SpellHandler._handle_spawn(source_obj, spell, world)
         if spell.flags & SpellFlag.AURA:
-            aura_spell = world.ruleset.get_spell(spell.next_spell)
-            aura = Aura.create_aura(world.current_timestamp, source_obj.obj_id, aura_spell, target_obj.obj_id)
-            target_obj.add_aura(aura)
-
-        # Handle spell flags
-        if spell.flags & SpellFlag.FIND_TARGET:
-            for game_obj in world.game_objs.values():
-                if game_obj.statuses & GameObjStatus.ALLIED != source_obj.statuses & GameObjStatus.ALLIED:
-                    source_obj.target_id = game_obj.obj_id
-        if spell.flags & SpellFlag.MOVE_UP:
-            source_obj.move_in_direction(0.0, 1.0, target_obj.movement_speed, world.get_delta_time())
-        if spell.flags & SpellFlag.MOVE_LEFT:
-            source_obj.move_in_direction(-1.0, 0.0, target_obj.movement_speed, world.get_delta_time())
-        if spell.flags & SpellFlag.MOVE_DOWN:
-            source_obj.move_in_direction(0.0, -1.0, target_obj.movement_speed, world.get_delta_time())
-        if spell.flags & SpellFlag.MOVE_RIGHT:
-            source_obj.move_in_direction(1.0, 0.0, target_obj.movement_speed, world.get_delta_time())
+            SpellHandler._handle_aura(source_obj, spell, target_obj, world)
+        if spell.flags & (SpellFlag.MOVE_UP | SpellFlag.MOVE_LEFT | SpellFlag.MOVE_DOWN | SpellFlag.MOVE_RIGHT):
+            SpellHandler._handle_movement(spell, target_obj, world)
+        if spell.flags & SpellFlag.TAB_TARGET:
+            SpellHandler._handle_tab_targeting(source_obj, world)
         if spell.flags & SpellFlag.DAMAGE:
-            spell_power = spell.power * source_obj.get_spell_modifier()
+            spell_power = spell.power * source_obj.spell_modifier
             target_obj.suffer_damage(spell_power)
         if spell.flags & SpellFlag.HEAL:
-            spell_power = spell.power * source_obj.get_spell_modifier()
+            spell_power = spell.power * source_obj.spell_modifier
             target_obj.restore_health(spell_power)
 
+    @staticmethod
+    def _handle_spawn(source_obj: GameObj, spell: Spell, world: World) -> None:
+        obj_id = world.game_obj_id_gen.new_id()
+        obj_template = world.ruleset.get_obj_template(spell.template_id)
+        new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, obj_template)
+        world.add_game_obj(new_obj)
+        if spell.flags & SpellFlag.SPAWN_BOSS:
+            if world.boss1 is None:
+                world.boss1 = new_obj
+            else:
+                assert world.boss2 is None, "Second boss already exists."
+                world.boss2 = new_obj
+        if spell.flags & SpellFlag.SPAWN_PLAYER:
+            assert world.player is None, "Player already exists."
+            world.player = new_obj
+
+    @staticmethod
+    def _handle_aura(source_obj: GameObj, spell: Spell, target_obj: GameObj, world: World) -> None:
+        aura_spell = world.ruleset.get_spell(spell.next_spell)
+        aura = Aura.create_aura(world.current_timestamp, source_obj.obj_id, aura_spell, target_obj.obj_id)
+        target_obj.add_aura(aura)
+
+    @staticmethod
+    def _handle_movement(spell: Spell, target_obj: GameObj, world: World) -> None:
+        if spell.flags & SpellFlag.MOVE_UP:
+            target_obj.move_in_direction(0.0, 1.0, target_obj.movement_speed, world.delta_time)
+        if spell.flags & SpellFlag.MOVE_LEFT:
+            target_obj.move_in_direction(-1.0, 0.0, target_obj.movement_speed, world.delta_time)
+        if spell.flags & SpellFlag.MOVE_DOWN:
+            target_obj.move_in_direction(0.0, -1.0, target_obj.movement_speed, world.delta_time)
+        if spell.flags & SpellFlag.MOVE_RIGHT:
+            target_obj.move_in_direction(1.0, 0.0, target_obj.movement_speed, world.delta_time)
+
+    @staticmethod
+    def _handle_tab_targeting(source_obj: GameObj, world: World) -> None:
+        if not source_obj.is_allied:
+            source_obj.current_target = world.player.obj_id
+        elif source_obj.current_target == world.boss1.obj_id:
+            source_obj.switch_target(world.boss2.obj_id)
+        else:
+            source_obj.switch_target(world.boss1.obj_id)
+
+
+class TargetHandler:
+    @staticmethod
+    def select_target(event: CombatEvent, source: GameObj, spell: Spell, world: World) -> GameObj:
+        if spell.flags & SpellFlag.SELF_CAST:
+            return source
+        if not IdGen.is_empty_id(event.target):
+            return world.get_game_obj(event.target)
+        if spell.flags & SpellFlag.DAMAGE:
+            if source.is_allied:
+                return world.boss1
+            return world.player
+        if spell.flags & SpellFlag.HEAL:
+            return source
+        return source
 
 class SpellValidator:
     @staticmethod
-    def validate_spell(source_obj: GameObj, spell: Spell, target_obj: GameObj, world: World) -> EventOutcome:
-        if spell.flags & (SpellFlag.MOVE_UP | SpellFlag.MOVE_LEFT | SpellFlag.MOVE_DOWN | SpellFlag.MOVE_RIGHT):
-            return EventOutcome.SUCCESS
+    def decide_outcome(source_obj: GameObj, spell: Spell, target_obj: GameObj) -> EventOutcome:
+        # not implemented
+        assert source_obj.obj_id + spell.spell_id + target_obj.obj_id > 0, "just a placeholder"
+        return EventOutcome.SUCCESS
+
 
 class InputHandler:
 
@@ -469,40 +557,35 @@ class InputHandler:
         spell_ids += [obj.move_left_id] if game_input.move_left else []
         spell_ids += [obj.move_down_id] if game_input.move_down else []
         spell_ids += [obj.move_right_id] if game_input.move_right else []
+        spell_ids += [obj.next_target] if game_input.next_target else []
         spell_ids += [obj.ability_1_id] if game_input.ability_1 else []
         spell_ids += [obj.ability_2_id] if game_input.ability_2 else []
         spell_ids += [obj.ability_3_id] if game_input.ability_3 else []
         spell_ids += [obj.ability_4_id] if game_input.ability_4 else []
-        assert IdGen.EMPTY_ID not in spell_ids
+        assert IdGen.EMPTY_ID not in spell_ids, "Game input resulted in an empty spell being cast."
         events: List[CombatEvent] = []
         for spell_id in spell_ids:
-            events.append(CombatEvent(
-                event_id=id_gen.new_id(),
-                timestamp=timestamp,
-                source=obj.obj_id,
-                spell=spell_id,
-                dest=obj.current_target,
-            ))
+            events.append(CombatEvent.create_from_input(id_gen.new_id(), timestamp, obj.obj_id, spell_id, obj.current_target))
         return events
 
 
-class GameManager:
+class GameInstance:
     def __init__(self) -> None:
         self.world: World = World()
 
     def simulate_game_in_console(self) -> None:
-        self.setup_game(1)
-        SIMULATION_DURATION = 5
+        self.setup_game(300)
+        SIMULATION_DURATION = 6
         UPDATES_PER_SECOND = 2
         for _ in range(0, SIMULATION_DURATION * UPDATES_PER_SECOND):
             # example of player input
-            self.process_server_tick(1 / UPDATES_PER_SECOND, True, False, False, False, True, False, False, False)
+            self.process_server_tick(1 / UPDATES_PER_SECOND, True, False, False, False, False, True, False, False, False)
 
     def setup_game(self, setup_spell_id: int) -> None:
         self.world.setup_game_obj(setup_spell_id)
 
-    def process_server_tick(self, delta_time: float, move_up: bool, move_left: bool, move_down: bool, move_right: bool, ability_1: bool, ability_2: bool, ability_3: bool, ability_4: bool) -> None:
-        self.world.advance_combat(delta_time, PlayerInput(local_timestamp=self.world.current_timestamp, move_up=move_up, move_left=move_left, move_down=move_down, move_right=move_right, ability_1=ability_1, ability_2=ability_2, ability_3=ability_3, ability_4=ability_4))
+    def process_server_tick(self, delta_time: float, move_up: bool, move_left: bool, move_down: bool, move_right: bool, next_target: bool, ability_1: bool, ability_2: bool, ability_3: bool, ability_4: bool) -> None:
+        self.world.advance_combat(delta_time, PlayerInput(local_timestamp=self.world.current_timestamp, move_up=move_up, move_left=move_left, move_down=move_down, move_right=move_right, next_target=next_target, ability_1=ability_1, ability_2=ability_2, ability_3=ability_3, ability_4=ability_4))
 
     def get_all_game_objs_to_draw(self) -> List[GameObj]:
         return self.world.game_objs.values()
@@ -532,16 +615,22 @@ class Serializer:
 
 
 class Utils:
-
     @staticmethod
     def load_collection(class_with_methods: Type[Any]) -> List[Any]:
         static_methods = [name for name, attr in class_with_methods.__dict__.items() if isinstance(attr, staticmethod)]
         return [getattr(class_with_methods, method)() for method in static_methods]
 
+    @staticmethod
+    def create_player_input_dct(list_of_inputs: List[PlayerInput]) -> Dict[float, PlayerInput]:
+        inputs_dct: SortedDict[float, PlayerInput] = SortedDict()
+        for player_input in list_of_inputs:
+            inputs_dct[player_input.local_timestamp] = player_input
+        return inputs_dct
+
 class Database:
     def __init__(self) -> None:
         self.spells: List[Spell] = Database.load_spell_collections()
-        self.npcs: List[GameObj] = Database.load_npc_collections()
+        self.obj_templates: List[GameObj] = Database.load_obj_template_collections()
 
     @staticmethod
     def load_spell_collections() -> List[Spell]:
@@ -550,10 +639,10 @@ class Database:
         return spells
 
     @staticmethod
-    def load_npc_collections() -> List[GameObj]:
-        npcs: List[GameObj] = []
-        npcs += Utils.load_collection(NpcCollectionCore)
-        return npcs
+    def load_obj_template_collections() -> List[GameObj]:
+        obj_templates: List[GameObj] = []
+        obj_templates += Utils.load_collection(ObjTemplateCollectionCore)
+        return obj_templates
 
 
 
@@ -563,86 +652,112 @@ class SpellCollectionCore:
         return Spell(spell_id=0)
 
     @staticmethod
-    def player_move_up() -> Spell:
-        return Spell(spell_id=1, flags=SpellFlag.MOVE_UP | SpellFlag.DENY_IF_CASTING)
+    def move_up() -> Spell:
+        return Spell(spell_id=1, flags=SpellFlag.MOVE_UP | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
     @staticmethod
-    def player_move_left() -> Spell:
-        return Spell(spell_id=2, flags=SpellFlag.MOVE_LEFT | SpellFlag.DENY_IF_CASTING)
+    def move_left() -> Spell:
+        return Spell(spell_id=2, flags=SpellFlag.MOVE_LEFT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
     @staticmethod
-    def player_move_down() -> Spell:
-        return Spell(spell_id=3, flags=SpellFlag.MOVE_DOWN | SpellFlag.DENY_IF_CASTING)
+    def move_down() -> Spell:
+        return Spell(spell_id=3, flags=SpellFlag.MOVE_DOWN | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
     @staticmethod
-    def player_move_right() -> Spell:
-        return Spell(spell_id=4, flags=SpellFlag.MOVE_RIGHT | SpellFlag.DENY_IF_CASTING)
+    def move_right() -> Spell:
+        return Spell(spell_id=4, flags=SpellFlag.MOVE_RIGHT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
+    @staticmethod
+    def tab_target() -> Spell:
+        return Spell(spell_id=5, flags=SpellFlag.TAB_TARGET)
 
     @staticmethod
     def fireblast() -> Spell:
         return Spell(
-            spell_id=5,
+            spell_id=100,
             power=3.0,
-            flags=SpellFlag.DAMAGE | SpellFlag.FIND_TARGET,
+            flags=SpellFlag.DAMAGE,
         )
 
     @staticmethod
-    def humble_heal() -> Spell:
+    def small_heal() -> Spell:
         return Spell(
-            spell_id=6,
-            duration=30.0,
-            ticks=50,
-            power=200.0,
+            spell_id=101,
+            duration=6.0,
+            ticks=10,
+            power=20.0,
             flags=SpellFlag.HEAL,
         )
 
     @staticmethod
-    def blessed_aura() -> Spell:
+    def healing_aura() -> Spell:
         return Spell(
-            spell_id=7,
-            next_spell=SpellCollectionCore.humble_heal().spell_id,
-            flags=SpellFlag.AURA,
+            spell_id=102,
+            next_spell=SpellCollectionCore.small_heal().spell_id,
+            flags=SpellFlag.AURA | SpellFlag.SELF_CAST,
         )
 
     @staticmethod
     def spawn_player() -> Spell:
         return Spell(
-            spell_id=8,
-            next_spell=SpellCollectionCore.spawn_enemy().spell_id,
-            flags=SpellFlag.SPAWN_PLAYER,
+            spell_id=200,
+            flags=SpellFlag.SPAWN_PLAYER | SpellFlag.SELF_CAST,
         )
 
     @staticmethod
     def spawn_enemy() -> Spell:
         return Spell(
-            spell_id=9,
-            flags=SpellFlag.SPAWN_NPC,
+            spell_id=201,
+            flags=SpellFlag.SPAWN_BOSS | SpellFlag.SELF_CAST,
+        )
+
+    @staticmethod
+    def spawn_target_dummy() -> Spell:
+        return Spell(
+            spell_id=202,
+            flags=SpellFlag.SPAWN_BOSS | SpellFlag.SELF_CAST,
         )
 
     @staticmethod
     def setup_test_zone() -> Spell:
         return Spell(
-            spell_id=10,
+            spell_id=300,
+            next_spell=SpellCollectionCore.setup_test_zone_seq1().spell_id,
+        )
+
+    @staticmethod
+    def setup_test_zone_seq1() -> Spell:
+        return SpellCollectionCore.spawn_enemy()._replace(
+            spell_id=301,
+            alias_id=SpellCollectionCore.spawn_enemy().spell_id,
+            next_spell=SpellCollectionCore.setup_test_zone_seq2().spell_id,
+        )
+
+    @staticmethod
+    def setup_test_zone_seq2() -> Spell:
+        return SpellCollectionCore.spawn_target_dummy()._replace(
+            spell_id=302,
+            alias_id=SpellCollectionCore.spawn_target_dummy().spell_id,
             next_spell=SpellCollectionCore.spawn_player().spell_id,
         )
 
 
-class NpcCollectionCore:
+class ObjTemplateCollectionCore:
     @staticmethod
-    def empty_npc() -> GameObj:
+    def empty_obj() -> GameObj:
         return GameObj(
-            npc_id=0,
+            template_id=0,
         )
 
     @staticmethod
-    def test_player() -> GameObj:
+    def player_template() -> GameObj:
         return GameObj(
-            npc_id=SpellCollectionCore.spawn_player().spell_id,
+            template_id=SpellCollectionCore.spawn_player().spell_id,
             hp=30.0,
-            statuses=GameObjStatus.ALLIED,
+            is_allied=True,
             x=0.3,
             y=0.3,
-            move_up_id=SpellCollectionCore.player_move_up().spell_id,
-            move_left_id=SpellCollectionCore.player_move_left().spell_id,
-            move_down_id=SpellCollectionCore.player_move_down().spell_id,
-            move_right_id=SpellCollectionCore.player_move_right().spell_id,
+            move_up_id=SpellCollectionCore.move_up().spell_id,
+            move_left_id=SpellCollectionCore.move_left().spell_id,
+            move_down_id=SpellCollectionCore.move_down().spell_id,
+            move_right_id=SpellCollectionCore.move_right().spell_id,
+            next_target=SpellCollectionCore.tab_target().spell_id,
             ability_1_id=SpellCollectionCore.fireblast().spell_id,
             ability_2_id=SpellCollectionCore.fireblast().spell_id,
             ability_3_id=SpellCollectionCore.fireblast().spell_id,
@@ -650,24 +765,34 @@ class NpcCollectionCore:
         )
 
     @staticmethod
-    def test_enemy() -> GameObj:
-        game_inputs: SortedDict[float, PlayerInput] = SortedDict()
-        input_1 = PlayerInput(local_timestamp=3.0, ability_1=True)
-        input_2 = PlayerInput(local_timestamp=5.0, ability_2=True)
-        game_inputs[input_1.local_timestamp] = input_1
-        game_inputs[input_2.local_timestamp] = input_2
+    def enemy_template() -> GameObj:
         return GameObj(
-            npc_id=SpellCollectionCore.spawn_enemy().spell_id,
+            template_id=SpellCollectionCore.spawn_enemy().spell_id,
             hp=30.0,
             x=0.7,
             y=0.7,
-            ability_1_id=SpellCollectionCore.humble_heal().spell_id,
-            ability_2_id=SpellCollectionCore.blessed_aura().spell_id,
-            inputs=game_inputs,
+            ability_1_id=SpellCollectionCore.small_heal().spell_id,
+            ability_2_id=SpellCollectionCore.healing_aura().spell_id,
+            inputs=Utils.create_player_input_dct([
+                PlayerInput(local_timestamp=3.0, ability_1=True),
+                PlayerInput(local_timestamp=5.0, ability_2=True),
+            ]),
         )
 
+    @staticmethod
+    def target_dummy_template() -> GameObj:
+        return GameObj(
+            template_id=SpellCollectionCore.spawn_target_dummy().spell_id,
+            hp=80.0,
+            x=0.5,
+            y=0.8,
+            ability_1_id=SpellCollectionCore.fireblast().spell_id,
+            inputs=Utils.create_player_input_dct([
+                PlayerInput(local_timestamp=4.0, ability_1=True),
+            ]),
+        )
 
 #%%
 if __name__ == "__main__":
-    manager = GameManager()
+    manager = GameInstance()
     manager.simulate_game_in_console()

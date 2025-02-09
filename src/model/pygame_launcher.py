@@ -2,7 +2,7 @@
 import pygame
 import sys
 from typing import List, Tuple
-from src.model.manager import GameManager, GameObj, Color
+from src.model.manager import GameInstance, GameObj, Color
 
 class PygameLauncher:
     def __init__(self) -> None:
@@ -21,7 +21,7 @@ class PygameLauncher:
 
         self.screen = None
         self.running = True
-        self.game_manager = GameManager()
+        self.game_manager = GameInstance()
 
     @staticmethod
     def run_game() -> None:
@@ -33,7 +33,7 @@ class PygameLauncher:
         game.calculate_play_area() # Calculate play area dimensions and adjusted borders
 
         # setup game manager
-        game.game_manager.setup_game(10)
+        game.game_manager.setup_game(300)
 
         # run game loop
         last_time = pygame.time.get_ticks()
@@ -57,21 +57,30 @@ class PygameLauncher:
         move_down = keys[pygame.K_s]
         move_right = keys[pygame.K_d]
 
+        # Targeting
+        next_target = False
+
         # Abilities
-        ability_1 = keys[pygame.K_1]
-        ability_2 = keys[pygame.K_2]
-        ability_3 = keys[pygame.K_3]
-        ability_4 = keys[pygame.K_4]
+        ability_1 = False
+        ability_2 = False
+        ability_3 = False
+        ability_4 = False
 
         # Process events for quitting
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.running = False
+            elif event.type == pygame.KEYDOWN:
+                next_target = event.key == pygame.K_TAB
+                ability_1 = event.key == pygame.K_1
+                ability_2 = event.key == pygame.K_2
+                ability_3 = event.key == pygame.K_3
+                ability_4 = event.key == pygame.K_4
 
         # Update game state
         self.game_manager.process_server_tick(
             delta_time,
-            move_up, move_left, move_down, move_right,
+            move_up, move_left, move_down, move_right, next_target,
             ability_1, ability_2, ability_3, ability_4
         )
 
@@ -95,7 +104,7 @@ class PygameLauncher:
             pos = (int(screen_x), int(screen_y))
 
             # Using a default size and color since they're not provided in the tuple
-            size = int(game_obj.get_size() * self.PLAY_HEIGHT)  # Default size
+            size = int(game_obj.size * self.PLAY_HEIGHT)  # Default size
             pygame.draw.circle(self.screen, Color.RED, pos, size)
 
         pygame.display.flip()
