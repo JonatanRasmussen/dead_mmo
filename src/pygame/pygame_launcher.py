@@ -1,27 +1,30 @@
 # pylint: disable=E1101
+import math
 import pygame
 import sys
-from typing import List, Tuple
-from src.model.manager import GameInstance, GameObj, Color
+from typing import List, Tuple, Optional, ValuesView
+from src.model.models import GameObj
+from src.config.color import Color
+from src.handlers.handler import GameInstance
 
 class PygameLauncher:
     def __init__(self) -> None:
-        self.WINDOW_WIDTH = 1920
-        self.WINDOW_HEIGHT = 1080
+        self.WINDOW_WIDTH: int = 1920
+        self.WINDOW_HEIGHT: int = 1080
 
-        self.PLAY_WIDTH = 0.0
-        self.PLAY_HEIGHT = 0.0
-        self.movement_adjustment_x = 0.0
-        self.movement_adjustment_y = 0.0
+        self.PLAY_WIDTH: float = 0.0
+        self.PLAY_HEIGHT: float = 0.0
+        self.movement_adjustment_x: float = 0.0
+        self.movement_adjustment_y: float = 0.0
 
-        self.BORDER_TOP = 0.1
-        self.BORDER_BOT = 0.2
-        self.BORDER_SIDES = 0.05
-        self.PLAY_RATIO = 1/1
+        self.BORDER_TOP: float = 0.1
+        self.BORDER_BOT: float = 0.2
+        self.BORDER_SIDES: float = 0.05
+        self.PLAY_RATIO: float = 1/1
 
-        self.screen = None
-        self.running = True
-        self.game_manager = GameInstance()
+        self.screen: pygame.Surface = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+        self.running: bool = True
+        self.game_manager: GameInstance = GameInstance()
 
     @staticmethod
     def run_game() -> None:
@@ -29,7 +32,6 @@ class PygameLauncher:
         game = PygameLauncher()
         pygame.init()
         pygame.display.set_caption("placeholder")
-        game.screen = pygame.display.set_mode((game.WINDOW_WIDTH, game.WINDOW_HEIGHT))
         game.calculate_play_area() # Calculate play area dimensions and adjusted borders
 
         # setup game manager
@@ -96,7 +98,7 @@ class PygameLauncher:
         pygame.draw.rect(self.screen, Color.GREY, (self.WINDOW_WIDTH - sides, 0, sides, self.WINDOW_HEIGHT))
 
         # Draw game objects
-        game_objs: List[GameObj] = self.game_manager.get_all_game_objs_to_draw()
+        game_objs: ValuesView[GameObj] = self.game_manager.get_all_game_objs_to_draw()
         for game_obj in game_objs:
             # Convert from unit coordinates (0-1) to screen coordinates
             screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.x * self.PLAY_WIDTH
@@ -105,7 +107,35 @@ class PygameLauncher:
 
             # Using a default size and color since they're not provided in the tuple
             size = int(game_obj.size * self.PLAY_HEIGHT)  # Default size
-            pygame.draw.circle(self.screen, Color.RED, pos, size)
+            pygame.draw.circle(self.screen, game_obj.color, pos, size)
+
+            """ To implement later: Each game object has a .gcd_progress attribute with
+                a value between 0.0 (empty) and 1.0 (full). Instead of circles, I want a
+                radial cooldown indicator that fills clockwise from 12 o'clock. """
+            # Draw the cooldown indicator
+            progress = game_obj.gcd_progress
+            if progress < 1.0:  # Only draw if not fully cooled down
+                print("test")
+                # Calculate the angle for the progress (0 to 360 degrees)
+                angle = progress * 360
+
+                # Create a surface for the cooldown overlay
+                surf = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+
+                # Draw the darkened overlay
+                pygame.draw.circle(surf, (0, 0, 0, 128), (size, size), size)  # Semi-transparent black
+
+                if angle > 0:  # Draw the revealed portion
+                    # Convert angle to radians and adjust starting position
+                    start_angle = -270  # Start from 12 o'clock position
+                    end_angle = start_angle + angle
+
+                    # Draw the pie shape to reveal the underlying circle
+                    pygame.draw.arc(surf, (0, 0, 0, 0), (0, 0, size * 2, size * 2),
+                                math.radians(start_angle), math.radians(end_angle), size)
+
+                # Blit the overlay onto the main screen
+                self.screen.blit(surf, (pos[0] - size, pos[1] - size))
 
         pygame.display.flip()
 

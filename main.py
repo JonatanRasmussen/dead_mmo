@@ -1,4 +1,4 @@
-from src.model.pygame_launcher import PygameLauncher
+from src.pygame.pygame_launcher import PygameLauncher
 
 #%%
 if __name__ == "__main__":
