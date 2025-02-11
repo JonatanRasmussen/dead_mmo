@@ -68,10 +68,11 @@ class PygameLauncher:
         ability_3 = False
         ability_4 = False
 
-        # Process events for quitting
         for event in pygame.event.get():
+            # Process events for quitting
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.running = False
+            # Ability key down presses
             elif event.type == pygame.KEYDOWN:
                 next_target = event.key == pygame.K_TAB
                 ability_1 = event.key == pygame.K_1
@@ -115,7 +116,6 @@ class PygameLauncher:
             # Draw the cooldown indicator
             progress = game_obj.gcd_progress
             if progress < 1.0:  # Only draw if not fully cooled down
-                print("test")
                 # Calculate the angle for the progress (0 to 360 degrees)
                 angle = progress * 360
 

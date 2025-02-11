@@ -44,6 +44,23 @@ class IdGen:
         self._assigned_ids = deque(id_num for id_num in self._assigned_ids if id_num != reserved_id)
 
 
+class Controls(NamedTuple):
+    """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
+    local_timestamp: float = 0.0
+    move_up: bool = False
+    move_left: bool = False
+    move_down: bool = False
+    move_right: bool = False
+    next_target: bool = False
+    ability_1: bool = False
+    ability_2: bool = False
+    ability_3: bool = False
+    ability_4: bool = False
+
+    def is_happening_now(self, last_visit: float, now: float) -> bool:
+        return self.local_timestamp > last_visit and self.local_timestamp <= now
+
+
 class SpellFlag(Flag):
     """ Flags for how spells should be handled. """
     NONE = 0
@@ -62,7 +79,6 @@ class SpellFlag(Flag):
     WARP_TO_POSITION = auto()
     TRY_MOVE = auto()
     FORCE_MOVE = auto()
-    SPAWN_NPC = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
     AURA = auto()
@@ -73,7 +89,7 @@ class Spell(NamedTuple):
     """ An action that can be performed by a game object. """
     spell_id: int = IdGen.EMPTY_ID
     alias_id: int = IdGen.EMPTY_ID
-    next_spell: int = IdGen.EMPTY_ID  # Next link in spell sequence (if this spell is part of one)
+    aura_effect_id: int = IdGen.EMPTY_ID
 
     power: float = 1.0
     variance: float = 0.0
@@ -88,15 +104,9 @@ class Spell(NamedTuple):
 
     flags: SpellFlag = SpellFlag.NONE
 
-    @property
-    def template_id(self) -> int:
-        if IdGen.is_empty_id(self.alias_id):
-            return self.spell_id
-        return self.alias_id
-
-    @property
-    def is_spell_sequence(self) -> bool:
-        return not IdGen.is_empty_id(self.next_spell)
+    spell_sequence: Optional[Tuple[int, ...]] = None
+    spawned_obj: Optional['GameObj'] = None
+    controls: Optional[Tuple[Controls, ...]] = None
 
 
 class Aura(NamedTuple):
@@ -116,7 +126,9 @@ class Aura(NamedTuple):
 
     @property
     def tick_interval(self) -> float:
-        return float('inf') if self.ticks == 0 else self.duration / self.ticks
+        if self.ticks == 0 or self.duration == 0:
+            return float('inf')
+        return self.duration / self.ticks
 
     @property
     def end_time(self) -> float:
@@ -126,7 +138,7 @@ class Aura(NamedTuple):
     def create_from_spell(cls, timestamp: float, source_id: int, spell: Spell, target_id: int) -> 'Aura':
         return Aura(
             source_id=source_id,
-            spell_id=spell.spell_id,
+            spell_id=spell.aura_effect_id,
             target_id=target_id,
             start_time=timestamp,
             duration=spell.duration,
@@ -158,26 +170,10 @@ class Aura(NamedTuple):
         end_ticks = self.ticks_elapsed(min(frame_end, self.end_time))
         return tuple(self.start_time + (tick_number * self.tick_interval) for tick_number in range(start_ticks + 1, end_ticks + 1))
 
-class PlayerInput(NamedTuple):
-    """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
-    local_timestamp: float = 0.0
-    move_up: bool = False
-    move_left: bool = False
-    move_down: bool = False
-    move_right: bool = False
-    next_target: bool = False
-    ability_1: bool = False
-    ability_2: bool = False
-    ability_3: bool = False
-    ability_4: bool = False
-
-    def is_happening_now(self, last_visit: float, now: float) -> bool:
-        return self.local_timestamp > last_visit and self.local_timestamp <= now
-
 
 class EventTrigger(Enum):
     EMPTY = 0
-    PLAYER_INPUT = 1
+    CONTROLS = 1
     CAST_FINISH = 2
     AURA_TICK = 3
 
@@ -193,10 +189,10 @@ class CombatEvent(NamedTuple):
     event_id: int = IdGen.EMPTY_ID
     base_event: int = IdGen.EMPTY_ID
     timestamp: float = 0.0
-    trigger: EventTrigger = EventTrigger.EMPTY
     source: int = IdGen.EMPTY_ID
     spell: int = IdGen.EMPTY_ID
-    target: int = IdGen.EMPTY_ID  # Target object
+    target: int = IdGen.EMPTY_ID
+    is_aura_tick: bool = False
     outcome: EventOutcome = EventOutcome.EMPTY
 
     @classmethod
@@ -204,18 +200,17 @@ class CombatEvent(NamedTuple):
         return CombatEvent(
             event_id=event_id,
             timestamp=timestamp,
-            trigger=EventTrigger.AURA_TICK,
             source=aura.source_id,
             spell=aura.spell_id,
             target=aura.target_id,
+            is_aura_tick=True,
         )
 
     @classmethod
-    def create_from_input(cls, event_id: int, timestamp: float, source_id: int, spell_id: int, target_id: int) -> 'CombatEvent':
+    def create_from_controls(cls, event_id: int, timestamp: float, source_id: int, spell_id: int, target_id: int) -> 'CombatEvent':
         return CombatEvent(
             event_id=event_id,
             timestamp=timestamp,
-            trigger=EventTrigger.PLAYER_INPUT,
             source=source_id,
             spell=spell_id,
             target=target_id,
@@ -223,7 +218,7 @@ class CombatEvent(NamedTuple):
 
     @property
     def event_summary(self) -> str:
-        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] obj_{self.source:04d} uses spell_{self.spell:04d} on obj_{self.target:04d}.)"
+        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] (obj_{self.source:04d} uses spell_{self.spell:04d} on obj_{self.target:04d}.)"
 
     @property
     def is_aoe(self) -> bool:
@@ -260,7 +255,7 @@ class GameObj:
     """ Combat units. Controlled by the player or NPCs. """
     obj_id: int = IdGen.EMPTY_ID
     parent_id: int = IdGen.EMPTY_ID
-    template_id: Final[int] = IdGen.EMPTY_ID
+    spawned_from_spell: Final[int] = IdGen.EMPTY_ID
 
     # Appearance
     color: Tuple[int, int, int] = Color.WHITE
@@ -297,16 +292,12 @@ class GameObj:
     ability_4_id: int = IdGen.EMPTY_ID
 
     # Cooldown timestamps
-    combat_timestamp: float = 0.0
     spawn_timestamp: float = 0.0
     gcd_start: float = 0.0
     ability_1_cd_start: float = 0.0
     ability_2_cd_start: float = 0.0
     ability_3_cd_start: float = 0.0
     ability_4_cd_start: float = 0.0
-
-    inputs: SortedDict[float, PlayerInput] = field(default_factory=SortedDict)
-    auras: Dict[Tuple[int, int, int], Aura] = field(default_factory=dict)
 
     @property
     def size(self) -> float:
@@ -319,7 +310,7 @@ class GameObj:
 
     @property
     def gcd_progress(self) -> float:
-        return min(1.0, (self.combat_timestamp - self.gcd_start) / self.gcd)
+        return min(1.0, (0 - self.gcd_start) / self.gcd)
 
     @classmethod
     def create_from_template(cls, unique_obj_id: int, parent_id: int, other: 'GameObj') -> 'GameObj':
@@ -327,30 +318,6 @@ class GameObj:
         new_obj.obj_id = unique_obj_id
         new_obj.parent_id = parent_id
         return new_obj
-
-    def fetch_events(self, event_id_gen: IdGen, last_visit: float, now: float) -> List[CombatEvent]:
-        self.combat_timestamp = now
-        events: List[CombatEvent] = []
-        for aura in self.auras.values():
-            if aura.has_tick_this_frame(last_visit, now):
-                assert aura.target_id == self.obj_id, f"Aura sitting on {self.obj_id} is targeting {aura.target_id}."
-                events.append(CombatEvent.create_from_aura_tick(event_id_gen.new_id(), now, aura))
-        for timestamp in self.inputs.irange(last_visit-self.spawn_timestamp, now-self.spawn_timestamp, inclusive=(False, True)):
-            player_input: PlayerInput = self.inputs[timestamp]
-            events += self._convert_to_events(event_id_gen, now, player_input)
-        return events
-
-    def add_input(self, timestamp: float, new_input: PlayerInput) -> None:
-        assert timestamp not in self.inputs, f"Input for timestamp={timestamp} already exists in obj_id={self.obj_id}"
-        self.inputs[timestamp] = new_input
-
-    def add_aura(self, aura: Aura) -> None:
-        assert aura.aura_id not in self.auras, f"Aura with ID ({aura.aura_id}) already exists."
-        self.auras[aura.aura_id] = aura
-
-    def get_aura(self, aura_id: Tuple[int, int, int]) -> Aura:
-        assert aura_id in self.auras, f"Aura with ID ({aura_id}) does not exist."
-        return self.auras.get(aura_id, Aura())
 
     def copy(self) -> 'GameObj':
         return copy(self)
@@ -372,19 +339,22 @@ class GameObj:
     def restore_health(self, spell_power: float) -> None:
         self.hp += spell_power
 
-    def _convert_to_events(self, id_gen: IdGen, timestamp: float, game_input: PlayerInput) -> List[CombatEvent]:
+    def time_since_spawn(self, current_time: float) -> float:
+        return current_time - self.spawn_timestamp
+
+    def convert_to_events(self, id_gen: IdGen, timestamp: float, controls: Controls) -> List[CombatEvent]:
         spell_ids: List[int] = []
-        spell_ids += [self.move_up_id] if game_input.move_up else []
-        spell_ids += [self.move_left_id] if game_input.move_left else []
-        spell_ids += [self.move_down_id] if game_input.move_down else []
-        spell_ids += [self.move_right_id] if game_input.move_right else []
-        spell_ids += [self.next_target] if game_input.next_target else []
-        spell_ids += [self.ability_1_id] if game_input.ability_1 else []
-        spell_ids += [self.ability_2_id] if game_input.ability_2 else []
-        spell_ids += [self.ability_3_id] if game_input.ability_3 else []
-        spell_ids += [self.ability_4_id] if game_input.ability_4 else []
-        assert IdGen.EMPTY_ID not in spell_ids, "Game input resulted in an empty spell being cast."
+        spell_ids += [self.move_up_id] if controls.move_up else []
+        spell_ids += [self.move_left_id] if controls.move_left else []
+        spell_ids += [self.move_down_id] if controls.move_down else []
+        spell_ids += [self.move_right_id] if controls.move_right else []
+        spell_ids += [self.next_target] if controls.next_target else []
+        spell_ids += [self.ability_1_id] if controls.ability_1 else []
+        spell_ids += [self.ability_2_id] if controls.ability_2 else []
+        spell_ids += [self.ability_3_id] if controls.ability_3 else []
+        spell_ids += [self.ability_4_id] if controls.ability_4 else []
+        assert IdGen.EMPTY_ID not in spell_ids, f"Controls {controls} resulted in an empty spell being cast."
         events: List[CombatEvent] = []
         for spell_id in spell_ids:
-            events.append(CombatEvent.create_from_input(id_gen.new_id(), timestamp, self.obj_id, spell_id, self.current_target))
+            events.append(CombatEvent.create_from_controls(id_gen.new_id(), timestamp, self.obj_id, spell_id, self.current_target))
         return events

@@ -2,30 +2,22 @@ from dataclasses import dataclass, asdict, field
 from sortedcontainers import SortedDict  # type: ignore
 from typing import Any, Dict, List, Tuple, Type, ValuesView, Optional, FrozenSet, Literal, Final, TypedDict, ClassVar, Set, Deque, NamedTuple
 from collections import deque
+import heapq
 from enum import Enum, Flag, auto
 from types import MappingProxyType
 from copy import copy, deepcopy
 import math
 import json
 from src.config.color import Color
-from src.model.models import IdGen, SpellFlag, Spell, Aura, PlayerInput, EventTrigger, EventOutcome, CombatEvent, GameObjStatus, GameObj
+from src.model.models import IdGen, SpellFlag, Spell, Aura, Controls, EventTrigger, EventOutcome, CombatEvent, GameObjStatus, GameObj
 from src.utils.utils import Utils
 from src.config.spell_db import Database
 
 class Ruleset:
     """ Static game configuration that should not be changed after combat has started. """
     def __init__(self) -> None:
-        self.obj_templates: Dict[int, GameObj] = {}
         self.spells: Dict[int, Spell] = {}
         self.populate_ruleset()
-
-    def get_obj_template(self, template_id: int) -> GameObj:
-        assert template_id in self.obj_templates, f"Obj template with ID {template_id} not found."
-        return self.obj_templates.get(template_id, GameObj())
-
-    def add_obj_template(self, template: GameObj) -> None:
-        assert template.template_id not in self.obj_templates, f"Obj template with ID {template.template_id} already exists."
-        self.obj_templates[template.template_id] = template
 
     def get_spell(self, spell_id: int) -> Spell:
         assert spell_id in self.spells, f"Spell with ID {spell_id} not found."
@@ -37,8 +29,6 @@ class Ruleset:
 
     def populate_ruleset(self) -> None:
         database = Database()
-        for template in database.obj_templates:
-            self.add_obj_template(template)
         for spell in database.spells:
             self.add_spell(spell)
 
@@ -68,9 +58,15 @@ class World:
         self.boss2: GameObj = self.environment
 
         self.ruleset: Ruleset = Ruleset()
-        self.auras: Dict[Tuple[int, int, int], Aura] = {}
+
+        self.auras: SortedDict[Tuple[int, int, int], Aura] = SortedDict()
+        self.controls: SortedDict[Tuple[float, int], Controls] = SortedDict()
+
         self.game_objs: Dict[int, GameObj] = {self.environment.obj_id: self.environment}
         self.combat_event_log: EventLog = EventLog()
+
+        self.events: List[Tuple[float, int, int, CombatEvent]] = []
+
 
     @property
     def delta_time(self) -> float:
@@ -95,16 +91,39 @@ class World:
         )
         self._handle_event(setup_event)
 
-    def advance_combat(self, delta_time: float, player_input: PlayerInput) -> None:
+    def advance_combat(self, delta_time: float, controls: Controls) -> None:
         self.previous_timestamp = self.current_timestamp
         self.current_timestamp += delta_time
-        if self.player is not None:
-            self.player.add_input(self.current_timestamp, player_input)
-        events: List[CombatEvent] = []
-        for obj in self.game_objs.values():
-            events += obj.fetch_events(self.event_id_gen, self.previous_timestamp, self.current_timestamp)
-        for event in events:
+        if self.player_exists:
+            self.add_controls(self.player.obj_id, self.current_timestamp, controls)
+        assert len(self.events) == 0, "Events not empty. This should not happen."
+        self.fetch_events_in_time_range()
+        max_iterations = 10_000
+        while self.events:
+            assert max_iterations > 0, "Infinite loop detected."
+            max_iterations -= 1
+            _, _, _, event = heapq.heappop(self.events)
             self._handle_event(event)
+
+
+    def fetch_events_in_time_range(self) -> None:
+        events: List[CombatEvent] = []
+        # Handle aura ticks
+        for aura in self.auras.values():
+            if aura.has_tick_this_frame(self.previous_timestamp, self.current_timestamp):
+                events.append(CombatEvent.create_from_aura_tick(self.event_id_gen.new_id(), self.current_timestamp, aura))
+        # Handle controls
+        start_key: Tuple[float, int] = (self.previous_timestamp, min(self.game_objs.keys()))
+        end_key: Tuple[float, int] = (self.current_timestamp, max(self.game_objs.keys()))
+        for timestamp, obj_id in self.controls.irange(start_key, end_key):
+            if timestamp == self.previous_timestamp:
+                continue # Prevent double processing of controls
+            controls: Controls = self.controls[(timestamp, obj_id)]
+            game_obj = self.get_game_obj(obj_id)
+            events += game_obj.convert_to_events(self.event_id_gen, controls.local_timestamp, controls)
+        for event in events:
+            heapq.heappush(self.events, (event.timestamp, event.source, event.event_id, event))
+
 
     def _handle_event(self, event: CombatEvent) -> None:
         source_obj = self.get_game_obj(event.source)
@@ -115,11 +134,11 @@ class World:
         outcome = SpellValidator.decide_outcome(source_obj, spell, target_obj)
         if outcome == EventOutcome.SUCCESS:
             SpellHandler.handle_spell(source_obj, spell, target_obj, self)
-            self.combat_event_log.add_event(event.finalize_outcome(outcome))
-            if spell.is_spell_sequence:
-                sequenced_event = event.continue_spell_sequence(self.event_id_gen.new_id(), spell.next_spell)
-                self._handle_event(sequenced_event)
-
+            if spell.spell_sequence is not None:
+                for next_spell in spell.spell_sequence:
+                    sequenced_event = event.continue_spell_sequence(self.event_id_gen.new_id(), next_spell)
+                    self._handle_event(sequenced_event)
+        self.combat_event_log.add_event(event.finalize_outcome(outcome))
 
     def add_game_obj(self, game_obj: GameObj) -> None:
         assert game_obj.obj_id not in self.game_objs, f"GameObj with ID {game_obj.obj_id} already exists."
@@ -129,11 +148,28 @@ class World:
         assert obj_id in self.game_objs, f"GameObj with ID {obj_id} does not exist."
         return self.game_objs.get(obj_id, GameObj())
 
+    def add_controls(self, obj_id: int, timestamp: float, new_controls: Controls) -> None:
+        key: Tuple[float, int] = (timestamp, obj_id)
+        assert key not in self.controls, f"Controls with (timestamp, obj_id) = ({key}) already exists."
+        self.controls[key] = new_controls
+
+    def add_aura(self, aura: Aura) -> None:
+        key: Tuple[int, int, int] = aura.aura_id
+        assert key not in self.auras, f"Aura with (source, spell, target) = ({key}) already exists."
+        self.auras[key] = aura
+
+    def get_aura(self, aura_id: Tuple[int, int, int]) -> Aura:
+        key = aura_id
+        assert key in self.auras, f"Aura with ID ({aura_id}) does not exist."
+        return self.auras.get(key, Aura())
+
+    def get_obj_auras(self, obj_id: int) -> List[Aura]:
+        return [aura for aura in self.auras.values() if aura.target_id == obj_id]
 
 class SpellHandler:
     @staticmethod
     def handle_spell(source_obj: GameObj, spell: Spell, target_obj: GameObj, world: World) -> None:
-        if spell.flags & (SpellFlag.SPAWN_NPC | SpellFlag.SPAWN_PLAYER | SpellFlag.SPAWN_BOSS):
+        if spell.spawned_obj is not None:
             SpellHandler._handle_spawn(source_obj, spell, world)
         if spell.flags & SpellFlag.AURA:
             SpellHandler._handle_aura(source_obj, spell, target_obj, world)
@@ -142,7 +178,6 @@ class SpellHandler:
         if spell.flags & SpellFlag.TAB_TARGET:
             SpellHandler._handle_tab_targeting(source_obj, world)
         if spell.flags & SpellFlag.TRIGGER_GCD:
-            print(source_obj.gcd_progress)
             source_obj.gcd_start = world.current_timestamp
         if spell.flags & SpellFlag.DAMAGE:
             spell_power = spell.power * source_obj.spell_modifier
@@ -153,10 +188,13 @@ class SpellHandler:
 
     @staticmethod
     def _handle_spawn(source_obj: GameObj, spell: Spell, world: World) -> None:
-        obj_id = world.game_obj_id_gen.new_id()
-        obj_template = world.ruleset.get_obj_template(spell.template_id)
-        new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, obj_template)
-        world.add_game_obj(new_obj)
+        if spell.spawned_obj is not None:
+            obj_id = world.game_obj_id_gen.new_id()
+            new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, spell.spawned_obj)
+            world.add_game_obj(new_obj)
+            if spell.controls is not None:
+                for controls in spell.controls:
+                    world.add_controls(obj_id, controls.local_timestamp, controls)
         if spell.flags & SpellFlag.SPAWN_BOSS:
             if not world.boss1_exists:
                 world.boss1 = new_obj
@@ -169,9 +207,8 @@ class SpellHandler:
 
     @staticmethod
     def _handle_aura(source_obj: GameObj, spell: Spell, target_obj: GameObj, world: World) -> None:
-        aura_spell = world.ruleset.get_spell(spell.next_spell)
-        aura = Aura.create_from_spell(world.current_timestamp, source_obj.obj_id, aura_spell, target_obj.obj_id)
-        target_obj.add_aura(aura)
+        aura = Aura.create_from_spell(world.current_timestamp, source_obj.obj_id, spell, target_obj.obj_id)
+        world.add_aura(aura)
 
     @staticmethod
     def _handle_movement(spell: Spell, target_obj: GameObj, world: World) -> None:
@@ -195,6 +232,7 @@ class SpellHandler:
         else:
             source_obj.switch_target(world.player.obj_id)
             # Not implemented. For now, let's assume boss1 always exist.
+
 
 class TargetHandler:
     @staticmethod
@@ -228,14 +266,14 @@ class GameInstance:
         SIMULATION_DURATION = 6
         UPDATES_PER_SECOND = 2
         for _ in range(0, SIMULATION_DURATION * UPDATES_PER_SECOND):
-            # example of player input
+            # example of controls
             self.process_server_tick(1 / UPDATES_PER_SECOND, True, False, False, False, False, True, False, False, False)
 
     def setup_game(self, setup_spell_id: int) -> None:
         self.world.setup_game_obj(setup_spell_id)
 
     def process_server_tick(self, delta_time: float, move_up: bool, move_left: bool, move_down: bool, move_right: bool, next_target: bool, ability_1: bool, ability_2: bool, ability_3: bool, ability_4: bool) -> None:
-        self.world.advance_combat(delta_time, PlayerInput(local_timestamp=self.world.current_timestamp, move_up=move_up, move_left=move_left, move_down=move_down, move_right=move_right, next_target=next_target, ability_1=ability_1, ability_2=ability_2, ability_3=ability_3, ability_4=ability_4))
+        self.world.advance_combat(delta_time, Controls(local_timestamp=self.world.current_timestamp, move_up=move_up, move_left=move_left, move_down=move_down, move_right=move_right, next_target=next_target, ability_1=ability_1, ability_2=ability_2, ability_3=ability_3, ability_4=ability_4))
 
     def get_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
         return self.world.game_objs.values()
