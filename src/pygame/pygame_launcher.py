@@ -2,10 +2,11 @@
 import math
 import pygame
 import sys
-from typing import List, Tuple, Optional, ValuesView
-from src.model.models import GameObj
+from typing import ValuesView
+from src.models.controls import Controls
+from src.models.game_obj import GameObj
 from src.config.color import Color
-from src.handlers.handler import GameInstance
+from src.handlers.game_instance import GameInstance
 
 class PygameLauncher:
     def __init__(self) -> None:
@@ -51,41 +52,39 @@ class PygameLauncher:
         sys.exit()
 
     def process_game_tick(self, delta_time: float) -> None:
-        keys = pygame.key.get_pressed()
-
-        # Movement
-        move_up = keys[pygame.K_w]
-        move_left = keys[pygame.K_a]
-        move_down = keys[pygame.K_s]
-        move_right = keys[pygame.K_d]
-
-        # Targeting
-        next_target = False
-
-        # Abilities
-        ability_1 = False
-        ability_2 = False
-        ability_3 = False
-        ability_4 = False
-
+        controls = Controls()
         for event in pygame.event.get():
-            # Process events for quitting
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.running = False
-            # Ability key down presses
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_w:
+                    controls = controls._replace(stop_move_up=True)
+                elif event.key == pygame.K_a:
+                    controls = controls._replace(stop_move_left=True)
+                elif event.key == pygame.K_s:
+                    controls = controls._replace(stop_move_down=True)
+                elif event.key == pygame.K_d:
+                    controls = controls._replace(stop_move_right=True)
             elif event.type == pygame.KEYDOWN:
-                next_target = event.key == pygame.K_TAB
-                ability_1 = event.key == pygame.K_1
-                ability_2 = event.key == pygame.K_2
-                ability_3 = event.key == pygame.K_3
-                ability_4 = event.key == pygame.K_4
-
-        # Update game state
-        self.game_manager.process_server_tick(
-            delta_time,
-            move_up, move_left, move_down, move_right, next_target,
-            ability_1, ability_2, ability_3, ability_4
-        )
+                if event.key == pygame.K_w:
+                    controls = controls._replace(start_move_up=True)
+                elif event.key == pygame.K_a:
+                    controls = controls._replace(start_move_left=True)
+                elif event.key == pygame.K_s:
+                    controls = controls._replace(start_move_down=True)
+                elif event.key == pygame.K_d:
+                    controls = controls._replace(start_move_right=True)
+                elif event.key == pygame.K_TAB:
+                    controls = controls._replace(next_target=True)
+                elif event.key == pygame.K_1:
+                    controls = controls._replace(ability_1=True)
+                elif event.key == pygame.K_2:
+                    controls = controls._replace(ability_2=True)
+                elif event.key == pygame.K_3:
+                    controls = controls._replace(ability_3=True)
+                elif event.key == pygame.K_4:
+                    controls = controls._replace(ability_4=True)
+        self.game_manager.process_frame(delta_time, controls)
 
     def draw_screen(self) -> None:
         self.screen.fill(Color.BLACK)

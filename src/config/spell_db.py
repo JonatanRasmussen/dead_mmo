@@ -1,18 +1,33 @@
-from typing import List
+from typing import Any, List, Dict, Type
 from src.config.color import Color
-from src.model.models import SpellFlag, Spell, Controls, GameObj
-from src.utils.utils import Utils
+
+from src.models.controls import Controls
+from src.models.game_obj import GameObj
+from src.models.spell import SpellFlag, Spell
 
 
-class Database:
+class SpellDatabase:
     def __init__(self) -> None:
-        self.spells: List[Spell] = Database.load_spell_collections()
+        self.spells_loaded_into_memory: Dict[int, Spell] = SpellDatabase.load_spells_into_memory()
 
     @staticmethod
-    def load_spell_collections() -> List[Spell]:
-        spells: List[Spell] = []
-        spells += Utils.load_collection(SpellCollectionCore)
-        return spells
+    def load_spells_into_memory() -> Dict[int, Spell]:
+        spells_to_load: List[Spell] = []
+        spells_to_load += SpellDatabase._load_collection(SpellCollectionCore)
+        spells_loaded_into_memory: Dict[int, Spell] = {}
+        for spell in spells_to_load:
+            assert spell.spell_id not in spells_to_load, f"Spell with ID {spell.spell_id} already exists."
+            spells_loaded_into_memory[spell.spell_id] = spell
+        return spells_loaded_into_memory
+
+    def get_spell(self, spell_id: int) -> Spell:
+        assert spell_id in self.spells_loaded_into_memory, f"Spell with ID {spell_id} not found."
+        return self.spells_loaded_into_memory.get(spell_id, Spell())
+
+    @staticmethod
+    def _load_collection(class_with_methods: Type[Any]) -> List[Any]:
+        static_methods = [name for name, attr in class_with_methods.__dict__.items() if isinstance(attr, staticmethod)]
+        return [getattr(class_with_methods, method)() for method in static_methods]
 
 
 class SpellCollectionCore:
@@ -34,7 +49,7 @@ class SpellCollectionCore:
         return Spell(spell_id=4, flags=SpellFlag.MOVE_RIGHT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
     @staticmethod
     def tab_target() -> Spell:
-        return Spell(spell_id=5, flags=SpellFlag.TAB_TARGET)
+        return Spell(spell_id=5, flags=SpellFlag.TAB_TARGET | SpellFlag.SELF_CAST)
 
     @staticmethod
     def fireblast() -> Spell:
@@ -75,11 +90,15 @@ class SpellCollectionCore:
                 color=Color.RED,
                 x=0.3,
                 y=0.3,
-                move_up_id=SpellCollectionCore.move_up().spell_id,
-                move_left_id=SpellCollectionCore.move_left().spell_id,
-                move_down_id=SpellCollectionCore.move_down().spell_id,
-                move_right_id=SpellCollectionCore.move_right().spell_id,
-                next_target=SpellCollectionCore.tab_target().spell_id,
+                start_move_up_id=SpellCollectionCore.move_up().spell_id,
+                stop_move_up_id=SpellCollectionCore.move_up().spell_id,
+                start_move_left_id=SpellCollectionCore.move_left().spell_id,
+                stop_move_left_id=SpellCollectionCore.move_left().spell_id,
+                start_move_down_id=SpellCollectionCore.move_down().spell_id,
+                stop_move_down_id=SpellCollectionCore.move_down().spell_id,
+                start_move_right_id=SpellCollectionCore.move_right().spell_id,
+                stop_move_right_id=SpellCollectionCore.move_right().spell_id,
+                next_target_id=SpellCollectionCore.tab_target().spell_id,
                 ability_1_id=SpellCollectionCore.fireblast().spell_id,
                 ability_2_id=SpellCollectionCore.fireblast().spell_id,
                 ability_3_id=SpellCollectionCore.fireblast().spell_id,
@@ -102,9 +121,9 @@ class SpellCollectionCore:
                 ability_1_id=SpellCollectionCore.small_heal().spell_id,
                 ability_2_id=SpellCollectionCore.healing_aura().spell_id,
             ),
-            controls=(
-                Controls(local_timestamp=3.0, ability_1=True),
-                Controls(local_timestamp=5.0, ability_2=True),
+            obj_controls=(
+                Controls(timestamp=3.0, ability_1=True),
+                Controls(timestamp=5.0, ability_2=True),
             )
         )
 
@@ -122,8 +141,8 @@ class SpellCollectionCore:
                 y=0.8,
                 ability_1_id=SpellCollectionCore.fireblast().spell_id,
             ),
-            controls=(
-                Controls(local_timestamp=4.0, ability_1=True),
+            obj_controls=(
+                Controls(timestamp=4.0, ability_1=True),
             )
         )
 
