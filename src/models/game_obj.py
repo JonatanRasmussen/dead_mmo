@@ -87,6 +87,10 @@ class GameObj(NamedTuple):
     def create_from_template(cls, unique_obj_id: int, parent_id: int, other: 'GameObj') -> 'GameObj':
         return other._replace(obj_id=unique_obj_id, parent_id=parent_id)
 
+    @classmethod
+    def create_environment(cls, unique_obj_id: int) -> 'GameObj':
+        return GameObj(obj_id=unique_obj_id)
+
     def teleport_to(self, new_x: float, new_y: float) -> 'GameObj':
         return self._replace(x=new_x, y=new_y)
 

@@ -1,8 +1,11 @@
-from typing import NamedTuple
+from typing import NamedTuple, List
 from enum import Enum
 
 from src.models.id_gen import IdGen
 from src.models.aura import Aura
+from src.models.game_obj import GameObj
+from src.models.spell import SpellFlag, Spell
+from src.models.world_state import WorldState
 
 
 class EventOutcome(Enum):
@@ -22,35 +25,21 @@ class CombatEvent(NamedTuple):
     is_periodic_tick: bool = False
     outcome: EventOutcome = EventOutcome.EMPTY
 
-    @classmethod
-    def create_from_aura_tick(cls, event_id: int, timestamp: float, aura: Aura) -> 'CombatEvent':
-        return CombatEvent(
-            event_id=event_id,
-            timestamp=timestamp,
-            source=aura.source_id,
-            spell=aura.spell_id,
-            target=aura.target_id,
-            is_periodic_tick=True,
-        )
+    @staticmethod
+    def create_events_happening_this_frame(state: WorldState) -> List['CombatEvent']:
+        frame_events: List[CombatEvent] = []
+        if not state.has_been_initialized:
+            frame_events.append(CombatEvent._create_setup_event(state))
+        frame_events.extend(CombatEvent._create_aura_events(state))
+        frame_events.extend(CombatEvent._create_controls_events(state))
+        return frame_events
 
-    @classmethod
-    def create_from_controls(cls, event_id: int, timestamp: float, source_id: int, spell_id: int, target_id: int) -> 'CombatEvent':
-        return CombatEvent(
-            event_id=event_id,
-            timestamp=timestamp,
-            source=source_id,
-            spell=spell_id,
-            target=target_id,
-        )
-
-    @classmethod
-    def create_setup_event(cls, event_id: int, timestamp: float, source_id: int, spell_id: int) -> 'CombatEvent':
-        return CombatEvent(
-            event_id=event_id,
-            timestamp=timestamp,
-            source=source_id,
-            spell=spell_id,
-        )
+    @staticmethod
+    def create_cascading_events(spell: Spell, event: 'CombatEvent', state: WorldState) -> List['CombatEvent']:
+        frame_events: List[CombatEvent] = []
+        frame_events.extend(CombatEvent._create_spell_sequence_events(spell, event, state))
+        frame_events.extend(CombatEvent._create_events_from_aura(spell, event, state))
+        return frame_events
 
     @property
     def event_summary(self) -> str:
@@ -83,3 +72,67 @@ class CombatEvent(NamedTuple):
 
     def also_target(self, new_event_id: int, new_target_id: int) -> 'CombatEvent':
         return self._replace(event_id=new_event_id, target=new_target_id)
+
+    @classmethod
+    def _create_from_aura_tick(cls, state: WorldState, aura: Aura) -> 'CombatEvent':
+        return CombatEvent(
+            event_id=state.generate_new_event_id(),
+            timestamp=state.current_timestamp,
+            source=aura.source_id,
+            spell=aura.spell_id,
+            target=aura.target_id,
+            is_periodic_tick=True,
+        )
+
+    @classmethod
+    def _create_setup_event(cls, state: WorldState) -> 'CombatEvent':
+        return CombatEvent(
+            event_id=state.generate_new_event_id(),
+            timestamp=0.0,
+            source=state.environment_id,
+            spell=state.setup_spell_id,
+        )
+
+    @staticmethod
+    def _create_aura_events(state: WorldState) -> List['CombatEvent']:
+        events: List['CombatEvent'] = []
+        for aura in state.all_auras:
+            if aura.has_tick_this_frame(state.previous_timestamp, state.current_timestamp):
+                events.append(CombatEvent._create_from_aura_tick(state, aura))
+        return events
+
+    @staticmethod
+    def _create_controls_events(state: WorldState) -> List['CombatEvent']:
+        events: List['CombatEvent'] = []
+        for timestamp, obj_id, controls in state.all_controls_in_current_frame:
+            if timestamp == state.previous_timestamp:
+                continue  # Prevent double processing of controls
+            game_obj: GameObj = state.get_game_obj(obj_id)
+            current_target = game_obj.current_target
+            spell_ids = game_obj.convert_controls_to_spell_ids(controls)
+            for spell_id in spell_ids:
+                events.append(CombatEvent(
+                    event_id=state.generate_new_event_id(),
+                    timestamp=timestamp,
+                    source=obj_id,
+                    spell=spell_id,
+                    target=current_target,
+                ))
+        return events
+
+    @staticmethod
+    def _create_spell_sequence_events(spell: Spell, event: 'CombatEvent', state: WorldState) -> List['CombatEvent']:
+        events: List['CombatEvent'] = []
+        if spell.spell_sequence is not None:
+            for next_spell in spell.spell_sequence:
+                events.append(event.continue_spell_sequence(state.generate_new_event_id(), next_spell))
+        return events
+
+    @staticmethod
+    def _create_events_from_aura(spell: Spell, event: 'CombatEvent', state: WorldState) -> List['CombatEvent']:
+        events: List['CombatEvent'] = []
+        if spell.flags & SpellFlag.AURA:
+            aura = state.get_aura(event.source, event.spell, event.target)
+            if aura.has_tick_this_frame(state.previous_timestamp, state.current_timestamp):
+                events.append(CombatEvent._create_from_aura_tick(state, aura))
+        return events

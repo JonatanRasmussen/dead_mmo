@@ -150,6 +150,7 @@ class SpellCollectionCore:
     def setup_test_zone() -> Spell:
         return Spell(
             spell_id=300,
+            flags=SpellFlag.IS_SETUP,
             spell_sequence=(
                 SpellCollectionCore.spawn_enemy().spell_id,
                 SpellCollectionCore.spawn_target_dummy().spell_id,

@@ -41,7 +41,7 @@ class SpellHandler:
     def _modify_target(source_obj: GameObj, spell: Spell, target_obj: GameObj, state: WorldState) -> GameObj:
         tar = target_obj
         if spell.flags & SpellFlag.TAB_TARGET:
-            tar = SpellHandler._handle_tab_targeting(target_obj, state)
+            tar = SpellHandler._handle_tab_targeting(tar, state)
         if spell.flags & (SpellFlag.MOVE_UP | SpellFlag.MOVE_LEFT | SpellFlag.MOVE_DOWN | SpellFlag.MOVE_RIGHT):
             tar = SpellHandler._handle_movement(spell, tar, state)
         if spell.flags & SpellFlag.DAMAGE:
@@ -61,19 +61,19 @@ class SpellHandler:
     def _handle_movement(spell: Spell, target_obj: GameObj, state: WorldState) -> GameObj:
         tar = target_obj
         if spell.flags & SpellFlag.MOVE_UP:
-            tar = target_obj.move_in_direction(0.0, 1.0, target_obj.movement_speed, state.delta_time)
+            tar = tar.move_in_direction(0.0, 1.0, tar.movement_speed, state.delta_time)
         if spell.flags & SpellFlag.MOVE_LEFT:
-            tar = target_obj.move_in_direction(-1.0, 0.0, target_obj.movement_speed, state.delta_time)
+            tar = tar.move_in_direction(-1.0, 0.0, tar.movement_speed, state.delta_time)
         if spell.flags & SpellFlag.MOVE_DOWN:
-            tar = target_obj.move_in_direction(0.0, -1.0, target_obj.movement_speed, state.delta_time)
+            tar = tar.move_in_direction(0.0, -1.0, tar.movement_speed, state.delta_time)
         if spell.flags & SpellFlag.MOVE_RIGHT:
-            tar = target_obj.move_in_direction(1.0, 0.0, target_obj.movement_speed, state.delta_time)
+            tar = tar.move_in_direction(1.0, 0.0, tar.movement_speed, state.delta_time)
         return tar
 
     @staticmethod
     def _handle_spawn(source_obj: GameObj, spell: Spell, state: WorldState) -> None:
         if spell.spawned_obj is not None:
-            obj_id = state.game_obj_id_gen.new_id()
+            obj_id = state.generate_new_game_obj_id()
             new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, spell.spawned_obj)
             state.add_game_obj(new_obj)
             if spell.obj_controls is not None:
@@ -81,13 +81,13 @@ class SpellHandler:
                     state.add_controls(obj_id, controls.timestamp, controls)
         if spell.flags & SpellFlag.SPAWN_BOSS:
             if not state.boss1_exists:
-                state.boss1_id = new_obj.obj_id
+                state.update_boss1_id(new_obj.obj_id)
             else:
                 assert not state.boss2_exists, "Second boss already exists."
-                state.boss2_id = new_obj.obj_id
+                state.update_boss2_id(new_obj.obj_id)
         if spell.flags & SpellFlag.SPAWN_PLAYER:
             assert not state.player_exists, "Player already exists."
-            state.player_id = new_obj.obj_id
+            state.update_player_id(new_obj.obj_id)
 
     @staticmethod
     def _handle_tab_targeting(target_obj: GameObj, state: WorldState) -> GameObj:

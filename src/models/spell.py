@@ -24,6 +24,7 @@ class SpellFlag(Flag):
     WARP_TO_POSITION = auto()
     TRY_MOVE = auto()
     FORCE_MOVE = auto()
+    IS_SETUP = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
     AURA = auto()
@@ -52,3 +53,15 @@ class Spell(NamedTuple):
     spell_sequence: Optional[Tuple[int, ...]] = None
     spawned_obj: Optional['GameObj'] = None
     obj_controls: Optional[Tuple[Controls, ...]] = None
+
+    @property
+    def is_aura(self) -> bool:
+        return bool(self.flags & SpellFlag.AURA)
+
+    @property
+    def has_spell_sequence(self) -> bool:
+        return self.spell_sequence is not None
+
+    @property
+    def has_cascading_events(self) -> float:
+        return self.is_aura or self.has_spell_sequence
