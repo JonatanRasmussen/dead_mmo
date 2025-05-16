@@ -2,7 +2,7 @@
 import math
 import pygame
 import sys
-from typing import ValuesView
+from typing import ValuesView, Optional
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.config.color import Color
@@ -27,11 +27,17 @@ class PygameLauncher:
         self.running: bool = True
         self.game_manager: GameInstance = GameInstance()
 
+        # For FPS counter
+        self.clock = pygame.time.Clock()
+        self.font: Optional[pygame.font.Font] = None  # Will be initialized after pygame.init()
+        self.fps = 0
+
     @staticmethod
     def run_game() -> None:
         # setup pygame
         game = PygameLauncher()
         pygame.init()
+        game.font = pygame.font.SysFont('Arial', 30)  # Initialize font after pygame.init()
         pygame.display.set_caption("placeholder")
         game.calculate_play_area() # Calculate play area dimensions and adjusted borders
 
@@ -48,7 +54,8 @@ class PygameLauncher:
 
             game.process_game_tick(delta_time)
             game.draw_screen()
-            pygame.time.Clock().tick(60)
+            #pygame.time.Clock().tick(60)
+            game.clock.tick(60)
         pygame.quit()
         sys.exit()
 
@@ -136,6 +143,14 @@ class PygameLauncher:
 
                 # Blit the overlay onto the main screen
                 self.screen.blit(surf, (pos[0] - size, pos[1] - size))
+
+        # Show FPS
+        self.fps = int(self.clock.get_fps())
+        if self.font is not None:  # Check if font is initialized
+            fps_text = self.font.render(f"FPS: {self.fps}", True, Color.WHITE)
+            self.screen.blit(fps_text, (10, 10))  # Position in top-left corner
+
+
 
         pygame.display.flip()
 

@@ -4,6 +4,7 @@ import heapq
 from src.controller.world_state import WorldState
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
+from src.utils.frame_processor import FrameProcessor
 
 
 class GameInstance:
@@ -14,10 +15,11 @@ class GameInstance:
         self._state.initialize_environment(setup_spell_id)
 
     def process_frame(self, delta_time: float, player_input: Controls) -> None:
-        self._state.process_frame(delta_time, player_input)
+        self._state.advance_timestamp_and_add_player_input(delta_time, player_input)
+        FrameProcessor.process_frame(self._state)
 
     def get_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
-        return self._state.all_game_objs
+        return self._state.view_game_objs
 
     def simulate_game_in_console(self) -> None:
         setup_spell_id = 300

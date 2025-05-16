@@ -53,15 +53,12 @@ class FinalizedEvent(NamedTuple):
     @property
     def timestamp(self) -> float:
         return self.combat_event.timestamp
-
     @property
     def source_id(self) -> int:
         return self.source.obj_id
-
     @property
     def spell_id(self) -> int:
         return self.spell.spell_id
-
     @property
     def target_id(self) -> int:
         return self.target.obj_id
@@ -70,6 +67,5 @@ class FinalizedEvent(NamedTuple):
     def outcome_is_valid(self) -> bool:
         return self.outcome != EventOutcome.FAILED
 
-    @property
-    def is_aura(self) -> bool:
-        return self.spell.is_aura
+    def update_source(self, new_source: GameObj) -> 'FinalizedEvent':
+        return self._replace(source=new_source)

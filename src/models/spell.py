@@ -9,10 +9,18 @@ from src.models.game_obj import GameObj
 class SpellFlag(Flag):
     """ Flags for how spells should be handled. """
     NONE = 0
-    MOVE_UP = auto()
-    MOVE_LEFT = auto()
-    MOVE_DOWN = auto()
-    MOVE_RIGHT = auto()
+    BEGIN_MOVE_UP = auto()
+    STOP_MOVE_UP = auto()
+    BEGIN_MOVE_LEFT = auto()
+    STOP_MOVE_LEFT = auto()
+    BEGIN_MOVE_DOWN = auto()
+    STOP_MOVE_DOWN = auto()
+    BEGIN_MOVE_RIGHT = auto()
+    STOP_MOVE_RIGHT = auto()
+    STEP_UP = auto()
+    STEP_LEFT = auto()
+    STEP_DOWN = auto()
+    STEP_RIGHT = auto()
     SELF_CAST = auto()
     TAB_TARGET = auto()
     TELEPORT = auto()
@@ -27,7 +35,8 @@ class SpellFlag(Flag):
     IS_SETUP = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
-    AURA = auto()
+    AURA_APPLY = auto()
+    AURA_CANCEL = auto()
     SLOT_1_ABILITY = auto()
 
 
@@ -55,8 +64,12 @@ class Spell(NamedTuple):
     obj_controls: Optional[Tuple[Controls, ...]] = None
 
     @property
-    def is_aura(self) -> bool:
-        return bool(self.flags & SpellFlag.AURA)
+    def has_aura_apply(self) -> bool:
+        return bool(self.flags & SpellFlag.AURA_APPLY)
+
+    @property
+    def has_aura_cancel(self) -> bool:
+        return bool(self.flags & SpellFlag.AURA_CANCEL)
 
     @property
     def has_spawned_object(self) -> bool:
@@ -68,4 +81,4 @@ class Spell(NamedTuple):
 
     @property
     def has_cascading_events(self) -> bool:
-        return self.is_aura or self.has_spell_sequence
+        return self.has_aura_apply or self.has_spell_sequence

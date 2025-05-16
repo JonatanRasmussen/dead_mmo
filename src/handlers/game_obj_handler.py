@@ -2,10 +2,11 @@ from sortedcontainers import SortedDict  # type: ignore
 from typing import Dict, List, Tuple, ValuesView
 
 from src.handlers.id_gen import IdGen
+from src.models.controls import Controls
 from src.models.game_obj import GameObj
+from src.models.important_ids import ImportantIDs
 from src.models.spell import SpellFlag, Spell
 from src.handlers.event_log import EventLog
-from src.handlers.controls_handler import ControlsHandler
 
 
 class GameObjHandler:
@@ -13,18 +14,23 @@ class GameObjHandler:
     def __init__(self) -> None:
         self._game_objs: Dict[int, GameObj] = {}
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
+        self._important_ids: ImportantIDs = ImportantIDs()
 
-        self.setup_spell_id: int = IdGen.EMPTY_ID
-        self.environment_id: int = IdGen.EMPTY_ID
-        self.player_id: int = IdGen.EMPTY_ID
-        self.boss1_id: int = IdGen.EMPTY_ID
-        self.boss2_id: int = IdGen.EMPTY_ID
+    @property
+    def important_ids(self) -> ImportantIDs:
+        return self._important_ids
 
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
         return self._game_objs.values()
 
-    def generate_new_game_obj_id(self) -> int:
+    @property
+    def get_lowest_and_highest_game_obj_id(self) -> Tuple[int, int]:
+        min_id = min(self._game_objs.keys()) if self._game_objs else 0
+        max_id = max(self._game_objs.keys()) if self._game_objs else 0
+        return (min_id, max_id)
+
+    def _generate_new_game_obj_id(self) -> int:
         return self._game_obj_id_gen.generate_new_id()
 
     def get_game_obj(self, obj_id: int) -> GameObj:
@@ -45,26 +51,25 @@ class GameObjHandler:
         self._game_objs[updated_game_obj.obj_id] = updated_game_obj
 
     def initialize_root_environment_obj(self, setup_spell_id: int) -> None:
-        self.setup_spell_id = setup_spell_id
-        assert IdGen.is_empty_id(self.environment_id), f"Environment is already initialized (ID={self.environment_id})"
-        game_obj = GameObj.create_environment(self.generate_new_game_obj_id())
+        self._important_ids = self._important_ids.update_setup_spell_id(setup_spell_id)
+        assert not self._important_ids.environment_exists, f"Environment is already initialized (ID={self._important_ids.environment_id})"
+        game_obj = GameObj.create_environment(self._generate_new_game_obj_id())
         self.add_game_obj(game_obj)
-        self.environment_id = game_obj.obj_id
+        self._important_ids = self._important_ids.update_environment_id(game_obj.obj_id)
 
-    def handle_spawn(self, source_obj: GameObj, spell: Spell, all_controls: ControlsHandler) -> None:
-        if spell.spawned_obj is not None:
-            obj_id = self.generate_new_game_obj_id()
-            new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, spell.spawned_obj)
-            self.add_game_obj(new_obj)
-            if spell.obj_controls is not None:
-                for controls in spell.obj_controls:
-                    all_controls.add_controls(obj_id, controls.timestamp, controls)
-            if spell.flags & SpellFlag.SPAWN_BOSS:
-                if IdGen.is_empty_id(self.boss1_id):
-                    self.boss1_id = new_obj.obj_id
-                else:
-                    assert IdGen.is_empty_id(self.boss2_id), "Second boss already exists."
-                    self.boss2_id = new_obj.obj_id
-            if spell.flags & SpellFlag.SPAWN_PLAYER:
-                assert IdGen.is_empty_id(self.player_id), "Player already exists."
-                self.player_id = new_obj.obj_id
+    def handle_spawn(self, source_obj: GameObj, spell: Spell) -> int:
+        if spell.spawned_obj is None:
+            return IdGen.EMPTY_ID
+        obj_id = self._generate_new_game_obj_id()
+        new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, spell.spawned_obj)
+        self.add_game_obj(new_obj)
+        if spell.flags & SpellFlag.SPAWN_BOSS:
+            if not self.important_ids.boss1_exists:
+                self._important_ids = self._important_ids.update_boss1_id(new_obj.obj_id)
+            else:
+                assert not self.important_ids.boss2_exists, "Second boss already exists."
+                self._important_ids = self._important_ids.update_boss2_id(new_obj.obj_id)
+        if spell.flags & SpellFlag.SPAWN_PLAYER:
+            assert not self.important_ids.player_exists, "Player already exists."
+            self._important_ids = self._important_ids.update_player_id(new_obj.obj_id)
+        return obj_id

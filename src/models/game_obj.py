@@ -94,9 +94,9 @@ class GameObj(NamedTuple):
     def teleport_to(self, new_x: float, new_y: float) -> 'GameObj':
         return self._replace(x=new_x, y=new_y)
 
-    def move_in_direction(self, x: float, y: float, move_speed: float, delta_t: float) -> 'GameObj':
-        new_x = self.x + x * move_speed * delta_t
-        new_y = self.y + y * move_speed * delta_t
+    def move_in_direction(self, x: float, y: float, move_speed: float, distance: float) -> 'GameObj':
+        new_x = self.x + x * move_speed * distance
+        new_y = self.y + y * move_speed * distance
         return self._replace(x=new_x, y=new_y)
 
     def switch_target(self, new_target: int) -> 'GameObj':

@@ -34,22 +34,100 @@ class SpellCollectionCore:
     @staticmethod
     def empty_spell() -> Spell:
         return Spell(spell_id=0)
-
     @staticmethod
-    def move_up() -> Spell:
-        return Spell(spell_id=1, flags=SpellFlag.MOVE_UP | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
+    def start_move_up() -> Spell:
+        return Spell(
+            spell_id=1,
+            aura_effect_id=SpellCollectionCore.step_up().spell_id,
+            duration=60.0,
+            ticks=60*250,
+            flags=SpellFlag.AURA_APPLY | SpellFlag.SELF_CAST,
+        )
     @staticmethod
-    def move_left() -> Spell:
-        return Spell(spell_id=2, flags=SpellFlag.MOVE_LEFT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
+    def stop_move_up() -> Spell:
+        return Spell(
+            spell_id=2,
+            aura_effect_id=SpellCollectionCore.start_move_up().spell_id,
+            flags=SpellFlag.AURA_CANCEL | SpellFlag.SELF_CAST
+        )
     @staticmethod
-    def move_down() -> Spell:
-        return Spell(spell_id=3, flags=SpellFlag.MOVE_DOWN | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
+    def start_move_left() -> Spell:
+        return Spell(
+            spell_id=3,
+            aura_effect_id=SpellCollectionCore.step_left().spell_id,
+            duration=60.0,
+            ticks=60*250,
+            flags=SpellFlag.AURA_APPLY | SpellFlag.SELF_CAST,
+        )
     @staticmethod
-    def move_right() -> Spell:
-        return Spell(spell_id=4, flags=SpellFlag.MOVE_RIGHT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST)
+    def stop_move_left() -> Spell:
+        return Spell(
+            spell_id=4,
+            aura_effect_id=SpellCollectionCore.start_move_left().spell_id,
+            flags=SpellFlag.AURA_CANCEL | SpellFlag.SELF_CAST,
+        )
+    @staticmethod
+    def start_move_down() -> Spell:
+        return Spell(
+            spell_id=5,
+            aura_effect_id=SpellCollectionCore.step_down().spell_id,
+            duration=60.0,
+            ticks=60*250,
+            flags=SpellFlag.AURA_APPLY | SpellFlag.SELF_CAST,
+        )
+    @staticmethod
+    def stop_move_down() -> Spell:
+        return Spell(
+            spell_id=6,
+            aura_effect_id=SpellCollectionCore.start_move_down().spell_id,
+            flags=SpellFlag.AURA_CANCEL | SpellFlag.SELF_CAST,
+        )
+    @staticmethod
+    def start_move_right() -> Spell:
+        return Spell(
+            spell_id=7,
+            aura_effect_id=SpellCollectionCore.step_right().spell_id,
+            duration=60.0,
+            ticks=60*250,
+            flags=SpellFlag.AURA_APPLY | SpellFlag.SELF_CAST,
+        )
+    @staticmethod
+    def stop_move_right() -> Spell:
+        return Spell(
+            spell_id=8,
+            aura_effect_id=SpellCollectionCore.start_move_right().spell_id,
+            flags=SpellFlag.AURA_CANCEL | SpellFlag.SELF_CAST,
+        )
+    @staticmethod
+    def step_up() -> Spell:
+        return Spell(
+            spell_id=11,
+            flags=SpellFlag.STEP_UP | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST
+        )
+    @staticmethod
+    def step_left() -> Spell:
+        return Spell(
+            spell_id=12,
+            flags=SpellFlag.STEP_LEFT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST
+        )
+    @staticmethod
+    def step_down() -> Spell:
+        return Spell(
+            spell_id=13,
+            flags=SpellFlag.STEP_DOWN | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST
+        )
+    @staticmethod
+    def step_right() -> Spell:
+        return Spell(
+            spell_id=14,
+            flags=SpellFlag.STEP_RIGHT | SpellFlag.DENY_IF_CASTING | SpellFlag.SELF_CAST
+        )
     @staticmethod
     def tab_target() -> Spell:
-        return Spell(spell_id=5, flags=SpellFlag.TAB_TARGET | SpellFlag.SELF_CAST)
+        return Spell(
+            spell_id=15,
+            flags=SpellFlag.TAB_TARGET | SpellFlag.SELF_CAST
+        )
 
     @staticmethod
     def fireblast() -> Spell:
@@ -63,6 +141,7 @@ class SpellCollectionCore:
     def small_heal() -> Spell:
         return Spell(
             spell_id=101,
+            power=8.0,
             flags=SpellFlag.HEAL | SpellFlag.SELF_CAST,
         )
 
@@ -74,7 +153,36 @@ class SpellCollectionCore:
             duration=6.0,
             ticks=10,
             power=20.0,
-            flags=SpellFlag.AURA | SpellFlag.SELF_CAST | SpellFlag.HEAL,
+            flags=SpellFlag.AURA_APPLY | SpellFlag.SELF_CAST | SpellFlag.HEAL,
+        )
+
+    @staticmethod
+    def spawn_single_step_player() -> Spell:
+        spell_id = 199
+        return Spell(
+            spell_id=spell_id,
+            flags=SpellFlag.SPAWN_PLAYER | SpellFlag.SELF_CAST,
+            spawned_obj=GameObj(
+                spawned_from_spell=spell_id,
+                hp=30.0,
+                is_allied=True,
+                color=Color.RED,
+                x=0.3,
+                y=0.3,
+                start_move_up_id=SpellCollectionCore.step_up().spell_id,
+                stop_move_up_id=SpellCollectionCore.step_up().spell_id,
+                start_move_left_id=SpellCollectionCore.step_left().spell_id,
+                stop_move_left_id=SpellCollectionCore.step_left().spell_id,
+                start_move_down_id=SpellCollectionCore.step_down().spell_id,
+                stop_move_down_id=SpellCollectionCore.step_down().spell_id,
+                start_move_right_id=SpellCollectionCore.step_right().spell_id,
+                stop_move_right_id=SpellCollectionCore.step_right().spell_id,
+                next_target_id=SpellCollectionCore.tab_target().spell_id,
+                ability_1_id=SpellCollectionCore.fireblast().spell_id,
+                ability_2_id=SpellCollectionCore.fireblast().spell_id,
+                ability_3_id=SpellCollectionCore.fireblast().spell_id,
+                ability_4_id=SpellCollectionCore.fireblast().spell_id,
+            ),
         )
 
     @staticmethod
@@ -90,14 +198,14 @@ class SpellCollectionCore:
                 color=Color.RED,
                 x=0.3,
                 y=0.3,
-                start_move_up_id=SpellCollectionCore.move_up().spell_id,
-                stop_move_up_id=SpellCollectionCore.move_up().spell_id,
-                start_move_left_id=SpellCollectionCore.move_left().spell_id,
-                stop_move_left_id=SpellCollectionCore.move_left().spell_id,
-                start_move_down_id=SpellCollectionCore.move_down().spell_id,
-                stop_move_down_id=SpellCollectionCore.move_down().spell_id,
-                start_move_right_id=SpellCollectionCore.move_right().spell_id,
-                stop_move_right_id=SpellCollectionCore.move_right().spell_id,
+                start_move_up_id=SpellCollectionCore.start_move_up().spell_id,
+                stop_move_up_id=SpellCollectionCore.stop_move_up().spell_id,
+                start_move_left_id=SpellCollectionCore.start_move_left().spell_id,
+                stop_move_left_id=SpellCollectionCore.stop_move_left().spell_id,
+                start_move_down_id=SpellCollectionCore.start_move_down().spell_id,
+                stop_move_down_id=SpellCollectionCore.stop_move_down().spell_id,
+                start_move_right_id=SpellCollectionCore.start_move_right().spell_id,
+                stop_move_right_id=SpellCollectionCore.stop_move_right().spell_id,
                 next_target_id=SpellCollectionCore.tab_target().spell_id,
                 ability_1_id=SpellCollectionCore.fireblast().spell_id,
                 ability_2_id=SpellCollectionCore.fireblast().spell_id,

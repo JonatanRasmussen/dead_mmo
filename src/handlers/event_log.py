@@ -34,6 +34,12 @@ class EventLog:
         print(f"Aura {new_aura.aura_id} WAS CREATED")
 
     @staticmethod
+    def summarize_aura_deletion(aura_to_be_deleted: Aura) -> None:
+        if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
+            return
+        print(f"Aura {aura_to_be_deleted.aura_id} WAS DELETED.")
+
+    @staticmethod
     def summarize_state_update(current: GameObj, updated: GameObj) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
