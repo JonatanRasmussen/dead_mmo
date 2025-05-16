@@ -5,8 +5,6 @@ from collections import deque
 from enum import Enum, Flag, auto
 from types import MappingProxyType
 from copy import copy, deepcopy
-import math
-import json
 from src.config.color import Color
 
 
@@ -28,12 +26,16 @@ class IdGen:
     def is_empty_id(id_num: int) -> bool:
         return id_num == IdGen.EMPTY_ID
 
+    @staticmethod
+    def is_valid_id(id_num: int) -> bool:
+        return not IdGen.is_empty_id(id_num)
+
     def assign_id_range(self, start: int, stop: int) -> None:
         for id_num in range(start, stop):
             if id_num not in self._reserved_ids:
                 self._assigned_ids.append(id_num)
 
-    def new_id(self) -> int:
+    def generate_new_id(self) -> int:
         if not self._assigned_ids:
             assert self._assigned_ids, "No more IDs available."
             return IdGen.EMPTY_ID

@@ -1,26 +1,20 @@
 from typing import Dict, List, Tuple, ValuesView
 import heapq
 
-from src.models.world_state import WorldState
+from src.controller.world_state import WorldState
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
-from src.handlers.event_system import EventSystem
 
 
 class GameInstance:
     def __init__(self) -> None:
         self._state = WorldState()
-        self._event_system = EventSystem()
 
     def setup_game(self, setup_spell_id: int) -> None:
-        self._state.modify_setup_spell_id(setup_spell_id)
+        self._state.initialize_environment(setup_spell_id)
 
     def process_frame(self, delta_time: float, player_input: Controls) -> None:
-        timestamped_controls = player_input.replace_timestamp(self._state.current_timestamp)
-        self._state.advance_timestamp(delta_time)
-        self._state.add_player_controls(timestamped_controls)
-        EventSystem.process_frame(self._state)
-        #self._event_system.process_events_happening_this_frame(self._state)
+        self._state.process_frame(delta_time, player_input)
 
     def get_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
         return self._state.all_game_objs

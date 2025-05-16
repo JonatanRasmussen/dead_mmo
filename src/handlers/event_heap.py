@@ -1,7 +1,8 @@
 import heapq
 from typing import Dict, List, Tuple, ValuesView
 
-from src.models.combat_event import CombatEvent
+from src.models.combat_event import CombatEvent, FinalizedEvent
+
 
 class EventHeap:
     MAX_ITERATIONS = 100_000
@@ -11,9 +12,9 @@ class EventHeap:
         self._iterations_remaining = EventHeap.MAX_ITERATIONS
 
     @classmethod
-    def create_from_event_list(cls, events: List[CombatEvent]) -> 'EventHeap':
+    def create_heap_from_list_of_events(cls, events: List[CombatEvent]) -> 'EventHeap':
         event_heap = EventHeap()
-        event_heap.register_multiple_events(events)
+        event_heap.register_events(events)
         return event_heap
 
     @property
@@ -29,6 +30,6 @@ class EventHeap:
     def register_event(self, event: CombatEvent) -> None:
         heapq.heappush(self._event_heap, (event.timestamp, event.source, event.event_id, event))
 
-    def register_multiple_events(self, events: List[CombatEvent]) -> None:
+    def register_events(self, events: List[CombatEvent]) -> None:
         for event in events:
             self.register_event(event)

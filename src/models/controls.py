@@ -3,7 +3,7 @@ from typing import NamedTuple
 
 class Controls(NamedTuple):
     """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
-    timestamp: float = 0.0
+    timestamp: float = float('inf')
 
     start_move_up: bool = False
     stop_move_up: bool = False
@@ -19,6 +19,10 @@ class Controls(NamedTuple):
     ability_2: bool = False
     ability_3: bool = False
     ability_4: bool = False
+
+    @property
+    def has_valid_timestamp(self) -> bool:
+        return self.timestamp != float('inf')
 
     def replace_timestamp(self, new_timestamp: float) -> 'Controls':
         return self._replace(timestamp=new_timestamp)

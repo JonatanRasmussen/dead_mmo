@@ -1,8 +1,7 @@
 from typing import Dict, List, Tuple, ValuesView
 import heapq
 
-from src.models.world_state import WorldState
-from src.models.id_gen import IdGen
+from src.handlers.id_gen import IdGen
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.models.spell import SpellFlag, Spell

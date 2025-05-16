@@ -172,3 +172,8 @@
 
 [2025-05-11 19:35:49] {BudoB}: Long time no see. Lost but not forgotten.
 [2025-05-11 19:35:59] {BudoB}: Code time: 4 hours.
+
+[2025-05-16 01:42:53] {BudoB}: Much code today. Made everything static, with state as param...
+[2025-05-16 01:43:17] {BudoB}: ... Just to refactor everything back into WorldState.
+[2025-05-16 01:43:30] {BudoB}: Such a hastle. Maybe I am overcomplicating things...
+[2025-05-16 01:43:44] {BudoB}: Code time: 7 hours.

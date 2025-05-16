@@ -6,7 +6,7 @@ from typing import ValuesView
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.config.color import Color
-from src.handlers.game_instance import GameInstance
+from src.controller.game_instance import GameInstance
 
 class PygameLauncher:
     def __init__(self) -> None:
@@ -36,7 +36,8 @@ class PygameLauncher:
         game.calculate_play_area() # Calculate play area dimensions and adjusted borders
 
         # setup game manager
-        game.game_manager.setup_game(300)
+        setup_spell_id = 300
+        game.game_manager.setup_game(setup_spell_id)
 
         # run game loop
         last_time = pygame.time.get_ticks()

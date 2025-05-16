@@ -1,7 +1,7 @@
 from typing import Tuple, Optional, NamedTuple
 from enum import Flag, auto
 
-from src.models.id_gen import IdGen
+from src.handlers.id_gen import IdGen
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
 
@@ -59,9 +59,13 @@ class Spell(NamedTuple):
         return bool(self.flags & SpellFlag.AURA)
 
     @property
+    def has_spawned_object(self) -> bool:
+        return self.spawned_obj is not None
+
+    @property
     def has_spell_sequence(self) -> bool:
         return self.spell_sequence is not None
 
     @property
-    def has_cascading_events(self) -> float:
+    def has_cascading_events(self) -> bool:
         return self.is_aura or self.has_spell_sequence

@@ -1,7 +1,7 @@
 from typing import Tuple, NamedTuple
 import math
 
-from src.models.id_gen import IdGen
+from src.handlers.id_gen import IdGen
 from src.models.spell import Spell
 
 
@@ -10,6 +10,7 @@ class Aura(NamedTuple):
     source_id: int = IdGen.EMPTY_ID
     spell_id: int = IdGen.EMPTY_ID
     target_id: int = IdGen.EMPTY_ID
+    aura_effect_id: int = IdGen.EMPTY_ID
     start_time: float = 0.0
     duration: float = 0.0
     ticks: int = 1
@@ -34,8 +35,9 @@ class Aura(NamedTuple):
     def create_from_spell(cls, timestamp: float, source_id: int, spell: Spell, target_id: int) -> 'Aura':
         return Aura(
             source_id=source_id,
-            spell_id=spell.aura_effect_id,
+            spell_id=spell.spell_id,
             target_id=target_id,
+            aura_effect_id=spell.aura_effect_id,
             start_time=timestamp,
             duration=spell.duration,
             ticks=spell.ticks,
@@ -55,13 +57,8 @@ class Aura(NamedTuple):
             return float('inf')
         return self.start_time + ((self.ticks_elapsed(current_time) + 1) * self.tick_interval)
 
-    def has_tick_this_frame(self, frame_start: float, frame_end: float) -> bool:
-        """ Ticks happen every tick_interval seconds, excluding t=start, including t=end. """
-        start_ticks = self.ticks_elapsed(max(frame_start, self.start_time))
-        end_ticks = self.ticks_elapsed(min(frame_end, self.end_time))
-        return end_ticks > start_ticks
-
-    def get_timestamp_for_ticks_this_frame(self, frame_start: float, frame_end: float) -> Tuple[float, ...]:
+    def get_timestamps_for_ticks_this_frame(self, frame_start: float, frame_end: float) -> Tuple[float, ...]:
+        """ Get timestamp for ticks happening this frame, excluding t=start, including t=end. """ #Note to self: Is this actually correct?
         start_ticks = self.ticks_elapsed(max(frame_start, self.start_time))
         end_ticks = self.ticks_elapsed(min(frame_end, self.end_time))
         return tuple(self.start_time + (tick_number * self.tick_interval) for tick_number in range(start_ticks + 1, end_ticks + 1))

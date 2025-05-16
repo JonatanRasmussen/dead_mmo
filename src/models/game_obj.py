@@ -3,7 +3,7 @@ from enum import Enum, auto
 import math
 
 from src.config.color import Color
-from src.models.id_gen import IdGen
+from src.handlers.id_gen import IdGen
 from src.models.controls import Controls
 
 
@@ -103,8 +103,6 @@ class GameObj(NamedTuple):
         return self._replace(current_target=new_target)
 
     def suffer_damage(self, spell_power: float) -> 'GameObj':
-        new_hp = self.hp - spell_power
-        print(f"Damage: {self.hp} -> {new_hp}")  # Debug print
         return self._replace(hp=self.hp - spell_power)
 
     def restore_health(self, spell_power: float) -> 'GameObj':
