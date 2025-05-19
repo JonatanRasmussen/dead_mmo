@@ -10,6 +10,8 @@ from src.models.controls import Controls
 class GameObjStatus(Enum):
     """ Flags for various status effects of game objects. """
     NONE = 0
+    ALIVE = auto()
+    DESPAWNED = auto()
     CASTING = auto()
     CHANNELING = auto()
     CROWD_CONTROLLED = auto()
@@ -26,7 +28,7 @@ class GameObj(NamedTuple):
     color: Tuple[int, int, int] = Color.WHITE
 
     # Status effects
-    statuses: GameObjStatus = GameObjStatus.NONE
+    status: GameObjStatus = GameObjStatus.NONE
 
     # Targeting
     is_allied: bool = False
@@ -80,16 +82,21 @@ class GameObj(NamedTuple):
         return 1.0
 
     @property
-    def gcd_progress(self) -> float:
-        return min(1.0, (0 - self.gcd_start) / self.gcd)
-
-    @classmethod
-    def create_from_template(cls, unique_obj_id: int, parent_id: int, other: 'GameObj') -> 'GameObj':
-        return other._replace(obj_id=unique_obj_id, parent_id=parent_id)
+    def is_visible(self) -> bool:
+        return self.status != GameObjStatus.DESPAWNED
 
     @classmethod
     def create_environment(cls, unique_obj_id: int) -> 'GameObj':
         return GameObj(obj_id=unique_obj_id)
+
+    def create_copy_of_template(self, unique_obj_id: int, parent_id: int) -> 'GameObj':
+        return self._replace(obj_id=unique_obj_id, parent_id=parent_id, status=GameObjStatus.ALIVE)
+
+    def get_gcd_progress(self, current_time: float) -> float:
+        return min(1.0, (current_time - self.gcd_start) / self.gcd)
+
+    def change_status(self, new_status: GameObjStatus) -> 'GameObj':
+        return self._replace(status=new_status)
 
     def teleport_to(self, new_x: float, new_y: float) -> 'GameObj':
         return self._replace(x=new_x, y=new_y)

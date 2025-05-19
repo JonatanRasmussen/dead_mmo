@@ -58,8 +58,8 @@ class EventLog:
             print(f"Obj {obj_id_fmt} COLOR update: {current.color} -> {updated.color}")
 
         # Status effects
-        if current.statuses != updated.statuses:
-            print(f"Obj {obj_id_fmt} STATUS update: {current.statuses} -> {updated.statuses}")
+        if current.status != updated.status:
+            print(f"Obj {obj_id_fmt} STATUS update: {current.status} -> {updated.status}")
 
         # Targeting
         if current.is_allied != updated.is_allied:

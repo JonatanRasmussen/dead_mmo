@@ -14,7 +14,7 @@ class TargetSelection:
     def select_target(source: GameObj, spell: Spell, target_id: int, important_ids: ImportantIDs) -> int:
         if spell.flags & SpellFlag.SELF_CAST:
             return source.obj_id
-        if not IdGen.is_empty_id(target_id):
+        if not IdGen.is_empty_id(target_id) and not spell.flags & SpellFlag.IGNORE_TARGET:
             return target_id
         if spell.flags & SpellFlag.DAMAGE:
             if source.is_allied:

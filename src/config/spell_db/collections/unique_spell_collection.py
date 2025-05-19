@@ -16,8 +16,15 @@ class UniqueSpellCollection:
         )
 
     @staticmethod
+    def despawn_self() -> Spell:
+        return UniqueSpellTemplates.self_apply_flag_template(
+            spell_id=33,
+            spell_flag=SpellFlag.DESPAWN
+        )
+
+    @staticmethod
     def tab_target() -> Spell:
-        return UniqueSpellTemplates.targeting(
+        return UniqueSpellTemplates.self_apply_flag_template(
             spell_id=15,
-            targeting_flag=SpellFlag.TAB_TARGET
+            spell_flag=SpellFlag.TAB_TARGET
         )

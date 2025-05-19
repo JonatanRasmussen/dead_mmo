@@ -75,10 +75,8 @@ class WorldState:
         if not f_event.outcome_is_valid:
             return
         self._event_log.log_event(f_event.combat_event)
-        spell = f_event.spell
-        if spell.has_spawned_object:
-            new_obj_id = self._game_objs.handle_spawn(f_event.source, spell)
-            self._controls.try_add_controls_for_newly_spawned_obj(new_obj_id, spell)
-        if spell.has_aura_apply or spell.has_aura_cancel:
-            self._auras.handle_aura(f_event.timestamp, f_event.source_id, spell, f_event.target_id)
-        self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, spell, f_event.target)
+        if f_event.spell.has_spawned_object:
+            new_obj_id = self._game_objs.handle_spawn(f_event.source, f_event.spell)
+            self._controls.try_add_controls_for_newly_spawned_obj(new_obj_id, f_event.spell)
+        self._auras.handle_aura(f_event.timestamp, f_event.source_id, f_event.spell, f_event.target_id)
+        self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, f_event.spell, f_event.target)

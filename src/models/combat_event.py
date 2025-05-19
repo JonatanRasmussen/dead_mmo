@@ -1,5 +1,5 @@
 from typing import NamedTuple, List
-from enum import Enum
+from enum import Enum, auto
 
 from src.handlers.id_gen import IdGen
 from src.models.game_obj import GameObj
@@ -7,9 +7,10 @@ from src.models.spell import Spell
 
 class EventOutcome(Enum):
     EMPTY = 0
-    SUCCESS = 1
-    FAILED = 2
-    MISSED = 3
+    SUCCESS = auto()
+    FAILED_NOT_WITHIN_RANGE = auto()
+    FAILED_SOURCE_HAS_DESPAWNED = auto()
+    FAILED_TARGET_HAS_DESPAWNED = auto()
 
 
 class CombatEvent(NamedTuple):
@@ -65,7 +66,7 @@ class FinalizedEvent(NamedTuple):
 
     @property
     def outcome_is_valid(self) -> bool:
-        return self.outcome != EventOutcome.FAILED
+        return self.outcome == EventOutcome.SUCCESS
 
     def update_source(self, new_source: GameObj) -> 'FinalizedEvent':
         return self._replace(source=new_source)

@@ -71,7 +71,7 @@ class GameObjHandler:
         if spell.spawned_obj is None:
             return IdGen.EMPTY_ID
         obj_id = self._generate_new_game_obj_id()
-        new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, spell.spawned_obj)
+        new_obj = spell.spawned_obj.create_copy_of_template(obj_id, source_obj.obj_id)
         self.add_game_obj(new_obj)
         if spell.flags & SpellFlag.SPAWN_BOSS:
             if not self._important_ids.boss1_exists:

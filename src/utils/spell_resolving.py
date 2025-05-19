@@ -3,7 +3,7 @@ import heapq
 
 from src.handlers.id_gen import IdGen
 from src.models.controls import Controls
-from src.models.game_obj import GameObj
+from src.models.game_obj import GameObjStatus, GameObj
 from src.models.spell import SpellFlag, Spell
 from src.models.combat_event import EventOutcome, CombatEvent, FinalizedEvent
 from src.models.important_ids import ImportantIDs
@@ -24,6 +24,8 @@ class SpellResolving:
             tar = tar.suffer_damage(spell.power * source_obj.spell_modifier)
         if spell.flags & SpellFlag.HEAL:
             tar = tar.restore_health(spell.power * source_obj.spell_modifier)
+        if spell.flags & SpellFlag.DESPAWN:
+            tar = tar.change_status(GameObjStatus.DESPAWNED)
         return tar
 
     @staticmethod

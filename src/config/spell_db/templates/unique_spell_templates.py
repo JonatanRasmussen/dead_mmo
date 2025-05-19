@@ -15,8 +15,8 @@ class UniqueSpellTemplates:
         )
 
     @staticmethod
-    def targeting(spell_id: int, targeting_flag: SpellFlag) -> Spell:
+    def self_apply_flag_template(spell_id: int, spell_flag: SpellFlag) -> Spell:
         return Spell(
             spell_id=spell_id,
-            flags=targeting_flag | SpellFlag.SELF_CAST
+            flags=spell_flag | SpellFlag.SELF_CAST
         )

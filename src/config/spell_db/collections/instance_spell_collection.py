@@ -18,5 +18,6 @@ class InstanceSpellCollection:
                 SpawnSpellCollection.spawn_enemy().spell_id,
                 SpawnSpellCollection.spawn_target_dummy().spell_id,
                 SpawnSpellCollection.spawn_player().spell_id,
+                SpawnSpellCollection.spawn_landmine().spell_id,
             ),
         )

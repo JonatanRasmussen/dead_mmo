@@ -25,7 +25,7 @@ class PygameLauncher:
 
         self.screen: pygame.Surface = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.running: bool = True
-        self.game_manager: GameInstance = GameInstance()
+        self.game_instance: GameInstance = GameInstance()
 
         # For FPS counter
         self.clock = pygame.time.Clock()
@@ -43,7 +43,7 @@ class PygameLauncher:
 
         # setup game manager
         setup_spell_id = 300
-        game.game_manager.setup_game(setup_spell_id)
+        game.game_instance.setup_game(setup_spell_id)
 
         # run game loop
         last_time = pygame.time.get_ticks()
@@ -92,7 +92,7 @@ class PygameLauncher:
                     controls = controls._replace(ability_3=True)
                 elif event.key == pygame.K_4:
                     controls = controls._replace(ability_4=True)
-        self.game_manager.process_frame(delta_time, controls)
+        self.game_instance.process_frame(delta_time, controls)
 
     def draw_screen(self) -> None:
         self.screen.fill(Color.BLACK)
@@ -106,8 +106,10 @@ class PygameLauncher:
         pygame.draw.rect(self.screen, Color.GREY, (self.WINDOW_WIDTH - sides, 0, sides, self.WINDOW_HEIGHT))
 
         # Draw game objects
-        game_objs: ValuesView[GameObj] = self.game_manager.get_all_game_objs_to_draw()
+        game_objs: ValuesView[GameObj] = self.game_instance.get_all_game_objs_to_draw()
         for game_obj in game_objs:
+            if not game_obj.is_visible:
+                continue
             # Convert from unit coordinates (0-1) to screen coordinates
             screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + game_obj.x * self.PLAY_WIDTH
             screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - game_obj.y) * self.PLAY_HEIGHT
@@ -121,7 +123,7 @@ class PygameLauncher:
                 a value between 0.0 (empty) and 1.0 (full). Instead of circles, I want a
                 radial cooldown indicator that fills clockwise from 12 o'clock. """
             # Draw the cooldown indicator
-            progress = game_obj.gcd_progress
+            progress = game_obj.get_gcd_progress(self.game_instance.ingame_time)
             if progress < 1.0:  # Only draw if not fully cooled down
                 # Calculate the angle for the progress (0 to 360 degrees)
                 angle = progress * 360

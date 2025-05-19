@@ -21,7 +21,7 @@ class FrameProcessing:
             f_event = FrameProcessing._finalize_event(event, state)
             if f_event.outcome_is_valid:
                 state.let_event_modify_world_state(f_event)
-                if f_event.outcome_is_valid and f_event.spell.has_cascading_events:
+                if f_event.spell.has_cascading_events:
                     cascading_events = FrameProcessing._create_cascading_events(f_event, state)
                     event_heap.register_events(cascading_events)
 
@@ -51,7 +51,7 @@ class FrameProcessing:
         cascading_events: List[CombatEvent] = []
 
         # If the event's spell is area-of-effect, add new events for each target
-        if f_event.spell.is_aoe is not None:
+        if f_event.spell.is_aoe:
             target_ids = TargetSelection.handle_aoe(f_event.source, f_event.spell,f_event.target, state.view_game_objs)
             for target_id in target_ids:
                 new_event_id = state.generate_new_event_id()

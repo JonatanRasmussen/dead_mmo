@@ -11,6 +11,11 @@ class GameInstance:
     def __init__(self) -> None:
         self._state = WorldState()
 
+    @property
+    def ingame_time(self) -> float:
+        _, current_time = self._state.timestamps
+        return current_time
+
     def setup_game(self, setup_spell_id: int) -> None:
         self._state.initialize_environment(setup_spell_id)
 
