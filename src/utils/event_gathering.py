@@ -5,10 +5,10 @@ from src.models.aura import Aura
 from src.models.combat_event import CombatEvent, FinalizedEvent
 from src.models.important_ids import ImportantIDs
 from src.handlers.id_gen import IdGen
-from src.controller.world_state import WorldState
+from src.controllers.world_state import WorldState
 
 
-class FrameEvents:
+class EventGathering:
 
     @staticmethod
     def create_events_happening_this_frame(state: WorldState) -> List[CombatEvent]:
@@ -26,11 +26,11 @@ class FrameEvents:
 
         # Add events from periodic auras ticking this frame
         for aura in state.view_auras:
-            aura_tick_events = FrameEvents.create_periodic_events_this_frame(aura, state)
+            aura_tick_events = EventGathering.create_periodic_events_this_frame(aura, state)
             events_this_frame.extend(aura_tick_events)
 
         # Add events from controls (game inputs) happening this frame
-        controls_events = FrameEvents._create_controls_events(state)
+        controls_events = EventGathering._create_controls_events(state)
         events_this_frame.extend(controls_events)
 
         return events_this_frame

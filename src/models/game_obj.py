@@ -99,6 +99,18 @@ class GameObj(NamedTuple):
         new_y = self.y + y * move_speed * distance
         return self._replace(x=new_x, y=new_y)
 
+    def set_ability_1(self, new_ability_1: int) -> 'GameObj':
+        return self._replace(ability_1_id=new_ability_1)
+
+    def set_ability_2(self, new_ability_2: int) -> 'GameObj':
+        return self._replace(ability_2_id=new_ability_2)
+
+    def set_ability_3(self, new_ability_3: int) -> 'GameObj':
+        return self._replace(ability_3_id=new_ability_3)
+
+    def set_ability_4(self, new_ability_4: int) -> 'GameObj':
+        return self._replace(ability_4_id=new_ability_4)
+
     def switch_target(self, new_target: int) -> 'GameObj':
         return self._replace(current_target=new_target)
 

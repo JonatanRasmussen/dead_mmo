@@ -37,7 +37,7 @@ class Aura(NamedTuple):
             source_id=source_id,
             spell_id=spell.spell_id,
             target_id=target_id,
-            aura_effect_id=spell.aura_effect_id,
+            aura_effect_id=spell.effect_id,
             start_time=timestamp,
             duration=spell.duration,
             ticks=spell.ticks,

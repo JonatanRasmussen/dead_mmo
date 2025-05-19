@@ -6,7 +6,7 @@ from typing import ValuesView, Optional
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.config.color import Color
-from src.controller.game_instance import GameInstance
+from src.controllers.game_instance import GameInstance
 
 class PygameLauncher:
     def __init__(self) -> None:

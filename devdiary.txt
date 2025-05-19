@@ -177,3 +177,9 @@
 [2025-05-16 01:43:17] {BudoB}: ... Just to refactor everything back into WorldState.
 [2025-05-16 01:43:30] {BudoB}: Such a hastle. Maybe I am overcomplicating things...
 [2025-05-16 01:43:44] {BudoB}: Code time: 7 hours.
+
+[2025-05-19 04:08:54] {BudoB}: Truly lovely.
+[2025-05-19 04:08:58] {BudoB}: It is that Kronk meme where it is all coming together.
+[2025-05-19 04:09:07] {BudoB}: Life is good. OOP maybe a skill issue after all.
+[2025-05-19 04:09:23] {BudoB}: I was stuck for so long but now my code is nice to extend.
+[2025-05-19 04:09:36] {BudoB}: Code time: 5 hours.

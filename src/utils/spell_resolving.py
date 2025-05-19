@@ -7,31 +7,19 @@ from src.models.game_obj import GameObj
 from src.models.spell import SpellFlag, Spell
 from src.models.combat_event import EventOutcome, CombatEvent, FinalizedEvent
 from src.models.important_ids import ImportantIDs
-from src.handlers.game_obj_handler import GameObjHandler
+from src.utils.target_selection import TargetSelection
 
-class SpellHandler:
-
-    @staticmethod
-    def select_target(source: GameObj, spell: Spell, target_id: int, important_ids: ImportantIDs) -> int:
-        if spell.flags & SpellFlag.SELF_CAST:
-            return source.obj_id
-        if not IdGen.is_empty_id(target_id):
-            return target_id
-        if spell.flags & SpellFlag.DAMAGE:
-            if source.is_allied:
-                return important_ids.boss1_id
-            return important_ids.player_id
-        if spell.flags & SpellFlag.HEAL:
-            return source.obj_id
-        return source.obj_id
+class SpellResolving:
 
     @staticmethod
     def modify_target(source_obj: GameObj, spell: Spell, target_obj: GameObj, important_ids: ImportantIDs) -> GameObj:
         tar = target_obj
         if spell.flags & SpellFlag.TAB_TARGET:
-            tar = SpellHandler._handle_tab_targeting(tar, important_ids)
+            tar = TargetSelection.handle_tab_targeting(tar, important_ids)
         if spell.flags & (SpellFlag.STEP_UP | SpellFlag.STEP_LEFT | SpellFlag.STEP_DOWN | SpellFlag.STEP_RIGHT):
-            tar = SpellHandler._handle_movement(spell, tar)
+            tar = SpellResolving._handle_movement(spell, tar)
+        if spell.flags & (SpellFlag.SET_ABILITY_SLOT_1 | SpellFlag.SET_ABILITY_SLOT_2 | SpellFlag.SET_ABILITY_SLOT_3 | SpellFlag.SET_ABILITY_SLOT_4):
+            tar = SpellResolving._handle_ability_swaps(spell, tar)
         if spell.flags & SpellFlag.DAMAGE:
             tar = tar.suffer_damage(spell.power * source_obj.spell_modifier)
         if spell.flags & SpellFlag.HEAL:
@@ -46,19 +34,6 @@ class SpellHandler:
         return src
 
     @staticmethod
-    def _handle_tab_targeting(target_obj: GameObj, important_ids: ImportantIDs) -> GameObj:
-        if not target_obj.is_allied:
-            return target_obj.switch_target(important_ids.player_id)
-        elif target_obj.current_target == important_ids.boss1_id and important_ids.boss2_exists:
-            return target_obj.switch_target(important_ids.boss2_id)
-        elif IdGen.is_valid_id(important_ids.boss1_id):
-            return target_obj.switch_target(important_ids.boss1_id)
-        else:
-            # Not implemented. For now, let's assume boss1 always exist.
-            assert False
-            return target_obj.switch_target(important_ids.player_id)
-
-    @staticmethod
     def _handle_movement(spell: Spell, target_obj: GameObj) -> GameObj:
         BASE_MOVE_DISTANCE = 0.001
         tar = target_obj
@@ -70,4 +45,17 @@ class SpellHandler:
             tar = tar.move_in_direction(0.0, -1.0, tar.movement_speed, BASE_MOVE_DISTANCE)
         if spell.flags & SpellFlag.STEP_RIGHT:
             tar = tar.move_in_direction(1.0, 0.0, tar.movement_speed, BASE_MOVE_DISTANCE)
+        return tar
+
+    @staticmethod
+    def _handle_ability_swaps(spell: Spell, target_obj: GameObj) -> GameObj:
+        tar = target_obj
+        if spell.flags & SpellFlag.SET_ABILITY_SLOT_1:
+            tar = tar.set_ability_1(spell.effect_id)
+        if spell.flags & SpellFlag.SET_ABILITY_SLOT_2:
+            tar = tar.set_ability_2(spell.effect_id)
+        if spell.flags & SpellFlag.SET_ABILITY_SLOT_3:
+            tar = tar.set_ability_3(spell.effect_id)
+        if spell.flags & SpellFlag.SET_ABILITY_SLOT_4:
+            tar = tar.set_ability_4(spell.effect_id)
         return tar

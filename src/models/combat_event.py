@@ -39,8 +39,8 @@ class CombatEvent(NamedTuple):
     def continue_spell_sequence(self, new_event_id: int, new_spell_id: int) -> 'CombatEvent':
         return self._replace(event_id=new_event_id, base_event=self.event_id, spell=new_spell_id)
 
-    def also_target(self, new_event_id: int, new_target_id: int) -> 'CombatEvent':
-        return self._replace(event_id=new_event_id, target=new_target_id)
+    def also_target(self, new_event_id: int, new_spell_id: int, new_target_id: int) -> 'CombatEvent':
+        return self._replace(event_id=new_event_id, spell=new_spell_id, target=new_target_id)
 
 
 class FinalizedEvent(NamedTuple):

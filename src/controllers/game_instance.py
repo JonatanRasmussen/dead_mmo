@@ -1,10 +1,10 @@
 from typing import Dict, List, Tuple, ValuesView
 import heapq
 
-from src.controller.world_state import WorldState
+from src.controllers.world_state import WorldState
 from src.models.controls import Controls
 from src.models.game_obj import GameObj
-from src.utils.frame_processor import FrameProcessor
+from src.utils.event_processing import FrameProcessing
 
 
 class GameInstance:
@@ -16,7 +16,7 @@ class GameInstance:
 
     def process_frame(self, delta_time: float, player_input: Controls) -> None:
         self._state.advance_timestamp_and_add_player_input(delta_time, player_input)
-        FrameProcessor.process_frame(self._state)
+        FrameProcessing.process_frame(self._state)
 
     def get_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
         return self._state.view_game_objs

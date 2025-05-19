@@ -7,6 +7,7 @@ from src.models.game_obj import GameObj
 from src.models.important_ids import ImportantIDs
 from src.models.spell import SpellFlag, Spell
 from src.handlers.event_log import EventLog
+from src.utils.spell_resolving import SpellResolving
 
 
 class GameObjHandler:
@@ -57,6 +58,15 @@ class GameObjHandler:
         self.add_game_obj(game_obj)
         self._important_ids = self._important_ids.update_environment_id(game_obj.obj_id)
 
+    def modify_game_obj(self, timestamp: float, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> None:
+        if spell.is_modifying_source:
+            updated_source_obj = SpellResolving.modify_source(timestamp, source_obj, spell)
+            self.update_game_obj(updated_source_obj)
+        else:
+            updated_source_obj = source_obj
+        updated_target_obj = SpellResolving.modify_target(updated_source_obj, spell, target_obj, self._important_ids)
+        self.update_game_obj(updated_target_obj)
+
     def handle_spawn(self, source_obj: GameObj, spell: Spell) -> int:
         if spell.spawned_obj is None:
             return IdGen.EMPTY_ID
@@ -64,12 +74,12 @@ class GameObjHandler:
         new_obj = GameObj.create_from_template(obj_id, source_obj.obj_id, spell.spawned_obj)
         self.add_game_obj(new_obj)
         if spell.flags & SpellFlag.SPAWN_BOSS:
-            if not self.important_ids.boss1_exists:
+            if not self._important_ids.boss1_exists:
                 self._important_ids = self._important_ids.update_boss1_id(new_obj.obj_id)
             else:
-                assert not self.important_ids.boss2_exists, "Second boss already exists."
+                assert not self._important_ids.boss2_exists, "Second boss already exists."
                 self._important_ids = self._important_ids.update_boss2_id(new_obj.obj_id)
         if spell.flags & SpellFlag.SPAWN_PLAYER:
-            assert not self.important_ids.player_exists, "Player already exists."
+            assert not self._important_ids.player_exists, "Player already exists."
             self._important_ids = self._important_ids.update_player_id(new_obj.obj_id)
         return obj_id

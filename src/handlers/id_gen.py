@@ -6,11 +6,12 @@ from enum import Enum, Flag, auto
 from types import MappingProxyType
 from copy import copy, deepcopy
 from src.config.color import Color
+from src.config.consts import Consts
 
 
 class IdGen:
     """ ID generator that provides unique IDs from a set of assigned integers. """
-    EMPTY_ID = 0
+    EMPTY_ID = Consts.EMPTY_ID
 
     def __init__(self) -> None:
         self._reserved_ids: Set[int] = set({IdGen.EMPTY_ID})

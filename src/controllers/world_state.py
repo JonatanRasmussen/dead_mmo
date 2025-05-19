@@ -12,8 +12,7 @@ from src.handlers.aura_handler import AuraHandler
 from src.handlers.controls_handler import ControlsHandler
 from src.handlers.game_obj_handler import GameObjHandler
 from src.handlers.event_log import EventLog
-from src.config.spell_db import SpellDatabase
-from src.utils.spell_handler import SpellHandler
+from src.handlers.spell_database import SpellDatabase
 
 
 class WorldState:
@@ -82,7 +81,4 @@ class WorldState:
             self._controls.try_add_controls_for_newly_spawned_obj(new_obj_id, spell)
         if spell.has_aura_apply or spell.has_aura_cancel:
             self._auras.handle_aura(f_event.timestamp, f_event.source_id, spell, f_event.target_id)
-        updated_source_obj = SpellHandler.modify_source(f_event.timestamp, f_event.source, spell)
-        self._game_objs.update_game_obj(updated_source_obj)
-        updated_target_obj = SpellHandler.modify_target(updated_source_obj, spell, f_event.target, self.important_ids)
-        self._game_objs.update_game_obj(updated_target_obj)
+        self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, spell, f_event.target)

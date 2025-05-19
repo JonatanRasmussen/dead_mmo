@@ -25,7 +25,7 @@ class AuraHandler:
 
     def handle_aura(self, timestamp: float, source_id: int, spell: Spell, target_id: int) -> None:
         if spell.has_aura_cancel: # Try cancel existing aura before applying new one
-            self.remove_obj_aura(target_id, spell.aura_effect_id)
+            self.remove_obj_aura(target_id, spell.effect_id)
         if spell.has_aura_apply:
             self.add_aura(timestamp, source_id, spell, target_id)
 

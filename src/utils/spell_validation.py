@@ -6,10 +6,8 @@ from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.models.spell import SpellFlag, Spell
 from src.models.combat_event import EventOutcome, CombatEvent
-from src.config.spell_db import SpellDatabase
 
-
-class SpellValidator:
+class SpellValidation:
     @staticmethod
     def decide_outcome(source_obj: GameObj, spell: Spell, target_obj: GameObj) -> EventOutcome:
         # not implemented
