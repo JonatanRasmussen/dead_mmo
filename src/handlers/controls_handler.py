@@ -1,5 +1,5 @@
 from sortedcontainers import SortedDict  # type: ignore
-from typing import Dict, List, Tuple, ValuesView
+from typing import List, Tuple
 
 from src.models.controls import Controls
 from src.models.spell import Spell

@@ -5,14 +5,14 @@ from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.models.spell import SpellFlag, Spell
 from src.handlers.id_gen import IdGen
-from src.config.spell_db.templates.instance_spell_template import InstanceSpellTemplates
+from src.config.spell_db.templates.spell_templates import SpellTemplates
 from src.config.spell_db.collections.spawn_spell_collection import SpawnSpellCollection
 
 
 class InstanceSpellCollection:
     @staticmethod
     def setup_test_zone() -> Spell:
-        return InstanceSpellTemplates.instance_setup(
+        return SpellTemplates.instance_setup(
             spell_id=300,
             spell_sequence=(
                 SpawnSpellCollection.spawn_enemy().spell_id,

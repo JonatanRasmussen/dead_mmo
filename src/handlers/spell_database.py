@@ -1,10 +1,6 @@
-from typing import Any, List, Dict, Type, Optional, Tuple
-from src.config.color import Color
+from typing import Any, List, Dict, Type
 
-from src.models.controls import Controls
-from src.models.game_obj import GameObj
 from src.models.spell import Spell
-from src.handlers.id_gen import IdGen
 from src.config.spell_db.collections.combat_spell_collection import CombatSpellCollection
 from src.config.spell_db.collections.instance_spell_collection import InstanceSpellCollection
 from src.config.spell_db.collections.movement_spell_collection import MovementSpellCollection
@@ -25,7 +21,7 @@ class SpellDatabase:
         spells_to_load += SpellDatabase._load_collection(InstanceSpellCollection)
         spells_loaded_into_memory: Dict[int, Spell] = {}
         for spell in spells_to_load:
-            assert spell.spell_id not in spells_to_load, f"Spell with ID {spell.spell_id} already exists."
+            assert spell.spell_id not in spells_loaded_into_memory, f"Spell with ID {spell.spell_id} already exists."
             spells_loaded_into_memory[spell.spell_id] = spell
         return spells_loaded_into_memory
 

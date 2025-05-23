@@ -1,9 +1,7 @@
 from typing import Tuple, NamedTuple
 import math
 
-from src.handlers.id_gen import IdGen
-from src.models.spell import Spell
-
+from src.models.spell import Spell, IdGen
 
 class Aura(NamedTuple):
     """ The effect of a previously cast spell that periodically ticks over a time span. """
@@ -46,19 +44,19 @@ class Aura(NamedTuple):
     def is_expired(self, current_time: float) -> bool:
         return current_time > self.end_time
 
-    def ticks_elapsed(self, current_time: float) -> int:
-        return max(0, math.floor((current_time - self.start_time) / self.tick_interval))
-
-    def ticks_remaining(self, current_time: float) -> int:
-        return max(0, self.ticks - self.ticks_elapsed(current_time))
-
-    def next_tick(self, current_time: float) -> float:
-        if self.ticks_remaining(current_time) == 0:
-            return float('inf')
-        return self.start_time + ((self.ticks_elapsed(current_time) + 1) * self.tick_interval)
-
     def get_timestamps_for_ticks_this_frame(self, frame_start: float, frame_end: float) -> Tuple[float, ...]:
         """ Get timestamp for ticks happening this frame, excluding t=start, including t=end. """ #Note to self: Is this actually correct?
-        start_ticks = self.ticks_elapsed(max(frame_start, self.start_time))
-        end_ticks = self.ticks_elapsed(min(frame_end, self.end_time))
+        start_ticks = self._ticks_elapsed(max(frame_start, self.start_time))
+        end_ticks = self._ticks_elapsed(min(frame_end, self.end_time))
         return tuple(self.start_time + (tick_number * self.tick_interval) for tick_number in range(start_ticks + 1, end_ticks + 1))
+
+    def _ticks_elapsed(self, current_time: float) -> int:
+        return max(0, math.floor((current_time - self.start_time) / self.tick_interval))
+
+    def _ticks_remaining(self, current_time: float) -> int:
+        return max(0, self.ticks - self._ticks_elapsed(current_time))
+
+    def _next_tick(self, current_time: float) -> float:
+        if self._ticks_remaining(current_time) == 0:
+            return float('inf')
+        return self.start_time + ((self._ticks_elapsed(current_time) + 1) * self.tick_interval)

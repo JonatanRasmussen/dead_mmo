@@ -1,16 +1,9 @@
-from sortedcontainers import SortedDict  # type: ignore
-from typing import Dict, List, Tuple, ValuesView
+from typing import List, Tuple, ValuesView
 
-from src.handlers.id_gen import IdGen
-from src.models.controls import Controls
-from src.models.game_obj import GameObj
-from src.models.important_ids import ImportantIDs
-from src.models.spell import SpellFlag, Spell
-from src.models.aura import Aura
-from src.models.combat_event import CombatEvent, FinalizedEvent
-from src.handlers.aura_handler import AuraHandler
-from src.handlers.controls_handler import ControlsHandler
-from src.handlers.game_obj_handler import GameObjHandler
+from src.models.event import UpcomingEvent, FinalizedEvent, EventFactory
+from src.handlers.aura_handler import AuraHandler, Aura, Spell
+from src.handlers.controls_handler import ControlsHandler, Controls, IdGen
+from src.handlers.game_obj_handler import GameObjHandler, GameObj, ImportantIDs
 from src.handlers.event_log import EventLog
 from src.handlers.spell_database import SpellDatabase
 
@@ -21,9 +14,6 @@ class WorldState:
     def __init__(self) -> None:
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
 
-        self._previous_timestamp: float = 0.0
-        self._current_timestamp: float = 0.0
-
         self._auras: AuraHandler = AuraHandler()
         self._controls: ControlsHandler = ControlsHandler()
         self._game_objs: GameObjHandler = GameObjHandler()
@@ -32,20 +22,8 @@ class WorldState:
         self._event_log: EventLog = EventLog()
 
     @property
-    def timestamps(self) -> Tuple[float,float]:
-        return (self._previous_timestamp, self._current_timestamp)
-    @property
-    def delta_time(self) -> float:
-        return self._current_timestamp - self._previous_timestamp
-
-    @property
     def view_auras(self) -> ValuesView[Aura]:
         return self._auras.view_auras
-    @property
-    def view_controls_for_current_frame(self) -> List[Tuple[float, int, Controls]]:
-        prev_t, curr_t = self._previous_timestamp, self._current_timestamp
-        min_id, max_id = self._game_objs.get_lowest_and_highest_game_obj_id
-        return self._controls.get_controls_in_timerange(prev_t, curr_t, min_id, max_id)
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
         return self._game_objs.view_game_objs
@@ -66,17 +44,19 @@ class WorldState:
     def initialize_environment(self, setup_spell_id: int) -> None:
         self._game_objs.initialize_root_environment_obj(setup_spell_id)
 
-    def advance_timestamp_and_add_player_input(self, delta_time: float, player_input: Controls) -> None:
-        self._previous_timestamp = self._current_timestamp
-        self._current_timestamp += delta_time
-        self._controls.add_realtime_player_controls(self.important_ids.player_id, self._current_timestamp, player_input)
+    def add_player_controls(self, frame_start: float, player_input: Controls) -> None:
+        self._controls.add_realtime_player_controls(self.important_ids.player_id, frame_start, player_input)
+
+    def view_controls_for_current_frame(self, frame_start: float, frame_end: float) -> List[Tuple[float, int, Controls]]:
+        min_id, max_id = self._game_objs.get_min_max_obj_id
+        return self._controls.get_controls_in_timerange(frame_start, frame_end, min_id, max_id)
 
     def let_event_modify_world_state(self, f_event: FinalizedEvent) -> None:
         if not f_event.outcome_is_valid:
             return
-        self._event_log.log_event(f_event.combat_event)
+        self._event_log.log_event(f_event.pending_event)
         if f_event.spell.has_spawned_object:
-            new_obj_id = self._game_objs.handle_spawn(f_event.source, f_event.spell)
+            new_obj_id = self._game_objs.handle_spawn(f_event.timestamp, f_event.source, f_event.spell)
             self._controls.try_add_controls_for_newly_spawned_obj(new_obj_id, f_event.spell)
         self._auras.handle_aura(f_event.timestamp, f_event.source_id, f_event.spell, f_event.target_id)
         self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, f_event.spell, f_event.target)

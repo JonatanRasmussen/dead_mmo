@@ -1,9 +1,7 @@
-import heapq
-from typing import Dict, List, Tuple, ValuesView
+from typing import Dict
 
-from src.models.combat_event import CombatEvent
+from src.models.event import UpcomingEvent, GameObj
 from src.models.aura import Aura
-from src.models.game_obj import GameObj
 
 
 class EventLog:
@@ -13,9 +11,9 @@ class EventLog:
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = False
 
     def __init__(self) -> None:
-        self._combat_event_log: Dict[int, CombatEvent] = {}
+        self._combat_event_log: Dict[int, UpcomingEvent] = {}
 
-    def log_event(self, event: CombatEvent) -> None:
+    def log_event(self, event: UpcomingEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
             print(event.event_summary)
         assert event.event_id not in self._combat_event_log, f"Event with ID {event.event_id} already exists."

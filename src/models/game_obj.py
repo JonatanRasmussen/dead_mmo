@@ -66,11 +66,11 @@ class GameObj(NamedTuple):
 
     # Cooldown timestamps
     spawn_timestamp: float = 0.0
-    gcd_start: float = 0.0
-    ability_1_cd_start: float = 0.0
-    ability_2_cd_start: float = 0.0
-    ability_3_cd_start: float = 0.0
-    ability_4_cd_start: float = 0.0
+    gcd_start: float = -999.9
+    ability_1_cd_start: float = -999.9
+    ability_2_cd_start: float = -999.9
+    ability_3_cd_start: float = -999.9
+    ability_4_cd_start: float = -999.9
 
 
     @property
@@ -86,11 +86,11 @@ class GameObj(NamedTuple):
         return self.status != GameObjStatus.DESPAWNED
 
     @classmethod
-    def create_environment(cls, unique_obj_id: int) -> 'GameObj':
-        return GameObj(obj_id=unique_obj_id)
+    def create_environment(cls, obj_id: int) -> 'GameObj':
+        return GameObj(obj_id=obj_id)
 
-    def create_copy_of_template(self, unique_obj_id: int, parent_id: int) -> 'GameObj':
-        return self._replace(obj_id=unique_obj_id, parent_id=parent_id, status=GameObjStatus.ALIVE)
+    def create_copy_of_template(self, obj_id: int, parent_id: int, timestamp: float) -> 'GameObj':
+        return self._replace(obj_id=obj_id, parent_id=parent_id, spawn_timestamp=timestamp, status=GameObjStatus.ALIVE)
 
     def get_gcd_progress(self, current_time: float) -> float:
         return min(1.0, (current_time - self.gcd_start) / self.gcd)

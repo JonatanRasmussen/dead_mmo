@@ -1,9 +1,6 @@
 from typing import Tuple, Optional, NamedTuple
 from enum import Flag, auto
-
-from src.handlers.id_gen import IdGen
-from src.models.controls import Controls
-from src.models.game_obj import GameObj
+from src.models.game_obj import GameObj, GameObjStatus, IdGen, Controls
 
 
 class SpellFlag(Flag):
@@ -11,7 +8,10 @@ class SpellFlag(Flag):
     NONE = 0
     SELF_CAST = auto()
     TAB_TARGET = auto()
+    TARGET_OTHER_TEAM = auto()
+    TARGET_OWN_TEAM = auto()
     TARGET_ALL = auto()
+    IGNORE_TARGET = auto()
     STEP_UP = auto()
     STEP_LEFT = auto()
     STEP_DOWN = auto()
@@ -20,14 +20,12 @@ class SpellFlag(Flag):
     SET_ABILITY_SLOT_2 = auto()
     SET_ABILITY_SLOT_3 = auto()
     SET_ABILITY_SLOT_4 = auto()
-    TELEPORT = auto()
     TRIGGER_GCD = auto()
     HAS_RANGE_LIMIT = auto()
-    IGNORE_TARGET = auto()
-    DESPAWN = auto()
-    DAMAGE = auto()
-    HEAL = auto()
+    DAMAGING = auto()
+    HEALING = auto()
     DENY_IF_CASTING = auto()
+    TELEPORT = auto()
     IS_CHANNEL = auto()
     WARP_TO_POSITION = auto()
     TRY_MOVE = auto()
@@ -35,6 +33,8 @@ class SpellFlag(Flag):
     IS_SETUP = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
+    SPAWN_OBJ = auto()
+    DESPAWN_SELF = auto()
     AURA_APPLY = auto()
     AURA_CANCEL = auto()
 
@@ -63,8 +63,13 @@ class Spell(NamedTuple):
     obj_controls: Optional[Tuple[Controls, ...]] = None
 
     @property
+    def is_harmful(self) -> bool:
+        return bool(self.flags & SpellFlag.TARGET_OTHER_TEAM)
+
+    @property
     def is_modifying_source(self) -> bool:
-        return bool(self.flags & SpellFlag.TRIGGER_GCD)
+        return True  # While I'm still frequently adding new flags, just return True
+        # return bool(self.flags & SpellFlag.TRIGGER_GCD)
 
     @property
     def is_aoe(self) -> bool:

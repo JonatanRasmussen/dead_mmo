@@ -1,26 +1,20 @@
-from typing import Dict, List, Tuple, ValuesView
-import heapq
+from typing import List, ValuesView
 
-from src.handlers.id_gen import IdGen
-from src.models.controls import Controls
-from src.models.game_obj import GameObj
-from src.models.spell import SpellFlag, Spell
-from src.models.combat_event import EventOutcome, CombatEvent, FinalizedEvent
+from src.models.spell import SpellFlag, Spell, GameObj, IdGen
 from src.models.important_ids import ImportantIDs
 
 class TargetSelection:
-
     @staticmethod
     def select_target(source: GameObj, spell: Spell, target_id: int, important_ids: ImportantIDs) -> int:
         if spell.flags & SpellFlag.SELF_CAST:
             return source.obj_id
-        if not IdGen.is_empty_id(target_id) and not spell.flags & SpellFlag.IGNORE_TARGET:
+        if IdGen.is_valid_id(target_id) and not spell.flags & SpellFlag.IGNORE_TARGET:
             return target_id
-        if spell.flags & SpellFlag.DAMAGE:
+        if spell.flags & SpellFlag.TARGET_OTHER_TEAM:
             if source.is_allied:
                 return important_ids.boss1_id
             return important_ids.player_id
-        if spell.flags & SpellFlag.HEAL:
+        if spell.flags & SpellFlag.TARGET_OWN_TEAM:
             return source.obj_id
         return source.obj_id
 

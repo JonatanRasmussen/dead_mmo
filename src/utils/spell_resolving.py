@@ -1,11 +1,4 @@
-from typing import Dict, List, Tuple, ValuesView
-import heapq
-
-from src.handlers.id_gen import IdGen
-from src.models.controls import Controls
-from src.models.game_obj import GameObjStatus, GameObj
-from src.models.spell import SpellFlag, Spell
-from src.models.combat_event import EventOutcome, CombatEvent, FinalizedEvent
+from src.models.spell import SpellFlag, Spell, GameObjStatus, GameObj
 from src.models.important_ids import ImportantIDs
 from src.utils.target_selection import TargetSelection
 
@@ -20,12 +13,10 @@ class SpellResolving:
             tar = SpellResolving._handle_movement(spell, tar)
         if spell.flags & (SpellFlag.SET_ABILITY_SLOT_1 | SpellFlag.SET_ABILITY_SLOT_2 | SpellFlag.SET_ABILITY_SLOT_3 | SpellFlag.SET_ABILITY_SLOT_4):
             tar = SpellResolving._handle_ability_swaps(spell, tar)
-        if spell.flags & SpellFlag.DAMAGE:
+        if spell.flags & SpellFlag.DAMAGING:
             tar = tar.suffer_damage(spell.power * source_obj.spell_modifier)
-        if spell.flags & SpellFlag.HEAL:
+        if spell.flags & SpellFlag.HEALING:
             tar = tar.restore_health(spell.power * source_obj.spell_modifier)
-        if spell.flags & SpellFlag.DESPAWN:
-            tar = tar.change_status(GameObjStatus.DESPAWNED)
         return tar
 
     @staticmethod
@@ -33,6 +24,8 @@ class SpellResolving:
         src = source_obj
         if spell.flags & SpellFlag.TRIGGER_GCD:
             src = src.set_gcd_start(timestamp)
+        if spell.flags & SpellFlag.DESPAWN_SELF:
+            src = src.change_status(GameObjStatus.DESPAWNED)
         return src
 
     @staticmethod

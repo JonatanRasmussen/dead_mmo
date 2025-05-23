@@ -92,7 +92,7 @@ class PygameLauncher:
                     controls = controls._replace(ability_3=True)
                 elif event.key == pygame.K_4:
                     controls = controls._replace(ability_4=True)
-        self.game_instance.process_frame(delta_time, controls)
+        self.game_instance.next_frame(delta_time, controls)
 
     def draw_screen(self) -> None:
         self.screen.fill(Color.BLACK)
@@ -106,7 +106,7 @@ class PygameLauncher:
         pygame.draw.rect(self.screen, Color.GREY, (self.WINDOW_WIDTH - sides, 0, sides, self.WINDOW_HEIGHT))
 
         # Draw game objects
-        game_objs: ValuesView[GameObj] = self.game_instance.get_all_game_objs_to_draw()
+        game_objs: ValuesView[GameObj] = self.game_instance.view_all_game_objs_to_draw
         for game_obj in game_objs:
             if not game_obj.is_visible:
                 continue

@@ -1,30 +1,24 @@
-from typing import Any, List, Dict, Type, Optional, Tuple
-from src.config.color import Color
-
-from src.models.controls import Controls
-from src.models.game_obj import GameObj
-from src.models.spell import SpellFlag, Spell
-from src.handlers.id_gen import IdGen
-from src.config.spell_db.templates.unique_spell_templates import UniqueSpellTemplates
+from src.models.spell import SpellFlag, Spell, IdGen
+from src.config.spell_db.templates.spell_templates import SpellTemplates
 
 
 class UniqueSpellCollection:
     @staticmethod
     def empty_spell() -> Spell:
-        return UniqueSpellTemplates.empty_spell_template(
+        return SpellTemplates.empty_spell_template(
             spell_id=IdGen.EMPTY_ID
         )
 
     @staticmethod
     def despawn_self() -> Spell:
-        return UniqueSpellTemplates.self_apply_flag_template(
+        return SpellTemplates.apply_flag_to_self(
             spell_id=33,
-            spell_flag=SpellFlag.DESPAWN
+            spell_flag=SpellFlag.DESPAWN_SELF
         )
 
     @staticmethod
     def tab_target() -> Spell:
-        return UniqueSpellTemplates.self_apply_flag_template(
+        return SpellTemplates.apply_flag_to_self(
             spell_id=15,
             spell_flag=SpellFlag.TAB_TARGET
         )

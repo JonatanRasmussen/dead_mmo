@@ -1,4 +1,4 @@
-from typing import Tuple, NamedTuple
+from typing import NamedTuple
 from src.handlers.id_gen import IdGen
 
 

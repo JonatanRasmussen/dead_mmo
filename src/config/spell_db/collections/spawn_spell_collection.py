@@ -5,16 +5,16 @@ from src.models.controls import Controls
 from src.models.game_obj import GameObj
 from src.models.spell import SpellFlag, Spell
 from src.handlers.id_gen import IdGen
-from src.config.spell_db.templates.spawn_spell_templates import SpawnSpellTemplates
-from src.config.spell_db.collections.movement_spell_collection import MovementSpellCollection
-from src.config.spell_db.collections.combat_spell_collection import CombatSpellCollection
+from src.config.spell_db.templates.spell_templates import SpellTemplates
 from src.config.spell_db.collections.unique_spell_collection import UniqueSpellCollection
+from src.config.spell_db.collections.combat_spell_collection import CombatSpellCollection
+from src.config.spell_db.collections.movement_spell_collection import MovementSpellCollection
 
 
 class SpawnSpellCollection:
     @staticmethod
     def spawn_single_step_player() -> Spell:
-        return SpawnSpellTemplates.new_player(
+        return SpellTemplates.new_player(
             spell_id=199,
             spawned_obj=GameObj(
                 hp=30.0,
@@ -40,7 +40,7 @@ class SpawnSpellCollection:
 
     @staticmethod
     def spawn_player() -> Spell:
-        return SpawnSpellTemplates.new_player(
+        return SpellTemplates.new_player(
             spell_id=200,
             spawned_obj=GameObj(
                 hp=30.0,
@@ -65,7 +65,7 @@ class SpawnSpellCollection:
 
     @staticmethod
     def spawn_enemy() -> Spell:
-        return SpawnSpellTemplates.new_boss(
+        return SpellTemplates.new_boss(
             spell_id=201,
             spawned_obj=GameObj(
                 hp=30.0,
@@ -85,7 +85,7 @@ class SpawnSpellCollection:
 
     @staticmethod
     def spawn_target_dummy() -> Spell:
-        return SpawnSpellTemplates.new_boss(
+        return SpellTemplates.new_boss(
             spell_id=202,
             spawned_obj=GameObj(
                 hp=80.0,
@@ -105,7 +105,7 @@ class SpawnSpellCollection:
 
     @staticmethod
     def spawn_landmine() -> Spell:
-        return SpawnSpellTemplates.new_hitbox(
+        return SpellTemplates.new_hitbox(
             spell_id=203,
             spawned_obj=GameObj(
                 hp=20.0,

@@ -1,11 +1,8 @@
 from sortedcontainers import SortedDict  # type: ignore
 from typing import Dict, List, Tuple, ValuesView
 
-from src.handlers.id_gen import IdGen
-from src.models.controls import Controls
-from src.models.game_obj import GameObj
+from src.models.spell import SpellFlag, Spell, GameObj, IdGen
 from src.models.important_ids import ImportantIDs
-from src.models.spell import SpellFlag, Spell
 from src.handlers.event_log import EventLog
 from src.utils.spell_resolving import SpellResolving
 
@@ -26,7 +23,7 @@ class GameObjHandler:
         return self._game_objs.values()
 
     @property
-    def get_lowest_and_highest_game_obj_id(self) -> Tuple[int, int]:
+    def get_min_max_obj_id(self) -> Tuple[int, int]:
         min_id = min(self._game_objs.keys()) if self._game_objs else 0
         max_id = max(self._game_objs.keys()) if self._game_objs else 0
         return (min_id, max_id)
@@ -67,11 +64,11 @@ class GameObjHandler:
         updated_target_obj = SpellResolving.modify_target(updated_source_obj, spell, target_obj, self._important_ids)
         self.update_game_obj(updated_target_obj)
 
-    def handle_spawn(self, source_obj: GameObj, spell: Spell) -> int:
+    def handle_spawn(self, timestamp: float, source_obj: GameObj, spell: Spell) -> int:
         if spell.spawned_obj is None:
             return IdGen.EMPTY_ID
         obj_id = self._generate_new_game_obj_id()
-        new_obj = spell.spawned_obj.create_copy_of_template(obj_id, source_obj.obj_id)
+        new_obj = spell.spawned_obj.create_copy_of_template(obj_id, source_obj.obj_id, timestamp)
         self.add_game_obj(new_obj)
         if spell.flags & SpellFlag.SPAWN_BOSS:
             if not self._important_ids.boss1_exists:

@@ -1,8 +1,7 @@
 from sortedcontainers import SortedDict  # type: ignore
 from typing import Dict, List, Tuple, ValuesView
 
-from src.models.spell import SpellFlag, Spell
-from src.models.aura import Aura
+from src.models.aura import Aura, Spell
 from src.handlers.event_log import EventLog
 
 

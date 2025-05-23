@@ -1,11 +1,6 @@
-from dataclasses import dataclass, asdict, field
-from sortedcontainers import SortedDict  # type: ignore
-from typing import Any, Dict, List, Tuple, Type, Optional, FrozenSet, Literal, Final, TypedDict, ClassVar, Set, Deque, NamedTuple
+from typing import Set, Deque
 from collections import deque
-from enum import Enum, Flag, auto
-from types import MappingProxyType
-from copy import copy, deepcopy
-from src.config.color import Color
+
 from src.config.consts import Consts
 
 
@@ -31,8 +26,8 @@ class IdGen:
     def is_valid_id(id_num: int) -> bool:
         return not IdGen.is_empty_id(id_num)
 
-    def assign_id_range(self, start: int, stop: int) -> None:
-        for id_num in range(start, stop):
+    def assign_id_range(self, id_start: int, id_stop: int) -> None:
+        for id_num in range(id_start, id_stop):
             if id_num not in self._reserved_ids:
                 self._assigned_ids.append(id_num)
 
