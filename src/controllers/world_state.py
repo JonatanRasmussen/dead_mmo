@@ -1,6 +1,6 @@
 from typing import List, Tuple, ValuesView
 
-from src.models.event import UpcomingEvent, FinalizedEvent, EventFactory
+from src.models.event import FinalizedEvent
 from src.handlers.aura_handler import AuraHandler, Aura, Spell
 from src.handlers.controls_handler import ControlsHandler, Controls, IdGen
 from src.handlers.game_obj_handler import GameObjHandler, GameObj, ImportantIDs
@@ -58,5 +58,7 @@ class WorldState:
         if f_event.spell.has_spawned_object:
             new_obj_id = self._game_objs.handle_spawn(f_event.timestamp, f_event.source, f_event.spell)
             self._controls.try_add_controls_for_newly_spawned_obj(new_obj_id, f_event.spell)
-        self._auras.handle_aura(f_event.timestamp, f_event.source_id, f_event.spell, f_event.target_id)
-        self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, f_event.spell, f_event.target)
+        if f_event.is_aura_creation or f_event.is_aura_deletion:
+            self._auras.handle_aura(f_event.timestamp, f_event.source_id, f_event.spell, f_event.target_id)
+        if not f_event.is_aura_creation:
+            self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, f_event.spell, f_event.target)

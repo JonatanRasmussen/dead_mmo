@@ -1,4 +1,4 @@
-from src.models.spell import SpellFlag, Spell, IdGen
+from src.models.spell import SpellFlag, SpellTarget, Spell, IdGen
 from src.config.spell_db.templates.spell_templates import SpellTemplates
 
 
@@ -18,7 +18,7 @@ class UniqueSpellCollection:
 
     @staticmethod
     def tab_target() -> Spell:
-        return SpellTemplates.apply_flag_to_self(
+        return SpellTemplates.apply_targeting_to_self(
             spell_id=15,
-            spell_flag=SpellFlag.TAB_TARGET
+            spell_targeting=SpellTarget.TARGET_SWAP_TO_NEXT
         )

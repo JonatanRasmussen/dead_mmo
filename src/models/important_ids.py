@@ -10,6 +10,9 @@ class ImportantIDs(NamedTuple):
     boss2_id: int = IdGen.EMPTY_ID
 
     @property
+    def missing_target_id(self) -> int:
+        return self.environment_id
+    @property
     def setup_spell_exists(self) -> bool:
         return IdGen.is_valid_id(self.setup_spell_id)
     @property
@@ -25,11 +28,8 @@ class ImportantIDs(NamedTuple):
     def boss2_exists(self) -> bool:
         return IdGen.is_valid_id(self.boss2_id)
 
-    def update_setup_spell_id(self, new_setup_spell_id: int) -> 'ImportantIDs':
-        return self._replace(setup_spell_id=new_setup_spell_id)
-
-    def update_environment_id(self, new_environment_id: int) -> 'ImportantIDs':
-        return self._replace(environment_id=new_environment_id)
+    def initialize_environment(self, setup_spell_id: int, environment_id: int) -> 'ImportantIDs':
+        return self._replace(setup_spell_id=setup_spell_id, environment_id=environment_id)
 
     def update_player_id(self, new_player_id: int) -> 'ImportantIDs':
         return self._replace(player_id=new_player_id)

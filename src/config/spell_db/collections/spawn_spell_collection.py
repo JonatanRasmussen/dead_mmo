@@ -13,32 +13,6 @@ from src.config.spell_db.collections.movement_spell_collection import MovementSp
 
 class SpawnSpellCollection:
     @staticmethod
-    def spawn_single_step_player() -> Spell:
-        return SpellTemplates.new_player(
-            spell_id=199,
-            spawned_obj=GameObj(
-                hp=30.0,
-                is_allied=True,
-                x=0.3,
-                y=0.3,
-                color=Color.RED,
-                start_move_up_id=MovementSpellCollection.step_up().spell_id,
-                stop_move_up_id=MovementSpellCollection.step_up().spell_id,
-                start_move_left_id=MovementSpellCollection.step_left().spell_id,
-                stop_move_left_id=MovementSpellCollection.step_left().spell_id,
-                start_move_down_id=MovementSpellCollection.step_down().spell_id,
-                stop_move_down_id=MovementSpellCollection.step_down().spell_id,
-                start_move_right_id=MovementSpellCollection.step_right().spell_id,
-                stop_move_right_id=MovementSpellCollection.step_right().spell_id,
-                next_target_id=UniqueSpellCollection.tab_target().spell_id,
-                ability_1_id=CombatSpellCollection.fireblast().spell_id,
-                ability_2_id=CombatSpellCollection.fireblast().spell_id,
-                ability_3_id=CombatSpellCollection.fireblast().spell_id,
-                ability_4_id=CombatSpellCollection.fireblast().spell_id,
-            ),
-        )
-
-    @staticmethod
     def spawn_player() -> Spell:
         return SpellTemplates.new_player(
             spell_id=200,
@@ -72,12 +46,12 @@ class SpawnSpellCollection:
                 x=0.7,
                 y=0.7,
                 color=Color.GREEN,
+                next_target_id=UniqueSpellCollection.tab_target().spell_id,
                 ability_1_id=CombatSpellCollection.small_heal().spell_id,
                 ability_2_id=CombatSpellCollection.healing_aura().spell_id,
-                ability_3_id=CombatSpellCollection.fireblast().spell_id,
-                ability_4_id=CombatSpellCollection.short_range_hurtbox().spell_id,
             ),
             obj_controls=(
+                Controls(timestamp=1.0, next_target=True),
                 Controls(timestamp=3.0, ability_1=True),
                 Controls(timestamp=5.0, ability_2=True),
             ),
@@ -92,12 +66,12 @@ class SpawnSpellCollection:
                 x=0.5,
                 y=0.8,
                 color=Color.BLUE,
-                ability_1_id=CombatSpellCollection.small_heal().spell_id,
-                ability_2_id=CombatSpellCollection.healing_aura().spell_id,
+                next_target_id=UniqueSpellCollection.tab_target().spell_id,
                 ability_3_id=CombatSpellCollection.fireblast().spell_id,
                 ability_4_id=CombatSpellCollection.short_range_hurtbox().spell_id,
             ),
             obj_controls=(
+                Controls(timestamp=1.0, next_target=True),
                 Controls(timestamp=4.0, ability_3=True),
                 Controls(timestamp=7.0, ability_4=True),
             ),
@@ -112,15 +86,6 @@ class SpawnSpellCollection:
                 x=0.2,
                 y=0.8,
                 color=Color.MAGENTA,
-                start_move_up_id=MovementSpellCollection.start_move_up().spell_id,
-                stop_move_up_id=MovementSpellCollection.stop_move_up().spell_id,
-                start_move_left_id=MovementSpellCollection.start_move_left().spell_id,
-                stop_move_left_id=MovementSpellCollection.stop_move_left().spell_id,
-                start_move_down_id=MovementSpellCollection.start_move_down().spell_id,
-                stop_move_down_id=MovementSpellCollection.stop_move_down().spell_id,
-                start_move_right_id=MovementSpellCollection.start_move_right().spell_id,
-                stop_move_right_id=MovementSpellCollection.stop_move_right().spell_id,
-                next_target_id=UniqueSpellCollection.tab_target().spell_id,
                 ability_1_id=CombatSpellCollection.landmine_aura().spell_id,
             ),
             obj_controls=(

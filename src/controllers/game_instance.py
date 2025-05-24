@@ -1,5 +1,4 @@
-from typing import Dict, List, Tuple, ValuesView
-import heapq
+from typing import Dict, ValuesView
 
 from src.models.controls import Controls
 from src.models.game_obj import GameObj

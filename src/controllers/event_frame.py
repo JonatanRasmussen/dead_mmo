@@ -1,14 +1,10 @@
-import heapq
-from typing import Dict, List, Tuple, ValuesView
-
 from src.models.aura import Aura
-from src.models.event import UpcomingEvent, FinalizedEvent
+from src.models.spell import SpellTarget
+from src.models.event import EventOutcome, UpcomingEvent, FinalizedEvent
 from src.models.controls import Controls
 from src.handlers.event_heap import EventHeap
 from src.handlers.id_gen import IdGen
 from src.controllers.world_state import WorldState
-from src.utils.spell_validation import SpellValidation
-from src.utils.target_selection import TargetSelection
 
 
 class EventFrame:
@@ -49,14 +45,8 @@ class EventFrame:
     def _insert_periodic_events_into_heap(self, aura: Aura) -> None:
         tick_timestamps = aura.get_timestamps_for_ticks_this_frame(self.frame_start, self.frame_end)
         for timestamp in tick_timestamps:
-            aura_tick = UpcomingEvent(
-                event_id=self.state.generate_new_event_id(),
-                timestamp=timestamp,
-                source=aura.source_id,
-                spell=aura.aura_effect_id,
-                target=aura.target_id,
-                is_periodic_tick=True,
-            )
+            event_id=self.state.generate_new_event_id()
+            aura_tick = UpcomingEvent.create_from_aura_tick(event_id, timestamp, aura)
             self._event_heap.insert_event(aura_tick)
 
     def _insert_controls_events_into_heap(self) -> None:
@@ -78,12 +68,11 @@ class EventFrame:
 
     def _insert_cascading_events_into_heap(self, f_event: FinalizedEvent) -> None:
         # If the event's spell is area-of-effect, add new events for each target
-        if f_event.spell.is_aoe:
-            target_ids = TargetSelection.handle_aoe(f_event.source, f_event.spell,f_event.target, self.state.view_game_objs)
+        if f_event.spell.is_area_of_effect:
+            target_ids = SpellTarget.handle_aoe(f_event.source, f_event.target, self.state.view_game_objs)
             for target_id in target_ids:
                 new_event_id = self.state.generate_new_event_id()
-                spell_effect = f_event.spell.effect_id
-                new_event = f_event.pending_event.also_target(new_event_id, spell_effect, target_id)
+                new_event = f_event.pending_event.also_target(new_event_id, f_event.spell_id, target_id)
                 self._event_heap.insert_event(new_event)
 
         # If the event's spell cascades into new spells, add those as new events
@@ -94,7 +83,7 @@ class EventFrame:
                 self._event_heap.insert_event(sequence_event)
 
         # If an aura was just created, see if it has any ticks happening this frame
-        if f_event.spell.has_aura_apply:
+        if f_event.is_aura_creation:
             aura = self.state.get_aura(f_event.source_id, f_event.spell_id, f_event.target_id)
             self._insert_periodic_events_into_heap(aura)
 
@@ -106,13 +95,13 @@ class EventFrame:
             source_id = self.state.important_ids.environment_id
         source_obj = self.state.get_game_obj(source_id)
         spell = self.state.get_spell(event.spell)
-        target_id = TargetSelection.select_target(source_obj, spell, event.target, self.state.important_ids)
+        target_id = spell.targeting.select_target(source_obj, event.target, self.state.important_ids)
         if target_id == source_obj.obj_id:
             target_obj = source_obj
         else:
             target_obj = self.state.get_game_obj(target_id)
         updated_event = event.update_source_and_target(source_obj.obj_id, target_obj.obj_id)
-        outcome = SpellValidation.decide_outcome(event.timestamp, source_obj, spell, target_obj)
+        outcome = EventOutcome.decide_outcome(event.timestamp, source_obj, spell, target_obj)
         finalized_event = FinalizedEvent(
             source=source_obj,
             spell=spell,

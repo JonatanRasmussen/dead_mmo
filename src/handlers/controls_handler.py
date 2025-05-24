@@ -33,7 +33,7 @@ class ControlsHandler:
         assert key not in self._controls, f"Controls with (timestamp, obj_id) = ({key}) already exists."
         self._controls[key] = new_controls
 
-    def try_add_controls_for_newly_spawned_obj(self, obj_id: int, spell: Spell):
+    def try_add_controls_for_newly_spawned_obj(self, obj_id: int, spell: Spell) -> None:
         if spell.obj_controls is not None:
             for controls in spell.obj_controls:
                 self.add_controls(obj_id, controls.timestamp, controls)

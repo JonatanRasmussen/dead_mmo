@@ -1,18 +1,42 @@
-from typing import NamedTuple, List
+from typing import NamedTuple
 from enum import Enum, auto
 
 from src.models.aura import Aura
-from src.models.spell import Spell, GameObj, IdGen
+from src.models.spell import SpellFlag, Spell, GameObjStatus, GameObj, IdGen
 
 
 class EventOutcome(Enum):
     EMPTY = 0
     SUCCESS = auto()
-    FAILED_NOT_WITHIN_RANGE = auto()
-    FAILED_GCD_NOT_READY = auto()
-    FAILED_SOURCE_HAS_DESPAWNED = auto()
-    FAILED_TARGET_HAS_DESPAWNED = auto()
+    OUT_OF_RANGE = auto()
+    GCD_NOT_READY = auto()
+    NO_TARGET_WAS_SELECTED = auto()
+    SOURCE_IS_DISABLED = auto()
+    TARGET_IS_INVALID = auto()
 
+    @staticmethod
+    def decide_outcome(timestamp: float, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> 'EventOutcome':
+        if not target_obj.status.is_valid_target and not source_obj.obj_id == target_obj.obj_id:
+            return EventOutcome.TARGET_IS_INVALID
+        if not target_obj.status.is_valid_source:
+            return EventOutcome.SOURCE_IS_DISABLED
+        if not EventOutcome._is_within_range(source_obj, spell, target_obj):
+            return EventOutcome.OUT_OF_RANGE
+        if not EventOutcome._gcd_is_available(timestamp, source_obj, spell):
+            return EventOutcome.GCD_NOT_READY
+        return EventOutcome.SUCCESS
+
+    @staticmethod
+    def _is_within_range(source_obj: GameObj, spell: Spell, target_obj: GameObj) -> bool:
+        if not spell.flags & SpellFlag.HAS_RANGE_LIMIT:
+            return True
+        return (source_obj.x - target_obj.x) ** 2 + (source_obj.y - target_obj.y) ** 2 <= spell.range_limit ** 2
+
+    @staticmethod
+    def _gcd_is_available(timestamp: float, source_obj: GameObj, spell: Spell) -> bool:
+        if not spell.flags & SpellFlag.TRIGGER_GCD:
+            return True
+        return source_obj.get_gcd_progress(timestamp) >= 1.0
 
 class UpcomingEvent(NamedTuple):
     event_id: int = IdGen.EMPTY_ID
@@ -23,17 +47,28 @@ class UpcomingEvent(NamedTuple):
     target: int = IdGen.EMPTY_ID
     is_periodic_tick: bool = False
 
+    @classmethod
+    def create_from_aura_tick(cls, event_id: int, timestamp: float, aura: Aura) -> 'UpcomingEvent':
+        return UpcomingEvent(
+            event_id=event_id,
+            timestamp=timestamp,
+            source=aura.source_id,
+            spell=aura.spell_id,
+            target=aura.target_id,
+            is_periodic_tick=True,
+        )
+
     @property
     def event_summary(self) -> str:
         return f"[{self.timestamp:.3f}: id={self.event_id:04d}] (obj_{self.source:04d} uses spell_{self.spell:04d} on obj_{self.target:04d}.)"
 
     @property
     def is_subevent(self) -> bool:
-        return not IdGen.is_empty_id(self.base_event)
+        return IdGen.is_valid_id(self.base_event)
 
     @property
     def has_target(self) -> bool:
-        return not IdGen.is_empty_id(self.target)
+        return IdGen.is_valid_id(self.target)
 
     def update_source_and_target(self, new_source: int, new_target: int) -> 'UpcomingEvent':
         return self._replace(source=new_source, target=new_target)
@@ -59,9 +94,11 @@ class FinalizedEvent(NamedTuple):
     def timestamp(self) -> float:
         return self.pending_event.timestamp
     @property
-    def is_periodic_tick(self) -> bool:
-        return self.pending_event.is_periodic_tick
-
+    def is_aura_creation(self) -> bool:
+        return self.spell.has_aura_apply and not self.pending_event.is_periodic_tick
+    @property
+    def is_aura_deletion(self) -> bool:
+        return self.spell.has_aura_cancel and not self.pending_event.is_periodic_tick
     @property
     def source_id(self) -> int:
         return self.source.obj_id
@@ -78,44 +115,3 @@ class FinalizedEvent(NamedTuple):
 
     def update_source(self, new_source: GameObj) -> 'FinalizedEvent':
         return self._replace(source=new_source)
-
-
-class EventFactory:
-    @staticmethod
-    def create_finalized_event(origin_event: UpcomingEvent, source: GameObj, spell: Spell, target: GameObj, outcome: EventOutcome) -> FinalizedEvent:
-        return FinalizedEvent(
-            pending_event=origin_event,
-            source=source,
-            spell=spell,
-            target=target,
-            outcome=outcome
-        )
-
-    @staticmethod
-    def create_setup_event(event_id: int, timestamp: float, spell_id: int) -> UpcomingEvent:
-        return UpcomingEvent(
-            event_id=event_id,
-            timestamp=timestamp,
-            spell=spell_id,
-        )
-
-    @staticmethod
-    def create_aura_tick_event(event_id: int, timestamp: float, aura: Aura) -> UpcomingEvent:
-        return UpcomingEvent(
-            event_id=event_id,
-            timestamp=timestamp,
-            source=aura.source_id,
-            spell=aura.aura_effect_id,
-            target=aura.target_id,
-            is_periodic_tick=True,
-        )
-
-    @staticmethod
-    def create_controls_event(event_id: int, timestamp: float, spell_id: int, source_obj: GameObj) -> UpcomingEvent:
-        return UpcomingEvent(
-            event_id=event_id,
-            timestamp=timestamp,
-            source=source_obj.obj_id,
-            spell=spell_id,
-            target=source_obj.current_target,
-        )

@@ -4,7 +4,6 @@ from typing import Dict, List, Tuple, ValuesView
 from src.models.spell import SpellFlag, Spell, GameObj, IdGen
 from src.models.important_ids import ImportantIDs
 from src.handlers.event_log import EventLog
-from src.utils.spell_resolving import SpellResolving
 
 
 class GameObjHandler:
@@ -49,19 +48,18 @@ class GameObjHandler:
         self._game_objs[updated_game_obj.obj_id] = updated_game_obj
 
     def initialize_root_environment_obj(self, setup_spell_id: int) -> None:
-        self._important_ids = self._important_ids.update_setup_spell_id(setup_spell_id)
         assert not self._important_ids.environment_exists, f"Environment is already initialized (ID={self._important_ids.environment_id})"
         game_obj = GameObj.create_environment(self._generate_new_game_obj_id())
         self.add_game_obj(game_obj)
-        self._important_ids = self._important_ids.update_environment_id(game_obj.obj_id)
+        self._important_ids = self._important_ids.initialize_environment(setup_spell_id, game_obj.obj_id)
 
     def modify_game_obj(self, timestamp: float, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> None:
         if spell.is_modifying_source:
-            updated_source_obj = SpellResolving.modify_source(timestamp, source_obj, spell)
+            updated_source_obj = spell.flags.modify_source(timestamp, source_obj, target_obj.obj_id)
             self.update_game_obj(updated_source_obj)
         else:
             updated_source_obj = source_obj
-        updated_target_obj = SpellResolving.modify_target(updated_source_obj, spell, target_obj, self._important_ids)
+        updated_target_obj = spell.flags.modify_target(updated_source_obj, spell.power, spell.referenced_spell, target_obj)
         self.update_game_obj(updated_target_obj)
 
     def handle_spawn(self, timestamp: float, source_obj: GameObj, spell: Spell) -> int:
@@ -80,3 +78,4 @@ class GameObjHandler:
             assert not self._important_ids.player_exists, "Player already exists."
             self._important_ids = self._important_ids.update_player_id(new_obj.obj_id)
         return obj_id
+

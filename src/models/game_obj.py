@@ -10,12 +10,28 @@ from src.models.controls import Controls
 class GameObjStatus(Enum):
     """ Flags for various status effects of game objects. """
     NONE = 0
+    ENVIRONMENT = auto()
     ALIVE = auto()
     DESPAWNED = auto()
     CASTING = auto()
     CHANNELING = auto()
     CROWD_CONTROLLED = auto()
     BANISHED = auto()
+
+    @property
+    def is_valid_source(self) -> bool:
+        return not self in {
+            GameObjStatus.DESPAWNED,
+            GameObjStatus.BANISHED,
+        }
+
+    @property
+    def is_valid_target(self) -> bool:
+        return not self in {
+            GameObjStatus.ENVIRONMENT,
+            GameObjStatus.DESPAWNED,
+            GameObjStatus.BANISHED,
+        }
 
 
 class GameObj(NamedTuple):
@@ -83,11 +99,11 @@ class GameObj(NamedTuple):
 
     @property
     def is_visible(self) -> bool:
-        return self.status != GameObjStatus.DESPAWNED
+        return not self.status in {GameObjStatus.ENVIRONMENT, GameObjStatus.DESPAWNED}
 
     @classmethod
     def create_environment(cls, obj_id: int) -> 'GameObj':
-        return GameObj(obj_id=obj_id)
+        return GameObj(obj_id=obj_id, status=GameObjStatus.ENVIRONMENT)
 
     def create_copy_of_template(self, obj_id: int, parent_id: int, timestamp: float) -> 'GameObj':
         return self._replace(obj_id=obj_id, parent_id=parent_id, spawn_timestamp=timestamp, status=GameObjStatus.ALIVE)
