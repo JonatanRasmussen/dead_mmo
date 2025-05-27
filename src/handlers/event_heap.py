@@ -29,4 +29,4 @@ class EventHeap:
         return event
 
     def insert_event(self, event: UpcomingEvent) -> None:
-        heapq.heappush(self._event_heap, (event.timestamp, event.source, event.event_id, event))
+        heapq.heappush(self._event_heap, (event.timestamp, event.source_id, event.event_id, event))

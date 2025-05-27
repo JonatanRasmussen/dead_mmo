@@ -16,7 +16,6 @@ class SpellFlag(Flag):
     SET_ABILITY_SLOT_3 = auto()
     SET_ABILITY_SLOT_4 = auto()
     TRIGGER_GCD = auto()
-    HAS_RANGE_LIMIT = auto()
     DAMAGING = auto()
     HEALING = auto()
     DENY_IF_CASTING = auto()
@@ -97,6 +96,7 @@ class SpellTarget(Enum):
         return self in {SpellTarget.TARGET_SWAP_TO_NEXT}
 
     def select_target(self, source: GameObj, target_id: int, important_ids: ImportantIDs) -> int:
+        assert self not in {SpellTarget.NONE}, f"obj {source.obj_id} is casting a spell with targeting=NONE"
         if self in {SpellTarget.CAST_ON_TARGET} and IdGen.is_valid_id(target_id):
             return target_id
         if self in {SpellTarget.SELF_CAST}:
@@ -145,7 +145,7 @@ class Spell(NamedTuple):
     flags: SpellFlag = SpellFlag.NONE
     targeting: SpellTarget = SpellTarget.NONE
 
-    referenced_spell: int = IdGen.EMPTY_ID
+    external_spell: int = IdGen.EMPTY_ID
     spell_sequence: Optional[Tuple[int, ...]] = None
     spawned_obj: Optional['GameObj'] = None
     obj_controls: Optional[Tuple[Controls, ...]] = None
@@ -154,6 +154,10 @@ class Spell(NamedTuple):
     def is_modifying_source(self) -> bool:
         return True  # While I'm still frequently adding new flags, just return True
         # return bool(self.flags & SpellFlag.TRIGGER_GCD)
+
+    @property
+    def has_range_limit(self) -> bool:
+        return self.range_limit > 0.0
 
     @property
     def has_aura_apply(self) -> bool:
@@ -176,4 +180,3 @@ class Spell(NamedTuple):
     @property
     def is_area_of_effect(self) -> bool:
         return self.targeting in {SpellTarget.TARGET_ALL}
-

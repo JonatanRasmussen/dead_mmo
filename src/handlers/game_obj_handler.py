@@ -30,6 +30,9 @@ class GameObjHandler:
     def _generate_new_game_obj_id(self) -> int:
         return self._game_obj_id_gen.generate_new_id()
 
+    def has_game_obj(self, obj_id: int) -> bool:
+        return obj_id in self._game_objs
+
     def get_game_obj(self, obj_id: int) -> GameObj:
         assert obj_id in self._game_objs, f"GameObj with ID {obj_id} does not exist."
         return self._game_objs.get(obj_id, GameObj())
@@ -59,14 +62,14 @@ class GameObjHandler:
             self.update_game_obj(updated_source_obj)
         else:
             updated_source_obj = source_obj
-        updated_target_obj = spell.flags.modify_target(updated_source_obj, spell.power, spell.referenced_spell, target_obj)
+        updated_target_obj = spell.flags.modify_target(updated_source_obj, spell.power, spell.external_spell, target_obj)
         self.update_game_obj(updated_target_obj)
 
-    def handle_spawn(self, timestamp: float, source_obj: GameObj, spell: Spell) -> int:
+    def handle_spawn(self, timestamp: float, parent_obj: GameObj, spell: Spell) -> int:
         if spell.spawned_obj is None:
             return IdGen.EMPTY_ID
         obj_id = self._generate_new_game_obj_id()
-        new_obj = spell.spawned_obj.create_copy_of_template(obj_id, source_obj.obj_id, timestamp)
+        new_obj = spell.spawned_obj.create_copy_of_template(obj_id, parent_obj.obj_id, timestamp)
         self.add_game_obj(new_obj)
         if spell.flags & SpellFlag.SPAWN_BOSS:
             if not self._important_ids.boss1_exists:

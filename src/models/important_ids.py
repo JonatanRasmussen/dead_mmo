@@ -13,6 +13,17 @@ class ImportantIDs(NamedTuple):
     def missing_target_id(self) -> int:
         return self.environment_id
     @property
+    def default_allied_id(self) -> int:
+        if self.player_exists:
+            return self.player_id
+        return self.missing_target_id
+    @property
+    def default_hostile_id(self) -> int:
+        if self.boss1_exists:
+            return self.boss1_id
+        return self.missing_target_id
+
+    @property
     def setup_spell_exists(self) -> bool:
         return IdGen.is_valid_id(self.setup_spell_id)
     @property

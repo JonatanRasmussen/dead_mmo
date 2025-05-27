@@ -7,6 +7,7 @@ from src.config.consts import Consts
 class IdGen:
     """ ID generator that provides unique IDs from a set of assigned integers. """
     EMPTY_ID = Consts.EMPTY_ID
+    EMPTY_TIMESTAMP = Consts.EMPTY_TIMESTAMP
 
     def __init__(self) -> None:
         self._reserved_ids: Set[int] = set({IdGen.EMPTY_ID})

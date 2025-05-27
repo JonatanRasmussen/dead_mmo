@@ -1,22 +1,28 @@
 from typing import Dict
 
-from src.models.event import UpcomingEvent, GameObj
+from src.models.event import FinalizedEvent, UpcomingEvent, GameObj
 from src.models.aura import Aura
 
 
 class EventLog:
     DEBUG_PRINT_LOG_UDPATES = True
+
+    DEBUG_PRINT_UNSUCCESFUL_EVENTS = False
+    DEBUG_PRINT_AURA_TICKS = False
+
     DEBUG_PRINT_AURA_UPDATES = True
     DEBUG_PRINT_GAME_OBJ_UPDATES = True
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = False
 
     def __init__(self) -> None:
-        self._combat_event_log: Dict[int, UpcomingEvent] = {}
+        self._combat_event_log: Dict[int, FinalizedEvent] = {}
 
-    def log_event(self, event: UpcomingEvent) -> None:
+    def log_event(self, event: FinalizedEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
-            print(event.event_summary)
-        assert event.event_id not in self._combat_event_log, f"Event with ID {event.event_id} already exists."
+            if not event.upcoming_event.is_aura_tick or self.DEBUG_PRINT_AURA_TICKS:
+                if event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
+                    print(event.event_summary)
+        assert event.event_id not in self._combat_event_log, f"Event with ID {event.event_id} already exists in event_log."
         self._combat_event_log[event.event_id] = event
 
     @staticmethod
@@ -29,13 +35,13 @@ class EventLog:
     def summarize_new_aura_creation(new_aura: Aura) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
-        print(f"Aura {new_aura.aura_id} WAS CREATED")
+        print(f"Aura {new_aura.aura_key} WAS CREATED")
 
     @staticmethod
     def summarize_aura_deletion(aura_to_be_deleted: Aura) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
-        print(f"Aura {aura_to_be_deleted.aura_id} WAS DELETED.")
+        print(f"Aura {aura_to_be_deleted.aura_key} WAS DELETED.")
 
     @staticmethod
     def summarize_state_update(current: GameObj, updated: GameObj) -> None:

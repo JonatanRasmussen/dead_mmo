@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import Tuple, NamedTuple
 from enum import Enum, auto
 
 from src.models.aura import Aura
@@ -13,12 +13,13 @@ class EventOutcome(Enum):
     NO_TARGET_WAS_SELECTED = auto()
     SOURCE_IS_DISABLED = auto()
     TARGET_IS_INVALID = auto()
+    AURA_NO_LONGER_EXISTS = auto()
 
     @staticmethod
     def decide_outcome(timestamp: float, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> 'EventOutcome':
         if not target_obj.status.is_valid_target and not source_obj.obj_id == target_obj.obj_id:
             return EventOutcome.TARGET_IS_INVALID
-        if not target_obj.status.is_valid_source:
+        if not source_obj.status.is_valid_source:
             return EventOutcome.SOURCE_IS_DISABLED
         if not EventOutcome._is_within_range(source_obj, spell, target_obj):
             return EventOutcome.OUT_OF_RANGE
@@ -28,7 +29,7 @@ class EventOutcome(Enum):
 
     @staticmethod
     def _is_within_range(source_obj: GameObj, spell: Spell, target_obj: GameObj) -> bool:
-        if not spell.flags & SpellFlag.HAS_RANGE_LIMIT:
+        if not spell.has_range_limit:
             return True
         return (source_obj.x - target_obj.x) ** 2 + (source_obj.y - target_obj.y) ** 2 <= spell.range_limit ** 2
 
@@ -40,48 +41,51 @@ class EventOutcome(Enum):
 
 class UpcomingEvent(NamedTuple):
     event_id: int = IdGen.EMPTY_ID
-    base_event: int = IdGen.EMPTY_ID
-    timestamp: float = -1.0
-    source: int = IdGen.EMPTY_ID
-    spell: int = IdGen.EMPTY_ID
-    target: int = IdGen.EMPTY_ID
-    is_periodic_tick: bool = False
+    base_event_id: int = IdGen.EMPTY_ID
+    timestamp: float = IdGen.EMPTY_TIMESTAMP
+    source_id: int = IdGen.EMPTY_ID
+    spell_id: int = IdGen.EMPTY_ID
+    target_id: int = IdGen.EMPTY_ID
+
+    aura_origin_spell_id: int = IdGen.EMPTY_ID
+    aura_id: int = IdGen.EMPTY_ID
 
     @classmethod
     def create_from_aura_tick(cls, event_id: int, timestamp: float, aura: Aura) -> 'UpcomingEvent':
         return UpcomingEvent(
             event_id=event_id,
             timestamp=timestamp,
-            source=aura.source_id,
-            spell=aura.spell_id,
-            target=aura.target_id,
-            is_periodic_tick=True,
+            source_id=aura.source_id,
+            spell_id=aura.periodic_spell_id,
+            target_id=aura.target_id,
+            aura_origin_spell_id=aura.origin_spell_id,
+            aura_id=aura.aura_id,
         )
 
     @property
-    def event_summary(self) -> str:
-        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] (obj_{self.source:04d} uses spell_{self.spell:04d} on obj_{self.target:04d}.)"
+    def has_target(self) -> bool:
+        return IdGen.is_valid_id(self.target_id)
+
+    @property
+    def is_aura_tick(self) -> bool:
+        return IdGen.is_valid_id(self.aura_origin_spell_id)
 
     @property
     def is_subevent(self) -> bool:
-        return IdGen.is_valid_id(self.base_event)
+        return IdGen.is_valid_id(self.base_event_id) or self.is_aura_tick
 
-    @property
-    def has_target(self) -> bool:
-        return IdGen.is_valid_id(self.target)
-
-    def update_source_and_target(self, new_source: int, new_target: int) -> 'UpcomingEvent':
-        return self._replace(source=new_source, target=new_target)
+    def update_source_and_target(self, new_source_id: int, new_target_id: int) -> 'UpcomingEvent':
+        return self._replace(source_id=new_source_id, target_id=new_target_id)
 
     def continue_spell_sequence(self, new_event_id: int, new_spell_id: int) -> 'UpcomingEvent':
-        return self._replace(event_id=new_event_id, base_event=self.event_id, spell=new_spell_id)
+        return self._replace(event_id=new_event_id, base_event_id=self.event_id, spell_id=new_spell_id)
 
     def also_target(self, new_event_id: int, new_spell_id: int, new_target_id: int) -> 'UpcomingEvent':
-        return self._replace(event_id=new_event_id, spell=new_spell_id, target=new_target_id)
+        return self._replace(event_id=new_event_id, base_event_id=self.event_id, spell_id=new_spell_id, target_id=new_target_id)
 
 
 class FinalizedEvent(NamedTuple):
-    pending_event: UpcomingEvent = UpcomingEvent()
+    upcoming_event: UpcomingEvent = UpcomingEvent()
     source: GameObj = GameObj()
     spell: Spell = Spell()
     target: GameObj = GameObj()
@@ -89,16 +93,10 @@ class FinalizedEvent(NamedTuple):
 
     @property
     def event_id(self) -> int:
-        return self.pending_event.event_id
+        return self.upcoming_event.event_id
     @property
     def timestamp(self) -> float:
-        return self.pending_event.timestamp
-    @property
-    def is_aura_creation(self) -> bool:
-        return self.spell.has_aura_apply and not self.pending_event.is_periodic_tick
-    @property
-    def is_aura_deletion(self) -> bool:
-        return self.spell.has_aura_cancel and not self.pending_event.is_periodic_tick
+        return self.upcoming_event.timestamp
     @property
     def source_id(self) -> int:
         return self.source.obj_id
@@ -112,6 +110,10 @@ class FinalizedEvent(NamedTuple):
     @property
     def outcome_is_valid(self) -> bool:
         return self.outcome == EventOutcome.SUCCESS
+
+    @property
+    def event_summary(self) -> str:
+        return f"[{self.timestamp:.3f}: id={self.event_id:04d}] {self.outcome} (obj_{self.source_id:04d} uses spell_{self.spell_id:04d} on obj_{self.target_id:04d}.)"
 
     def update_source(self, new_source: GameObj) -> 'FinalizedEvent':
         return self._replace(source=new_source)

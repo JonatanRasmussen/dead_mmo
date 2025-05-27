@@ -1,9 +1,11 @@
 from typing import NamedTuple
 
+from src.handlers.id_gen import IdGen
+
 
 class Controls(NamedTuple):
     """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
-    timestamp: float = float('inf')
+    timestamp: float = IdGen.EMPTY_TIMESTAMP
 
     start_move_up: bool = False
     stop_move_up: bool = False
@@ -22,7 +24,7 @@ class Controls(NamedTuple):
 
     @property
     def has_valid_timestamp(self) -> bool:
-        return self.timestamp != float('inf')
+        return self.timestamp != IdGen.EMPTY_TIMESTAMP
 
     def replace_timestamp(self, new_timestamp: float) -> 'Controls':
         return self._replace(timestamp=new_timestamp)

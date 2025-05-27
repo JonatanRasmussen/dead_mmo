@@ -1,11 +1,8 @@
 from typing import Any, List, Dict, Type
 
 from src.models.spell import Spell
-from src.config.spell_db.collections.combat_spell_collection import CombatSpellCollection
-from src.config.spell_db.collections.instance_spell_collection import InstanceSpellCollection
-from src.config.spell_db.collections.movement_spell_collection import MovementSpellCollection
-from src.config.spell_db.collections.spawn_spell_collection import SpawnSpellCollection
-from src.config.spell_db.collections.unique_spell_collection import UniqueSpellCollection
+from src.templates.spell_factory import SpellFactory
+from src.templates.spec_00 import Spec00
 
 class SpellDatabase:
     def __init__(self) -> None:
@@ -13,14 +10,11 @@ class SpellDatabase:
 
     @staticmethod
     def load_spells_into_memory() -> Dict[int, Spell]:
-        spells_to_load: List[Spell] = []
-        spells_to_load += SpellDatabase._load_collection(UniqueSpellCollection)
-        spells_to_load += SpellDatabase._load_collection(MovementSpellCollection)
-        spells_to_load += SpellDatabase._load_collection(CombatSpellCollection)
-        spells_to_load += SpellDatabase._load_collection(SpawnSpellCollection)
-        spells_to_load += SpellDatabase._load_collection(InstanceSpellCollection)
+        spells_to_load: List[SpellFactory] = []
+        spells_to_load += SpellDatabase._load_collection(Spec00)
         spells_loaded_into_memory: Dict[int, Spell] = {}
-        for spell in spells_to_load:
+        for spell_factory in spells_to_load:
+            spell = spell_factory.build()
             assert spell.spell_id not in spells_loaded_into_memory, f"Spell with ID {spell.spell_id} already exists."
             spells_loaded_into_memory[spell.spell_id] = spell
         return spells_loaded_into_memory

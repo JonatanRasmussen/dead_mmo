@@ -81,12 +81,12 @@ class GameObj(NamedTuple):
     ability_4_id: int = IdGen.EMPTY_ID
 
     # Cooldown timestamps
-    spawn_timestamp: float = 0.0
-    gcd_start: float = -999.9
-    ability_1_cd_start: float = -999.9
-    ability_2_cd_start: float = -999.9
-    ability_3_cd_start: float = -999.9
-    ability_4_cd_start: float = -999.9
+    spawn_timestamp: float = IdGen.EMPTY_TIMESTAMP
+    gcd_start: float = IdGen.EMPTY_TIMESTAMP
+    ability_1_cd_start: float = IdGen.EMPTY_TIMESTAMP
+    ability_2_cd_start: float = IdGen.EMPTY_TIMESTAMP
+    ability_3_cd_start: float = IdGen.EMPTY_TIMESTAMP
+    ability_4_cd_start: float = IdGen.EMPTY_TIMESTAMP
 
 
     @property

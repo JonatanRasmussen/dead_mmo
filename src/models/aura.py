@@ -5,8 +5,10 @@ from src.models.spell import Spell, IdGen
 
 class Aura(NamedTuple):
     """ The effect of a previously cast spell that periodically ticks over a time span. """
+    aura_id: int = IdGen.EMPTY_ID
     source_id: int = IdGen.EMPTY_ID
-    spell_id: int = IdGen.EMPTY_ID
+    origin_spell_id: int = IdGen.EMPTY_ID
+    periodic_spell_id: int = IdGen.EMPTY_ID
     target_id: int = IdGen.EMPTY_ID
     start_time: float = 0.0
     duration: float = 0.0
@@ -15,8 +17,8 @@ class Aura(NamedTuple):
     is_hidden: bool = False
 
     @property
-    def aura_id(self) -> Tuple[int, int, int]:
-        return self.source_id, self.spell_id, self.target_id
+    def aura_key(self) -> Tuple[int, int, int]:
+        return Aura.create_aura_key(self.source_id, self.origin_spell_id, self.target_id)
 
     @property
     def tick_interval(self) -> float:
@@ -28,22 +30,15 @@ class Aura(NamedTuple):
     def end_time(self) -> float:
         return self.start_time + self.duration
 
-    @classmethod
-    def create_from_spell(cls, timestamp: float, source_id: int, spell: Spell, target_id: int) -> 'Aura':
-        return Aura(
-            source_id=source_id,
-            spell_id=spell.spell_id,
-            target_id=target_id,
-            start_time=timestamp,
-            duration=spell.duration,
-            ticks=spell.ticks,
-        )
+    @staticmethod
+    def create_aura_key(source_id: int, spell_id: int, target_id: int) -> Tuple[int, int, int]:
+        return (source_id, spell_id, target_id)
 
     def is_expired(self, current_time: float) -> bool:
         return current_time > self.end_time
 
     def get_timestamps_for_ticks_this_frame(self, frame_start: float, frame_end: float) -> Tuple[float, ...]:
-        """ Get timestamp for ticks happening this frame, excluding t=start, including t=end. """ #Note to self: Is this actually correct?
+        """ Get timestamp for ticks happening this frame, excluding frame_start, including frame_end """
         start_ticks = self._ticks_elapsed(max(frame_start, self.start_time))
         end_ticks = self._ticks_elapsed(min(frame_end, self.end_time))
         return tuple(self.start_time + (tick_number * self.tick_interval) for tick_number in range(start_ticks + 1, end_ticks + 1))
