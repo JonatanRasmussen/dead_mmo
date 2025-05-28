@@ -117,10 +117,18 @@ class GameObj(NamedTuple):
     def teleport_to(self, new_x: float, new_y: float) -> 'GameObj':
         return self._replace(x=new_x, y=new_y)
 
-    def move_in_direction(self, x: float, y: float, move_speed: float, distance: float) -> 'GameObj':
-        new_x = self.x + x * move_speed * distance
-        new_y = self.y + y * move_speed * distance
+    def move_in_direction(self, x: float, y: float, move_speed: float) -> 'GameObj':
+        new_x = self.x + x * move_speed
+        new_y = self.y + y * move_speed
         return self._replace(x=new_x, y=new_y)
+
+    def move_towards_coordinates(self, x: float, y: float, move_speed: float) -> 'GameObj':
+        dx = x - self.x
+        dy = y - self.y
+        distance = math.hypot(dx, dy)
+        if distance == 0:
+            return self
+        return self.move_in_direction(dx/distance, dy/distance, move_speed)
 
     def set_ability_1(self, new_ability_1: int) -> 'GameObj':
         return self._replace(ability_1_id=new_ability_1)

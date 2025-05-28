@@ -34,7 +34,10 @@ class SpellFactory:
         return self.set_targeting(SpellTarget.SELF_CAST)
 
     def target_cast(self) -> 'SpellFactory':
-        return self.set_targeting(SpellTarget.CAST_ON_TARGET)
+        return self.set_targeting(SpellTarget.TARGET_CAST)
+
+    def aura_cast(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.AURA_CAST)
 
     def hostile_cast(self) -> 'SpellFactory':
         return self.set_targeting(SpellTarget.HOSTILE_CAST)

@@ -11,6 +11,7 @@ class SpellFlag(Flag):
     STEP_LEFT = auto()
     STEP_DOWN = auto()
     STEP_RIGHT = auto()
+    MOVE_TOWARDS_TARGET = auto()
     SET_ABILITY_SLOT_1 = auto()
     SET_ABILITY_SLOT_2 = auto()
     SET_ABILITY_SLOT_3 = auto()
@@ -45,27 +46,29 @@ class SpellFlag(Flag):
             tar = tar.restore_health(power * source_obj.spell_modifier)
         return tar
 
-    def modify_source(self, timestamp: float, source_obj: GameObj, target_id: int) -> GameObj:
+    def modify_source(self, timestamp: float, source_obj: GameObj, target_obj: GameObj) -> GameObj:
         src = source_obj
         if self & SpellFlag.SET_TARGET:
-            src = src.switch_target(target_id)
+            src = src.switch_target(target_obj.obj_id)
         if self & SpellFlag.TRIGGER_GCD:
             src = src.set_gcd_start(timestamp)
         if self & SpellFlag.DESPAWN_SELF:
             src = src.change_status(GameObjStatus.DESPAWNED)
+        if self & SpellFlag.MOVE_TOWARDS_TARGET:
+            src = src.move_towards_coordinates(target_obj.x, target_obj.y, src.movement_speed * 0.0005)
         return src
 
     def _handle_movement(self, target_obj: GameObj) -> GameObj:
         BASE_MOVE_DISTANCE = 0.001
         tar = target_obj
         if self & SpellFlag.STEP_UP:
-            tar = tar.move_in_direction(0.0, 1.0, tar.movement_speed, BASE_MOVE_DISTANCE)
+            tar = tar.move_in_direction(0.0, 1.0, tar.movement_speed * BASE_MOVE_DISTANCE)
         if self & SpellFlag.STEP_LEFT:
-            tar = tar.move_in_direction(-1.0, 0.0, tar.movement_speed, BASE_MOVE_DISTANCE)
+            tar = tar.move_in_direction(-1.0, 0.0, tar.movement_speed * BASE_MOVE_DISTANCE)
         if self & SpellFlag.STEP_DOWN:
-            tar = tar.move_in_direction(0.0, -1.0, tar.movement_speed, BASE_MOVE_DISTANCE)
+            tar = tar.move_in_direction(0.0, -1.0, tar.movement_speed * BASE_MOVE_DISTANCE)
         if self & SpellFlag.STEP_RIGHT:
-            tar = tar.move_in_direction(1.0, 0.0, tar.movement_speed, BASE_MOVE_DISTANCE)
+            tar = tar.move_in_direction(1.0, 0.0, tar.movement_speed * BASE_MOVE_DISTANCE)
         return tar
 
     def _handle_ability_swaps(self, referenced_spell: int, target_obj: GameObj) -> GameObj:
@@ -84,7 +87,8 @@ class SpellFlag(Flag):
 class SpellTarget(Enum):
     """ Defines targeting behavior for spell """
     NONE = 0
-    CAST_ON_TARGET = auto()
+    TARGET_CAST = auto()
+    AURA_CAST = auto()
     SELF_CAST = auto()
     FRIENDLY_CAST = auto()
     HOSTILE_CAST = auto()
@@ -95,10 +99,13 @@ class SpellTarget(Enum):
     def is_target_swap(self) -> bool:
         return self in {SpellTarget.TARGET_SWAP_TO_NEXT}
 
-    def select_target(self, source: GameObj, target_id: int, important_ids: ImportantIDs) -> int:
+    def select_target(self, source: GameObj, aura_target: int, important_ids: ImportantIDs) -> int:
+        obj_target = source.current_target
         assert self not in {SpellTarget.NONE}, f"obj {source.obj_id} is casting a spell with targeting=NONE"
-        if self in {SpellTarget.CAST_ON_TARGET} and IdGen.is_valid_id(target_id):
-            return target_id
+        if self in {SpellTarget.TARGET_CAST} and IdGen.is_valid_id(obj_target):
+            return obj_target
+        if self in {SpellTarget.AURA_CAST} and IdGen.is_valid_id(aura_target):
+            return aura_target
         if self in {SpellTarget.SELF_CAST}:
             return source.obj_id
         if self in {SpellTarget.HOSTILE_CAST}:

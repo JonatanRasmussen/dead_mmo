@@ -58,7 +58,7 @@ class GameObjHandler:
 
     def modify_game_obj(self, timestamp: float, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> None:
         if spell.is_modifying_source:
-            updated_source_obj = spell.flags.modify_source(timestamp, source_obj, target_obj.obj_id)
+            updated_source_obj = spell.flags.modify_source(timestamp, source_obj, target_obj)
             self.update_game_obj(updated_source_obj)
         else:
             updated_source_obj = source_obj

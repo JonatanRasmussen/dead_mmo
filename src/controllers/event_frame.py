@@ -67,7 +67,6 @@ class EventFrame:
                     timestamp=timestamp,
                     source_id=source_obj.obj_id,
                     spell_id=spell_id,
-                    target_id=source_obj.current_target,
                 )
                 self._event_heap.insert_event(controls_event)
 

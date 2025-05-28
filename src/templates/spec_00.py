@@ -44,6 +44,13 @@ class Spec00:
         return SpellTemplates.step_move_self(1, SpellFlag.STEP_RIGHT)
 
     @staticmethod
+    def step_towards_target() -> SpellFactory:
+        return (
+            SpellFactory(361)
+            .target_cast()
+            .add_flag(SpellFlag.MOVE_TOWARDS_TARGET)
+        )
+    @staticmethod
     def start_move_up() -> SpellFactory:
         return SpellTemplates.start_move_self(92, Spec00.step_up().spell_id)
 
@@ -60,6 +67,10 @@ class Spec00:
         return SpellTemplates.start_move_self(2, Spec00.step_right().spell_id)
 
     @staticmethod
+    def start_move_towards_target() -> SpellFactory:
+        return SpellTemplates.start_move_self(362, Spec00.step_towards_target().spell_id)
+
+    @staticmethod
     def stop_move_up() -> SpellFactory:
         return SpellTemplates.cancel_aura_on_self(93, Spec00.start_move_up().spell_id)
 
@@ -74,6 +85,11 @@ class Spec00:
     @staticmethod
     def stop_move_right() -> SpellFactory:
         return SpellTemplates.cancel_aura_on_self(3, Spec00.start_move_right().spell_id)
+
+    @staticmethod
+    def stop_move_towards_target() -> SpellFactory:
+        return SpellTemplates.cancel_aura_on_self(363, Spec00.start_move_towards_target().spell_id)
+
 
     @staticmethod
     def fire_blast() -> SpellFactory:
@@ -118,9 +134,9 @@ class Spec00:
             stop_move_right_id=Spec00.stop_move_right().spell_id,
             next_target_id=Spec00.tab_target().spell_id,
             ability_1_id=Spec00.fire_blast().spell_id,
-            ability_2_id=Spec00.fire_blast().spell_id,
-            ability_3_id=Spec00.fire_aura_apply().spell_id,
-            ability_4_id=Spec00.fire_aura_apply().spell_id,
+            ability_2_id=Spec00.fire_aura_apply().spell_id,
+            ability_3_id=Spec00.start_move_towards_target().spell_id,
+            ability_4_id=Spec00.stop_move_towards_target().spell_id,
         )
         return (
             SpellFactory(42)
@@ -158,7 +174,7 @@ class Spec00:
             color=Color.BLUE,
             next_target_id=Spec00.tab_target().spell_id,
             ability_3_id=Spec00.fire_blast().spell_id,
-            ability_4_id=Spec00.fire_blast().spell_id,
+            ability_4_id=Spec00.start_move_towards_target().spell_id,
         )
         obj_controls = (
             Controls(timestamp=1.5, next_target=True),
