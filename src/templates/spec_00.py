@@ -26,6 +26,24 @@ class Spec00:
             SpellFactory(15)
             .target_swap()
         )
+    @staticmethod
+    def target_parent() -> SpellFactory:
+        return (
+            SpellFactory(15)
+            .target_swap()
+        )
+    @staticmethod
+    def target_parents_target() -> SpellFactory:
+        return (
+            SpellFactory(15)
+            .target_swap()
+        )
+    @staticmethod
+    def teleport_to_source() -> SpellFactory:
+        return (
+            SpellFactory(15)
+            .target_swap()
+        )
 
     @staticmethod
     def step_up() -> SpellFactory:
@@ -116,6 +134,33 @@ class Spec00:
     @staticmethod
     def fire_explosion_apply() -> SpellFactory:
         return SpellTemplates.apply_aura_to_self(115, Spec00.fire_explosion_tick().spell_id, 15.0, 150)
+
+    @staticmethod
+    def bolt_explosion_tick() -> SpellFactory:
+        return (
+            SpellTemplates.damage_enemies_within_range(116, 34.0, 0.05)
+            .despawn_self()
+        )
+    @staticmethod
+    def bolt_explosion_apply() -> SpellFactory:
+        return SpellTemplates.apply_aura_to_self(117, Spec00.fire_explosion_tick().spell_id, 30.0, 1200)
+    @staticmethod
+    def spawn_bolt() -> SpellFactory:
+        game_obj = GameObj(
+            hp=7.0,
+            x=0.5,
+            y=0.5,
+            color=Color.WHITE,
+            next_target_id=Spec00.tab_target().spell_id,
+            ability_1_id=Spec00.fire_blast().spell_id,
+            ability_2_id=Spec00.fire_aura_apply().spell_id,
+            ability_3_id=Spec00.start_move_towards_target().spell_id,
+            ability_4_id=Spec00.stop_move_towards_target().spell_id,
+        )
+        return (
+            SpellFactory(42)
+            .spawn_player(game_obj)
+        )
 
     @staticmethod
     def spawn_player() -> SpellFactory:

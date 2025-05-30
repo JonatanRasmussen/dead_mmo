@@ -108,6 +108,12 @@ class EventFrame:
         if target_id == source_obj.obj_id:
             target_obj = source_obj
         else:
+            if spell.targeting.is_targeting_another_objs_target and IdGen.is_valid_id(target_id):
+                obj_with_target_to_copy = self.state.get_game_obj(target_id)
+                if IdGen.is_valid_id(obj_with_target_to_copy.current_target):
+                    target_id = obj_with_target_to_copy.current_target
+                else:
+                    target_id = self.state.important_ids.missing_target_id
             target_obj = self.state.get_game_obj(target_id)
 
         # Finalize the event's outcome and update its source and target

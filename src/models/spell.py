@@ -87,9 +87,13 @@ class SpellFlag(Flag):
 class SpellTarget(Enum):
     """ Defines targeting behavior for spell """
     NONE = 0
+    SELF_CAST = auto()
     TARGET_CAST = auto()
     AURA_CAST = auto()
-    SELF_CAST = auto()
+    PARENT_CAST = auto()
+    TARGET_OF_PARENT_CAST = auto()
+    TARGET_OF_TARGET_CAST = auto()
+    TARGET_OF_AURA_CAST = auto()
     FRIENDLY_CAST = auto()
     HOSTILE_CAST = auto()
     TARGET_ALL = auto()
@@ -99,15 +103,25 @@ class SpellTarget(Enum):
     def is_target_swap(self) -> bool:
         return self in {SpellTarget.TARGET_SWAP_TO_NEXT}
 
+    @property
+    def is_targeting_another_objs_target(self) -> bool:
+        return self in {
+            SpellTarget.TARGET_OF_PARENT_CAST,
+            SpellTarget.TARGET_OF_TARGET_CAST,
+            SpellTarget.TARGET_OF_AURA_CAST
+        }
+
     def select_target(self, source: GameObj, aura_target: int, important_ids: ImportantIDs) -> int:
         obj_target = source.current_target
         assert self not in {SpellTarget.NONE}, f"obj {source.obj_id} is casting a spell with targeting=NONE"
-        if self in {SpellTarget.TARGET_CAST} and IdGen.is_valid_id(obj_target):
-            return obj_target
-        if self in {SpellTarget.AURA_CAST} and IdGen.is_valid_id(aura_target):
-            return aura_target
         if self in {SpellTarget.SELF_CAST}:
             return source.obj_id
+        if self in {SpellTarget.TARGET_CAST, SpellTarget.TARGET_OF_TARGET_CAST} and IdGen.is_valid_id(obj_target):
+            return obj_target
+        if self in {SpellTarget.AURA_CAST, SpellTarget.TARGET_OF_AURA_CAST} and IdGen.is_valid_id(aura_target):
+            return aura_target
+        if self in {SpellTarget.PARENT_CAST, SpellTarget.TARGET_OF_PARENT_CAST} and IdGen.is_valid_id(source.parent_id):
+            return source.parent_id
         if self in {SpellTarget.HOSTILE_CAST}:
             if source.is_allied:
                 return important_ids.boss1_id
