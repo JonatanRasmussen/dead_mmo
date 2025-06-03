@@ -1,0 +1,18 @@
+src/assets/
+  audio/
+    explosion.wav
+    hit.ogg
+    heal.mp3
+  images/
+    player.png
+    enemy.png
+  animations/
+    explosion/
+      0.png
+      1.png
+      2.png
+      ...
+    hit_effect/
+      frame_00.png
+      frame_01.png
+      ...

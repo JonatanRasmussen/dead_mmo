@@ -1,3 +1,5 @@
+from typing import ValuesView
+
 from src.models.aura import Aura
 from src.models.spell import SpellTarget
 from src.models.event import EventOutcome, UpcomingEvent, FinalizedEvent
@@ -16,6 +18,10 @@ class EventFrame:
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._event_log: EventLog = EventLog()
         self._event_heap: EventHeap = EventHeap()
+
+    @property
+    def view_all_events_this_frame(self) -> ValuesView[FinalizedEvent]:
+        return self._event_log.view_all_events
 
     def add_player_input(self, player_controls: Controls) -> None:
         self.state.add_player_controls(self.frame_end, player_controls)

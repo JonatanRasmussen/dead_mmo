@@ -88,6 +88,13 @@ class GameObj(NamedTuple):
     ability_3_cd_start: float = IdGen.EMPTY_TIMESTAMP
     ability_4_cd_start: float = IdGen.EMPTY_TIMESTAMP
 
+    # Cosmetics
+    sprite_name: str = ""
+    audio_name: str = ""
+
+    @property
+    def should_play_audio(self) -> bool:
+        return self.audio_name != ""
 
     @property
     def size(self) -> float:

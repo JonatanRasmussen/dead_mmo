@@ -29,19 +29,19 @@ class Spec00:
     @staticmethod
     def target_parent() -> SpellFactory:
         return (
-            SpellFactory(15)
+            SpellFactory(16)
             .target_swap()
         )
     @staticmethod
     def target_parents_target() -> SpellFactory:
         return (
-            SpellFactory(15)
+            SpellFactory(17)
             .target_swap()
         )
     @staticmethod
     def teleport_to_source() -> SpellFactory:
         return (
-            SpellFactory(15)
+            SpellFactory(18)
             .target_swap()
         )
 
@@ -158,7 +158,7 @@ class Spec00:
             ability_4_id=Spec00.stop_move_towards_target().spell_id,
         )
         return (
-            SpellFactory(42)
+            SpellFactory(41)
             .spawn_player(game_obj)
         )
 

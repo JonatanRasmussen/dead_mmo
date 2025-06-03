@@ -171,6 +171,21 @@ class Spell(NamedTuple):
     spawned_obj: Optional['GameObj'] = None
     obj_controls: Optional[Tuple[Controls, ...]] = None
 
+    # Audio properties
+    audio_name: Optional[str] = None
+    should_play_audio: bool = True
+    spell_type: str = ""
+
+    # Animation properties
+    animation_name: Optional[str] = None
+    should_play_animation: bool = True
+    animation_scale: float = 1.0
+
+    # Effect placement
+    animate_on_target: bool = True  # If False, animate on source
+    animate_on_impact: bool = False  # For projectiles, animate where they hit
+
+
     @property
     def is_modifying_source(self) -> bool:
         return True  # While I'm still frequently adding new flags, just return True

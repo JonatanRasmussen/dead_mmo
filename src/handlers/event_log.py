@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, ValuesView
 
 from src.models.event import FinalizedEvent, UpcomingEvent, GameObj
 from src.models.aura import Aura
@@ -16,6 +16,10 @@ class EventLog:
 
     def __init__(self) -> None:
         self._combat_event_log: Dict[int, FinalizedEvent] = {}
+
+    @property
+    def view_all_events(self) -> ValuesView[FinalizedEvent]:
+        return self._combat_event_log.values()
 
     def log_event(self, event: FinalizedEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:

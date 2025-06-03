@@ -1,6 +1,7 @@
 from typing import Dict, ValuesView
 
 from src.models.controls import Controls
+from src.models.event import FinalizedEvent
 from src.models.game_obj import GameObj
 from src.controllers.world_state import WorldState
 from src.controllers.event_frame import EventFrame
@@ -22,6 +23,10 @@ class GameInstance:
     @property
     def view_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
         return self.state.view_game_objs
+
+    @property
+    def view_all_finalized_events_this_frame(self) -> ValuesView[FinalizedEvent]:
+        return self._most_recent_frame.view_all_events_this_frame
 
     def setup_game(self, setup_spell_id: int) -> None:
         self.state.initialize_environment(setup_spell_id)
