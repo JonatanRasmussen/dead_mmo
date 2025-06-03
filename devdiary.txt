@@ -207,3 +207,23 @@
 [2025-05-30 05:07:24] {BudoB}: Cheeky little 5AM coding. And it's not morning. Oof.
 [2025-05-30 05:07:46] {BudoB}: Nice six hours of sleep before a long walk with friends.
 [2025-05-30 05:08:03] {BudoB}: Code time: 1 hours.
+
+[2025-06-03 04:25:00] {BudoB}: Vibe coded some sprite/audio/animation stuff in pygame.
+[2025-06-03 04:25:19] {BudoB}: Exciting! I want this to look passable when shown to friends.
+[2025-06-03 04:25:48] {BudoB}: Tomorrow I will cook up some code.
+[2025-06-03 04:25:57] {BudoB}: Random addition, but Elden Ring Nightreign dog boss was cool.
+[2025-06-03 04:26:33] {BudoB}: Did it with some randos. Feels good to play coop with gamers.
+[2025-06-03 04:26:51] {BudoB}: I want my game to feel the same some day.
+[2025-06-03 04:27:17] {BudoB}: Also, some early design philosophies...
+[2025-06-03 04:27:34] {BudoB}: Difficulty should come from in-depth dps rotation.
+[2025-06-03 04:28:00] {BudoB}: Bosses should not have dodge mechanics / bullet hell vomit.
+[2025-06-03 04:28:15] {BudoB}: Rather, they should have burn phases or other damage amps.
+[2025-06-03 04:28:30] {BudoB}: Randomness and variance will prevent bosses from being solved.
+[2025-06-03 04:29:27] {BudoB}: Rather than learning a scripted dance, the player must adapt.
+[2025-06-03 04:29:54] {BudoB}: Players should play their class, not the boss.
+[2025-06-03 04:30:15] {BudoB}: That was a good one, that line above. I should remember that.
+[2025-06-03 04:30:42] {BudoB}: KISS, keep it simple, stupid! Don't over-engineer the bosses.
+[2025-06-03 04:30:56] {BudoB}: Keep it light and fun. Good audio and visual feedback.
+[2025-06-03 04:31:05] {BudoB}: Audio can carry games. I hope. Cuz my graphics won't be nice.
+[2025-06-03 04:31:19] {BudoB}: No more yap. I am sleepy. It is 4:30 AM and birds are chippin'.
+[2025-06-03 04:32:06] {BudoB}: Code time: 1 hours.
