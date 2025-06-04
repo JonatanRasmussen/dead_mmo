@@ -38,9 +38,8 @@ class AudioManager:
     def process_events(self, finalized_events: ValuesView[FinalizedEvent]) -> None:
         """Process all finalized events and play audio for events that should play audio"""
         for event in finalized_events:
-            if hasattr(event, 'should_play_audio') and event.should_play_audio:
-                if hasattr(event, 'audio_name') and event.audio_name:
-                    self.play_sound(event.audio_name)
+            if event.should_play_audio:
+                self.play_sound(event.audio_name)
 
     def play_sound(self, audio_name: str) -> None:
         """Play a sound effect"""

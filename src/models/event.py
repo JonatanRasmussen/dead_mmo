@@ -122,123 +122,36 @@ class FinalizedEvent(NamedTuple):
     @property
     def should_play_audio(self) -> bool:
         """Determine if this event should play audio"""
-        if not self.outcome_is_valid:
-            return False
-
-        # Check if the spell has audio defined
-        if hasattr(self.spell, 'audio_name') and self.spell.audio_name:
-            return True
-
-        # Check if the spell type indicates it should have audio
-        if hasattr(self.spell, 'should_play_audio'):
-            return self.spell.should_play_audio
-
-        # Default audio for certain spell types or outcomes
-        if hasattr(self.spell, 'spell_type'):
-            audio_spell_types = ['damage', 'heal', 'buff', 'debuff', 'projectile']
-            return self.spell.spell_type.lower() in audio_spell_types
-
-        return False
+        return self.spell.should_play_audio
 
     @property
-    def audio_name(self) -> Optional[str]:
+    def audio_name(self) -> str:
         """Get the audio file name for this event"""
-        if not self.should_play_audio:
-            return None
-
-        # First priority: spell-specific audio
-        if hasattr(self.spell, 'audio_name') and self.spell.audio_name:
-            return self.spell.audio_name
-
-        # Second priority: spell type-based audio
-        if hasattr(self.spell, 'spell_type') and self.spell.spell_type:
-            return f"{self.spell.spell_type.lower()}_sound"
-
-        # Fallback: generic spell audio
-        return "spell_cast"
+        return self.spell.audio_name
 
     # Animation properties
     @property
     def should_play_animation(self) -> bool:
         """Determine if this event should play an animation"""
-        if not self.outcome_is_valid:
-            return False
-
-        # Check if the spell has animation defined
-        if hasattr(self.spell, 'animation_name') and self.spell.animation_name:
-            return True
-
-        # Check if the spell type indicates it should have animation
-        if hasattr(self.spell, 'should_play_animation'):
-            return self.spell.should_play_animation
-
-        # Default animation for certain spell types
-        if hasattr(self.spell, 'spell_type'):
-            animation_spell_types = ['damage', 'heal', 'explosion', 'projectile_hit', 'buff', 'debuff']
-            return self.spell.spell_type.lower() in animation_spell_types
-
-        return False
+        return self.spell.should_play_animation
 
     @property
-    def animation_name(self) -> Optional[str]:
+    def animation_name(self) -> str:
         """Get the animation name for this event"""
-        if not self.should_play_animation:
-            return None
+        return self.spell.animation_name
 
-        # First priority: spell-specific animation
-        if hasattr(self.spell, 'animation_name') and self.spell.animation_name:
-            return self.spell.animation_name
-
-        # Second priority: spell type-based animation
-        if hasattr(self.spell, 'spell_type') and self.spell.spell_type:
-            return f"{self.spell.spell_type.lower()}_effect"
-
-        # Fallback: generic spell animation
-        return "spell_effect"
-
-    @property
-    def x(self) -> float:
-        """Get the x coordinate for animation/effect placement"""
-        # Animation should generally appear on the target
-        return self.target.x if self.target else self.source.x
-
-    @property
-    def y(self) -> float:
-        """Get the y coordinate for animation/effect placement"""
-        # Animation should generally appear on the target
-        return self.target.y if self.target else self.source.y
 
     @property
     def animation_scale(self) -> float:
         """Get the scale factor for the animation"""
-        # Default scale
-        base_scale = 1.0
-
-        # Scale based on spell properties if available
-        if hasattr(self.spell, 'animation_scale'):
-            base_scale = self.spell.animation_scale
-        elif hasattr(self.spell, 'power') and self.spell.power:
-            # Scale based on spell power (assuming power is 0-100)
-            base_scale = 0.5 + (self.spell.power / 100.0) * 0.5  # Scale from 0.5 to 1.0
-
-        # Scale based on target size if available
-        if hasattr(self.target, 'size') and self.target.size:
-            base_scale *= self.target.size
-
-        return max(0.1, min(3.0, base_scale))  # Clamp between 0.1 and 3.0
+        return self.spell.animation_scale
 
     # Additional helper properties
     @property
     def effect_position(self) -> tuple[float, float]:
         """Get the position where effects should be displayed as a tuple"""
-        return (self.x, self.y)
-
-    @property
-    def has_visual_effect(self) -> bool:
-        """Check if this event has any visual effect (animation)"""
-        return self.should_play_animation
-
-    @property
-    def has_audio_effect(self) -> bool:
-        """Check if this event has any audio effect"""
-        return self.should_play_audio
+        if self.spell.animate_on_target:
+            game_obj = self.target
+        else:
+            game_obj = self.source
+        return (game_obj.x, game_obj.y)

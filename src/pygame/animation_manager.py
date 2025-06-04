@@ -126,14 +126,13 @@ class AnimationManager:
     def process_events(self, finalized_events: ValuesView[FinalizedEvent]) -> None:
         """Process all finalized events and start animations for events that should play animations"""
         for event in finalized_events:
-            if hasattr(event, 'should_play_animation') and event.should_play_animation:
-                if hasattr(event, 'animation_name') and event.animation_name:
-                    # Get position from event (you might need to adjust these attribute names)
-                    x = getattr(event, 'x', 0.5)  # Default to center if no position
-                    y = getattr(event, 'y', 0.5)
-                    scale = getattr(event, 'animation_scale', 1.0)
+            if event.should_play_animation:
+                # Get position from event (you might need to adjust these attribute names)
+                x = getattr(event, 'x', 0.5)  # Default to center if no position
+                y = getattr(event, 'y', 0.5)
+                scale = getattr(event, 'animation_scale', 1.0)
 
-                    self.start_animation(event.animation_name, x, y, scale)
+                self.start_animation(event.animation_name, x, y, scale)
 
     def start_animation(self, animation_name: str, x: float, y: float, scale: float = 1.0) -> bool:
         """Start playing an animation at the specified world coordinates"""

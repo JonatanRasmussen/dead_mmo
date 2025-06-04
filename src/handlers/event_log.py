@@ -14,7 +14,9 @@ class EventLog:
     DEBUG_PRINT_GAME_OBJ_UPDATES = True
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = False
 
-    def __init__(self) -> None:
+    def __init__(self, frame_start: float, frame_end: float) -> None:
+        self.frame_start: float = frame_start
+        self.frame_end: float = frame_end
         self._combat_event_log: Dict[int, FinalizedEvent] = {}
 
     @property

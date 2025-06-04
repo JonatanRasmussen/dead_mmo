@@ -11,11 +11,16 @@ class WorldState:
     """ The entire game state of the save file that is currently in use """
 
     def __init__(self) -> None:
+        self._ingame_time: float = 0.0
         self._auras: AuraHandler = AuraHandler()
         self._controls: ControlsHandler = ControlsHandler()
         self._game_objs: GameObjHandler = GameObjHandler()
 
         self._spell_database: SpellDatabase = SpellDatabase()
+
+    @property
+    def get_ingame_time(self) -> float:
+        return self._ingame_time
 
     @property
     def view_auras(self) -> ValuesView[Aura]:
@@ -40,10 +45,14 @@ class WorldState:
     def initialize_environment(self, setup_spell_id: int) -> None:
         self._game_objs.initialize_root_environment_obj(setup_spell_id)
 
-    def add_player_controls(self, frame_start: float, player_input: Controls) -> None:
-        self._controls.add_realtime_player_controls(self.important_ids.player_id, frame_start, player_input)
+    def advance_ingame_time(self, delta_time: float) -> None:
+        self._ingame_time += delta_time
+
+    def add_player_controls(self, player_input: Controls) -> None:
+        self._controls.add_realtime_player_controls(self.important_ids.player_id, self._ingame_time, player_input)
 
     def view_controls_for_current_frame(self, frame_start: float, frame_end: float) -> List[Tuple[float, int, Controls]]:
+        assert frame_end == self._ingame_time
         min_id, max_id = self._game_objs.get_min_max_obj_id
         return self._controls.get_controls_in_timerange(frame_start, frame_end, min_id, max_id)
 

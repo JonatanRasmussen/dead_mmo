@@ -59,10 +59,10 @@ class PygameLauncher:
             controls = self.input_handler.process_events()
 
             # Update game state
-            self.game_instance.next_frame(delta_time, controls)
+            self.game_instance.process_next_frame(delta_time, controls)
 
             # Get finalized events from this frame
-            finalized_events = self.game_instance.view_all_finalized_events_this_frame
+            finalized_events = self.game_instance.view_all_events_this_frame
 
             # Process events for audio and animations
             self.audio_manager.process_events(finalized_events)

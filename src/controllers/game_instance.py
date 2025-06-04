@@ -1,44 +1,46 @@
-from typing import Dict, ValuesView
+from typing import List, ValuesView
 
 from src.models.controls import Controls
 from src.models.event import FinalizedEvent
 from src.models.game_obj import GameObj
 from src.controllers.world_state import WorldState
 from src.controllers.event_frame import EventFrame
+from src.handlers.event_log import EventLog
 
 
 class GameInstance:
     def __init__(self) -> None:
-        self.event_frames: Dict[float, EventFrame] = {}
-        self._most_recent_frame: EventFrame = EventFrame(0.0, 0.0, WorldState())
-
-    @property
-    def state(self) -> WorldState:
-        return self._most_recent_frame.state
+        self._state: WorldState = WorldState()
+        self._event_frame_logs: List[EventLog] = []
 
     @property
     def ingame_time(self) -> float:
-        return self._most_recent_frame.frame_end
+        return self._state.get_ingame_time
+
+    @property
+    def event_log_for_current_frame(self) -> EventLog:
+        assert len(self._event_frame_logs) > 0
+        assert self.ingame_time == self._event_frame_logs[-1].frame_end
+        return self._event_frame_logs[-1]
 
     @property
     def view_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
-        return self.state.view_game_objs
+        return self._state.view_game_objs
 
     @property
-    def view_all_finalized_events_this_frame(self) -> ValuesView[FinalizedEvent]:
-        return self._most_recent_frame.view_all_events_this_frame
+    def view_all_events_this_frame(self) -> ValuesView[FinalizedEvent]:
+        return self.event_log_for_current_frame.view_all_events
 
     def setup_game(self, setup_spell_id: int) -> None:
-        self.state.initialize_environment(setup_spell_id)
+        self._state.initialize_environment(setup_spell_id)
 
-    def next_frame(self, delta_time: float, player_input: Controls) -> None:
-        new_frame_start = self._most_recent_frame.frame_end
-        new_frame_end = new_frame_start + delta_time
-        frame = EventFrame(new_frame_start, new_frame_end, self.state)
-        frame.add_player_input(player_input)
-        frame.process_frame()
-        self.event_frames[frame.frame_start] = frame
-        self._most_recent_frame = frame
+    def process_next_frame(self, delta_time: float, player_input: Controls) -> None:
+        frame_start = self.ingame_time
+        self._state.advance_ingame_time(delta_time)
+        frame_end = self.ingame_time
+        self._state.add_player_controls(player_input)
+        event_log = EventFrame.update_state(frame_start, frame_end, self._state)
+        self._event_frame_logs.append(event_log)
 
     def simulate_game_in_console(self) -> None:
         setup_spell_id = 300
@@ -48,4 +50,4 @@ class GameInstance:
         for _ in range(0, SIMULATION_DURATION * UPDATES_PER_SECOND):
             # example of controls
             controls = Controls(start_move_up=True, ability_1=True)
-            self.next_frame(1 / UPDATES_PER_SECOND, controls)
+            self.process_next_frame(1 / UPDATES_PER_SECOND, controls)

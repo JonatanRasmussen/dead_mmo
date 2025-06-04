@@ -172,19 +172,22 @@ class Spell(NamedTuple):
     obj_controls: Optional[Tuple[Controls, ...]] = None
 
     # Audio properties
-    audio_name: Optional[str] = None
-    should_play_audio: bool = True
+    audio_name: str = ""
     spell_type: str = ""
 
     # Animation properties
-    animation_name: Optional[str] = None
-    should_play_animation: bool = True
+    animation_name: str = ""
     animation_scale: float = 1.0
 
     # Effect placement
     animate_on_target: bool = True  # If False, animate on source
-    animate_on_impact: bool = False  # For projectiles, animate where they hit
 
+    @property
+    def should_play_audio(self) -> bool:
+        return self.audio_name is not None and self.audio_name != ""
+    @property
+    def should_play_animation(self) -> bool:
+        return self.animation_name is not None and self.animation_name != ""
 
     @property
     def is_modifying_source(self) -> bool:
