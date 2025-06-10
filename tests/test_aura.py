@@ -3,7 +3,8 @@ import os
 import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from src.models.aura import Aura, IdGen
+from src.models.aura import Aura
+from src.handlers.id_gen import IdGen
 
 
 def test_get_timestamps_for_ticks_this_frame():

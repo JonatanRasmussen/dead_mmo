@@ -1,14 +1,13 @@
 from typing import Dict, ValuesView
 
-from src.models.event import FinalizedEvent, UpcomingEvent, GameObj
-from src.models.aura import Aura
+from src.models import Aura, FinalizedEvent, GameObj
 
 
 class EventLog:
     DEBUG_PRINT_LOG_UDPATES = True
 
-    DEBUG_PRINT_UNSUCCESFUL_EVENTS = False
-    DEBUG_PRINT_AURA_TICKS = False
+    DEBUG_PRINT_UNSUCCESFUL_EVENTS = True
+    DEBUG_PRINT_AURA_TICKS = True
 
     DEBUG_PRINT_AURA_UPDATES = True
     DEBUG_PRINT_GAME_OBJ_UPDATES = True
@@ -41,13 +40,13 @@ class EventLog:
     def summarize_new_aura_creation(new_aura: Aura) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
-        print(f"Aura {new_aura.aura_key} WAS CREATED")
+        print(f"Aura {new_aura.get_key_for_aura} WAS CREATED")
 
     @staticmethod
     def summarize_aura_deletion(aura_to_be_deleted: Aura) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
-        print(f"Aura {aura_to_be_deleted.aura_key} WAS DELETED.")
+        print(f"Aura {aura_to_be_deleted.get_key_for_aura} WAS DELETED.")
 
     @staticmethod
     def summarize_state_update(current: GameObj, updated: GameObj) -> None:

@@ -1,8 +1,7 @@
-from sortedcontainers import SortedDict  # type: ignore
-from typing import Dict, List, Tuple, ValuesView
+from typing import Dict, List, Tuple, Iterable, ValuesView, Optional
 
-from src.models.spell import SpellFlag, Spell, GameObj, IdGen
-from src.models.important_ids import ImportantIDs
+from src.models import Aura, ImportantIDs, SpellFlag, Spell, GameObj
+from src.handlers.id_gen import IdGen
 from src.handlers.event_log import EventLog
 
 
@@ -14,18 +13,17 @@ class GameObjHandler:
         self._important_ids: ImportantIDs = ImportantIDs()
 
     @property
+    def most_recent_game_obj(self) -> GameObj:
+        obj_id = self._game_obj_id_gen.most_recent_id
+        return self.get_game_obj(obj_id)
+
+    @property
     def important_ids(self) -> ImportantIDs:
         return self._important_ids
 
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
         return self._game_objs.values()
-
-    @property
-    def get_min_max_obj_id(self) -> Tuple[int, int]:
-        min_id = min(self._game_objs.keys()) if self._game_objs else 0
-        max_id = max(self._game_objs.keys()) if self._game_objs else 0
-        return (min_id, max_id)
 
     def _generate_new_game_obj_id(self) -> int:
         return self._game_obj_id_gen.generate_new_id()
@@ -62,14 +60,18 @@ class GameObjHandler:
             self.update_game_obj(updated_source_obj)
         else:
             updated_source_obj = source_obj
+        if updated_source_obj.obj_id == target_obj.obj_id:
+            target_obj = updated_source_obj  # Do not overwrite changes made to updated_source_obj
         updated_target_obj = spell.flags.modify_target(updated_source_obj, spell.power, spell.external_spell, target_obj)
         self.update_game_obj(updated_target_obj)
 
-    def handle_spawn(self, timestamp: float, parent_obj: GameObj, spell: Spell) -> int:
+    def handle_spawn(self, timestamp: float, parent_obj: GameObj, spell: Spell) -> Optional[GameObj]:
         if spell.spawned_obj is None:
-            return IdGen.EMPTY_ID
+            return None
         obj_id = self._generate_new_game_obj_id()
         new_obj = spell.spawned_obj.create_copy_of_template(obj_id, parent_obj.obj_id, timestamp)
+        if not self._game_obj_is_environment(parent_obj):
+            new_obj = new_obj.change_allied_status(parent_obj.is_allied)
         self.add_game_obj(new_obj)
         if spell.flags & SpellFlag.SPAWN_BOSS:
             if not self._important_ids.boss1_exists:
@@ -80,5 +82,7 @@ class GameObjHandler:
         if spell.flags & SpellFlag.SPAWN_PLAYER:
             assert not self._important_ids.player_exists, "Player already exists."
             self._important_ids = self._important_ids.update_player_id(new_obj.obj_id)
-        return obj_id
+        return new_obj
 
+    def _game_obj_is_environment(self, game_obj: GameObj) -> bool:
+        return game_obj.obj_id == self._important_ids.environment_id

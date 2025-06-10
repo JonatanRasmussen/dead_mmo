@@ -1,13 +1,13 @@
 from typing import NamedTuple
-from src.handlers.id_gen import IdGen
+from src.config import Consts
 
 
 class ImportantIDs(NamedTuple):
-    setup_spell_id: int = IdGen.EMPTY_ID
-    environment_id: int = IdGen.EMPTY_ID
-    player_id: int = IdGen.EMPTY_ID
-    boss1_id: int = IdGen.EMPTY_ID
-    boss2_id: int = IdGen.EMPTY_ID
+    setup_spell_id: int = Consts.EMPTY_ID
+    environment_id: int = Consts.EMPTY_ID
+    player_id: int = Consts.EMPTY_ID
+    boss1_id: int = Consts.EMPTY_ID
+    boss2_id: int = Consts.EMPTY_ID
 
     @property
     def missing_target_id(self) -> int:
@@ -25,19 +25,19 @@ class ImportantIDs(NamedTuple):
 
     @property
     def setup_spell_exists(self) -> bool:
-        return IdGen.is_valid_id(self.setup_spell_id)
+        return Consts.is_valid_id(self.setup_spell_id)
     @property
     def environment_exists(self) -> bool:
-        return IdGen.is_valid_id(self.environment_id)
+        return Consts.is_valid_id(self.environment_id)
     @property
     def player_exists(self) -> bool:
-        return IdGen.is_valid_id(self.player_id)
+        return Consts.is_valid_id(self.player_id)
     @property
     def boss1_exists(self) -> bool:
-        return IdGen.is_valid_id(self.boss1_id)
+        return Consts.is_valid_id(self.boss1_id)
     @property
     def boss2_exists(self) -> bool:
-        return IdGen.is_valid_id(self.boss2_id)
+        return Consts.is_valid_id(self.boss2_id)
 
     def initialize_environment(self, setup_spell_id: int, environment_id: int) -> 'ImportantIDs':
         return self._replace(setup_spell_id=setup_spell_id, environment_id=environment_id)
@@ -50,3 +50,4 @@ class ImportantIDs(NamedTuple):
 
     def update_boss2_id(self, new_boss2_id: int) -> 'ImportantIDs':
         return self._replace(boss2_id=new_boss2_id)
+

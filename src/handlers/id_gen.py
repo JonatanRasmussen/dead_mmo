@@ -6,26 +6,20 @@ from src.config.consts import Consts
 
 class IdGen:
     """ ID generator that provides unique IDs from a set of assigned integers. """
-    EMPTY_ID = Consts.EMPTY_ID
-    EMPTY_TIMESTAMP = Consts.EMPTY_TIMESTAMP
-
     def __init__(self) -> None:
-        self._reserved_ids: Set[int] = set({IdGen.EMPTY_ID})
+        self._reserved_ids: Set[int] = set({Consts.EMPTY_ID})
         self._assigned_ids: Deque[int] = deque()
+        self._most_recent_id: int = Consts.EMPTY_ID
+
+    @property
+    def most_recent_id(self) -> int:
+        return self._most_recent_id
 
     @classmethod
     def create_preassigned_range(cls, id_start: int, id_stop: int) -> 'IdGen':
         id_gen = IdGen()
         id_gen.assign_id_range(id_start, id_stop)
         return id_gen
-
-    @staticmethod
-    def is_empty_id(id_num: int) -> bool:
-        return id_num == IdGen.EMPTY_ID
-
-    @staticmethod
-    def is_valid_id(id_num: int) -> bool:
-        return not IdGen.is_empty_id(id_num)
 
     def assign_id_range(self, id_start: int, id_stop: int) -> None:
         for id_num in range(id_start, id_stop):
@@ -35,8 +29,12 @@ class IdGen:
     def generate_new_id(self) -> int:
         if not self._assigned_ids:
             assert self._assigned_ids, "No more IDs available."
-            return IdGen.EMPTY_ID
-        return self._assigned_ids.popleft()
+            return Consts.EMPTY_ID
+        new_id = self._assigned_ids.popleft()
+        self._most_recent_id = new_id
+        assert new_id > Consts.MIN_ID, "ID is lower than Consts.MIN_ID."
+        assert new_id < Consts.MAX_ID, "ID is higher than Consts.MAX_ID."
+        return new_id
 
     def reserve_id(self, reserved_id: int) -> None:
         self._reserved_ids.add(reserved_id)

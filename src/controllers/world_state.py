@@ -1,10 +1,7 @@
 from typing import List, Tuple, ValuesView
 
-from src.models.event import UpcomingEvent, FinalizedEvent
-from src.handlers.aura_handler import AuraHandler, Aura, Spell
-from src.handlers.controls_handler import ControlsHandler, Controls, IdGen
-from src.handlers.game_obj_handler import GameObjHandler, GameObj, ImportantIDs
-from src.handlers.spell_database import SpellDatabase
+from src.models import Aura, Controls, GameObj, ImportantIDs, UpcomingEvent, FinalizedEvent, Spell
+from src.handlers import AuraHandler, ControlsHandler, GameObjHandler, SpellDatabase
 
 
 class WorldState:
@@ -29,6 +26,10 @@ class WorldState:
     def view_game_objs(self) -> ValuesView[GameObj]:
         return self._game_objs.view_game_objs
     @property
+    def most_recent_game_obj(self) -> GameObj:
+        return self._game_objs.most_recent_game_obj
+
+    @property
     def important_ids(self) -> ImportantIDs:
         return self._game_objs.important_ids
 
@@ -48,20 +49,21 @@ class WorldState:
     def advance_ingame_time(self, delta_time: float) -> None:
         self._ingame_time += delta_time
 
-    def add_player_controls(self, player_input: Controls) -> None:
-        self._controls.add_realtime_player_controls(self.important_ids.player_id, self._ingame_time, player_input)
+    def add_player_controls(self, player_input: Controls, timestamp: float) -> None:
+        if timestamp != 0.0:
+            self._controls.add_realtime_player_controls(self.important_ids.player_id, timestamp, player_input)
 
     def view_controls_for_current_frame(self, frame_start: float, frame_end: float) -> List[Tuple[float, int, Controls]]:
         assert frame_end == self._ingame_time
-        min_id, max_id = self._game_objs.get_min_max_obj_id
-        return self._controls.get_controls_in_timerange(frame_start, frame_end, min_id, max_id)
+        return self._controls.get_controls_in_timerange(frame_start, frame_end)
 
     def let_event_modify_world_state(self, f_event: FinalizedEvent) -> None:
         if not f_event.outcome_is_valid:
             return
         if f_event.spell.has_spawned_object:
-            new_obj_id = self._game_objs.handle_spawn(f_event.timestamp, f_event.target, f_event.spell)
-            self._controls.try_add_controls_for_newly_spawned_obj(new_obj_id, f_event.spell)
+            new_obj = self._game_objs.handle_spawn(f_event.timestamp, f_event.target, f_event.spell)
+            if new_obj is not None:
+                self._controls.add_controls_for_newly_spawned_obj(new_obj, f_event.spell)
         if f_event.spell.has_aura_apply or f_event.spell.has_aura_cancel:
             self._auras.handle_aura(f_event)
         self._game_objs.modify_game_obj(f_event.timestamp, f_event.source, f_event.spell, f_event.target)

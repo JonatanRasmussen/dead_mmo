@@ -2,7 +2,7 @@ import pygame
 import math
 from typing import ValuesView
 from src.models.game_obj import GameObj
-from src.config.color import Color
+from src.config import Colors
 from src.pygame.window_manager import WindowManager
 from src.pygame.sprite_manager import SpriteManager
 from src.pygame.animation_manager import AnimationManager
@@ -25,7 +25,7 @@ class Renderer:
 
     def _clear_screen(self) -> None:
         """Clear the screen with black"""
-        self.window_manager.screen.fill(Color.BLACK)
+        self.window_manager.screen.fill(Colors.BLACK)
 
     def _draw_borders(self) -> None:
         """Draw the game area borders"""
@@ -34,10 +34,10 @@ class Renderer:
         sides = int(self.window_manager.WINDOW_WIDTH * self.window_manager.BORDER_SIDES)
 
         # Draw border rectangles
-        pygame.draw.rect(self.window_manager.screen, Color.GREY, (0, 0, self.window_manager.WINDOW_WIDTH, top))
-        pygame.draw.rect(self.window_manager.screen, Color.GREY, (0, self.window_manager.WINDOW_HEIGHT - bot, self.window_manager.WINDOW_WIDTH, bot))
-        pygame.draw.rect(self.window_manager.screen, Color.GREY, (0, 0, sides, self.window_manager.WINDOW_HEIGHT))
-        pygame.draw.rect(self.window_manager.screen, Color.GREY, (self.window_manager.WINDOW_WIDTH - sides, 0, sides, self.window_manager.WINDOW_HEIGHT))
+        pygame.draw.rect(self.window_manager.screen, Colors.GREY, (0, 0, self.window_manager.WINDOW_WIDTH, top))
+        pygame.draw.rect(self.window_manager.screen, Colors.GREY, (0, self.window_manager.WINDOW_HEIGHT - bot, self.window_manager.WINDOW_WIDTH, bot))
+        pygame.draw.rect(self.window_manager.screen, Colors.GREY, (0, 0, sides, self.window_manager.WINDOW_HEIGHT))
+        pygame.draw.rect(self.window_manager.screen, Colors.GREY, (self.window_manager.WINDOW_WIDTH - sides, 0, sides, self.window_manager.WINDOW_HEIGHT))
 
     def _draw_game_objects(self, game_objs: ValuesView[GameObj], ingame_time: float) -> None:
         """Draw all visible game objects"""
@@ -107,5 +107,5 @@ class Renderer:
 
     def _draw_fps(self, fps: int) -> None:
         """Draw the FPS counter"""
-        fps_text = self.font.render(f"FPS: {fps}", True, Color.WHITE)
+        fps_text = self.font.render(f"FPS: {fps}", True, Colors.WHITE)
         self.window_manager.screen.blit(fps_text, (10, 10))

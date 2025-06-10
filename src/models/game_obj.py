@@ -1,10 +1,10 @@
-from typing import List, Tuple, NamedTuple
+from typing import List, Tuple, NamedTuple, Optional, Iterable
 from enum import Enum, auto
 import math
 
-from src.config.color import Color
-from src.handlers.id_gen import IdGen
+from src.config import Colors, Consts
 from src.models.controls import Controls
+from src.models.upcoming_event import UpcomingEvent
 
 
 class GameObjStatus(Enum):
@@ -36,20 +36,20 @@ class GameObjStatus(Enum):
 
 class GameObj(NamedTuple):
     """ Combat units. Controlled by the player or NPCs. """
-    obj_id: int = IdGen.EMPTY_ID
-    parent_id: int = IdGen.EMPTY_ID
-    spawned_from_spell: int = IdGen.EMPTY_ID
+    obj_id: int = Consts.EMPTY_ID
+    parent_id: int = Consts.EMPTY_ID
+    spawned_from_spell: int = Consts.EMPTY_ID
 
     # Appearance
-    color: Tuple[int, int, int] = Color.WHITE
+    color: Tuple[int, int, int] = Colors.WHITE
 
     # Status effects
     status: GameObjStatus = GameObjStatus.NONE
 
     # Targeting
     is_allied: bool = False
-    current_target: int = IdGen.EMPTY_ID
-    selected_spell: int = IdGen.EMPTY_ID
+    current_target: int = Consts.EMPTY_ID
+    selected_spell: int = Consts.EMPTY_ID
 
     # Combat stats
     hp: float = 0.0
@@ -64,29 +64,29 @@ class GameObj(NamedTuple):
     angle: float = 0.0
 
     # Ability movement slots
-    start_move_up_id: int = IdGen.EMPTY_ID
-    stop_move_up_id: int = IdGen.EMPTY_ID
-    start_move_left_id: int = IdGen.EMPTY_ID
-    stop_move_left_id: int = IdGen.EMPTY_ID
-    start_move_down_id: int = IdGen.EMPTY_ID
-    stop_move_down_id: int = IdGen.EMPTY_ID
-    start_move_right_id: int = IdGen.EMPTY_ID
-    stop_move_right_id: int = IdGen.EMPTY_ID
+    start_move_up_id: int = Consts.EMPTY_ID
+    stop_move_up_id: int = Consts.EMPTY_ID
+    start_move_left_id: int = Consts.EMPTY_ID
+    stop_move_left_id: int = Consts.EMPTY_ID
+    start_move_down_id: int = Consts.EMPTY_ID
+    stop_move_down_id: int = Consts.EMPTY_ID
+    start_move_right_id: int = Consts.EMPTY_ID
+    stop_move_right_id: int = Consts.EMPTY_ID
 
     # Ability spell slots
-    next_target_id: int = IdGen.EMPTY_ID
-    ability_1_id: int = IdGen.EMPTY_ID
-    ability_2_id: int = IdGen.EMPTY_ID
-    ability_3_id: int = IdGen.EMPTY_ID
-    ability_4_id: int = IdGen.EMPTY_ID
+    next_target_id: int = Consts.EMPTY_ID
+    ability_1_id: int = Consts.EMPTY_ID
+    ability_2_id: int = Consts.EMPTY_ID
+    ability_3_id: int = Consts.EMPTY_ID
+    ability_4_id: int = Consts.EMPTY_ID
 
     # Cooldown timestamps
-    spawn_timestamp: float = IdGen.EMPTY_TIMESTAMP
-    gcd_start: float = IdGen.EMPTY_TIMESTAMP
-    ability_1_cd_start: float = IdGen.EMPTY_TIMESTAMP
-    ability_2_cd_start: float = IdGen.EMPTY_TIMESTAMP
-    ability_3_cd_start: float = IdGen.EMPTY_TIMESTAMP
-    ability_4_cd_start: float = IdGen.EMPTY_TIMESTAMP
+    spawn_timestamp: float = Consts.EMPTY_TIMESTAMP
+    gcd_start: float = Consts.EMPTY_TIMESTAMP
+    ability_1_cd_start: float = Consts.EMPTY_TIMESTAMP
+    ability_2_cd_start: float = Consts.EMPTY_TIMESTAMP
+    ability_3_cd_start: float = Consts.EMPTY_TIMESTAMP
+    ability_4_cd_start: float = Consts.EMPTY_TIMESTAMP
 
     # Cosmetics
     sprite_name: str = ""
@@ -118,16 +118,22 @@ class GameObj(NamedTuple):
     def get_gcd_progress(self, current_time: float) -> float:
         return min(1.0, (current_time - self.gcd_start) / self.gcd)
 
+    def change_allied_status(self, new_allied_status) -> 'GameObj':
+        return self._replace(is_allied=new_allied_status)
+
     def change_status(self, new_status: GameObjStatus) -> 'GameObj':
         return self._replace(status=new_status)
 
     def teleport_to(self, new_x: float, new_y: float) -> 'GameObj':
         return self._replace(x=new_x, y=new_y)
 
+    def teleport_to_coordinates(self, new_x: float, new_y: float) -> 'GameObj':
+        return self._replace(x=new_x, y=new_y)
+
     def move_in_direction(self, x: float, y: float, move_speed: float) -> 'GameObj':
         new_x = self.x + x * move_speed
         new_y = self.y + y * move_speed
-        return self._replace(x=new_x, y=new_y)
+        return self.teleport_to_coordinates(new_x, new_y)
 
     def move_towards_coordinates(self, x: float, y: float, move_speed: float) -> 'GameObj':
         dx = x - self.x
@@ -180,10 +186,25 @@ class GameObj(NamedTuple):
         spell_ids += [self.stop_move_down_id] if controls.stop_move_down else []
         spell_ids += [self.start_move_right_id] if controls.start_move_right else []
         spell_ids += [self.stop_move_right_id] if controls.stop_move_right else []
-        spell_ids += [self.next_target_id] if controls.next_target else []
+        spell_ids += [self.next_target_id] if controls.swap_target else []
         spell_ids += [self.ability_1_id] if controls.ability_1 else []
         spell_ids += [self.ability_2_id] if controls.ability_2 else []
         spell_ids += [self.ability_3_id] if controls.ability_3 else []
         spell_ids += [self.ability_4_id] if controls.ability_4 else []
-        assert IdGen.EMPTY_ID not in spell_ids, f"Controls has empty spell cast: {self}{controls}"
+        assert Consts.EMPTY_ID not in spell_ids, "Controls is casting empty spell ID, fix spell configs."
         return spell_ids
+
+    def create_events_from_controls(self, controls: Controls) -> Iterable[UpcomingEvent]:
+        spell_ids = self.convert_controls_to_spell_ids(controls)
+        offset_timestamp = controls.timeline_timestamp + self.spawn_timestamp
+        input_event_order = 0
+        for spell_id in spell_ids:
+            input_event_order += 1
+            yield UpcomingEvent(
+                timestamp=offset_timestamp,
+                source_id=self.obj_id,
+                spell_id=spell_id,
+                target_id=self.current_target,
+                priority=input_event_order,
+            )
+

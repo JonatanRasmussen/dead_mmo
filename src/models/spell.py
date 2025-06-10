@@ -1,7 +1,8 @@
 from typing import List, Tuple, Optional, NamedTuple, ValuesView
 from enum import Enum, Flag, auto
+from src.config import Consts
 from src.models.important_ids import ImportantIDs
-from src.models.game_obj import GameObj, GameObjStatus, IdGen, Controls
+from src.models.game_obj import GameObj, GameObjStatus, Controls
 
 
 class SpellFlag(Flag):
@@ -12,6 +13,7 @@ class SpellFlag(Flag):
     STEP_DOWN = auto()
     STEP_RIGHT = auto()
     MOVE_TOWARDS_TARGET = auto()
+    TELEPORT_TO_TARGET = auto()
     SET_ABILITY_SLOT_1 = auto()
     SET_ABILITY_SLOT_2 = auto()
     SET_ABILITY_SLOT_3 = auto()
@@ -19,13 +21,13 @@ class SpellFlag(Flag):
     TRIGGER_GCD = auto()
     DAMAGING = auto()
     HEALING = auto()
+    AOE = auto()
+    TARGET_OF_TARGET = auto()
     DENY_IF_CASTING = auto()
-    TELEPORT = auto()
     IS_CHANNEL = auto()
-    WARP_TO_POSITION = auto()
     TRY_MOVE = auto()
     FORCE_MOVE = auto()
-    SET_TARGET = auto()
+    UPDATE_CURRENT_TARGET = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
     SPAWN_OBJ = auto()
@@ -48,7 +50,7 @@ class SpellFlag(Flag):
 
     def modify_source(self, timestamp: float, source_obj: GameObj, target_obj: GameObj) -> GameObj:
         src = source_obj
-        if self & SpellFlag.SET_TARGET:
+        if self & SpellFlag.UPDATE_CURRENT_TARGET:
             src = src.switch_target(target_obj.obj_id)
         if self & SpellFlag.TRIGGER_GCD:
             src = src.set_gcd_start(timestamp)
@@ -56,6 +58,8 @@ class SpellFlag(Flag):
             src = src.change_status(GameObjStatus.DESPAWNED)
         if self & SpellFlag.MOVE_TOWARDS_TARGET:
             src = src.move_towards_coordinates(target_obj.x, target_obj.y, src.movement_speed * 0.0005)
+        if self & SpellFlag.TELEPORT_TO_TARGET:
+            src = src.teleport_to_coordinates(target_obj.x, target_obj.y)
         return src
 
     def _handle_movement(self, target_obj: GameObj) -> GameObj:
@@ -87,54 +91,41 @@ class SpellFlag(Flag):
 class SpellTarget(Enum):
     """ Defines targeting behavior for spell """
     NONE = 0
-    SELF_CAST = auto()
-    TARGET_CAST = auto()
-    AURA_CAST = auto()
-    PARENT_CAST = auto()
-    TARGET_OF_PARENT_CAST = auto()
-    TARGET_OF_TARGET_CAST = auto()
-    TARGET_OF_AURA_CAST = auto()
-    FRIENDLY_CAST = auto()
-    HOSTILE_CAST = auto()
-    TARGET_ALL = auto()
-    TARGET_SWAP_TO_NEXT = auto()
+    SELF = auto()
+    PARENT = auto()
+    AURA_TARGET = auto()
+    CURRENT_TARGET = auto()
+    DEFAULT_FRIENDLY = auto()
+    DEFAULT_ENEMY = auto()
+    TAB_TO_NEXT = auto()
 
     @property
     def is_target_swap(self) -> bool:
-        return self in {SpellTarget.TARGET_SWAP_TO_NEXT}
-
-    @property
-    def is_targeting_another_objs_target(self) -> bool:
-        return self in {
-            SpellTarget.TARGET_OF_PARENT_CAST,
-            SpellTarget.TARGET_OF_TARGET_CAST,
-            SpellTarget.TARGET_OF_AURA_CAST
-        }
+        return self in {SpellTarget.TAB_TO_NEXT}
 
     def select_target(self, source: GameObj, aura_target: int, important_ids: ImportantIDs) -> int:
-        obj_target = source.current_target
         assert self not in {SpellTarget.NONE}, f"obj {source.obj_id} is casting a spell with targeting=NONE"
-        if self in {SpellTarget.SELF_CAST}:
+        if self in {SpellTarget.SELF}:
             return source.obj_id
-        if self in {SpellTarget.TARGET_CAST, SpellTarget.TARGET_OF_TARGET_CAST} and IdGen.is_valid_id(obj_target):
-            return obj_target
-        if self in {SpellTarget.AURA_CAST, SpellTarget.TARGET_OF_AURA_CAST} and IdGen.is_valid_id(aura_target):
+        if self in {SpellTarget.AURA_TARGET} and Consts.is_valid_id(aura_target):
             return aura_target
-        if self in {SpellTarget.PARENT_CAST, SpellTarget.TARGET_OF_PARENT_CAST} and IdGen.is_valid_id(source.parent_id):
+        if self in {SpellTarget.CURRENT_TARGET} and Consts.is_valid_id(aura_target):
+            return source.current_target
+        if self in {SpellTarget.PARENT} and Consts.is_valid_id(source.parent_id):
             return source.parent_id
-        if self in {SpellTarget.HOSTILE_CAST}:
+        if self in {SpellTarget.DEFAULT_ENEMY}:
             if source.is_allied:
                 return important_ids.boss1_id
             return important_ids.player_id
-        if self in {SpellTarget.FRIENDLY_CAST}:
+        if self in {SpellTarget.DEFAULT_FRIENDLY}:
             return source.obj_id
         if self.is_target_swap:
-            if self in {SpellTarget.TARGET_SWAP_TO_NEXT}:
+            if self in {SpellTarget.TAB_TO_NEXT}:
                 if not source.is_allied:
                     return important_ids.player_id
                 elif source.current_target == important_ids.boss1_id and important_ids.boss2_exists:
                     return important_ids.boss2_id
-                elif IdGen.is_valid_id(important_ids.boss1_id):
+                elif Consts.is_valid_id(important_ids.boss1_id):
                     return important_ids.boss1_id
                 else:
                     # Not implemented. For now, let's assume boss1 always exist.
@@ -149,8 +140,8 @@ class SpellTarget(Enum):
 
 class Spell(NamedTuple):
     """ An action that can be performed by a game object. """
-    spell_id: int = IdGen.EMPTY_ID
-    alias_id: int = IdGen.EMPTY_ID
+    spell_id: int = Consts.EMPTY_ID
+    alias_id: int = Consts.EMPTY_ID
 
     power: float = 1.0
     variance: float = 0.0
@@ -166,7 +157,7 @@ class Spell(NamedTuple):
     flags: SpellFlag = SpellFlag.NONE
     targeting: SpellTarget = SpellTarget.NONE
 
-    external_spell: int = IdGen.EMPTY_ID
+    external_spell: int = Consts.EMPTY_ID
     spell_sequence: Optional[Tuple[int, ...]] = None
     spawned_obj: Optional['GameObj'] = None
     obj_controls: Optional[Tuple[Controls, ...]] = None
@@ -212,10 +203,19 @@ class Spell(NamedTuple):
 
     @property
     def has_cascading_events(self) -> bool:
-        return self.is_area_of_effect or self.has_aura_apply or self.spell_sequence is not None
+        return (
+            self.is_area_of_effect or
+            self.has_aura_apply or
+            self.has_spawned_object or
+            self.spell_sequence is not None
+        )
 
     #Targeting
 
     @property
+    def is_target_of_target(self) -> bool:
+        return SpellFlag.TARGET_OF_TARGET in self.flags
+
+    @property
     def is_area_of_effect(self) -> bool:
-        return self.targeting in {SpellTarget.TARGET_ALL}
+        return SpellFlag.AOE in self.flags

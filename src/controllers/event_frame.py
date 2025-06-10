@@ -1,9 +1,6 @@
-from src.models.aura import Aura
-from src.models.spell import SpellTarget
-from src.models.event import EventOutcome, UpcomingEvent, FinalizedEvent
-from src.handlers.event_heap import EventHeap
-from src.handlers.id_gen import IdGen
-from src.handlers.event_log import EventLog
+from src.config import Consts
+from src.models import Aura, SpellTarget, EventOutcome, UpcomingEvent, FinalizedEvent
+from src.handlers import EventHeap, IdGen, EventLog
 from src.controllers.world_state import WorldState
 
 
@@ -35,9 +32,9 @@ class EventFrame:
 
     def _insert_frame_events_into_heap(self) -> None:
         # Add setup event if state is not initialized
-        if IdGen.is_empty_id(self._state.important_ids.player_id):
+        if Consts.is_empty_id(self._state.important_ids.player_id):
             setup_event = UpcomingEvent(
-                event_id=self._generate_new_event_id(),
+                priority=self._generate_new_event_id(),
                 timestamp=0.0,
                 spell_id=self._state.important_ids.setup_spell_id,
             )
@@ -50,11 +47,8 @@ class EventFrame:
         self._insert_controls_events_into_heap()
 
     def _insert_periodic_events_into_heap(self, aura: Aura) -> None:
-        tick_timestamps = aura.get_timestamps_for_ticks_this_frame(self._frame_start, self._frame_end)
-        for timestamp in tick_timestamps:
-            event_id=self._generate_new_event_id()
-            aura_tick = UpcomingEvent.create_from_aura_tick(event_id, timestamp, aura)
-            self._event_heap.insert_event(aura_tick)
+        for aura_tick_event in aura.create_aura_tick_events(self._frame_start, self._frame_end):
+            self._event_heap.insert_event(aura_tick_event)
 
     def _insert_controls_events_into_heap(self) -> None:
         controls_this_frame = self._state.view_controls_for_current_frame(self._frame_start, self._frame_end)
@@ -62,30 +56,30 @@ class EventFrame:
             if timestamp == self._frame_start and timestamp > 0.0:
                 continue  # Prevent double processing of controls
             source_obj = self._state.get_game_obj(obj_id)
-            spell_ids = source_obj.convert_controls_to_spell_ids(controls)
-            for spell_id in spell_ids:
-                controls_event = UpcomingEvent(
-                    event_id=self._generate_new_event_id(),
-                    timestamp=timestamp,
-                    source_id=source_obj.obj_id,
-                    spell_id=spell_id,
-                )
-                self._event_heap.insert_event(controls_event)
+            for obj_controls_event in source_obj.create_events_from_controls(controls):
+                self._event_heap.insert_event(obj_controls_event)
 
     def _insert_cascading_events_into_heap(self, f_event: FinalizedEvent) -> None:
+        # If the event's spell spawned an obj, add any new controls happening this frame
+        if f_event.spell.has_spawned_object and f_event.spell.obj_controls is not None:
+            spawned_obj = self._state.most_recent_game_obj
+            for not_yet_offset_controls in f_event.spell.obj_controls:
+                controls = not_yet_offset_controls.increase_offset(spawned_obj.spawn_timestamp)
+                if controls.ingame_timestamp > self._frame_start and controls.ingame_timestamp <= self._frame_end:
+                    for obj_controls_event in spawned_obj.create_events_from_controls(controls):
+                        self._event_heap.insert_event(obj_controls_event)
+
         # If the event's spell is area-of-effect, add new events for each target
         if f_event.spell.is_area_of_effect:
             target_ids = SpellTarget.handle_aoe(f_event.source, f_event.target, self._state.view_game_objs)
             for target_id in target_ids:
-                new_event_id = self._generate_new_event_id()
-                new_event = f_event.upcoming_event.also_target(new_event_id, f_event.spell_id, target_id)
+                new_event = f_event.upcoming_event.also_target(f_event.spell_id, target_id)
                 self._event_heap.insert_event(new_event)
 
         # If the event's spell cascades into new spells, add those as new events
         if f_event.spell.spell_sequence is not None:
             for next_spell in f_event.spell.spell_sequence:
-                new_event_id = self._generate_new_event_id()
-                sequence_event = f_event.upcoming_event.continue_spell_sequence(new_event_id, next_spell)
+                sequence_event = f_event.upcoming_event.continue_spell_sequence(next_spell)
                 self._event_heap.insert_event(sequence_event)
 
         # If an aura was just created, see if it has any ticks happening this frame
@@ -96,7 +90,9 @@ class EventFrame:
     def _finalize_event(self, event: UpcomingEvent) -> FinalizedEvent:
         # Convert source_id/spell_id/target_id to actual object references
         # Finalize the event's source_obj
-        if IdGen.is_valid_id(event.source_id):
+        assert (event.timestamp > self._frame_start or event.timestamp == 0.0), f"frame starts at {self._frame_start} but event has timestamp {event.timestamp}."
+        assert event.timestamp <= self._frame_end, f"frame ends at {self._frame_end}, but event has timestamp {event.timestamp}."
+        if Consts.is_valid_id(event.source_id):
             source_id = event.source_id
         else:
             source_id = self._state.important_ids.environment_id
@@ -110,9 +106,9 @@ class EventFrame:
         if target_id == source_obj.obj_id:
             target_obj = source_obj
         else:
-            if spell.targeting.is_targeting_another_objs_target and IdGen.is_valid_id(target_id):
+            if spell.is_target_of_target and Consts.is_valid_id(target_id):
                 obj_with_target_to_copy = self._state.get_game_obj(target_id)
-                if IdGen.is_valid_id(obj_with_target_to_copy.current_target):
+                if Consts.is_valid_id(obj_with_target_to_copy.current_target):
                     target_id = obj_with_target_to_copy.current_target
                 else:
                     target_id = self._state.important_ids.missing_target_id
@@ -125,6 +121,7 @@ class EventFrame:
         else:
             outcome = EventOutcome.decide_outcome(event.timestamp, source_obj, spell, target_obj)
         finalized_event = FinalizedEvent(
+            event_id=self._generate_new_event_id(),
             source=source_obj,
             spell=spell,
             target=target_obj,

@@ -1,7 +1,7 @@
 from typing import Tuple
 
 
-class Color:
+class Colors:
     """ Color configurations for drawing game objects. """
     BLACK: Tuple[int, int, int] = (0, 0, 0)
     WHITE: Tuple[int, int, int] = (255, 255, 255)

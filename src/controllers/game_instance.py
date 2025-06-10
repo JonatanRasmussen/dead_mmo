@@ -1,11 +1,9 @@
 from typing import List, ValuesView
 
-from src.models.controls import Controls
-from src.models.event import FinalizedEvent
-from src.models.game_obj import GameObj
+from src.models import Controls, FinalizedEvent, GameObj
+from src.handlers import EventLog
 from src.controllers.world_state import WorldState
 from src.controllers.event_frame import EventFrame
-from src.handlers.event_log import EventLog
 
 
 class GameInstance:
@@ -38,7 +36,8 @@ class GameInstance:
         frame_start = self.ingame_time
         self._state.advance_ingame_time(delta_time)
         frame_end = self.ingame_time
-        self._state.add_player_controls(player_input)
+        frame_middle = frame_start + (frame_end - frame_start) / 2
+        self._state.add_player_controls(player_input, frame_middle)
         event_log = EventFrame.update_state(frame_start, frame_end, self._state)
         self._event_frame_logs.append(event_log)
 

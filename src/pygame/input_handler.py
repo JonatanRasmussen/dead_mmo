@@ -42,7 +42,7 @@ class InputHandler:
         elif event.key == pygame.K_d:
             return controls._replace(start_move_right=True)
         elif event.key == pygame.K_TAB:
-            return controls._replace(next_target=True)
+            return controls._replace(swap_target=True)
         elif event.key == pygame.K_1:
             return controls._replace(ability_1=True)
         elif event.key == pygame.K_2:

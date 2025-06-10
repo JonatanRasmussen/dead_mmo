@@ -1,24 +1,19 @@
-from typing import Tuple, NamedTuple
+from typing import Tuple, NamedTuple, Iterable
 import math
 
-from src.models.spell import Spell, IdGen
+from src.config import Consts
+from src.models.upcoming_event import UpcomingEvent
 
 class Aura(NamedTuple):
     """ The effect of a previously cast spell that periodically ticks over a time span. """
-    aura_id: int = IdGen.EMPTY_ID
-    source_id: int = IdGen.EMPTY_ID
-    origin_spell_id: int = IdGen.EMPTY_ID
-    periodic_spell_id: int = IdGen.EMPTY_ID
-    target_id: int = IdGen.EMPTY_ID
+    aura_id: int = Consts.EMPTY_ID
+    source_id: int = Consts.EMPTY_ID
+    origin_spell_id: int = Consts.EMPTY_ID
+    periodic_spell_id: int = Consts.EMPTY_ID
+    target_id: int = Consts.EMPTY_ID
     start_time: float = 0.0
     duration: float = 0.0
     ticks: int = 1
-    is_debuff: bool = False
-    is_hidden: bool = False
-
-    @property
-    def aura_key(self) -> Tuple[int, int, int]:
-        return Aura.create_aura_key(self.source_id, self.origin_spell_id, self.target_id)
 
     @property
     def tick_interval(self) -> float:
@@ -30,9 +25,24 @@ class Aura(NamedTuple):
     def end_time(self) -> float:
         return self.start_time + self.duration
 
-    @staticmethod
-    def create_aura_key(source_id: int, spell_id: int, target_id: int) -> Tuple[int, int, int]:
-        return (source_id, spell_id, target_id)
+    @property
+    def get_key_for_aura(self) -> Tuple[int, int, int]:
+        return (self.source_id, self.origin_spell_id, self.target_id)
+
+    def create_aura_tick_events(self, frame_start: float, frame_end: float) -> Iterable[UpcomingEvent]:
+        tick_timestamps = self.get_timestamps_for_ticks_this_frame(frame_start, frame_end)
+        tick_event_order = 0
+        for tick_timestamp in tick_timestamps:
+            tick_event_order += 1
+            yield UpcomingEvent(
+                timestamp=tick_timestamp,
+                source_id=self.source_id,
+                spell_id=self.periodic_spell_id,
+                target_id=self.target_id,
+                priority=tick_event_order,
+                aura_origin_spell_id=self.origin_spell_id,
+                aura_id=self.aura_id,
+            )
 
     def is_expired(self, current_time: float) -> bool:
         return current_time > self.end_time

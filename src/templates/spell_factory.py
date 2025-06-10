@@ -25,34 +25,51 @@ class SpellFactory:
         self.spell = self.spell._replace(flags=self.spell.flags & ~removed_flag)
         return self
 
+    def set_audio(self, audio_file_name: str) -> 'SpellFactory':
+        assert (self.spell.audio_name is not None), f"Spell audio is already set to {self.spell.audio_name}."
+        self.spell = self.spell._replace(audio_name=audio_file_name)
+        return self
+
     def set_targeting(self, targeting: SpellTarget) -> 'SpellFactory':
         assert (self.spell.targeting == SpellTarget.NONE), f"Targeting is already set to {targeting}."
         self.spell = self.spell._replace(targeting=targeting)
         return self
 
-    def self_cast(self) -> 'SpellFactory':
-        return self.set_targeting(SpellTarget.SELF_CAST)
+    def cast_on_self(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.SELF)
 
-    def target_cast(self) -> 'SpellFactory':
-        return self.set_targeting(SpellTarget.TARGET_CAST)
+    def cast_on_parent(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.PARENT)
 
-    def aura_cast(self) -> 'SpellFactory':
-        return self.set_targeting(SpellTarget.AURA_CAST)
+    def cast_on_aura_target(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.AURA_TARGET)
 
-    def hostile_cast(self) -> 'SpellFactory':
-        return self.set_targeting(SpellTarget.HOSTILE_CAST)
+    def cast_on_current_target(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.CURRENT_TARGET)
 
-    def friendly_cast(self) -> 'SpellFactory':
-        return self.set_targeting(SpellTarget.FRIENDLY_CAST)
+    def cast_on_default_friendly(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.DEFAULT_FRIENDLY)
 
-    def target_swap(self) -> 'SpellFactory':
-        return self.add_flag(SpellFlag.SET_TARGET).set_targeting(SpellTarget.TARGET_SWAP_TO_NEXT)
+    def cast_on_default_enemy(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.DEFAULT_ENEMY)
+
+    def cast_on_next_tab_target(self) -> 'SpellFactory':
+        return self.set_targeting(SpellTarget.TAB_TO_NEXT)
+
+    def update_current_target(self) -> 'SpellFactory':
+        return self.add_flag(SpellFlag.UPDATE_CURRENT_TARGET)
+
+    def cast_on_target_of_target(self) -> 'SpellFactory':
+        return self.add_flag(SpellFlag.TARGET_OF_TARGET)
 
     def use_gcd(self) -> 'SpellFactory':
         return self.add_flag(SpellFlag.TRIGGER_GCD)
 
     def despawn_self(self) -> 'SpellFactory':
         return self.add_flag(SpellFlag.DESPAWN_SELF)
+
+    def teleport_to_parent(self) -> 'SpellFactory':
+        return self.add_flag(SpellFlag.TELEPORT_TO_TARGET).cast_on_parent()
 
     def set_spell_sequence(self, sequence: Tuple[int, ...]) -> 'SpellFactory':
         self.spell = self.spell._replace(spell_sequence=sequence)
@@ -70,20 +87,18 @@ class SpellFactory:
         self.spell = self.spell._replace(obj_controls=controls)
         return self
 
-    def spawn_enemy_obj(self, game_obj: GameObj) -> 'SpellFactory':
+    def spawn_obj(self, game_obj: GameObj) -> 'SpellFactory':
         obj_to_spawn = game_obj._replace(spawned_from_spell=self.spell.spell_id)
         self.spell = self.spell._replace(spawned_obj=obj_to_spawn)
-        return self.self_cast().add_flag(SpellFlag.SPAWN_OBJ)
-
-    def spawn_friendly_obj(self, game_obj: GameObj) -> 'SpellFactory':
-        obj_to_spawn = game_obj._replace(is_allied=True)
-        return self.spawn_enemy_obj(obj_to_spawn)
+        return self.cast_on_self().add_flag(SpellFlag.SPAWN_OBJ)
 
     def spawn_boss(self, game_obj: GameObj) -> 'SpellFactory':
-        return self.add_flag(SpellFlag.SPAWN_BOSS).spawn_enemy_obj(game_obj)
+        obj_to_spawn = game_obj._replace(is_allied=False)
+        return self.add_flag(SpellFlag.SPAWN_BOSS).spawn_obj(obj_to_spawn)
 
     def spawn_player(self, game_obj: GameObj) -> 'SpellFactory':
-        return self.add_flag(SpellFlag.SPAWN_PLAYER).spawn_friendly_obj(game_obj)
+        obj_to_spawn = game_obj._replace(is_allied=True)
+        return self.add_flag(SpellFlag.SPAWN_PLAYER).spawn_obj(obj_to_spawn)
 
     def inflict_damage(self, spell_power: float) -> 'SpellFactory':
         assert not (self.spell.flags & SpellFlag.HEALING), f"{self.spell.spell_id} with HEALING flag cannot be set to apply damage."
@@ -109,7 +124,7 @@ class SpellTemplates:
     def step_move_self(spell_id: int, direction: SpellFlag) -> SpellFactory:
         return (
             SpellFactory(spell_id)
-            .self_cast()
+            .cast_on_self()
             .add_flag(direction)
             .add_flag(SpellFlag.DENY_IF_CASTING)
         )
@@ -118,7 +133,7 @@ class SpellTemplates:
     def apply_aura_to_self(spell_id: int, periodic_spell_id: int, duration: float, ticks: int) -> SpellFactory:
         return (
             SpellFactory(spell_id)
-            .self_cast()
+            .cast_on_self()
             .apply_aura(periodic_spell_id, duration, ticks)
         )
 
@@ -130,7 +145,7 @@ class SpellTemplates:
     def cancel_aura_on_self(spell_id: int, aura_spell_id: int) -> SpellFactory:
         return (
             SpellFactory(spell_id)
-            .self_cast()
+            .cast_on_self()
             .cancel_aura(aura_spell_id)
         )
 
@@ -138,7 +153,7 @@ class SpellTemplates:
     def damage_current_target(spell_id: int, power: float) -> SpellFactory:
         return (
             SpellFactory(spell_id)
-            .target_cast()
+            .cast_on_current_target()
             .inflict_damage(power)
         )
 
@@ -146,7 +161,16 @@ class SpellTemplates:
     def damage_enemies_within_range(spell_id: int, power: float, radius: float) -> 'SpellFactory':
         return (
             SpellFactory(spell_id)
-            .hostile_cast()
+            .cast_on_default_enemy()
+            .inflict_damage(power)
+            .set_range_limit(radius)
+        )
+
+    @staticmethod
+    def damage_current_target_when_within_range(spell_id: int, power: float, radius: float) -> 'SpellFactory':
+        return (
+            SpellFactory(spell_id)
+            .cast_on_current_target()
             .inflict_damage(power)
             .set_range_limit(radius)
         )
