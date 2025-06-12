@@ -30,28 +30,24 @@ class Aura(NamedTuple):
         return (self.source_id, self.origin_spell_id, self.target_id)
 
     def create_aura_tick_events(self, frame_start: float, frame_end: float) -> Iterable[UpcomingEvent]:
-        tick_timestamps = self.get_timestamps_for_ticks_this_frame(frame_start, frame_end)
+        """ Return an event for each tick happening this frame, excluding frame_start, including frame_end """
+        tick_timestamps = self._get_timestamps_for_ticks()
         tick_event_order = 0
         for tick_timestamp in tick_timestamps:
-            tick_event_order += 1
-            yield UpcomingEvent(
-                timestamp=tick_timestamp,
-                source_id=self.source_id,
-                spell_id=self.periodic_spell_id,
-                target_id=self.target_id,
-                priority=tick_event_order,
-                aura_origin_spell_id=self.origin_spell_id,
-                aura_id=self.aura_id,
-            )
+            if frame_start < tick_timestamp <= frame_end:
+                tick_event_order += 1
+                yield UpcomingEvent(
+                    timestamp=tick_timestamp,
+                    source_id=self.source_id,
+                    spell_id=self.periodic_spell_id,
+                    target_id=self.target_id,
+                    priority=tick_event_order,
+                    aura_origin_spell_id=self.origin_spell_id,
+                    aura_id=self.aura_id,
+                )
 
     def is_expired(self, current_time: float) -> bool:
         return current_time > self.end_time
-
-    def get_timestamps_for_ticks_this_frame(self, frame_start: float, frame_end: float) -> Tuple[float, ...]:
-        """ Get timestamp for ticks happening this frame, excluding frame_start, including frame_end """
-        start_ticks = self._ticks_elapsed(max(frame_start, self.start_time))
-        end_ticks = self._ticks_elapsed(min(frame_end, self.end_time))
-        return tuple(self.start_time + (tick_number * self.tick_interval) for tick_number in range(start_ticks + 1, end_ticks + 1))
 
     def _ticks_elapsed(self, current_time: float) -> int:
         return max(0, math.floor((current_time - self.start_time) / self.tick_interval))
@@ -63,3 +59,10 @@ class Aura(NamedTuple):
         if self._ticks_remaining(current_time) == 0:
             return float('inf')
         return self.start_time + ((self._ticks_elapsed(current_time) + 1) * self.tick_interval)
+
+    def _get_timestamps_for_ticks(self) -> Iterable[float]:
+        """Return timestamps for all ticks occuring during the aura's lifetime. """
+        if self.tick_interval == float('inf') or self.ticks <= 0:
+            return
+        for i in range(1, self.ticks + 1):
+            yield self.start_time + i * self.tick_interval

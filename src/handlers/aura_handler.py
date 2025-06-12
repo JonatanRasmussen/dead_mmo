@@ -1,6 +1,7 @@
 from sortedcontainers import SortedDict  # type: ignore
-from typing import Dict, List, Tuple, ValuesView
+from typing import Dict, List, Tuple, Iterable, ValuesView
 
+from src.config import Consts
 from src.models import Aura, UpcomingEvent, FinalizedEvent
 from src.handlers.id_gen import IdGen
 from src.handlers.event_log import EventLog
@@ -28,8 +29,10 @@ class AuraHandler:
         assert key in self._auras, f"Aura with ID {key} does not exist."
         return self._auras.get(key, Aura())
 
-    def get_obj_auras(self, obj_id: int) -> List[Aura]:
-        return [aura for aura in self._auras.values() if aura.target_id == obj_id]
+    def get_obj_auras(self, obj_id: int) -> Iterable[Aura]:
+        start_key = self.create_aura_key(obj_id, Consts.MIN_ID, Consts.MIN_ID)
+        end_key = self.create_aura_key(obj_id, Consts.MAX_ID, Consts.MAX_ID)
+        yield from (self._auras[key] for key in self._auras.irange(start_key, end_key))
 
     def handle_aura(self, f_event: FinalizedEvent) -> None:
         if f_event.spell.has_aura_cancel:

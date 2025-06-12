@@ -1,8 +1,10 @@
 from typing import Any, List, Dict, Type
 
 from src.models.spell import Spell
-from src.templates.spell_factory import SpellFactory
-from src.templates.spec_00 import Spec00
+from src.handlers.spell_factory import SpellFactory
+from src.templates import BasicMovement, BasicTargeting, BasicSpawning
+from src.templates import NpcBoss, NpcHealingPowerup, NpcLandmine, NpcTargetDummy
+from src.templates import SpecWarlock, ZoneTestGround
 
 class SpellDatabase:
     def __init__(self) -> None:
@@ -11,7 +13,15 @@ class SpellDatabase:
     @staticmethod
     def load_spells_into_memory() -> Dict[int, Spell]:
         spells_to_load: List[SpellFactory] = []
-        spells_to_load += SpellDatabase._load_collection(Spec00)
+        spells_to_load += SpellDatabase._load_collection(BasicMovement)
+        spells_to_load += SpellDatabase._load_collection(BasicTargeting)
+        spells_to_load += SpellDatabase._load_collection(BasicSpawning)
+        spells_to_load += SpellDatabase._load_collection(NpcBoss)
+        spells_to_load += SpellDatabase._load_collection(NpcHealingPowerup)
+        spells_to_load += SpellDatabase._load_collection(NpcLandmine)
+        spells_to_load += SpellDatabase._load_collection(NpcTargetDummy)
+        spells_to_load += SpellDatabase._load_collection(SpecWarlock)
+        spells_to_load += SpellDatabase._load_collection(ZoneTestGround)
         spells_loaded_into_memory: Dict[int, Spell] = {}
         for spell_factory in spells_to_load:
             spell = spell_factory.build()

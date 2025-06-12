@@ -21,7 +21,7 @@ def test_get_timestamps_for_ticks_this_frame():
     )
 
     # Frame from 2.5 to 5.5 should contain ticks at 3.0, 4.0, 5.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(2.5, 5.5)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(2.5, 5.5)
     expected = (3.0, 4.0, 5.0)
     assert timestamps == expected, f"Expected {expected}, got {timestamps}"
 
@@ -35,7 +35,7 @@ def test_frame_starts_exactly_at_tick():
     )
 
     # Frame from 2.0 to 4.5 should include tick at 2.0 (frame start) and ticks at 3.0, 4.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(2.0, 4.5)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(2.0, 4.5)
     expected = (3.0, 4.0)
     assert timestamps == expected
 
@@ -49,7 +49,7 @@ def test_frame_ends_exactly_at_tick():
     )
 
     # Frame from 1.5 to 3.0 should include tick at 2.0 but exclude tick at 3.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(1.5, 3.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(1.5, 3.0)
     expected = (2.0, 3.0)
     assert timestamps == expected
 
@@ -63,7 +63,7 @@ def test_frame_with_no_ticks():
     )
 
     # Frame from 2.5 to 3.5 contains no ticks
-    timestamps = aura.get_timestamps_for_ticks_this_frame(2.5, 3.5)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(2.5, 3.5)
     expected = ()
     assert timestamps == expected
 
@@ -77,7 +77,7 @@ def test_frame_before_aura_starts():
     )
 
     # Frame from 1.0 to 3.0 is before aura starts
-    timestamps = aura.get_timestamps_for_ticks_this_frame(1.0, 3.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(1.0, 3.0)
     expected = ()
     assert timestamps == expected
 
@@ -91,7 +91,7 @@ def test_frame_after_aura_ends():
     )
 
     # Frame from 7.0 to 9.0 is after aura ends
-    timestamps = aura.get_timestamps_for_ticks_this_frame(7.0, 9.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(7.0, 9.0)
     expected = ()
     assert timestamps == expected
 
@@ -105,7 +105,7 @@ def test_frame_overlaps_aura_start():
     )
 
     # Frame from 1.0 to 5.0 should contain ticks at 4.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(3.0, 7.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(3.0, 7.0)
     expected = (6.0,)
     assert timestamps == expected
 
@@ -119,7 +119,7 @@ def test_frame_overlaps_aura_end():
     )
 
     # Frame from 3.5 to 7.0 should contain ticks at 4.0, 5.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(3.5, 7.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(3.5, 7.0)
     expected = (4.0, 5.0)
     assert timestamps == expected
 
@@ -133,7 +133,7 @@ def test_single_tick_aura():
     )
 
     # Frame that contains the single tick
-    timestamps = aura.get_timestamps_for_ticks_this_frame(0.5, 5.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(0.5, 5.0)
     expected = (4.0,)  # tick occurs at start_time + duration
     assert timestamps == expected
 
@@ -147,7 +147,7 @@ def test_very_short_frame():
     )
 
     # Very short frame from 2.9 to 3.1 should contain tick at 3.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(2.99, 3.01)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(2.99, 3.01)
     expected = (3.0,)
     assert timestamps == expected
 
@@ -160,7 +160,7 @@ def test_zero_ticks():
         ticks=0
     )
 
-    timestamps = aura.get_timestamps_for_ticks_this_frame(1.0, 4.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(1.0, 4.0)
     expected = ()
     assert timestamps == expected
 
@@ -173,7 +173,7 @@ def test_zero_duration():
         ticks=5
     )
 
-    timestamps = aura.get_timestamps_for_ticks_this_frame(1.0, 4.0)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(1.0, 4.0)
     expected = ()
     assert timestamps == expected
 
@@ -187,7 +187,7 @@ def test_fractional_tick_intervals():
     )
 
     # Frame from 0.75 to 2.25 should contain ticks at 1.0, 1.5, 2.0
-    timestamps = aura.get_timestamps_for_ticks_this_frame(0.75, 2.25)
+    timestamps = aura._get_timestamps_for_ticks_this_frame(0.75, 2.25)
     expected = (1.0, 1.5, 2.0)
     assert timestamps == expected
 

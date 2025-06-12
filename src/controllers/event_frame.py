@@ -1,5 +1,5 @@
 from src.config import Consts
-from src.models import Aura, SpellTarget, EventOutcome, UpcomingEvent, FinalizedEvent
+from src.models import Aura, Controls, GameObj, SpellTarget, EventOutcome, UpcomingEvent, FinalizedEvent
 from src.handlers import EventHeap, IdGen, EventLog
 from src.controllers.world_state import WorldState
 
@@ -29,6 +29,7 @@ class EventFrame:
                 self._state.let_event_modify_world_state(finalized_event)
                 if finalized_event.spell.has_cascading_events:
                     self._insert_cascading_events_into_heap(finalized_event)
+        self._state.remove_all_expired_auras(self._frame_end)
 
     def _insert_frame_events_into_heap(self) -> None:
         # Add setup event if state is not initialized
@@ -39,24 +40,33 @@ class EventFrame:
                 spell_id=self._state.important_ids.setup_spell_id,
             )
             self._event_heap.insert_event(setup_event)
-        # Add events from periodic auras ticking this frame
+
+        # Add events from auras (periodic spell effects) ticking this frame
+        cached_source: GameObj = GameObj()
         for aura in self._state.view_auras:
-            if not aura.is_expired(self._frame_start):
+            if aura.source_id != cached_source.obj_id:
+                # Because view_auras is a SortedDict, auras from the same source is in sequence
+                assert aura.source_id > cached_source.obj_id
+                cached_source = self._state.get_game_obj(aura.source_id)
+            if not cached_source.is_despawned:
                 self._insert_periodic_events_into_heap(aura)
-        # Add events from controls (game inputs) happening this frame
-        self._insert_controls_events_into_heap()
+
+        # Add events from controls (i.e. game inputs) happening this frame
+        controls_this_frame = self._state.view_controls_for_current_frame(self._frame_start, self._frame_end)
+        for _, obj_id, controls in controls_this_frame:
+            game_obj = self._state.get_game_obj(obj_id)
+            if not game_obj.is_despawned:
+                self._insert_controls_events_into_heap(game_obj, controls)
 
     def _insert_periodic_events_into_heap(self, aura: Aura) -> None:
-        for aura_tick_event in aura.create_aura_tick_events(self._frame_start, self._frame_end):
-            self._event_heap.insert_event(aura_tick_event)
+        if not aura.is_expired(self._frame_start):
+            for aura_tick_event in aura.create_aura_tick_events(self._frame_start, self._frame_end):
+                assert aura_tick_event.timestamp != self._frame_start, "OOPSIE"
+                self._event_heap.insert_event(aura_tick_event)
 
-    def _insert_controls_events_into_heap(self) -> None:
-        controls_this_frame = self._state.view_controls_for_current_frame(self._frame_start, self._frame_end)
-        for timestamp, obj_id, controls in controls_this_frame:
-            if timestamp == self._frame_start and timestamp > 0.0:
-                continue  # Prevent double processing of controls
-            source_obj = self._state.get_game_obj(obj_id)
-            for obj_controls_event in source_obj.create_events_from_controls(controls):
+    def _insert_controls_events_into_heap(self, game_obj: GameObj, controls: Controls) -> None:
+        if self._frame_start < controls.ingame_timestamp <= self._frame_end:
+            for obj_controls_event in game_obj.create_events_from_controls(controls):
                 self._event_heap.insert_event(obj_controls_event)
 
     def _insert_cascading_events_into_heap(self, f_event: FinalizedEvent) -> None:
@@ -65,9 +75,7 @@ class EventFrame:
             spawned_obj = self._state.most_recent_game_obj
             for not_yet_offset_controls in f_event.spell.obj_controls:
                 controls = not_yet_offset_controls.increase_offset(spawned_obj.spawn_timestamp)
-                if controls.ingame_timestamp > self._frame_start and controls.ingame_timestamp <= self._frame_end:
-                    for obj_controls_event in spawned_obj.create_events_from_controls(controls):
-                        self._event_heap.insert_event(obj_controls_event)
+                self._insert_controls_events_into_heap(spawned_obj, controls)
 
         # If the event's spell is area-of-effect, add new events for each target
         if f_event.spell.is_area_of_effect:
@@ -87,6 +95,7 @@ class EventFrame:
             aura = self._state.get_aura(f_event.source_id, f_event.spell_id, f_event.target_id)
             self._insert_periodic_events_into_heap(aura)
 
+
     def _finalize_event(self, event: UpcomingEvent) -> FinalizedEvent:
         # Convert source_id/spell_id/target_id to actual object references
         # Finalize the event's source_obj
@@ -97,6 +106,9 @@ class EventFrame:
         else:
             source_id = self._state.important_ids.environment_id
         source_obj = self._state.get_game_obj(source_id)
+        if source_obj.is_despawned:
+            outcome = EventOutcome.AURA_NO_LONGER_EXISTS
+
 
         # Finalize the event's spell
         spell = self._state.get_spell(event.spell_id)

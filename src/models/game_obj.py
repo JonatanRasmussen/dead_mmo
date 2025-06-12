@@ -108,6 +108,10 @@ class GameObj(NamedTuple):
     def is_visible(self) -> bool:
         return not self.status in {GameObjStatus.ENVIRONMENT, GameObjStatus.DESPAWNED}
 
+    @property
+    def is_despawned(self) -> bool:
+        return self.status == GameObjStatus.DESPAWNED
+
     @classmethod
     def create_environment(cls, obj_id: int) -> 'GameObj':
         return GameObj(obj_id=obj_id, status=GameObjStatus.ENVIRONMENT)

@@ -1,4 +1,4 @@
-from typing import List, Tuple, ValuesView
+from typing import List, Tuple, Iterable, ValuesView
 
 from src.models import Aura, Controls, GameObj, ImportantIDs, UpcomingEvent, FinalizedEvent, Spell
 from src.handlers import AuraHandler, ControlsHandler, GameObjHandler, SpellDatabase
@@ -35,6 +35,12 @@ class WorldState:
 
     def aura_exists(self, u_event: UpcomingEvent) -> bool:
         return self._auras.aura_exists(u_event)
+    def get_obj_auras(self, obj_id: int) -> Iterable[Aura]:
+        yield from self._auras.get_obj_auras(obj_id)
+    def remove_all_expired_auras(self, frame_end: float) -> None:
+        for aura in self.view_auras:
+            if aura.is_expired(frame_end):
+                self._auras.remove_aura(*aura.get_key_for_aura)
 
     def get_aura(self, source_id: int, spell_id: int, target_id: int) -> Aura:
         return self._auras.get_aura(source_id, spell_id, target_id)

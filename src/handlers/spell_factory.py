@@ -174,3 +174,29 @@ class SpellTemplates:
             .inflict_damage(power)
             .set_range_limit(radius)
         )
+
+    @staticmethod
+    def heal_current_target(spell_id: int, power: float) -> SpellFactory:
+        return (
+            SpellFactory(spell_id)
+            .cast_on_current_target()
+            .restore_health(power)
+        )
+
+    @staticmethod
+    def heal_allies_within_range(spell_id: int, power: float, radius: float) -> 'SpellFactory':
+        return (
+            SpellFactory(spell_id)
+            .cast_on_default_friendly()
+            .restore_health(power)
+            .set_range_limit(radius)
+        )
+
+    @staticmethod
+    def heal_current_target_when_within_range(spell_id: int, power: float, radius: float) -> 'SpellFactory':
+        return (
+            SpellFactory(spell_id)
+            .cast_on_current_target()
+            .restore_health(power)
+            .set_range_limit(radius)
+        )
