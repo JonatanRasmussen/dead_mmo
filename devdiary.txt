@@ -239,3 +239,11 @@
 [2025-06-09 01:07:59] {BudoB}: Solving the money issue for life is hard, but not impossible.
 [2025-06-09 01:08:25] {BudoB}: It inspires me. That, and actually creating a game I enjoy.
 [2025-06-09 01:08:47] {BudoB}: Code time: 9 hours.
+
+[2025-06-12 18:36:18] {BudoB}: Debugging sucks. Spent 2 hours fixing a bug.
+[2025-06-12 18:36:50] {BudoB}: Worst thing, the change to the code that caused it wasn't needed.
+[2025-06-12 18:36:58] {BudoB}: I just did it because I thought it would be easy.
+[2025-06-12 18:38:00] {BudoB}: Turns out, a sorteddict with tuple keys has unintuitive irange.
+[2025-06-12 18:38:40] {BudoB}: Get me out of here. The weather is good. I wanna head out.
+[2025-06-12 18:38:58] {BudoB}: Too bad most of the afternoon is gone now. Sadge :C
+[2025-06-12 18:39:15] {BudoB}: Code time: 7 hours.

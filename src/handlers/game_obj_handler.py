@@ -13,11 +13,6 @@ class GameObjHandler:
         self._important_ids: ImportantIDs = ImportantIDs()
 
     @property
-    def most_recent_game_obj(self) -> GameObj:
-        obj_id = self._game_obj_id_gen.most_recent_id
-        return self.get_game_obj(obj_id)
-
-    @property
     def important_ids(self) -> ImportantIDs:
         return self._important_ids
 

@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-
+from src.config import Consts
 from src.models.game_obj import GameObj, Controls
 from src.models.spell import SpellFlag, SpellTarget, Spell
 
@@ -139,7 +139,8 @@ class SpellTemplates:
 
     @staticmethod
     def start_move_self(spell_id: int, periodic_spell_id: int) -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(spell_id, periodic_spell_id, 60.0, 60*250)
+        updates_per_second = Consts.MOVEMENT_UPDATES_PER_SECOND
+        return SpellTemplates.apply_aura_to_self(spell_id, periodic_spell_id, 60.0, 60*updates_per_second)
 
     @staticmethod
     def cancel_aura_on_self(spell_id: int, aura_spell_id: int) -> SpellFactory:

@@ -9,11 +9,6 @@ class IdGen:
     def __init__(self) -> None:
         self._reserved_ids: Set[int] = set({Consts.EMPTY_ID})
         self._assigned_ids: Deque[int] = deque()
-        self._most_recent_id: int = Consts.EMPTY_ID
-
-    @property
-    def most_recent_id(self) -> int:
-        return self._most_recent_id
 
     @classmethod
     def create_preassigned_range(cls, id_start: int, id_stop: int) -> 'IdGen':
@@ -31,7 +26,6 @@ class IdGen:
             assert self._assigned_ids, "No more IDs available."
             return Consts.EMPTY_ID
         new_id = self._assigned_ids.popleft()
-        self._most_recent_id = new_id
         assert new_id > Consts.MIN_ID, "ID is lower than Consts.MIN_ID."
         assert new_id < Consts.MAX_ID, "ID is higher than Consts.MAX_ID."
         return new_id

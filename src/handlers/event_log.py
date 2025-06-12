@@ -1,17 +1,17 @@
 from typing import Dict, ValuesView
-
+from src.config import LogConfig
 from src.models import Aura, FinalizedEvent, GameObj
 
 
 class EventLog:
-    DEBUG_PRINT_LOG_UDPATES = True
+    DEBUG_PRINT_LOG_UDPATES = LogConfig.DEBUG_PRINT_LOG_UDPATES
 
-    DEBUG_PRINT_UNSUCCESFUL_EVENTS = True
-    DEBUG_PRINT_AURA_TICKS = True
+    DEBUG_PRINT_UNSUCCESFUL_EVENTS = LogConfig.DEBUG_PRINT_UNSUCCESFUL_EVENTS
+    DEBUG_PRINT_AURA_TICKS = LogConfig.DEBUG_PRINT_AURA_TICKS
 
-    DEBUG_PRINT_AURA_UPDATES = True
-    DEBUG_PRINT_GAME_OBJ_UPDATES = True
-    DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = False
+    DEBUG_PRINT_AURA_UPDATES = LogConfig.DEBUG_PRINT_AURA_UPDATES
+    DEBUG_PRINT_GAME_OBJ_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_UPDATES
+    DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES
 
     def __init__(self, frame_start: float, frame_end: float) -> None:
         self.frame_start: float = frame_start

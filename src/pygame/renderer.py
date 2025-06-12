@@ -53,7 +53,7 @@ class Renderer:
         size = int(game_obj.size * self.window_manager.PLAY_HEIGHT)
 
         # Check if the game object has a sprite
-        if hasattr(game_obj, 'sprite_name') and game_obj.sprite_name:
+        if game_obj.should_render_sprite:
             self._draw_sprite(game_obj, pos, size)
         else:
             # Fallback to circle drawing

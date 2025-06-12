@@ -1,4 +1,4 @@
-from src.config import AudioFiles, Colors, Consts
+from src.config import AudioFiles, Colors, Consts, SpriteFiles
 from src.models import Controls, GameObj, SpellFlag, SpellTarget, Spell
 from src.handlers.spell_factory import SpellFactory, SpellTemplates
 from src.templates.basic_movement import BasicMovement
@@ -65,6 +65,7 @@ class SpecWarlock:
             x=0.3,
             y=0.3,
             color=Colors.RED,
+            sprite_name=SpriteFiles.PORO_PLAYER,
             start_move_up_id=BasicMovement.start_move_up().spell_id,
             stop_move_up_id=BasicMovement.stop_move_up().spell_id,
             start_move_left_id=BasicMovement.start_move_left().spell_id,
