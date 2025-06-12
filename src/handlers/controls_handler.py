@@ -1,5 +1,5 @@
 from sortedcontainers import SortedDict  # type: ignore
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Optional
 
 from src.config import Consts
 from src.models import Controls, GameObj, Spell, UpcomingEvent
@@ -15,16 +15,17 @@ class ControlsHandler:
         end_key = (frame_end, Consts.MAX_ID)
         yield from ((k[0], k[1], self._controls[k]) for k in self._controls.irange(start_key, end_key))
 
-    def add_realtime_player_controls(self, obj_id: int, frame_middle: float, new_controls: Controls) -> None:
+    def add_realtime_player_controls(self, new_controls: Controls, frame_middle: float, obj_id: int, ) -> None:
         if Consts.is_valid_id(obj_id) and not new_controls.is_empty:
+            assert frame_middle != 0.0, "frame_middle is 0.0"
             assert new_controls.offset == 0.0, "Realtime controls should not have any offset."
+            assert not new_controls.is_empty, f"{obj_id} has empty controls"
             realtime_controls = new_controls.replace_timestamp(frame_middle)
             realtime_player_controls = realtime_controls.assign_obj_id(obj_id)
-            assert not realtime_player_controls.is_empty, f"{obj_id} has empty controls"
             self._add_controls(realtime_player_controls)
 
-    def add_controls_for_newly_spawned_obj(self, game_obj: GameObj, spell: Spell) -> None:
-        if spell.obj_controls is not None:
+    def add_controls_for_newly_spawned_obj(self, game_obj: Optional[GameObj], spell: Spell) -> None:
+        if game_obj is not None and spell.obj_controls is not None:
             for controls in spell.obj_controls:
                 offset_controls = controls.increase_offset_and_assign_obj_id(game_obj.obj_id, game_obj.spawn_timestamp)
                 assert not offset_controls.is_empty, f"{game_obj.obj_id} has empty controls"

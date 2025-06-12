@@ -34,4 +34,6 @@ class NpcHealingPowerup:
             SpellFactory(171)
             .spawn_obj(game_obj)
             .add_controls(obj_controls)
+            .use_gcd()
+            .set_audio(AudioFiles.REJUVENATION_APPLY)
         )

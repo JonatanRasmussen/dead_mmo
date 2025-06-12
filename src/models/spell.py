@@ -198,15 +198,11 @@ class Spell(NamedTuple):
         return SpellFlag.AURA_CANCEL in self.flags
 
     @property
-    def has_spawned_object(self) -> bool:
-        return self.spawned_obj is not None
-
-    @property
     def has_cascading_events(self) -> bool:
         return (
             self.is_area_of_effect or
             self.has_aura_apply or
-            self.has_spawned_object or
+            self.spawned_obj is not None or
             self.spell_sequence is not None
         )
 

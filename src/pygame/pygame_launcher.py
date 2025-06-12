@@ -25,16 +25,12 @@ class PygameLauncher:
         self.renderer = Renderer(self.window_manager, self.sprite_manager, self.animation_manager)
 
         # Initialize game instance
-        self.game_instance = GameInstance()
+        self.game_instance = GameInstance(environment_setup_id=300)
 
     @staticmethod
     def run_game() -> None:
         """Main entry point to run the game"""
         game = PygameLauncher()
-
-        # Setup game
-        setup_spell_id = 300
-        game.game_instance.setup_game(setup_spell_id)
 
         # Preload common assets (optional optimization)
         # game.sprite_manager.preload_sprites(['player', 'enemy', 'projectile'])

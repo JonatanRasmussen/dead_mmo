@@ -1,6 +1,6 @@
 from typing import Dict, List, Tuple, Iterable, ValuesView, Optional
 
-from src.models import Aura, ImportantIDs, SpellFlag, Spell, GameObj
+from src.models import Aura, ImportantIDs, SpellFlag, Spell, GameObj, FinalizedEvent
 from src.handlers.id_gen import IdGen
 from src.handlers.event_log import EventLog
 
@@ -43,24 +43,30 @@ class GameObjHandler:
         assert updated_game_obj.obj_id in self._game_objs, f"GameObj with ID {updated_game_obj.obj_id} does not exist."
         self._game_objs[updated_game_obj.obj_id] = updated_game_obj
 
-    def initialize_root_environment_obj(self, setup_spell_id: int) -> None:
+    def initialize_environment(self) -> None:
         assert not self._important_ids.environment_exists, f"Environment is already initialized (ID={self._important_ids.environment_id})"
         game_obj = GameObj.create_environment(self._generate_new_game_obj_id())
         self.add_game_obj(game_obj)
-        self._important_ids = self._important_ids.initialize_environment(setup_spell_id, game_obj.obj_id)
+        self._important_ids = self._important_ids.initialize_environment(game_obj.obj_id)
 
-    def modify_game_obj(self, timestamp: float, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> None:
+    def modify_game_obj(self, f_event: FinalizedEvent) -> None:
+        spell = f_event.spell
         if spell.is_modifying_source:
-            updated_source_obj = spell.flags.modify_source(timestamp, source_obj, target_obj)
+            updated_source_obj = spell.flags.modify_source(f_event.timestamp, f_event.source, f_event.target)
             self.update_game_obj(updated_source_obj)
         else:
-            updated_source_obj = source_obj
-        if updated_source_obj.obj_id == target_obj.obj_id:
+            updated_source_obj = f_event.source
+        if updated_source_obj.obj_id == f_event.target_id:
             target_obj = updated_source_obj  # Do not overwrite changes made to updated_source_obj
+        else:
+            target_obj = f_event.target
         updated_target_obj = spell.flags.modify_target(updated_source_obj, spell.power, spell.external_spell, target_obj)
         self.update_game_obj(updated_target_obj)
 
-    def handle_spawn(self, timestamp: float, parent_obj: GameObj, spell: Spell) -> Optional[GameObj]:
+    def handle_spawn(self, f_event: FinalizedEvent) -> Optional[GameObj]:
+        timestamp = f_event.timestamp
+        spell = f_event.spell
+        parent_obj = f_event.target
         if spell.spawned_obj is None:
             return None
         obj_id = self._generate_new_game_obj_id()
