@@ -1,5 +1,5 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, SpellFlag, SpellTarget, Spell
+from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting
@@ -12,8 +12,8 @@ class NpcTargetDummy:
     def spawn_target_dummy() -> SpellFactory:
         game_obj = GameObj(
             hp=80.0,
-            x=0.5,
-            y=0.8,
+            x=-0.2,
+            y=0.1,
             color=Colors.BLUE,
             next_target_id=BasicTargeting.targetswap_to_next_tab_target().spell_id,
             ability_3_id=SpecWarlock.fire_blast().spell_id,

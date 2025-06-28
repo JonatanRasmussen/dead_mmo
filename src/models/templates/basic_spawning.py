@@ -1,5 +1,5 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, SpellFlag, SpellTarget, Spell
+from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 
 
@@ -15,5 +15,5 @@ class BasicSpawning:
         return (
             SpellFactory(33)
             .cast_on_self()
-            .add_flag(SpellFlag.DESPAWN_SELF)
+            .add_flag(Behavior.DESPAWN_SELF)
         )

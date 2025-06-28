@@ -1,38 +1,36 @@
 from typing import List, Tuple, NamedTuple, Optional, Iterable
-from enum import Enum, auto
 import math
 
 from src.config import Colors, Consts
 from .controls import Controls
+from .obj_status import ObjStatus
 from .upcoming_event import UpcomingEvent
 
 
-class GameObjStatus(Enum):
-    """ Flags for various status effects of game objects. """
-    NONE = 0
-    ENVIRONMENT = auto()
-    ALIVE = auto()
-    DESPAWNED = auto()
-    CASTING = auto()
-    CHANNELING = auto()
-    CROWD_CONTROLLED = auto()
-    BANISHED = auto()
-
-    @property
-    def is_valid_source(self) -> bool:
-        return not self in {
-            GameObjStatus.DESPAWNED,
-            GameObjStatus.BANISHED,
-        }
-
-    @property
-    def is_valid_target(self) -> bool:
-        return not self in {
-            GameObjStatus.ENVIRONMENT,
-            GameObjStatus.DESPAWNED,
-            GameObjStatus.BANISHED,
-        }
-
+# Brainstorm for components:
+    # DefaultIDs
+    # Delays
+    # Health
+    # HitChance
+    # Items
+    # Keybindings
+    # Limitations
+    # Logger
+    # Lockout
+    # Movement
+    # Modifiers
+    # PassiveEffects
+    # Position
+    # Power
+    # Progress
+    # Quests
+    # Randomness
+    # Resistances
+    # Resource
+    # RpgStats
+    # Visuals
+    # Waits
+    # Weights
 
 class GameObj(NamedTuple):
     """ Combat units. Controlled by the player or NPCs. """
@@ -40,11 +38,8 @@ class GameObj(NamedTuple):
     parent_id: int = Consts.EMPTY_ID
     spawned_from_spell: int = Consts.EMPTY_ID
 
-    # Appearance
-    color: Tuple[int, int, int] = Colors.WHITE
-
     # Status effects
-    status: GameObjStatus = GameObjStatus.NONE
+    status: ObjStatus = ObjStatus.NONE
 
     # Targeting
     is_allied: bool = False
@@ -88,6 +83,9 @@ class GameObj(NamedTuple):
     ability_3_cd_start: float = Consts.EMPTY_TIMESTAMP
     ability_4_cd_start: float = Consts.EMPTY_TIMESTAMP
 
+    # Appearance
+    color: Tuple[int, int, int] = Colors.WHITE
+
     # Cosmetics
     sprite_name: str = ""
     audio_name: str = ""
@@ -109,27 +107,42 @@ class GameObj(NamedTuple):
         return 1.0
 
     @property
+    def is_environment(self) -> float:
+        return self.status in {ObjStatus.ENVIRONMENT}
+
+    @property
     def is_visible(self) -> bool:
-        return not self.status in {GameObjStatus.ENVIRONMENT, GameObjStatus.DESPAWNED}
+        return not self.status in {ObjStatus.ENVIRONMENT, ObjStatus.DESPAWNED}
 
     @property
     def is_despawned(self) -> bool:
-        return self.status == GameObjStatus.DESPAWNED
+        return self.status == ObjStatus.DESPAWNED
+
 
     @classmethod
     def create_environment(cls, obj_id: int) -> 'GameObj':
-        return GameObj(obj_id=obj_id, status=GameObjStatus.ENVIRONMENT)
+        return GameObj(obj_id=obj_id, status=ObjStatus.ENVIRONMENT, current_target=obj_id)
 
-    def create_copy_of_template(self, obj_id: int, parent_id: int, timestamp: float) -> 'GameObj':
-        return self._replace(obj_id=obj_id, parent_id=parent_id, spawn_timestamp=timestamp, status=GameObjStatus.ALIVE)
+    def create_child_obj(self, obj_id: int, parent: 'GameObj', timestamp: float, target_id: int) -> 'GameObj':
+        if parent.is_environment:
+            team = self.is_allied
+        else:
+            team = parent.is_allied
+        return self._replace(
+            obj_id=obj_id,
+            parent_id=parent.obj_id,
+            spawn_timestamp=timestamp,
+            current_target=target_id,
+            status=ObjStatus.ALIVE,
+            is_allied=team,
+            x=parent.x+self.x,
+            y=parent.y+self.y,
+        )
 
     def get_gcd_progress(self, current_time: float) -> float:
         return min(1.0, (current_time - self.gcd_start) / self.gcd)
 
-    def change_allied_status(self, new_allied_status) -> 'GameObj':
-        return self._replace(is_allied=new_allied_status)
-
-    def change_status(self, new_status: GameObjStatus) -> 'GameObj':
+    def change_status(self, new_status: ObjStatus) -> 'GameObj':
         return self._replace(status=new_status)
 
     def teleport_to(self, new_x: float, new_y: float) -> 'GameObj':
@@ -139,8 +152,9 @@ class GameObj(NamedTuple):
         return self._replace(x=new_x, y=new_y)
 
     def move_in_direction(self, x: float, y: float, move_speed: float) -> 'GameObj':
-        new_x = self.x + x * move_speed
-        new_y = self.y + y * move_speed
+        GLOBAL_MODIFIER = Consts.MOVEMENT_DISTANCE_PER_SECOND / Consts.MOVEMENT_UPDATES_PER_SECOND
+        new_x = self.x + x * move_speed * GLOBAL_MODIFIER
+        new_y = self.y + y * move_speed * GLOBAL_MODIFIER
         return self.teleport_to_coordinates(new_x, new_y)
 
     def move_towards_coordinates(self, x: float, y: float, move_speed: float) -> 'GameObj':
@@ -178,13 +192,30 @@ class GameObj(NamedTuple):
     def get_time_since_spawn(self, current_time: float) -> float:
         return current_time - self.spawn_timestamp
 
+    def is_same_team(self, other: 'GameObj') -> bool:
+        return self.is_allied == other.is_allied
+
     def print_delta(self, other: 'GameObj') -> None:
         # Convert to dictionaries
         d1, d2 = self._asdict(), other._asdict()
         diff = {key: (d1[key], d2[key]) for key in d1 if d1[key] != d2[key]}
         print(diff)
 
-    def convert_controls_to_spell_ids(self, controls: Controls) -> List[int]:
+    def create_events_from_controls(self, controls: Controls, frame_start: float, frame_end: float) -> Iterable[UpcomingEvent]:
+        if not self.is_despawned and frame_start < controls.ingame_timestamp <= frame_end:
+            spell_ids = self._convert_controls_to_spell_ids(controls)
+            input_event_order = 0
+            for spell_id in spell_ids:
+                input_event_order += 1
+                yield UpcomingEvent(
+                    timestamp=controls.ingame_timestamp,
+                    source_id=self.obj_id,
+                    spell_id=spell_id,
+                    target_id=self.current_target,
+                    priority=input_event_order,
+                )
+
+    def _convert_controls_to_spell_ids(self, controls: Controls) -> List[int]:
         spell_ids: List[int] = []
         if controls.start_move_up:
             assert Consts.is_valid_id(self.start_move_up_id), f"Invalid spell ID for {self.obj_id}: start_move_up_id"
@@ -228,18 +259,3 @@ class GameObj(NamedTuple):
         assert not controls.is_empty, f"Controls for {self.obj_id} is empty."
         assert Consts.EMPTY_ID not in spell_ids, f"Controls for {self.obj_id} is casting empty spell ID, fix spell configs."
         return spell_ids
-
-    def create_events_from_controls(self, controls: Controls, frame_start: float, frame_end: float) -> Iterable[UpcomingEvent]:
-        if not self.is_despawned and frame_start < controls.ingame_timestamp <= frame_end:
-            spell_ids = self.convert_controls_to_spell_ids(controls)
-            input_event_order = 0
-            for spell_id in spell_ids:
-                input_event_order += 1
-                yield UpcomingEvent(
-                    timestamp=controls.ingame_timestamp,
-                    source_id=self.obj_id,
-                    spell_id=spell_id,
-                    target_id=self.current_target,
-                    priority=input_event_order,
-                )
-

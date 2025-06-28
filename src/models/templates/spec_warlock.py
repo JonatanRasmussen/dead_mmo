@@ -1,5 +1,5 @@
 from src.config import AudioFiles, Colors, Consts, SpriteFiles
-from src.models.components import Controls, GameObj, SpellFlag, SpellTarget, Spell
+from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting
@@ -12,6 +12,7 @@ class SpecWarlock:
     def fire_blast() -> SpellFactory:
         return (
             SpellTemplates.damage_current_target(111, 13.0)
+            .add_flag(Behavior.AOE)
             .use_gcd()
             .set_audio(AudioFiles.SHADOW_BOLT_HIT)
         )
@@ -31,28 +32,26 @@ class SpecWarlock:
             .despawn_self()
         )
     @staticmethod
-    def shadowbolt_apply() -> SpellFactory:
+    def aura_shadowbolt() -> SpellFactory:
         return SpellTemplates.apply_aura_to_self(117, SpecWarlock.shadowbolt_tick().spell_id, 30.0, 1200)
     @staticmethod
     def shadowbolt_spawn() -> SpellFactory:
         game_obj = GameObj(
             hp=7.0,
-            x=0.5,
-            y=0.5,
+            x=0.0,
+            y=0.05,
             movement_speed=5.0,
             color=Colors.WHITE,
-            next_target_id=BasicTargeting.targetswap_to_parents_current_target().spell_id,
-            ability_1_id=BasicMovement.teleport_to_parent().spell_id,
-            ability_2_id=BasicMovement.start_move_towards_target().spell_id,
-            ability_3_id=SpecWarlock.shadowbolt_apply().spell_id,
+            ability_1_id=BasicMovement.start_move_towards_target().spell_id,
+            ability_2_id=SpecWarlock.aura_shadowbolt().spell_id,
         )
         obj_controls = (
-            Controls(timeline_timestamp=0.0, swap_target=True, ability_1=True),
-            Controls(timeline_timestamp=0.001, ability_2=True, ability_3=True),
+            Controls(timeline_timestamp=0.0, ability_1=True, ability_2=True),
         )
         return (
             SpellFactory(41)
-            .spawn_obj(game_obj)
+            .spawn_projectile(game_obj)
+            .add_flag(Behavior.AOE)
             .add_controls(obj_controls)
             .use_gcd()
             .set_audio(AudioFiles.SHADOW_BOLT_CAST)

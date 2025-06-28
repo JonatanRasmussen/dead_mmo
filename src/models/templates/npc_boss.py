@@ -1,5 +1,5 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, SpellFlag, SpellTarget, Spell
+from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting

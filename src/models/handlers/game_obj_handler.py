@@ -1,8 +1,7 @@
 from typing import Dict, List, Tuple, Iterable, ValuesView, Optional
 
-from src.models.components import Aura, ImportantIDs, SpellFlag, Spell, GameObj, FinalizedEvent
-from src.models.services.event_log import EventLog
-from .id_gen import IdGen
+from src.models.components import ImportantIDs, Behavior, GameObj, FinalizedEvent
+from src.models.services import EventLog, IdGen
 
 
 class GameObjHandler:
@@ -66,21 +65,19 @@ class GameObjHandler:
     def handle_spawn(self, f_event: FinalizedEvent) -> Optional[GameObj]:
         timestamp = f_event.timestamp
         spell = f_event.spell
-        parent_obj = f_event.target
+        parent_obj = f_event.source
         if spell.spawned_obj is None:
             return None
         obj_id = self._generate_new_game_obj_id()
-        new_obj = spell.spawned_obj.create_copy_of_template(obj_id, parent_obj.obj_id, timestamp)
-        if not self._game_obj_is_environment(parent_obj):
-            new_obj = new_obj.change_allied_status(parent_obj.is_allied)
+        new_obj = spell.spawned_obj.create_child_obj(obj_id, parent_obj, timestamp, f_event.target.obj_id)
         self.add_game_obj(new_obj)
-        if spell.flags & SpellFlag.SPAWN_BOSS:
+        if spell.flags & Behavior.SPAWN_BOSS:
             if not self._important_ids.boss1_exists:
                 self._important_ids = self._important_ids.update_boss1_id(new_obj.obj_id)
             else:
                 assert not self._important_ids.boss2_exists, "Second boss already exists."
                 self._important_ids = self._important_ids.update_boss2_id(new_obj.obj_id)
-        if spell.flags & SpellFlag.SPAWN_PLAYER:
+        if spell.flags & Behavior.SPAWN_PLAYER:
             assert not self._important_ids.player_exists, "Player already exists."
             self._important_ids = self._important_ids.update_player_id(new_obj.obj_id)
         return new_obj

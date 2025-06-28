@@ -6,7 +6,10 @@ class Consts:
     MAX_ID: int = 999_999
     EMPTY_TIMESTAMP: float = -999.9
 
-    MOVEMENT_UPDATES_PER_SECOND = 250
+    EVENT_HEAP_MAX_ITERATIONS = 100_000
+
+    MOVEMENT_DISTANCE_PER_SECOND = 0.1
+    MOVEMENT_UPDATES_PER_SECOND = 30
 
     @staticmethod
     def is_empty_id(id_num: int) -> bool:

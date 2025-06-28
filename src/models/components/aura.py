@@ -4,6 +4,7 @@ import math
 from src.config import Consts
 from .upcoming_event import UpcomingEvent
 
+
 class Aura(NamedTuple):
     """ The effect of a previously cast spell that periodically ticks over a time span. """
     aura_id: int = Consts.EMPTY_ID

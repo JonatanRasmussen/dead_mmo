@@ -2,7 +2,7 @@ from sortedcontainers import SortedDict  # type: ignore
 from typing import List, Tuple, Iterable, Optional
 
 from src.config import Consts
-from src.models.components import Controls, GameObj, Spell, UpcomingEvent
+from src.models.components import Controls, GameObj, Spell
 
 
 class ControlsHandler:

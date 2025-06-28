@@ -3,8 +3,7 @@ from typing import Dict, List, Tuple, Iterable, ValuesView
 
 from src.config import Consts
 from src.models.components import Aura, UpcomingEvent, FinalizedEvent
-from src.models.services.event_log import EventLog
-from .id_gen import IdGen
+from src.models.services import EventLog, IdGen
 
 
 class AuraHandler:

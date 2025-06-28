@@ -1,9 +1,9 @@
 from typing import List, Tuple, Iterable, ValuesView, Optional
 
 from src.config import Consts
-from src.models.components import Aura, Controls, GameObj, ImportantIDs, UpcomingEvent, FinalizedEvent, Spell, SpellTarget, EventOutcome
-from src.models.handlers import AuraHandler, ControlsHandler, GameObjHandler, EventHeap, IdGen, SpellDatabase
-from src.models.services import EventLog
+from src.models.components import Aura, Controls, EventOutcome, GameObj, ImportantIDs, UpcomingEvent, FinalizedEvent, Targeting
+from src.models.handlers import AuraHandler, ControlsHandler, GameObjHandler, SpellDatabase
+from src.models.services import EventLog, FrameHeap, IdGen
 
 
 class WorldState:
@@ -28,7 +28,7 @@ class WorldState:
     def process_frame(self, frame_start: float, frame_end: float) -> EventLog:
         event_log = EventLog(frame_start, frame_end)
         event_id_gen = IdGen.create_preassigned_range(1, 10_000)
-        event_heap = EventHeap()
+        event_heap = FrameHeap()
 
         # Initialize environment if this is the very first frame
         if not self.important_ids.environment_exists:
@@ -81,15 +81,18 @@ class WorldState:
                 yield from new_obj.create_events_from_controls(offset_controls, frame_start, frame_end)
 
         # If the event's spell is area-of-effect, add new events for each target
-        if f_event.spell.is_area_of_effect:
-            target_ids = SpellTarget.handle_aoe(f_event.source, f_event.target, self.view_game_objs)
-            for target_id in target_ids:
-                yield f_event.upcoming_event.also_target(f_event.spell_id, target_id)
+        if f_event.spell.is_area_of_effect and not f_event.upcoming_event.is_aoe_targeting:
+            priority = f_event.upcoming_event.priority
+            for target_id in Targeting.select_targets_for_aoe(f_event.source, f_event.target, self.view_game_objs):
+                priority += 1
+                yield f_event.upcoming_event.continue_aoe_targeting(f_event.spell_id, priority, target_id)
 
         # If the event's spell cascades into new spells, add those as new events
         if f_event.spell.spell_sequence is not None:
+            priority = f_event.upcoming_event.priority
             for next_spell in f_event.spell.spell_sequence:
-                yield f_event.upcoming_event.continue_spell_sequence(next_spell)
+                priority += 1
+                yield f_event.upcoming_event.continue_spell_sequence(next_spell, priority)
 
         # If an aura was just created, see if it has any ticks happening this frame
         if f_event.spell.has_aura_apply:
@@ -109,7 +112,10 @@ class WorldState:
         spell = self._spell_database.get_spell(event.spell_id)
 
         # Finalize the event's target_obj
-        target_id = spell.targeting.select_target(source_obj, event.target_id, self.important_ids)
+        if event.is_aoe_targeting:
+            target_id = event.target_id
+        else:
+            target_id = spell.targeting.select_target(source_obj, event.target_id, self.important_ids)
         if target_id == source_obj.obj_id:
             target_obj = source_obj
         else:
@@ -126,7 +132,7 @@ class WorldState:
         if updated_event.is_aura_tick and not self._auras.aura_exists(event):  # Do NOT use updated_event here
             outcome = EventOutcome.AURA_NO_LONGER_EXISTS
         else:
-            outcome = EventOutcome.decide_outcome(event.timestamp, source_obj, spell, target_obj)
+            outcome = EventOutcome.decide_outcome(event.timestamp, source_obj, spell, target_obj, event.is_aoe_targeting)
         finalized_event = FinalizedEvent(
             event_id=event_id,
             source=source_obj,

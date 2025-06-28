@@ -1,5 +1,5 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, SpellFlag, SpellTarget, Spell
+from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_targeting import BasicTargeting
 
@@ -20,8 +20,8 @@ class NpcHealingPowerup:
     def spawn_healing_powerup() -> SpellFactory:
         game_obj = GameObj(
             hp=30.0,
-            x=0.7,
-            y=0.3,
+            x=0.2,
+            y=-0.2,
             color=Colors.GREEN,
             next_target_id=BasicTargeting.targetswap_to_parent().spell_id,
             ability_1_id=NpcHealingPowerup.healing_burst_apply().spell_id,
@@ -32,7 +32,7 @@ class NpcHealingPowerup:
         )
         return (
             SpellFactory(171)
-            .spawn_obj(game_obj)
+            .spawn_minion(game_obj)
             .add_controls(obj_controls)
             .use_gcd()
             .set_audio(AudioFiles.REJUVENATION_APPLY)

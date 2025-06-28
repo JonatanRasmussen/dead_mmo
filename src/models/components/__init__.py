@@ -1,17 +1,25 @@
 from .aura import Aura
+from .behavior import Behavior
 from .controls import Controls
-from .event import EventOutcome, FinalizedEvent
+from .event_outcome import EventOutcome
+from .finalized_event import FinalizedEvent
 from .game_obj import GameObj
 from .important_ids import ImportantIDs
-from .spell import SpellFlag, SpellTarget, Spell
+from .obj_status import ObjStatus
+from .spell import Spell
+from .targeting import Targeting
 from .upcoming_event import UpcomingEvent
 
 __all__ = [
     "Aura",
+    "Behavior",
     "Controls",
-    "EventOutcome", "FinalizedEvent",
+    "EventOutcome",
+    "FinalizedEvent",
     "GameObj",
     "ImportantIDs",
-    "SpellFlag", "SpellTarget", "Spell",
+    "ObjStatus",
+    "Targeting",
+    "Spell",
     "UpcomingEvent"
 ]

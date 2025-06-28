@@ -1,31 +1,31 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, SpellFlag, SpellTarget, Spell
+from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 
 
 class BasicMovement:
     @staticmethod
     def step_up() -> SpellFactory:
-        return SpellTemplates.step_move_self(91, SpellFlag.STEP_UP)
+        return SpellTemplates.step_move_self(91, Behavior.STEP_UP)
 
     @staticmethod
     def step_left() -> SpellFactory:
-        return SpellTemplates.step_move_self(181, SpellFlag.STEP_LEFT)
+        return SpellTemplates.step_move_self(181, Behavior.STEP_LEFT)
 
     @staticmethod
     def step_down() -> SpellFactory:
-        return SpellTemplates.step_move_self(271, SpellFlag.STEP_DOWN)
+        return SpellTemplates.step_move_self(271, Behavior.STEP_DOWN)
 
     @staticmethod
     def step_right() -> SpellFactory:
-        return SpellTemplates.step_move_self(1, SpellFlag.STEP_RIGHT)
+        return SpellTemplates.step_move_self(1, Behavior.STEP_RIGHT)
 
     @staticmethod
     def step_towards_target() -> SpellFactory:
         return (
             SpellFactory(361)
             .cast_on_current_target()
-            .add_flag(SpellFlag.MOVE_TOWARDS_TARGET)
+            .add_flag(Behavior.MOVE_TOWARDS_TARGET)
         )
     @staticmethod
     def start_move_up() -> SpellFactory:
