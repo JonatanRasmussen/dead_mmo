@@ -1,9 +1,8 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, Behavior, Targeting, Spell
+from src.models.components import Behavior, Controls, GameObj, Loadout, Position, Resources
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting
-from .basic_spawning import BasicSpawning
 
 
 class NpcLandmine:
@@ -21,17 +20,22 @@ class NpcLandmine:
     @staticmethod
     def spawn_landmine() -> SpellFactory:
         game_obj = GameObj(
-            hp=20.0,
-            x=-0.5,
-            y=0.1,
+            res=Resources(
+                hp=20.0,
+            ),
+            pos=Position(
+                x=-0.5,
+                y=0.1,
+            ),
             color=Colors.MAGENTA,
-            ability_1_id=NpcLandmine.landmine_explosion_apply().spell_id,
+            loadout=Loadout(
+                ability_1_id=NpcLandmine.landmine_explosion_apply().spell_id,
+            )
         )
         obj_controls = (
             Controls(timeline_timestamp=1.5, ability_1=True),
         )
         return (
             SpellFactory(71)
-            .spawn_minion(game_obj)
-            .add_controls(obj_controls)
+            .spawn_minion(game_obj, obj_controls)
         )

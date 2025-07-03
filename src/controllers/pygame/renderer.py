@@ -1,7 +1,7 @@
 import pygame
 import math
 from typing import ValuesView
-from src.models.components import GameObj
+from src.models.components import GameObj, Position
 from src.config import Colors
 from .window_manager import WindowManager
 from .sprite_manager import SpriteManager
@@ -49,7 +49,7 @@ class Renderer:
 
     def _draw_game_object(self, game_obj: GameObj, ingame_time: float) -> None:
         """Draw a single game object"""
-        pos = self.window_manager.world_to_screen_coords(game_obj.x, game_obj.y)
+        pos = self.window_manager.world_to_screen_coords(game_obj.pos.x, game_obj.pos.y)
         size = int(game_obj.size * self.window_manager.PLAY_HEIGHT)
 
         # Check if the game object has a sprite
@@ -64,7 +64,7 @@ class Renderer:
 
     def _draw_sprite(self, game_obj: GameObj, pos: tuple, size: int) -> None:
         """Draw a sprite for the game object"""
-        sprite = self.sprite_manager.get_sprite(game_obj.sprite_name)
+        sprite = self.sprite_manager.get_sprite(game_obj.views.sprite_name)
 
         # Scale sprite to match the desired size
         sprite_size = size * 2  # Diameter

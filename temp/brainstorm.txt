@@ -1,0 +1,24 @@
+# Brainstorm for components:
+    # DefaultIDs
+    # Delays
+    # Health
+    # HitChance
+    # Items
+    # Keybindings
+    # Limitations
+    # Logger
+    # Lockout
+    # Movement
+    # Modifiers
+    # PassiveEffects
+    # Position
+    # Power
+    # Progress
+    # Quests
+    # Randomness
+    # Resistances
+    # Resource
+    # RpgStats
+    # Visuals
+    # Waits
+    # Weights

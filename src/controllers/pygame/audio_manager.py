@@ -9,7 +9,7 @@ class AudioManager:
     def __init__(self, assets_path: str = "src/assets/audio"):
         pygame.mixer.init()
         self.assets_path = Path(assets_path)
-        self.sounds: Dict[str, pygame.mixer.Sound] = {}
+        self.sounds: dict[str, pygame.mixer.Sound] = {}
         self.music_volume = 0.7
         self.sound_volume = 0.7
 

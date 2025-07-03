@@ -253,3 +253,13 @@
 [2025-06-29 01:54:13] {BudoB}: I am getting distracted though. Folder icons are funny.
 [2025-06-29 01:54:28] {BudoB}: Making classes that cover the entire alphabet is also funny.
 [2025-06-29 01:54:45] {BudoB}: Code time: 6 hours.
+
+[2025-07-03 17:29:23] {BudoB}: Forgot to update devdiary yesterday but a lot happened.
+[2025-07-03 17:29:41] {BudoB}: And also, not a lot happened.
+[2025-07-03 17:29:57] {BudoB}: It is procrastination at its worst.
+[2025-07-03 17:30:41] {BudoB}: Changing a bunch of classes back and fourth.
+[2025-07-03 17:30:52] {BudoB}: I am however happy with the results.
+[2025-07-03 17:30:59] {BudoB}: Even though the game does not look or play any different.
+[2025-07-03 17:31:07] {BudoB}: Maybe one day I will realize that my refactoring is worth it.
+[2025-07-03 17:31:18] {BudoB}: Or maybe not. But most importantly, it IS satisfying.
+[2025-07-03 17:31:36] {BudoB}: Code time: 11 hours.

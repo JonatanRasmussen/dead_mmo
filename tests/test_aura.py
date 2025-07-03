@@ -20,7 +20,7 @@ def test_get_timestamps_for_ticks_this_frame():
     )
 
     # Frame from 2.5 to 5.5 should contain ticks at 3.0, 4.0, 5.0
-    timestamps = aura._get_timestamps_for_ticks
+    timestamps = aura.tick_timestamps  # pylint: disable=W0212
     expected = (1.0, 2.0, 3.0, 4.0, 5.0)
     assert timestamps == expected, f"Expected {expected}, got {timestamps}"
 

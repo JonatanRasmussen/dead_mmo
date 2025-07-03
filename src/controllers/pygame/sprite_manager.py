@@ -6,7 +6,7 @@ from pathlib import Path
 class SpriteManager:
     def __init__(self, assets_path: str = "src/assets/images"):
         self.assets_path = Path(assets_path)
-        self.sprites: Dict[str, pygame.Surface] = {}
+        self.sprites: dict[str, pygame.Surface] = {}
         self.default_sprite: pygame.Surface = self._create_default_sprite()
         self._create_default_sprite()
 

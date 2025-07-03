@@ -1,8 +1,8 @@
-from typing import List, Tuple, Iterable, NamedTuple, Optional, ValuesView
-from enum import Enum, Flag, auto
+from enum import Flag, auto
 
 from .game_obj import GameObj
 from .obj_status import ObjStatus
+from .position import Position
 
 
 class Behavior(Flag):
@@ -35,52 +35,45 @@ class Behavior(Flag):
     AURA_APPLY = auto()
     AURA_CANCEL = auto()
 
-    def modify_target(self, source_obj: GameObj, power: float, referenced_spell: int, target_obj: GameObj) -> GameObj:
-        tar = target_obj
+    def modify_target(self, source_obj: GameObj, power: float, referenced_spell: int, target_obj: GameObj) -> None:
         if self & (Behavior.STEP_UP | Behavior.STEP_LEFT | Behavior.STEP_DOWN | Behavior.STEP_RIGHT):
-            tar = self._handle_movement(tar)
+            self._handle_movement(target_obj)
         if self & (Behavior.SET_ABILITY_SLOT_1 | Behavior.SET_ABILITY_SLOT_2 | Behavior.SET_ABILITY_SLOT_3 | Behavior.SET_ABILITY_SLOT_4):
-            tar = self._handle_ability_swaps(referenced_spell, tar)
+            self._handle_ability_swaps(referenced_spell, target_obj)
         if self & Behavior.DAMAGING:
-            tar = tar.suffer_damage(power * source_obj.spell_modifier)
+            target_obj.res.hp -= power * source_obj.spell_modifier
         if self & Behavior.HEALING:
-            tar = tar.restore_health(power * source_obj.spell_modifier)
-        return tar
+            target_obj.res.hp += power * source_obj.spell_modifier
 
-    def modify_source(self, timestamp: float, source_obj: GameObj, target_obj: GameObj) -> GameObj:
+    def modify_source(self, timestamp: float, source_obj: GameObj, target_obj: GameObj) -> None:
         src = source_obj
         if self & Behavior.UPDATE_CURRENT_TARGET:
-            src = src.switch_target(target_obj.obj_id)
+            source_obj.current_target = target_obj.obj_id
         if self & Behavior.TRIGGER_GCD:
-            src = src.set_gcd_start(timestamp)
+            source_obj.cds.gcd_start = timestamp
         if self & Behavior.DESPAWN_SELF:
-            src = src.change_status(ObjStatus.DESPAWNED)
+            source_obj.status = ObjStatus.DESPAWNED
         if self & Behavior.MOVE_TOWARDS_TARGET:
-            src = src.move_towards_coordinates(target_obj.x, target_obj.y, src.movement_speed)
+            source_obj.pos.move_towards_destination(target_obj.pos, src.mods.movement_speed)
         if self & Behavior.TELEPORT_TO_TARGET:
-            src = src.teleport_to_coordinates(target_obj.x, target_obj.y)
-        return src
+            source_obj.pos.teleport_to_position(target_obj.pos)
 
-    def _handle_movement(self, target_obj: GameObj) -> GameObj:
-        tar = target_obj
+    def _handle_movement(self, target_obj: GameObj) -> None:
         if self & Behavior.STEP_UP:
-            tar = tar.move_in_direction(0.0, 1.0, tar.movement_speed)
+            target_obj.pos.move_in_direction(Position(x=0.0, y=1.0), target_obj.mods.movement_speed)
         if self & Behavior.STEP_LEFT:
-            tar = tar.move_in_direction(-1.0, 0.0, tar.movement_speed)
+            target_obj.pos.move_in_direction(Position(x=-1.0, y=0.0), target_obj.mods.movement_speed)
         if self & Behavior.STEP_DOWN:
-            tar = tar.move_in_direction(0.0, -1.0, tar.movement_speed)
+            target_obj.pos.move_in_direction(Position(x=0.0, y=-1.0), target_obj.mods.movement_speed)
         if self & Behavior.STEP_RIGHT:
-            tar = tar.move_in_direction(1.0, 0.0, tar.movement_speed)
-        return tar
+            target_obj.pos.move_in_direction(Position(x=1.0, y=0.0), target_obj.mods.movement_speed)
 
-    def _handle_ability_swaps(self, referenced_spell: int, target_obj: GameObj) -> GameObj:
-        tar = target_obj
+    def _handle_ability_swaps(self, referenced_spell: int, target_obj: GameObj) -> None:
         if self & Behavior.SET_ABILITY_SLOT_1:
-            tar = tar.set_ability_1(referenced_spell)
+            target_obj.loadout.ability_1_id = referenced_spell
         if self & Behavior.SET_ABILITY_SLOT_2:
-            tar = tar.set_ability_2(referenced_spell)
+            target_obj.loadout.ability_2_id = referenced_spell
         if self & Behavior.SET_ABILITY_SLOT_3:
-            tar = tar.set_ability_3(referenced_spell)
+            target_obj.loadout.ability_3_id = referenced_spell
         if self & Behavior.SET_ABILITY_SLOT_4:
-            tar = tar.set_ability_4(referenced_spell)
-        return tar
+            target_obj.loadout.ability_4_id = referenced_spell

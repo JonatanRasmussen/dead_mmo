@@ -23,6 +23,6 @@ class BasicTargeting:
         return (
             SpellFactory(17)
             .cast_on_parent()
-            .cast_on_target_of_target()
+            .add_flag(Behavior.TARGET_OF_TARGET)
             .update_current_target()
         )

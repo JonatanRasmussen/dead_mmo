@@ -1,13 +1,13 @@
-from typing import NamedTuple, Tuple
+from dataclasses import dataclass
 
 from src.config import Consts
 
-
-class Controls(NamedTuple):
+@dataclass(slots=True)
+class Controls:
     """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
     obj_id: int = Consts.EMPTY_ID
     timeline_timestamp: float = Consts.EMPTY_TIMESTAMP
-    offset: float = 0.0
+    _offset: float = 0.0
 
     start_move_up: bool = False
     stop_move_up: bool = False
@@ -25,8 +25,8 @@ class Controls(NamedTuple):
     ability_4: bool = False
 
     @property
-    def get_key_for_controls(self) -> Tuple[float, int]:
-        return (self.ingame_timestamp, self.obj_id)
+    def get_key_for_controls(self) -> tuple[float, int]:
+        return (self.ingame_time, self.obj_id)
 
     @property
     def is_empty(self) -> bool:
@@ -47,28 +47,13 @@ class Controls(NamedTuple):
         ))
 
     @property
-    def ingame_timestamp(self) -> float:
-        return self.timeline_timestamp + self.offset
+    def ingame_time(self) -> float:
+        return self.timeline_timestamp + self._offset
 
     @property
     def has_valid_timestamp(self) -> bool:
-        return self.timeline_timestamp != Consts.EMPTY_TIMESTAMP
+        return self.ingame_time != Consts.EMPTY_TIMESTAMP
 
-    def replace_timestamp(self, new_timestamp: float) -> 'Controls':
-        return self._replace(timeline_timestamp=new_timestamp)
-
-    def increase_offset_and_assign_obj_id(self, new_obj_id: int, additional_offset: float) -> 'Controls':
-        updated_obj_id = self.assign_obj_id(new_obj_id)
-        return updated_obj_id.increase_offset(additional_offset)
-
-    def assign_obj_id(self, new_obj_id: int) -> 'Controls':
-        assert self.obj_id == Consts.EMPTY_ID, f"Controls was assigned new obj_id {new_obj_id} but obj_id is already {self.obj_id}"
-        return self._replace(obj_id=new_obj_id)
-
-    def increase_offset(self, additional_offset: float) -> 'Controls':
-        assert self.offset == 0.0, "Controls has been offset more than once, is this intentional?"
-        new_offset = self.offset + additional_offset
-        return self._replace(offset=new_offset)
-
-    def is_happening_now(self, last_visit: float, now: float) -> bool:
-        return self.timeline_timestamp > last_visit and self.timeline_timestamp <= now
+    def increase_offset(self, additional_offset: float) -> None:
+        assert self._offset == 0.0, "Controls has been offset more than once, is this intentional?"
+        self._offset += additional_offset

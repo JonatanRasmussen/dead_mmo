@@ -3,7 +3,7 @@ from enum import Enum, auto
 
 class ObjStatus(Enum):
     """ Various status effects that game objects can have. """
-    NONE = 0  # Should never be used outside initialization
+    EMPTY = 0  # Should never be used outside initialization
     ENVIRONMENT = auto()  # Special case used only by ENVIRONMENT objs
     ALIVE = auto()  # Default status used to indicate the absence of other status effects
     DESPAWNED = auto()  # Permamently removed from combat, cannot be source or target of events

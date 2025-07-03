@@ -1,14 +1,14 @@
 from typing import List, ValuesView
 
 from src.models.components import Controls, FinalizedEvent, GameObj
-from src.models.services import EventLog
+from src.models.handlers import EventLog
 from src.models.managers.world_state import WorldState
 
 
 class GameInstance:
     def __init__(self, environment_setup_id: int) -> None:
         self._state: WorldState = WorldState(environment_setup_id)
-        self._event_frame_logs: List[EventLog] = []
+        self._event_frame_logs: list[EventLog] = []
         self._ingame_time: float = 0.0
 
     @property

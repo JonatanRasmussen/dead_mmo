@@ -55,12 +55,12 @@ class WindowManager:
             self.movement_adjustment_x = 1.0
             self.movement_adjustment_y = aspect_ratio
 
-    def world_to_screen_coords(self, x: float, y: float) -> Tuple[int, int]:
+    def world_to_screen_coords(self, x: float, y: float) -> tuple[int, int]:
         """Convert from unit coordinates (0-1) to screen coordinates"""
         screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + x * self.PLAY_WIDTH
         screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - y) * self.PLAY_HEIGHT
         return (int(screen_x), int(screen_y))
 
-    def get_play_area_size(self) -> Tuple[float, float]:
+    def get_play_area_size(self) -> tuple[float, float]:
         """Returns the play area dimensions"""
         return (self.PLAY_WIDTH, self.PLAY_HEIGHT)

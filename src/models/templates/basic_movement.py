@@ -5,6 +5,10 @@ from src.models.services.spell_factory import SpellFactory, SpellTemplates
 
 class BasicMovement:
     @staticmethod
+    def empty_spell() -> SpellFactory:
+        return SpellFactory(Consts.EMPTY_ID)
+
+    @staticmethod
     def step_up() -> SpellFactory:
         return SpellTemplates.step_move_self(91, Behavior.STEP_UP)
 
@@ -22,11 +26,7 @@ class BasicMovement:
 
     @staticmethod
     def step_towards_target() -> SpellFactory:
-        return (
-            SpellFactory(361)
-            .cast_on_current_target()
-            .add_flag(Behavior.MOVE_TOWARDS_TARGET)
-        )
+        return SpellFactory(361).cast_on_target().add_flag(Behavior.MOVE_TOWARDS_TARGET)
     @staticmethod
     def start_move_up() -> SpellFactory:
         return SpellTemplates.start_move_self(92, BasicMovement.step_up().spell_id)

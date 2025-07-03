@@ -1,18 +1,19 @@
-from typing import Tuple, NamedTuple, Optional
+from dataclasses import dataclass, field
 
 from src.config.consts import Consts
 from .event_outcome import EventOutcome
 from .game_obj import GameObj
+from .position import Position
 from .spell import Spell
 from .upcoming_event import UpcomingEvent
 
-
-class FinalizedEvent(NamedTuple):
+@dataclass(slots=True)
+class FinalizedEvent:
     event_id: int = Consts.EMPTY_ID
-    upcoming_event: UpcomingEvent = UpcomingEvent()
-    source: GameObj = GameObj()
-    spell: Spell = Spell()
-    target: GameObj = GameObj()
+    upcoming_event: UpcomingEvent = field(default_factory=UpcomingEvent)
+    source: GameObj = field(default_factory=GameObj)
+    spell: Spell = field(default_factory=Spell)
+    target: GameObj = field(default_factory=GameObj)
     outcome: EventOutcome = EventOutcome.EMPTY
 
     @property
@@ -35,9 +36,6 @@ class FinalizedEvent(NamedTuple):
     @property
     def event_summary(self) -> str:
         return f"[{self.timestamp:.3f}: id={self.event_id:04d}] {self.outcome} (obj_{self.source_id:04d} uses spell_{self.spell_id:04d} on obj_{self.target_id:04d}.)"
-
-    def update_source(self, new_source: GameObj) -> 'FinalizedEvent':
-        return self._replace(source=new_source)
 
     # Audio properties
     @property
@@ -68,10 +66,10 @@ class FinalizedEvent(NamedTuple):
 
     # Additional helper properties
     @property
-    def effect_position(self) -> tuple[float, float]:
+    def effect_position(self) -> Position:
         """Get the position where effects should be displayed as a tuple"""
         if self.spell.animate_on_target:
             game_obj = self.target
         else:
             game_obj = self.source
-        return (game_obj.x, game_obj.y)
+        return (game_obj.pos)

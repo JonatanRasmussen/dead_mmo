@@ -1,14 +1,13 @@
 # pylint: disable=E1101
 import pygame
 import sys
-from typing import List, Tuple
 
 class OldColor:
-    BLACK: Tuple[int, int, int] = (0, 0, 0)
-    WHITE: Tuple[int, int, int] = (255, 255, 255)
-    RED: Tuple[int, int, int] = (255, 0, 0)
-    GREEN: Tuple[int, int, int] = (0, 255, 0)
-    BLUE: Tuple[int, int, int] = (0, 0, 255)
+    BLACK: tuple[int, int, int] = (0, 0, 0)
+    WHITE: tuple[int, int, int] = (255, 255, 255)
+    RED: tuple[int, int, int] = (255, 0, 0)
+    GREEN: tuple[int, int, int] = (0, 255, 0)
+    BLUE: tuple[int, int, int] = (0, 0, 255)
 
 class OldGameObj:
     def __init__(self) -> None:
@@ -21,7 +20,7 @@ class OldGameObj:
         self.power: float = 1.0
         self.movespeed: float = 0.01
 
-        self.color: Tuple[int, int, int] = OldColor.BLUE
+        self.color: tuple[int, int, int] = OldColor.BLUE
 
     @classmethod
     def create_empty(cls) -> 'OldGameObj':
@@ -55,7 +54,7 @@ class OldEncounter:
     def __init__(self) -> None:
         self.player: OldGameObj = OldGameObj.create_player()
         self.enemy: OldGameObj = OldGameObj.create_enemy()
-        self.all_game_objs: List[OldGameObj] = [self.player, self.enemy]
+        self.all_game_objs: list[OldGameObj] = [self.player, self.enemy]
 
         self.player.reposition(0.5, 0.75)
         self.enemy.reposition(0.5, 0.25)

@@ -10,7 +10,7 @@ from src.models.components import GameObj, FinalizedEvent
 @dataclass
 class Animation:
     """Represents an animated effect"""
-    frames: List[pygame.Surface]
+    frames: list[pygame.Surface]
     frame_duration: float  # Duration of each frame in seconds
     loop: bool = False
     scale: float = 1.0
@@ -28,8 +28,8 @@ class ActiveAnimation:
 class AnimationManager:
     def __init__(self, assets_path: str = "src/assets/animations"):
         self.assets_path = Path(assets_path)
-        self.animations: Dict[str, Animation] = {}
-        self.active_animations: List[ActiveAnimation] = []
+        self.animations: dict[str, Animation] = {}
+        self.active_animations: list[ActiveAnimation] = []
         self.default_frame_duration = 0.1  # 100ms per frame by default
 
     def load_animation(self, animation_name: str, frame_count: Optional[int] = None) -> Optional[Animation]:
@@ -62,7 +62,7 @@ class AnimationManager:
         self.animations[animation_name] = animation
         return animation
 
-    def _load_frames_from_directory(self, animation_dir: Path, frame_count: Optional[int]) -> List[pygame.Surface]:
+    def _load_frames_from_directory(self, animation_dir: Path, frame_count: Optional[int]) -> list[pygame.Surface]:
         """Load animation frames from a directory"""
         frames = []
 
@@ -92,7 +92,7 @@ class AnimationManager:
 
         return frames
 
-    def _load_frames_from_files(self, animation_name: str, frame_count: Optional[int]) -> List[pygame.Surface]:
+    def _load_frames_from_files(self, animation_name: str, frame_count: Optional[int]) -> list[pygame.Surface]:
         """Load animation frames from individual files with naming convention"""
         frames = []
         frame_index = 0
@@ -200,7 +200,7 @@ class AnimationManager:
         """Set the default frame duration for new animations"""
         self.default_frame_duration = duration
 
-    def preload_animations(self, animation_names: List[str]) -> None:
+    def preload_animations(self, animation_names: list[str]) -> None:
         """Preload a list of animations"""
         for animation_name in animation_names:
             self.load_animation(animation_name)

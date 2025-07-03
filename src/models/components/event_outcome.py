@@ -1,4 +1,3 @@
-from typing import Tuple, NamedTuple, Optional
 from enum import Enum, auto
 
 from .behavior import Behavior
@@ -41,7 +40,7 @@ class EventOutcome(Enum):
     def _is_within_range(source_obj: GameObj, spell: Spell, target_obj: GameObj) -> bool:
         if not spell.has_range_limit:
             return True
-        return (source_obj.x - target_obj.x) ** 2 + (source_obj.y - target_obj.y) ** 2 <= spell.range_limit ** 2
+        return source_obj.pos.has_target_within_range(target_obj.pos, spell.range_limit)
 
     @staticmethod
     def _gcd_is_available(timestamp: float, source_obj: GameObj, spell: Spell) -> bool:

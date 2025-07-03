@@ -3,3 +3,5 @@ __pycache__/
 audio
 images
 video
+.pytest_cache
+.vscode

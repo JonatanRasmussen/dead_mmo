@@ -3,14 +3,14 @@ from typing import Dict, List, Tuple, Iterable, ValuesView
 
 from src.config import Consts
 from src.models.components import Aura, UpcomingEvent, FinalizedEvent
-from src.models.services import EventLog, IdGen
+from src.models.handlers.event_log import EventLog
+from src.models.handlers.id_gen import IdGen
 
 
 class AuraHandler:
 
     def __init__(self) -> None:
-        self._auras: SortedDict[Tuple[int, int, int], Aura] = SortedDict()
-        self._aura_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
+        self._auras: SortedDict[tuple[int, int, int], Aura] = SortedDict()
 
     @property
     def view_auras(self) -> ValuesView[Aura]:
@@ -21,7 +21,7 @@ class AuraHandler:
         if key not in self._auras:
             return False
         aura = self.get_aura(key[0], key[1], key[2])
-        return aura.aura_id == u_event.aura_id
+        return aura.start_time == u_event.aura_start_time
 
     def get_aura(self, source_id: int, spell_id: int, target_id: int) -> Aura:
         key = self.create_aura_key(source_id, spell_id, target_id)
@@ -35,16 +35,15 @@ class AuraHandler:
 
     def handle_aura(self, f_event: FinalizedEvent) -> None:
         if f_event.spell.has_aura_cancel:
-            self.remove_aura(f_event.source_id, f_event.spell.external_spell, f_event.target_id)
+            self.remove_aura(f_event.source_id, f_event.spell.effect_id, f_event.target_id)
         if f_event.spell.has_aura_apply:
             self.add_aura(f_event)
 
     def add_aura(self, f_event: FinalizedEvent) -> None:
         aura = Aura(
-            aura_id = self._aura_id_gen.generate_new_id(),
             source_id=f_event.source_id,
             origin_spell_id=f_event.spell.spell_id,
-            periodic_spell_id=f_event.spell.external_spell,
+            periodic_spell_id=f_event.spell.effect_id,
             target_id=f_event.target_id,
             start_time=f_event.timestamp,
             duration=f_event.spell.duration,
@@ -56,7 +55,7 @@ class AuraHandler:
         # Handle aura already existing
         self.try_remove_aura(aura.source_id, aura.origin_spell_id, aura.target_id)
 
-        key: Tuple[int, int, int] = aura.get_key_for_aura
+        key: tuple[int, int, int] = aura.key
         assert key not in self._auras, f"Aura with (source, spell, target) = ({key}) already exists."
         self._auras[key] = aura
 
@@ -73,5 +72,5 @@ class AuraHandler:
         del self._auras[key]
 
     @staticmethod
-    def create_aura_key(source_id: int, spell_id: int, target_id: int) -> Tuple[int, int, int]:
+    def create_aura_key(source_id: int, spell_id: int, target_id: int) -> tuple[int, int, int]:
         return (source_id, spell_id, target_id)

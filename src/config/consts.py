@@ -9,7 +9,7 @@ class Consts:
     EVENT_HEAP_MAX_ITERATIONS = 100_000
 
     MOVEMENT_DISTANCE_PER_SECOND = 0.1
-    MOVEMENT_UPDATES_PER_SECOND = 30
+    MOVEMENT_UPDATES_PER_SECOND = 60
 
     @staticmethod
     def is_empty_id(id_num: int) -> bool:
