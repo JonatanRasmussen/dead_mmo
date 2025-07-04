@@ -15,7 +15,7 @@ class NpcLandmine:
 
     @staticmethod
     def landmine_explosion_apply() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(115, NpcLandmine.landmine_explosion_tick().spell_id, 15.0, 150)
+        return SpellTemplates.apply_aura_to_self(115, NpcLandmine.landmine_explosion_tick().spell_id, 15000, 150)
 
     @staticmethod
     def spawn_landmine() -> SpellFactory:
@@ -33,7 +33,7 @@ class NpcLandmine:
             )
         )
         obj_controls = (
-            Controls(timeline_timestamp=1.5, ability_1=True),
+            Controls(timeline_timestamp=1500, ability_1=True),
         )
         return (
             SpellFactory(71)

@@ -45,7 +45,7 @@ class SpellFactory:
         self.spell.spell_sequence = sequence
         return self
 
-    def apply_aura(self, periodic_spell_id: int, duration: float, ticks: int) -> 'SpellFactory':
+    def apply_aura(self, periodic_spell_id: int, duration: int, ticks: int) -> 'SpellFactory':
         self.spell.duration = duration
         self.spell.ticks = ticks
         self.spell.effect_id = periodic_spell_id
@@ -136,7 +136,7 @@ class SpellTemplates:
         )
 
     @staticmethod
-    def apply_aura_to_self(spell_id: int, periodic_spell_id: int, duration: float, ticks: int) -> SpellFactory:
+    def apply_aura_to_self(spell_id: int, periodic_spell_id: int, duration: int, ticks: int) -> SpellFactory:
         return (
             SpellFactory(spell_id)
             .cast_on_self()
@@ -146,7 +146,7 @@ class SpellTemplates:
     @staticmethod
     def start_move_self(spell_id: int, periodic_spell_id: int) -> SpellFactory:
         updates_per_second = Consts.MOVEMENT_UPDATES_PER_SECOND
-        return SpellTemplates.apply_aura_to_self(spell_id, periodic_spell_id, 60.0, 60*updates_per_second)
+        return SpellTemplates.apply_aura_to_self(spell_id, periodic_spell_id, 60000, 60*updates_per_second)
 
     @staticmethod
     def cancel_aura_on_self(spell_id: int, aura_spell_id: int) -> SpellFactory:

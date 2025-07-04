@@ -25,9 +25,9 @@ class NpcTargetDummy:
             )
         )
         obj_controls = (
-            Controls(timeline_timestamp=1.5, swap_target=True),
-            Controls(timeline_timestamp=4.0, ability_3=True),
-            Controls(timeline_timestamp=7.0, ability_4=True),
+            Controls(timeline_timestamp=1500, swap_target=True),
+            Controls(timeline_timestamp=4000, ability_3=True),
+            Controls(timeline_timestamp=7000, ability_4=True),
         )
         return (
             SpellFactory(70)

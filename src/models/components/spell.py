@@ -20,8 +20,8 @@ class Spell:
     range_limit: float = 0.0
     #self.cost: float = 0 #not yet implemented
     #self.gcd_mod: float = 0.0 #not yet implemented
-    cast_time: float = 0.0
-    duration: float = 0.0
+    cast_time: int = 0
+    duration: int = 0
     ticks: int = 1
     #max_stacks: int = 1 #not yet implemented
 

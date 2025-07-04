@@ -17,7 +17,7 @@ class FinalizedEvent:
     outcome: EventOutcome = EventOutcome.EMPTY
 
     @property
-    def timestamp(self) -> float:
+    def timestamp(self) -> int:
         return self.upcoming_event.timestamp
     @property
     def source_id(self) -> int:
@@ -67,7 +67,7 @@ class FinalizedEvent:
     # Additional helper properties
     @property
     def effect_position(self) -> Position:
-        """Get the position where effects should be displayed as a tuple"""
+        """Get the position where effects should be displayed"""
         if self.spell.animate_on_target:
             game_obj = self.target
         else:

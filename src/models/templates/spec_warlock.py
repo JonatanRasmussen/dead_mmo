@@ -22,7 +22,7 @@ class SpecWarlock:
 
     @staticmethod
     def fire_aura_apply() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(113, SpecWarlock.fire_aura_tick().spell_id, 3.0, 30)
+        return SpellTemplates.apply_aura_to_self(113, SpecWarlock.fire_aura_tick().spell_id, 3000, 30)
     @staticmethod
     def shadowbolt_tick() -> SpellFactory:
         return (
@@ -32,7 +32,7 @@ class SpecWarlock:
         )
     @staticmethod
     def aura_shadowbolt() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(117, SpecWarlock.shadowbolt_tick().spell_id, 30.0, 1200)
+        return SpellTemplates.apply_aura_to_self(117, SpecWarlock.shadowbolt_tick().spell_id, 30000, 1200)
     @staticmethod
     def shadowbolt_spawn() -> SpellFactory:
         game_obj = GameObj(
@@ -53,7 +53,7 @@ class SpecWarlock:
             )
         )
         obj_controls = (
-            Controls(timeline_timestamp=0.0, ability_1=True, ability_2=True),
+            Controls(timeline_timestamp=0, ability_1=True, ability_2=True),
         )
         return (
             SpellFactory(41)

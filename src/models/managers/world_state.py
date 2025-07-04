@@ -22,10 +22,10 @@ class WorldState:
     @property
     def default_ids(self) -> DefaultIDs:
         return self._game_objs.default_ids
-    def add_realtime_player_controls(self, player_input: Controls, frame_middle: float) -> None:
-        self._controls.add_realtime_player_controls(player_input, frame_middle, self.default_ids.player_id)
+    def add_realtime_player_controls(self, player_input: Controls, timestamp: int) -> None:
+        self._controls.add_realtime_player_controls(player_input, timestamp, self.default_ids.player_id)
 
-    def process_frame(self, frame_start: float, frame_end: float) -> EventLog:
+    def process_frame(self, frame_start: int, frame_end: int) -> EventLog:
         event_log = EventLog(frame_start, frame_end)
         event_id_gen = IdGen.create_preassigned_range(1, 10_000)
         event_heap = FrameHeap()
@@ -33,7 +33,7 @@ class WorldState:
         # Initialize environment if this is the very first frame
         if not self.default_ids.environment_exists:
             self._game_objs.initialize_environment()
-            event_heap.insert_event(UpcomingEvent(timestamp=0.0, spell_id=self._environment_setup_id))
+            event_heap.insert_event(UpcomingEvent(timestamp=0, spell_id=self._environment_setup_id))
 
         # Prepare state updates for current frame
         for event in self._fetch_events_happening_this_frame(frame_start, frame_end):
@@ -42,7 +42,7 @@ class WorldState:
         # Execute state updates for current frame
         while event_heap.has_unprocessed_events:
             u_event = event_heap.pop_next_event()
-            assert (u_event.timestamp > frame_start or u_event.timestamp == 0.0), f"frame starts at {frame_start} but event has timestamp {u_event}."
+            assert (u_event.timestamp > frame_start or u_event.timestamp == 0), f"frame starts at {frame_start} but event has timestamp {u_event}."
             assert u_event.timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {u_event}."
             f_event = self._finalize_event(u_event, event_id_gen.generate_new_id())
             event_log.log_event(f_event)
@@ -59,22 +59,22 @@ class WorldState:
         self._remove_all_expired_auras(frame_end)
         return event_log
 
-    def _fetch_events_happening_this_frame(self, frame_start: float, frame_end: float) -> Iterable[UpcomingEvent]:
+    def _fetch_events_happening_this_frame(self, frame_start: int, frame_end: int) -> Iterable[UpcomingEvent]:
         """ Create events for periodic effects and controls that are scheduled for this frame. """
         for aura in self._auras.view_auras:
             yield from UpcomingEvent.create_aura_tick_events(aura, frame_start, frame_end)
         for _, obj_id, controls in self._controls.get_controls_in_timerange(frame_start, frame_end):
-            assert (controls.ingame_time > frame_start or controls.ingame_time == 0.0), f"frame starts at {frame_start} but controls has timestamp {controls.ingame_time}."
+            assert (controls.ingame_time > frame_start or controls.ingame_time == 0), f"frame starts at {frame_start} but controls has timestamp {controls.ingame_time}."
             assert controls.ingame_time <= frame_end, f"frame ends at {frame_end}, but controls has timestamp {controls.ingame_time}."
             game_obj = self._game_objs.get_game_obj(obj_id)
             yield from UpcomingEvent.create_events_from_controls(game_obj, controls, frame_start, frame_end)
 
-    def _fetch_cascading_events(self, frame_start: float, frame_end: float, f_event: FinalizedEvent, new_obj: Optional[GameObj]) -> Iterable[UpcomingEvent]:
+    def _fetch_cascading_events(self, frame_start: int, frame_end: int, f_event: FinalizedEvent, new_obj: Optional[GameObj]) -> Iterable[UpcomingEvent]:
         # If the event's spell spawned an obj, add any new controls happening this frame
         if new_obj is not None and f_event.spell.obj_controls is not None:
             assert f_event.spell.spawned_obj is not None, "new_obj exists but is not from spell."
             for controls in f_event.spell.copy_obj_controls:
-                assert (new_obj.cds.spawn_timestamp > frame_start or new_obj.cds.spawn_timestamp == 0.0), f"frame starts at {frame_start} but {new_obj.obj_id} has spawn_timestamp {new_obj.cds.spawn_timestamp}."
+                assert (new_obj.cds.spawn_timestamp > frame_start or new_obj.cds.spawn_timestamp == 0), f"frame starts at {frame_start} but {new_obj.obj_id} has spawn_timestamp {new_obj.cds.spawn_timestamp}."
                 assert new_obj.cds.spawn_timestamp <= frame_end, f"frame ends at {frame_end} but {new_obj.obj_id} has spawn_timestamp {new_obj.cds.spawn_timestamp}."
                 controls.increase_offset(new_obj.cds.spawn_timestamp)
                 assert not controls.is_empty, f"Controls for {new_obj.obj_id} is empty."
@@ -146,7 +146,7 @@ class WorldState:
         )
         return finalized_event
 
-    def _remove_all_expired_auras(self, frame_end: float) -> None:
+    def _remove_all_expired_auras(self, frame_end: int) -> None:
         cached_source: GameObj = GameObj()
         for aura in self._auras.view_auras:
             if aura.source_id != cached_source.obj_id:

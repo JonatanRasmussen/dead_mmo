@@ -14,7 +14,7 @@ class NpcHealingPowerup:
 
     @staticmethod
     def healing_burst_apply() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(215, NpcHealingPowerup.healing_burst_tick().spell_id, 15.0, 150)
+        return SpellTemplates.apply_aura_to_self(215, NpcHealingPowerup.healing_burst_tick().spell_id, 15000, 150)
 
     @staticmethod
     def spawn_healing_powerup() -> SpellFactory:
@@ -33,8 +33,8 @@ class NpcHealingPowerup:
             )
         )
         obj_controls = (
-            Controls(timeline_timestamp=0.1, swap_target=True),
-            Controls(timeline_timestamp=0.2, ability_1=True),
+            Controls(timeline_timestamp=100, swap_target=True),
+            Controls(timeline_timestamp=200, ability_1=True),
         )
         return (
             SpellFactory(171)

@@ -45,7 +45,7 @@ class Behavior(Flag):
         if self & Behavior.HEALING:
             target_obj.res.hp += power * source_obj.spell_modifier
 
-    def modify_source(self, timestamp: float, source_obj: GameObj, target_obj: GameObj) -> None:
+    def modify_source(self, timestamp: int, source_obj: GameObj, target_obj: GameObj) -> None:
         src = source_obj
         if self & Behavior.UPDATE_CURRENT_TARGET:
             source_obj.current_target = target_obj.obj_id

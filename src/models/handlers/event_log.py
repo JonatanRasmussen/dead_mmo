@@ -16,9 +16,9 @@ class EventLog:
     DEBUG_PRINT_GAME_OBJ_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_UPDATES
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES
 
-    def __init__(self, frame_start: float, frame_end: float) -> None:
-        self.frame_start: float = frame_start
-        self.frame_end: float = frame_end
+    def __init__(self, frame_start: int, frame_end: int) -> None:
+        self.frame_start: int = frame_start
+        self.frame_end: int = frame_end
         self._combat_event_log: dict[int, FinalizedEvent] = {}
 
     @property
@@ -56,11 +56,13 @@ class EventLog:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
 
-        # Helper function to format floats with 3 decimal places
         def fmt(value):
+            """ Helper function to format floats with 3 decimal places """
             if isinstance(value, float):
                 return f"{value:.3f}"
-            return value
+            if isinstance(value, int) and value > 1000: # Heuristic to guess if it's a timestamp
+                return f"{value / 1000.0:.3f}s"
+            return str(value) # Convert all to string for consistency
 
         # Format object ID with 4 digits and leading zeros
         obj_id_fmt = f"{current.obj_id:04d}"
@@ -88,8 +90,8 @@ class EventLog:
             Logger.debug(f"Obj {obj_id_fmt} SPEED update: {fmt(current.mods.movement_speed)} -> {fmt(updated.mods.movement_speed)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.is_attackable != updated.is_attackable:
             Logger.debug(f"Obj {obj_id_fmt} ATTACKABLE update: {current.is_attackable} -> {updated.is_attackable}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.gcd != updated.gcd:
-            Logger.debug(f"Obj {obj_id_fmt} GCD update: {fmt(current.gcd)} -> {fmt(updated.gcd)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        if current.gcd_mod != updated.gcd_mod:
+            Logger.debug(f"Obj {obj_id_fmt} GCD update: {fmt(current.gcd_mod)} -> {fmt(updated.gcd_mod)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
         # Positional data
         if EventLog.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES:

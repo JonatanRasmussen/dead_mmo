@@ -29,11 +29,11 @@ class NpcBoss:
             )
         )
         obj_controls = (
-            Controls(timeline_timestamp=0.4, ability_3=True),
-            Controls(timeline_timestamp=0.8, ability_4=True),
-            Controls(timeline_timestamp=1.0, swap_target=True),
-            Controls(timeline_timestamp=3.0, ability_1=True),
-            Controls(timeline_timestamp=5.0, ability_2=True),
+            Controls(timeline_timestamp=400, ability_3=True),
+            Controls(timeline_timestamp=800, ability_4=True),
+            Controls(timeline_timestamp=1000, swap_target=True),
+            Controls(timeline_timestamp=3000, ability_1=True),
+            Controls(timeline_timestamp=5000, ability_2=True),
         )
         return (
             SpellFactory(69)

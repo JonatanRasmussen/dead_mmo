@@ -14,7 +14,7 @@ class Renderer:
         self.animation_manager = animation_manager
         self.font = pygame.font.SysFont('Arial', 30)
 
-    def draw_frame(self, game_objs: ValuesView[GameObj], fps: int, ingame_time: float) -> None:
+    def draw_frame(self, game_objs: ValuesView[GameObj], fps: int, ingame_time: int) -> None:
         """Draw a complete frame"""
         self._clear_screen()
         self._draw_borders()
@@ -39,7 +39,7 @@ class Renderer:
         pygame.draw.rect(self.window_manager.screen, Colors.GREY, (0, 0, sides, self.window_manager.WINDOW_HEIGHT))
         pygame.draw.rect(self.window_manager.screen, Colors.GREY, (self.window_manager.WINDOW_WIDTH - sides, 0, sides, self.window_manager.WINDOW_HEIGHT))
 
-    def _draw_game_objects(self, game_objs: ValuesView[GameObj], ingame_time: float) -> None:
+    def _draw_game_objects(self, game_objs: ValuesView[GameObj], ingame_time: int) -> None:
         """Draw all visible game objects"""
         for game_obj in game_objs:
             if not game_obj.is_visible:
@@ -47,7 +47,7 @@ class Renderer:
 
             self._draw_game_object(game_obj, ingame_time)
 
-    def _draw_game_object(self, game_obj: GameObj, ingame_time: float) -> None:
+    def _draw_game_object(self, game_obj: GameObj, ingame_time: int) -> None:
         """Draw a single game object"""
         pos = self.window_manager.world_to_screen_coords(game_obj.pos.x, game_obj.pos.y)
         size = int(game_obj.size * self.window_manager.PLAY_HEIGHT)
@@ -74,7 +74,7 @@ class Renderer:
         sprite_rect = scaled_sprite.get_rect(center=pos)
         self.window_manager.screen.blit(scaled_sprite, sprite_rect)
 
-    def _draw_cooldown_indicator(self, game_obj: GameObj, pos: tuple, size: int, ingame_time: float) -> None:
+    def _draw_cooldown_indicator(self, game_obj: GameObj, pos: tuple, size: int, ingame_time: int) -> None:
         """Draw the radial cooldown indicator"""
         progress = game_obj.get_gcd_progress(ingame_time)
         if progress >= 1.0:  # Fully cooled down, no indicator needed

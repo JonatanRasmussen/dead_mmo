@@ -55,7 +55,8 @@ class PygameLauncher:
             controls = self.input_handler.process_events()
 
             # Update game state
-            self.game_instance.process_next_frame(delta_time, controls)
+            delta_time_in_ms = self.game_instance.convert_delta_time_to_int_in_ms(delta_time)
+            self.game_instance.process_next_frame(delta_time_in_ms, controls)
 
             # Get finalized events from this frame
             finalized_events = self.game_instance.view_all_events_this_frame

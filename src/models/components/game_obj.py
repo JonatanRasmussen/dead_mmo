@@ -33,7 +33,7 @@ class GameObj:
 
     # Combat stats
     is_attackable: bool = False
-    gcd: float = 1.0
+    gcd_mod: float = 1.0
 
     # Cosmetics and Appearance
     color: tuple[int, int, int] = Colors.WHITE
@@ -86,5 +86,6 @@ class GameObj:
     def is_despawned(self) -> bool:
         return self.status == ObjStatus.DESPAWNED
 
-    def get_gcd_progress(self, current_time: float) -> float:
-        return min(1.0, (current_time - self.cds.gcd_start) / self.gcd)
+    def get_gcd_progress(self, current_time: int) -> float:
+        gcd = Consts.BASE_GCD * self.gcd_mod
+        return min(1.0, (current_time - self.cds.gcd_start) / gcd)

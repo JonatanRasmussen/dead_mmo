@@ -8,7 +8,7 @@ from .game_obj import GameObj
 
 @dataclass(slots=True)
 class UpcomingEvent:
-    timestamp: float = Consts.EMPTY_TIMESTAMP
+    timestamp: int = Consts.EMPTY_TIMESTAMP
     priority: int = 0
 
     source_id: int = Consts.EMPTY_ID
@@ -18,12 +18,12 @@ class UpcomingEvent:
     spell_modifier: float = 1.0
 
     aura_origin_spell_id: int = Consts.EMPTY_ID
-    aura_start_time: float = Consts.EMPTY_TIMESTAMP
+    aura_start_time: int = Consts.EMPTY_TIMESTAMP
     is_spell_sequence: bool = False
     is_aoe_targeting: bool = False
 
     @property
-    def key(self) -> tuple[float, int, int, int, int]:
+    def key(self) -> tuple[int, int, int, int, int]:
         return (self.timestamp, self.priority, self.source_id, self.target_id, self.spell_id)
 
     @property
@@ -35,7 +35,7 @@ class UpcomingEvent:
         return Consts.is_valid_id(self.aura_origin_spell_id)
 
     @staticmethod
-    def create_aura_tick_events(aura: Aura, frame_start: float, frame_end: float) -> Iterable['UpcomingEvent']:
+    def create_aura_tick_events(aura: Aura, frame_start: int, frame_end: int) -> Iterable['UpcomingEvent']:
         """ Return an event for each tick happening this frame, excluding frame_start, including frame_end """
         priority = 0
         for tick_timestamp in aura.tick_timestamps:
@@ -52,7 +52,7 @@ class UpcomingEvent:
                 )
 
     @staticmethod
-    def create_events_from_controls(game_obj: GameObj, controls: Controls, frame_start: float, frame_end: float) -> Iterable['UpcomingEvent']:
+    def create_events_from_controls(game_obj: GameObj, controls: Controls, frame_start: int, frame_end: int) -> Iterable['UpcomingEvent']:
         if not game_obj.is_despawned and frame_start < controls.ingame_time <= frame_end:
             input_event_order = 0
             for spell_id in game_obj.loadout.convert_controls_to_spell_ids(controls, game_obj.obj_id):

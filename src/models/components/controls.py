@@ -6,8 +6,8 @@ from src.config import Consts
 class Controls:
     """ Keypresses for a given timestamp. Is used to make game objects initiate a spellcast. """
     obj_id: int = Consts.EMPTY_ID
-    timeline_timestamp: float = Consts.EMPTY_TIMESTAMP
-    _offset: float = 0.0
+    timeline_timestamp: int = Consts.EMPTY_TIMESTAMP
+    _offset: int = 0
 
     start_move_up: bool = False
     stop_move_up: bool = False
@@ -25,7 +25,7 @@ class Controls:
     ability_4: bool = False
 
     @property
-    def get_key_for_controls(self) -> tuple[float, int]:
+    def get_key_for_controls(self) -> tuple[int, int]:
         return (self.ingame_time, self.obj_id)
 
     @property
@@ -47,13 +47,13 @@ class Controls:
         ))
 
     @property
-    def ingame_time(self) -> float:
+    def ingame_time(self) -> int:
         return self.timeline_timestamp + self._offset
 
     @property
     def has_valid_timestamp(self) -> bool:
         return self.ingame_time != Consts.EMPTY_TIMESTAMP
 
-    def increase_offset(self, additional_offset: float) -> None:
-        assert self._offset == 0.0, "Controls has been offset more than once, is this intentional?"
+    def increase_offset(self, additional_offset: int) -> None:
+        assert self._offset == 0, "Controls has been offset more than once, is this intentional?"
         self._offset += additional_offset

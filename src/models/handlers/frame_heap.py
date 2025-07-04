@@ -7,7 +7,7 @@ from src.models.components import UpcomingEvent
 
 class FrameHeap:
     def __init__(self) -> None:
-        self._event_heap: list[tuple[float, int, int, int, int, UpcomingEvent]] = []
+        self._event_heap: list[tuple[int, int, int, int, int, UpcomingEvent]] = []
         self._iterations_remaining = Consts.EVENT_HEAP_MAX_ITERATIONS
 
     @classmethod
@@ -18,7 +18,7 @@ class FrameHeap:
         return event_heap
 
     @property
-    def has_unprocessed_events(self) -> float:
+    def has_unprocessed_events(self) -> int:
         return len(self._event_heap) > 0
 
     def insert_event(self, event: UpcomingEvent) -> None:

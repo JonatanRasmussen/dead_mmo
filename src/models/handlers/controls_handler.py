@@ -8,18 +8,23 @@ from src.models.components import Controls, GameObj, Spell
 class ControlsHandler:
 
     def __init__(self) -> None:
-        self._controls: SortedDict[tuple[float, int], Controls] = SortedDict()
+        self._controls: SortedDict[tuple[int, int], Controls] = SortedDict()
 
-    def get_controls_in_timerange(self, frame_start: float, frame_end: float) -> Iterable[tuple[float, int, Controls]]:
+    """def get_controls_in_timerange(self, frame_start: int, frame_end: int) -> Iterable[tuple[int, int, Controls]]:
         start_key = (frame_start, Consts.MIN_ID)
         end_key = (frame_end, Consts.MAX_ID)
-        yield from ((k[0], k[1], self._controls[k]) for k in self._controls.irange(start_key, end_key))
+        yield from ((k[0], k[1], self._controls[k]) for k in self._controls.irange(start_key, end_key, inclusive=(False, True)))"""
 
-    def add_realtime_player_controls(self, new_controls: Controls, frame_middle: float, obj_id: int, ) -> None:
+    def get_controls_in_timerange(self, frame_start: int, frame_end: int) -> Iterable[tuple[int, int, Controls]]:
+        for (timestamp, obj_id), controls in self._controls.items():
+            if frame_start < timestamp <= frame_end:
+                yield (timestamp, obj_id, controls)
+
+    def add_realtime_player_controls(self, new_controls: Controls, timestamp: int, obj_id: int) -> None:
         if Consts.is_valid_id(obj_id) and not new_controls.is_empty:
-            assert frame_middle != 0.0, "frame_middle should not be 0.0"
+            assert timestamp != 0, "timestamp should not be 0"
             assert not new_controls.is_empty, f"{obj_id} has empty controls"
-            new_controls.timeline_timestamp = frame_middle
+            new_controls.timeline_timestamp = timestamp
             new_controls.obj_id = obj_id
             self._add_controls(new_controls)
 
@@ -32,7 +37,7 @@ class ControlsHandler:
                 self._add_controls(controls)
 
     def _add_controls(self, new_controls: Controls) -> None:
-        key: tuple[float, int] = new_controls.get_key_for_controls
+        key: tuple[int, int] = new_controls.get_key_for_controls
         assert Consts.is_valid_id(new_controls.obj_id), "Controls for invalid / empty GameObj cannot be added."
         assert new_controls.has_valid_timestamp, "Controls has invalid / uninitialized timestamp."
         assert not new_controls.is_empty, f"{new_controls.obj_id} has empty controls"
