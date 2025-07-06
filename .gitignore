@@ -5,4 +5,4 @@ images
 video
 .pytest_cache
 .vscode
-logs
+logs/
