@@ -7,25 +7,18 @@ from src.models.managers.world_state import WorldState
 
 
 class GameInstance:
-    def __init__(self, environment_setup_id: int) -> None:
-        self._state: WorldState = WorldState(environment_setup_id)
-        self._event_frame_logs: list[EventLog] = []
-        self._ingame_time: int = 0
+    def __init__(self, setup_spell_ids: list[int]) -> None:
+        self.ingame_time: int = 0
         self._rounding_error: float = 0.0
-
-    @property
-    def ingame_time(self) -> int:
-        return self._ingame_time
-
+        self._state: WorldState = WorldState()
+        self._event_frame_logs: dict[int, EventLog] = self._state._process_setup_events(self.ingame_time, setup_spell_ids)
     @property
     def view_all_game_objs_to_draw(self) -> ValuesView[GameObj]:
         return self._state.view_game_objs
 
     @property
     def view_all_events_this_frame(self) -> ValuesView[FinalizedEvent]:
-        assert len(self._event_frame_logs) > 0
-        assert self.ingame_time == self._event_frame_logs[-1].frame_end
-        return self._event_frame_logs[-1].view_all_events
+        return self._event_frame_logs[self.ingame_time].view_all_events
 
     @property
     def rounding_error(self) -> float:
@@ -41,16 +34,14 @@ class GameInstance:
         return rounded_ms
 
     def process_next_frame(self, delta_time: int, player_input: Controls) -> None:
-        frame_start = self.ingame_time
-        self._ingame_time += delta_time
-        frame_end = self.ingame_time
-        self._state.add_realtime_player_controls(player_input, frame_end)
-        event_log = self._state.process_frame(frame_start, frame_end)
-        self._event_frame_logs.append(event_log)
+        self.ingame_time += delta_time
+        self._state.try_add_player_input(player_input, self.ingame_time)
+        event_log = self._state.process_frame(self.ingame_time)
+        self._event_frame_logs[self.ingame_time] = event_log
 
     @staticmethod
-    def simulate_game_in_console(setup_spell_id: int) -> None:
-        game_instance = GameInstance(setup_spell_id)
+    def simulate_game_in_console(setup_spell_ids: list[int]) -> None:
+        game_instance = GameInstance(setup_spell_ids)
         SIMULATION_DURATION_MS = 6000
         UPDATES_PER_SECOND = 50
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND

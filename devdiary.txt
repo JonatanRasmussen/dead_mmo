@@ -263,3 +263,9 @@
 [2025-07-03 17:31:07] {BudoB}: Maybe one day I will realize that my refactoring is worth it.
 [2025-07-03 17:31:18] {BudoB}: Or maybe not. But most importantly, it IS satisfying.
 [2025-07-03 17:31:36] {BudoB}: Code time: 11 hours.
+
+[2025-07-07 00:37:37] {BudoB}: Funny how a thought in Marco's summer house could fix my code.
+[2025-07-07 00:38:10] {BudoB}: Having an event heap across frames, adding each event once.
+[2025-07-07 00:38:39] {BudoB}: ...Instead of scanning for controls and aura ticks within frame.
+[2025-07-07 00:38:53] {BudoB}: Good stuff. Idk this is getting good I hope. Coding is fun.
+[2025-07-07 00:39:14] {BudoB}: Code time: 4 hours.

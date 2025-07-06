@@ -12,8 +12,7 @@ from .fps_manager import FPSManager
 
 class PygameLauncher:
     def __init__(self) -> None:
-        # Initialize pygame
-        pygame.init()
+        pygame.init()  # Initialize pygame
 
         # Initialize managers
         self.window_manager = WindowManager()
@@ -21,11 +20,11 @@ class PygameLauncher:
         self.audio_manager = AudioManager()
         self.animation_manager = AnimationManager()
         self.input_handler = InputHandler()
-        self.fps_manager = FPSManager(60)
+        self.fps_manager = FPSManager(165)
         self.renderer = Renderer(self.window_manager, self.sprite_manager, self.animation_manager)
 
         # Initialize game instance
-        self.game_instance = GameInstance(environment_setup_id=300)
+        self.game_instance = GameInstance(setup_spell_ids=[300])
 
     @staticmethod
     def run_game() -> None:
@@ -35,42 +34,23 @@ class PygameLauncher:
         # Preload common assets (optional optimization)
         # game.sprite_manager.preload_sprites(['player', 'enemy', 'projectile'])
         # game.animation_manager.preload_animations(['explosion', 'hit_effect', 'heal_effect'])
+        game.main_loop()  # Run main game loop
 
-        # Run main game loop
-        game.main_loop()
-
-        # Cleanup
-        pygame.quit()
+        pygame.quit()  # Cleanup
         sys.exit()
 
     def main_loop(self) -> None:
         """Main game loop"""
         last_time = pygame.time.get_ticks()
-
         while self.input_handler.is_running():
-            # Calculate delta time
             delta_time, last_time = self.fps_manager.get_delta_time(last_time)
-
-            # Process input
             controls = self.input_handler.process_events()
-
-            # Update game state
             delta_time_in_ms = self.game_instance.convert_delta_time_to_int_in_ms(delta_time)
             self.game_instance.process_next_frame(delta_time_in_ms, controls)
-
-            # Get finalized events from this frame
             finalized_events = self.game_instance.view_all_events_this_frame
-
-            # Process events for audio and animations
             self.audio_manager.process_events(finalized_events)
             self.animation_manager.process_events(finalized_events)
-
-            # Update animations
             self.animation_manager.update(delta_time)
-
-            # Render frame
             game_objs = self.game_instance.view_all_game_objs_to_draw
             self.renderer.draw_frame(game_objs, self.fps_manager.get_fps(), self.game_instance.ingame_time)
-
-            # Maintain target FPS
-            self.fps_manager.tick()
+            self.fps_manager.tick()  # Maintain target FPS

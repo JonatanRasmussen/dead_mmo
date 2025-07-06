@@ -16,9 +16,7 @@ class EventLog:
     DEBUG_PRINT_GAME_OBJ_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_UPDATES
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES
 
-    def __init__(self, frame_start: int, frame_end: int) -> None:
-        self.frame_start: int = frame_start
-        self.frame_end: int = frame_end
+    def __init__(self) -> None:
         self._combat_event_log: dict[int, FinalizedEvent] = {}
 
     @property

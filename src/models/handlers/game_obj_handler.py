@@ -11,6 +11,7 @@ class GameObjHandler:
         self._game_objs: dict[int, GameObj] = {}
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._default_ids: DefaultIDs = DefaultIDs()
+        self._create_environment_obj()
 
     @property
     def default_ids(self) -> DefaultIDs:
@@ -43,12 +44,6 @@ class GameObjHandler:
         assert updated_game_obj.obj_id in self._game_objs, f"GameObj with ID {updated_game_obj.obj_id} does not exist."
         self._game_objs[updated_game_obj.obj_id] = updated_game_obj
 
-    def initialize_environment(self) -> None:
-        assert not self._default_ids.environment_exists, f"Environment is already initialized (ID={self._default_ids.environment_id})"
-        game_obj = GameObj.create_environment(self._generate_new_game_obj_id())
-        self.add_game_obj(game_obj)
-        self._default_ids.environment_id = game_obj.obj_id
-
     def modify_game_obj(self, f_event: FinalizedEvent) -> None:
         spell = f_event.spell
         spell.flags.modify_source(f_event.timestamp, f_event.source, f_event.target)
@@ -72,6 +67,12 @@ class GameObjHandler:
         self._update_default_ids(child, f_event.spell)
         return child
 
+    def _create_environment_obj(self) -> None:
+        assert not self.default_ids.environment_exists, f"Environment is already initialized (ID={self._default_ids.environment_id})"
+        game_obj = GameObj.create_environment(self._generate_new_game_obj_id())
+        self.add_game_obj(game_obj)
+        self.default_ids.environment_id = game_obj.obj_id
+
     def _update_default_ids(self, new_obj: GameObj, spell: Spell) -> None:
         if spell.flags & Behavior.SPAWN_BOSS:
             if not self._default_ids.boss1_exists:
@@ -82,6 +83,3 @@ class GameObjHandler:
         if spell.flags & Behavior.SPAWN_PLAYER:
             assert not self._default_ids.player_exists, "Player already exists."
             self._default_ids.player_id = new_obj.obj_id
-
-    def _game_obj_is_environment(self, game_obj: GameObj) -> bool:
-        return game_obj.obj_id == self._default_ids.environment_id

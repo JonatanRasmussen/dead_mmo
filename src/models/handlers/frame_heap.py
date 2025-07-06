@@ -1,5 +1,5 @@
 import heapq
-from typing import List, Tuple
+from typing import Optional
 
 from src.config import Consts
 from src.models.components import UpcomingEvent
@@ -17,9 +17,9 @@ class FrameHeap:
             event_heap.insert_event(event)
         return event_heap
 
-    @property
-    def has_unprocessed_events(self) -> int:
-        return len(self._event_heap) > 0
+    def has_unprocessed_events(self, timestamp_to_stop_after: float) -> bool:
+        next_event = self._peek_next_event()
+        return next_event is not None and next_event.timestamp <= timestamp_to_stop_after
 
     def insert_event(self, event: UpcomingEvent) -> None:
         heapq.heappush(self._event_heap, (*event.key, event))
@@ -30,3 +30,8 @@ class FrameHeap:
         self._iterations_remaining -= 1
         _, _, _, _, _, event = heapq.heappop(self._event_heap)
         return event
+
+    def _peek_next_event(self) -> Optional[UpcomingEvent]:
+        if len(self._event_heap) > 0:
+            return self._event_heap[0][-1]
+        return None
