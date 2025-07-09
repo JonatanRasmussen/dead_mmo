@@ -1,7 +1,8 @@
 from typing import Iterable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 from src.config import Consts
+from src.models.utils.copy_utils import CopyTools
 from .aura import Aura
 from .controls import Controls
 from .game_obj import GameObj
@@ -38,7 +39,7 @@ class UpcomingEvent:
         priority = self.priority
         for target_id in target_ids:
             priority += 1
-            aoe_copy = replace(self)
+            aoe_copy = self._create_copy()
             aoe_copy.priority = priority
             aoe_copy.target_id = target_id
             aoe_copy.is_aoe_targeting = True
@@ -48,7 +49,7 @@ class UpcomingEvent:
         priority = self.priority
         for next_spell_id in spell_sequence_ids:
             priority += 1
-            seq_copy = replace(self)
+            seq_copy = self._create_copy()
             seq_copy.priority = priority
             seq_copy.spell_id = next_spell_id
             seq_copy.is_spell_sequence = True
@@ -88,3 +89,6 @@ class UpcomingEvent:
     def create_setup_events(timestamp: int, source_id: int, setup_spell_ids: list[int]) -> Iterable['UpcomingEvent']:
         for spell_id in setup_spell_ids:
             yield UpcomingEvent(timestamp=timestamp, source_id=source_id, spell_id=spell_id)
+
+    def _create_copy(self) -> 'UpcomingEvent':
+        return CopyTools.full_copy(self)

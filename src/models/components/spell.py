@@ -1,5 +1,5 @@
 from typing import Iterable, Optional
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from src.config import Consts
 from .behavior import Behavior
 from .controls import Controls
@@ -46,7 +46,7 @@ class Spell:
     def copy_obj_controls(self) -> Iterable[Controls]:
         if self.obj_controls is not None:
             for controls in self.obj_controls:
-                yield replace(controls)
+                yield controls.create_copy()
 
     @property
     def should_play_audio(self) -> bool:

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from src.config import Consts
+from src.models.utils.copy_utils import CopyTools
 
 @dataclass(slots=True)
 class Controls:
@@ -57,3 +58,6 @@ class Controls:
     def increase_offset(self, additional_offset: int) -> None:
         assert self._offset == 0, "Controls has been offset more than once, is this intentional?"
         self._offset += additional_offset
+
+    def create_copy(self) -> 'Controls':
+        return CopyTools.full_copy(self)

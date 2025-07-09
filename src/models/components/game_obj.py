@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 import math
 
 from src.config import Colors, Consts
+from src.models.utils.copy_utils import CopyTools
 from .hostility import Hostility
 from .loadout import Loadout
 from .modifiers import Modifiers
@@ -39,15 +40,7 @@ class GameObj:
     color: tuple[int, int, int] = Colors.WHITE
 
     def create_copy(self) -> 'GameObj':
-        return replace(
-            self,
-            cds=replace(self.cds),
-            loadout=replace(self.loadout),
-            mods=replace(self.mods),
-            pos=replace(self.pos),
-            res=replace(self.res),
-            views=replace(self.views),
-        )
+        return CopyTools.full_copy(self)
 
     @classmethod
     def create_environment(cls, obj_id: int) -> 'GameObj':
