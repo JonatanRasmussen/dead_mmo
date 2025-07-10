@@ -1,17 +1,21 @@
-from typing import Any, List, Dict, Type
+from typing import Any, Type
 
-from src.models.components import Spell
+from src.models.configs import Spell
 from src.models.services import SpellFactory
-from src.models.templates import BasicMovement, BasicTargeting
-from src.models.templates import NpcBoss, NpcHealingPowerup, NpcLandmine, NpcTargetDummy
-from src.models.templates import SpecWarlock, ZoneTestGround
+from src.models.configs.templates import BasicMovement, BasicTargeting
+from src.models.configs.templates import NpcBoss, NpcHealingPowerup, NpcLandmine, NpcTargetDummy
+from src.models.configs.templates import SpecWarlock, ZoneTestGround
 
 class SpellDatabase:
     def __init__(self) -> None:
-        self.spells_loaded_into_memory: dict[int, Spell] = SpellDatabase.load_spells_into_memory()
+        self.spells_loaded_into_memory: dict[int, Spell] = SpellDatabase._load_spells_into_memory()
+
+    def get_spell(self, spell_id: int) -> Spell:
+        assert spell_id in self.spells_loaded_into_memory, f"Spell with ID {spell_id} not found."
+        return self.spells_loaded_into_memory.get(spell_id, Spell())
 
     @staticmethod
-    def load_spells_into_memory() -> dict[int, Spell]:
+    def _load_spells_into_memory() -> dict[int, Spell]:
         spells_to_load: list[SpellFactory] = []
         spells_to_load += SpellDatabase._load_collection(BasicMovement)
         spells_to_load += SpellDatabase._load_collection(BasicTargeting)
@@ -27,10 +31,6 @@ class SpellDatabase:
             assert spell.spell_id not in spells_loaded_into_memory, f"Spell with ID {spell.spell_id} already exists."
             spells_loaded_into_memory[spell.spell_id] = spell
         return spells_loaded_into_memory
-
-    def get_spell(self, spell_id: int) -> Spell:
-        assert spell_id in self.spells_loaded_into_memory, f"Spell with ID {spell_id} not found."
-        return self.spells_loaded_into_memory.get(spell_id, Spell())
 
     @staticmethod
     def _load_collection(class_with_methods: Type[Any]) -> list[Any]:

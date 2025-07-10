@@ -2,7 +2,7 @@ import heapq
 from typing import Optional
 
 from src.config import Consts
-from src.models.components import UpcomingEvent
+from src.models.events import UpcomingEvent
 
 
 class FrameHeap:

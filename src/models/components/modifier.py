@@ -1,0 +1,4 @@
+
+
+class Multiplier(float):
+    pass

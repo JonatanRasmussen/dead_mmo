@@ -1,7 +1,7 @@
-from .game_instance import GameInstance
+from .combat_instance import CombatInstance
 from .world_state import WorldState
 
 __all__ = [
-    "GameInstance",
+    "CombatInstance",
     "WorldState",
 ]

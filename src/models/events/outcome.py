@@ -1,11 +1,10 @@
 from enum import Enum, auto
 
-from .behavior import Behavior
-from .game_obj import GameObj
-from .spell import Spell
+from src.models.components import GameObj
+from src.models.configs import Behavior, Spell
 
 
-class EventOutcome(Enum):
+class Outcome(Enum):
     EMPTY = 0
     SUCCESS = auto()
     OUT_OF_RANGE = auto()
@@ -17,24 +16,24 @@ class EventOutcome(Enum):
 
     @property
     def is_success(self) -> bool:
-        return self in {EventOutcome.SUCCESS}
+        return self in {Outcome.SUCCESS}
 
     @staticmethod
-    def decide_outcome(timestamp: int, source_obj: GameObj, spell: Spell, target_obj: GameObj, skip_source_validation: bool) -> 'EventOutcome':
+    def decide_outcome(timestamp: int, source_obj: GameObj, spell: Spell, target_obj: GameObj, skip_source_validation: bool) -> 'Outcome':
         # Validate source
         if not skip_source_validation:
-            if not source_obj.status.is_valid_source:
-                return EventOutcome.SOURCE_IS_DISABLED
-            if not EventOutcome._gcd_is_available(timestamp, source_obj, spell):
-                return EventOutcome.GCD_NOT_READY
+            if not source_obj.state.is_valid_source:
+                return Outcome.SOURCE_IS_DISABLED
+            if not Outcome._gcd_is_available(timestamp, source_obj, spell):
+                return Outcome.GCD_NOT_READY
         # Validate target
-        if not target_obj.status.is_valid_target and not source_obj.obj_id == target_obj.obj_id:
-            return EventOutcome.TARGET_IS_INVALID
+        if not target_obj.state.is_valid_target and not source_obj.obj_id == target_obj.obj_id:
+            return Outcome.TARGET_IS_INVALID
         # Validate source relative to target
-        if not EventOutcome._is_within_range(source_obj, spell, target_obj):
-            return EventOutcome.OUT_OF_RANGE
+        if not Outcome._is_within_range(source_obj, spell, target_obj):
+            return Outcome.OUT_OF_RANGE
         # More outcome conditions to be added here.
-        return EventOutcome.SUCCESS
+        return Outcome.SUCCESS
 
     @staticmethod
     def _is_within_range(source_obj: GameObj, spell: Spell, target_obj: GameObj) -> bool:

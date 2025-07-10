@@ -1,6 +1,7 @@
 from typing import Optional, Tuple
 from src.config import Consts
-from src.models.components import Behavior, Controls, GameObj, Hostility, Targeting, Spell
+from src.models.components import Controls, GameObj, Faction
+from src.models.configs import Behavior, Targeting, Spell
 
 
 class SpellFactory:
@@ -107,11 +108,11 @@ class SpellFactory:
         return self._spawn_obj(game_obj).add_controls(controls).cast_on_target()
 
     def spawn_player(self, game_obj: GameObj) -> 'SpellFactory':
-        game_obj.team = Hostility.ALLIED
+        game_obj.team = Faction.ALLIED
         return self._spawn_obj(game_obj).add_flag(Behavior.SPAWN_PLAYER).cast_on_self()
 
     def spawn_boss(self, game_obj: GameObj, controls: tuple[Controls, ...]) -> 'SpellFactory':
-        game_obj.team = Hostility.ENEMY
+        game_obj.team = Faction.ENEMY
         return self.add_flag(Behavior.SPAWN_BOSS).spawn_minion(game_obj, controls)
 
     def _spawn_obj(self, game_obj: GameObj) -> 'SpellFactory':

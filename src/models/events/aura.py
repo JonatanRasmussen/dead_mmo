@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from src.config import Consts
 
+
 @dataclass(slots=True)
 class Aura:
     """ The effect of a previously cast spell that periodically ticks over a time span. """

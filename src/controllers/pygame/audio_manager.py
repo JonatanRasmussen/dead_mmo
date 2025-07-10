@@ -3,7 +3,8 @@ import os
 from typing import Dict, Optional, ValuesView
 from pathlib import Path
 
-from src.models.components import GameObj, FinalizedEvent
+from src.models.components import GameObj
+from src.models.events import FinalizedEvent
 
 class AudioManager:
     def __init__(self, assets_path: str = "src/assets/audio"):

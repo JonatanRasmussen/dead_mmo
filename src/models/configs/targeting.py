@@ -2,7 +2,7 @@ from typing import Iterable, ValuesView
 from enum import Enum, auto
 from src.config import Consts
 from .default_ids import DefaultIDs
-from .game_obj import GameObj
+from src.models.components import GameObj
 
 
 class Targeting(Enum):
@@ -45,5 +45,5 @@ class Targeting(Enum):
     def select_targets_for_aoe(source: GameObj, target: GameObj, all_game_objs: ValuesView[GameObj]) -> Iterable[int]:
         for obj in all_game_objs:
             team_is_hit_by_aoe = obj.team.is_valid_aoe_target(source.team, target.team)
-            if team_is_hit_by_aoe and obj.status.is_valid_target and obj.obj_id != target.obj_id:
+            if team_is_hit_by_aoe and obj.state.is_valid_target and obj.obj_id != target.obj_id:
                 yield obj.obj_id

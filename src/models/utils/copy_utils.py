@@ -1,12 +1,12 @@
 from dataclasses import is_dataclass, fields
-from enum import Enum, Flag
+from enum import Enum, Flag, IntFlag
 from typing import Any
 
 
 class CopyTools:
     @staticmethod
     def full_copy(obj: Any) -> Any:
-        if isinstance(obj, (int, float, str, bool, type(None), Enum, Flag)):
+        if isinstance(obj, (int, float, str, bool, type(None), Enum, Flag, IntFlag)):
             return obj
         elif isinstance(obj, list):
             return [CopyTools.full_copy(item) for item in obj]

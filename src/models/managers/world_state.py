@@ -1,7 +1,9 @@
 from typing import Iterable, ValuesView, Optional
 
 from src.config import Consts
-from src.models.components import Controls, DefaultIDs, EventOutcome, FinalizedEvent, GameObj, Spell, Targeting, UpcomingEvent
+from src.models.components import Controls, GameObj
+from src.models.configs import DefaultIDs, Spell, Targeting
+from src.models.events import FinalizedEvent, Outcome, UpcomingEvent
 from src.models.handlers import AuraHandler, EventLog, FrameHeap, GameObjHandler, IdGen, SpellDatabase
 
 
@@ -67,11 +69,11 @@ class WorldState:
         spell = self._spell_database.get_spell(event.spell_id)
         target_obj = self._decide_event_target(event, source_obj, spell)
         if event.is_aura_tick and not self._auras.aura_exists(event):
-            outcome = EventOutcome.AURA_NO_LONGER_EXISTS
+            outcome = Outcome.AURA_NO_LONGER_EXISTS
         else:
             event.source_id = source_obj.obj_id
             event.target_id = target_obj.obj_id
-            outcome = EventOutcome.decide_outcome(event.timestamp, source_obj, spell, target_obj, event.is_aoe_targeting)
+            outcome = Outcome.decide_outcome(event.timestamp, source_obj, spell, target_obj, event.is_aoe_targeting)
         finalized_event = FinalizedEvent(event_id=event_id, source=source_obj, spell=spell, target=target_obj, upcoming_event=event, outcome=outcome)
         return finalized_event
 

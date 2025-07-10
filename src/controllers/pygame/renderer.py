@@ -64,7 +64,7 @@ class Renderer:
 
     def _draw_sprite(self, game_obj: GameObj, pos: tuple, size: int) -> None:
         """Draw a sprite for the game object"""
-        sprite = self.sprite_manager.get_sprite(game_obj.views.sprite_name)
+        sprite = self.sprite_manager.get_sprite(game_obj.sprite_name)
 
         # Scale sprite to match the desired size
         sprite_size = size * 2  # Diameter

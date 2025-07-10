@@ -1,5 +1,6 @@
 import pygame
-from src.models.components import Controls
+from src.models.components.controls import Controls, KeyPresses
+
 
 class InputHandler:
     def __init__(self):
@@ -22,34 +23,34 @@ class InputHandler:
     def _handle_keyup(self, event: pygame.event.Event, controls: Controls) -> None:
         """Handle key release events"""
         if event.key == pygame.K_w:
-            controls.stop_move_up = True
+            controls.key_presses |= KeyPresses.STOP_MOVE_UP
         elif event.key == pygame.K_a:
-            controls.stop_move_left = True
+            controls.key_presses |= KeyPresses.STOP_MOVE_LEFT
         elif event.key == pygame.K_s:
-            controls.stop_move_down = True
+            controls.key_presses |= KeyPresses.STOP_MOVE_DOWN
         elif event.key == pygame.K_d:
-            controls.stop_move_right = True
+            controls.key_presses |= KeyPresses.STOP_MOVE_RIGHT
 
     def _handle_keydown(self, event: pygame.event.Event, controls: Controls) -> None:
         """Handle key press events"""
         if event.key == pygame.K_w:
-            controls.start_move_up = True
+            controls.key_presses |= KeyPresses.START_MOVE_UP
         elif event.key == pygame.K_a:
-            controls.start_move_left = True
+            controls.key_presses |= KeyPresses.START_MOVE_LEFT
         elif event.key == pygame.K_s:
-            controls.start_move_down = True
+            controls.key_presses |= KeyPresses.START_MOVE_DOWN
         elif event.key == pygame.K_d:
-            controls.start_move_right = True
+            controls.key_presses |= KeyPresses.START_MOVE_RIGHT
         elif event.key == pygame.K_TAB:
-            controls.swap_target = True
+            controls.key_presses |= KeyPresses.SWAP_TARGET
         elif event.key == pygame.K_1:
-            controls.ability_1 = True
+            controls.key_presses |= KeyPresses.ABILITY_1
         elif event.key == pygame.K_2:
-            controls.ability_2 = True
+            controls.key_presses |= KeyPresses.ABILITY_2
         elif event.key == pygame.K_3:
-            controls.ability_3 = True
+            controls.key_presses |= KeyPresses.ABILITY_3
         elif event.key == pygame.K_4:
-            controls.ability_4 = True
+            controls.key_presses |= KeyPresses.ABILITY_4
 
     def is_running(self) -> bool:
         """Check if the game should continue running"""

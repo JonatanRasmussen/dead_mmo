@@ -1,7 +1,10 @@
-from typing import Dict, ValuesView
+from typing import ValuesView
+
+from src.models.components import GameObj
 from src.config import LogConfig
-from src.models.components import Aura, FinalizedEvent, GameObj
+from src.models.events import Aura, FinalizedEvent
 from src.models.utils import Logger
+
 
 class EventLog:
     FILENAME_COMBAT_EVENT_LOG = Logger.FILENAME_COMBAT_EVENT_LOG
@@ -70,8 +73,8 @@ class EventLog:
             Logger.debug(f"Obj {obj_id_fmt} COLOR update: {current.color} -> {updated.color}", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
         # Status effects
-        if current.status != updated.status:
-            Logger.debug(f"Obj {obj_id_fmt} STATUS update: {current.status} -> {updated.status}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        if current.state != updated.state:
+            Logger.debug(f"Obj {obj_id_fmt} STATUS update: {current.state} -> {updated.state}", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
         # Targeting
         if current.team.is_allied != updated.team.is_allied:
@@ -84,8 +87,8 @@ class EventLog:
         # Combat stats
         if current.res.hp != updated.res.hp:
             Logger.debug(f"Obj {obj_id_fmt} HP update: {fmt(current.res.hp)} -> {fmt(updated.res.hp)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.mods.movement_speed != updated.mods.movement_speed:
-            Logger.debug(f"Obj {obj_id_fmt} SPEED update: {fmt(current.mods.movement_speed)} -> {fmt(updated.mods.movement_speed)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        if current.stats.movement_speed != updated.stats.movement_speed:
+            Logger.debug(f"Obj {obj_id_fmt} SPEED update: {fmt(current.stats.movement_speed)} -> {fmt(updated.stats.movement_speed)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.is_attackable != updated.is_attackable:
             Logger.debug(f"Obj {obj_id_fmt} ATTACKABLE update: {current.is_attackable} -> {updated.is_attackable}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.gcd_mod != updated.gcd_mod:
@@ -96,34 +99,11 @@ class EventLog:
             if current.pos.x != updated.pos.x or current.pos.y != updated.pos.y or current.pos.angle != updated.pos.angle:
                 Logger.debug(f"Obj {obj_id_fmt} POSITION update: ({fmt(current.pos.x)}, {fmt(current.pos.y)}, {fmt(current.pos.angle)}) -> ({fmt(updated.pos.x)}, {fmt(updated.pos.y)}, {fmt(updated.pos.angle)}) (x, y, angle)", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
-        # Ability movement slots
-        movement_slots = [
-            ("MOVE UP START", current.loadout.start_move_up_id, updated.loadout.start_move_up_id),
-            ("MOVE UP STOP", current.loadout.stop_move_up_id, updated.loadout.stop_move_up_id),
-            ("MOVE LEFT START", current.loadout.start_move_left_id, updated.loadout.start_move_left_id),
-            ("MOVE LEFT STOP", current.loadout.stop_move_left_id, updated.loadout.stop_move_left_id),
-            ("MOVE DOWN START", current.loadout.start_move_down_id, updated.loadout.start_move_down_id),
-            ("MOVE DOWN STOP", current.loadout.stop_move_down_id, updated.loadout.stop_move_down_id),
-            ("MOVE RIGHT START", current.loadout.start_move_right_id, updated.loadout.start_move_right_id),
-            ("MOVE RIGHT STOP", current.loadout.stop_move_right_id, updated.loadout.stop_move_right_id)
-        ]
-
-        for name, old_id, new_id in movement_slots:
-            if old_id != new_id:
-                Logger.debug(f"Obj {obj_id_fmt} {name} update: {old_id:04d} -> {new_id:04d}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-
-        # Ability spell slots
-        spell_slots = [
-            ("NEXT TARGET", current.loadout.next_target_id, updated.loadout.next_target_id),
-            ("ABILITY 1", current.loadout.ability_1_id, updated.loadout.ability_1_id),
-            ("ABILITY 2", current.loadout.ability_2_id, updated.loadout.ability_2_id),
-            ("ABILITY 3", current.loadout.ability_3_id, updated.loadout.ability_3_id),
-            ("ABILITY 4", current.loadout.ability_4_id, updated.loadout.ability_4_id)
-        ]
-
-        for name, old_id, new_id in spell_slots:
-            if old_id != new_id:
-                Logger.debug(f"Obj {obj_id_fmt} {name} update: {old_id:04d} -> {new_id:04d}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        for i in range (len(current.loadout.spell_ids)):
+            if current.loadout.spell_ids[i] != updated.loadout.spell_ids[i]:
+                old_id = current.loadout.spell_ids[i]
+                new_id = updated.loadout.spell_ids[i]
+                Logger.debug(f"Obj {obj_id_fmt} loadout update at index {i}: {old_id:04d} -> {new_id:04d}", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
         # Cooldown timestamps
         cooldown_timestamps = [

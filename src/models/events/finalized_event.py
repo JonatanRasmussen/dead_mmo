@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
 
 from src.config.consts import Consts
-from .event_outcome import EventOutcome
-from .game_obj import GameObj
-from .position import Position
-from .spell import Spell
+from src.models.components import GameObj, Position
+from src.models.configs import Spell
+from .outcome import Outcome
 from .upcoming_event import UpcomingEvent
 
 @dataclass(slots=True)
@@ -14,7 +13,7 @@ class FinalizedEvent:
     source: GameObj = field(default_factory=GameObj)
     spell: Spell = field(default_factory=Spell)
     target: GameObj = field(default_factory=GameObj)
-    outcome: EventOutcome = EventOutcome.EMPTY
+    outcome: Outcome = Outcome.EMPTY
 
     @property
     def timestamp(self) -> int:

@@ -1,5 +1,6 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Behavior, Controls, GameObj, Loadout, Position, Resources
+from src.models.components import Controls, GameObj, Faction, KeyPresses, Loadout, Position, Resources
+from src.models.configs import Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_targeting import BasicTargeting
 
@@ -27,14 +28,13 @@ class NpcHealingPowerup:
                 y=-0.2,
             ),
             color=Colors.GREEN,
-            loadout=Loadout(
-                next_target_id=BasicTargeting.targetswap_to_parent().spell_id,
-                ability_1_id=NpcHealingPowerup.healing_burst_apply().spell_id,
-            )
+            loadout=Loadout()
+                .bind_spell(KeyPresses.SWAP_TARGET, BasicTargeting.targetswap_to_parent().spell_id)
+                .bind_spell(KeyPresses.ABILITY_1, NpcHealingPowerup.healing_burst_apply().spell_id)
         )
         obj_controls = (
-            Controls(timeline_timestamp=100, swap_target=True),
-            Controls(timeline_timestamp=200, ability_1=True),
+            Controls(timeline_timestamp=100, key_presses=KeyPresses.SWAP_TARGET),
+            Controls(timeline_timestamp=200, key_presses=KeyPresses.ABILITY_1),
         )
         return (
             SpellFactory(171)

@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 
-class ObjStatus(Enum):
+class Status(Enum):
     """ Various status effects that game objects can have. """
     EMPTY = 0  # Should never be used outside initialization
     ENVIRONMENT = auto()  # Special case used only by ENVIRONMENT objs
@@ -16,14 +16,14 @@ class ObjStatus(Enum):
     @property
     def is_valid_source(self) -> bool:
         return not self in {
-            ObjStatus.DESPAWNED,
-            ObjStatus.BANISHED,
+            Status.DESPAWNED,
+            Status.BANISHED,
         }
 
     @property
     def is_valid_target(self) -> bool:
         return not self in {
-            ObjStatus.ENVIRONMENT,
-            ObjStatus.DESPAWNED,
-            ObjStatus.BANISHED,
+            Status.ENVIRONMENT,
+            Status.DESPAWNED,
+            Status.BANISHED,
         }

@@ -1,6 +1,8 @@
 from typing import ValuesView, Optional
 
-from src.models.components import Behavior, DefaultIDs, FinalizedEvent, GameObj, Hostility, ObjStatus, Spell
+from src.models.components import GameObj, Status
+from src.models.configs import Behavior, DefaultIDs, Spell
+from src.models.events import FinalizedEvent
 from src.models.handlers.event_log import EventLog
 from src.models.handlers.id_gen import IdGen
 
@@ -47,7 +49,7 @@ class GameObjHandler:
     def modify_game_obj(self, f_event: FinalizedEvent) -> None:
         spell = f_event.spell
         spell.flags.modify_source(f_event.timestamp, f_event.source, f_event.target)
-        spell.flags.modify_target(f_event.source, spell.power, spell.effect_id, f_event.target)
+        spell.flags.modify_target(f_event.source, spell.power, f_event.target)
 
     def handle_spawn(self, f_event: FinalizedEvent) -> Optional[GameObj]:
         template = f_event.spell.spawned_obj
@@ -59,7 +61,7 @@ class GameObjHandler:
         child.parent_id=parent.obj_id
         child.cds.spawn_timestamp=f_event.timestamp
         child.current_target=f_event.target_id
-        child.status=ObjStatus.ALIVE
+        child.state=Status.ALIVE
         child.pos.x += parent.pos.x
         child.pos.y += parent.pos.y
         child.team = child.team.decide_team_based_on_parent(parent.team)

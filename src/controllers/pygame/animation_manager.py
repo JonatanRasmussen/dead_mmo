@@ -4,7 +4,8 @@ from typing import Dict, List, Optional, Tuple, ValuesView
 from pathlib import Path
 from dataclasses import dataclass
 
-from src.models.components import GameObj, FinalizedEvent
+from src.models.components import GameObj
+from src.models.events import FinalizedEvent
 
 
 @dataclass

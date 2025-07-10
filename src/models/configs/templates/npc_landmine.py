@@ -1,5 +1,6 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Behavior, Controls, GameObj, Loadout, Position, Resources
+from src.models.components import Controls, GameObj, Faction, KeyPresses, Loadout, Position, Resources
+from src.models.configs import Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting
@@ -28,12 +29,11 @@ class NpcLandmine:
                 y=0.1,
             ),
             color=Colors.MAGENTA,
-            loadout=Loadout(
-                ability_1_id=NpcLandmine.landmine_explosion_apply().spell_id,
-            )
+            loadout=Loadout()
+                .bind_spell(KeyPresses.ABILITY_1, NpcLandmine.landmine_explosion_apply().spell_id)
         )
         obj_controls = (
-            Controls(timeline_timestamp=1500, ability_1=True),
+            Controls(timeline_timestamp=1500, key_presses=KeyPresses.ABILITY_1),
         )
         return (
             SpellFactory(71)

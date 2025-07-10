@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 from src.config import Consts
 from src.models.utils.copy_utils import CopyTools
+from src.models.components import Controls, GameObj
 from .aura import Aura
-from .controls import Controls
-from .game_obj import GameObj
+
 
 @dataclass(slots=True)
 class UpcomingEvent:

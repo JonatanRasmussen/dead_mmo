@@ -1,6 +1,6 @@
 from enum import Enum, auto
 
-class Hostility(Enum):
+class Faction(Enum):
     """ Team relationships between GameObjs, used for spell targeting. """
     EMPTY = 0
     ALLIED = auto()
@@ -9,16 +9,16 @@ class Hostility(Enum):
 
     @property
     def is_allied(self) -> bool:
-        return self in {Hostility.ALLIED}
+        return self in {Faction.ALLIED}
 
     @property
     def is_enemy(self) -> bool:
-        return self in {Hostility.ENEMY}
+        return self in {Faction.ENEMY}
 
-    def is_valid_aoe_target(self, sources_team: 'Hostility', targets_team: 'Hostility') -> bool:
+    def is_valid_aoe_target(self, sources_team: 'Faction', targets_team: 'Faction') -> bool:
         return (self == sources_team) == (sources_team == targets_team)
 
-    def decide_team_based_on_parent(self, parents_team: 'Hostility') -> 'Hostility':
-        if parents_team in {Hostility.NEUTRAL}:
+    def decide_team_based_on_parent(self, parents_team: 'Faction') -> 'Faction':
+        if parents_team in {Faction.NEUTRAL}:
             return self
         return parents_team

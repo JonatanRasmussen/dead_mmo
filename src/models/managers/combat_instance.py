@@ -1,12 +1,13 @@
 from typing import List, ValuesView
 import math
 
-from src.models.components import Controls, FinalizedEvent, GameObj
+from src.models.components import Controls, GameObj, KeyPresses
+from src.models.events import FinalizedEvent
 from src.models.handlers import EventLog
 from src.models.managers.world_state import WorldState
 
 
-class GameInstance:
+class CombatInstance:
     def __init__(self, setup_spell_ids: list[int]) -> None:
         self.ingame_time: int = 0
         self._rounding_error: float = 0.0
@@ -41,12 +42,12 @@ class GameInstance:
 
     @staticmethod
     def simulate_game_in_console(setup_spell_ids: list[int]) -> None:
-        game_instance = GameInstance(setup_spell_ids)
+        game_instance = CombatInstance(setup_spell_ids)
         SIMULATION_DURATION_MS = 6000
         UPDATES_PER_SECOND = 50
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
         num_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
         for _ in range(num_iterations):
             # example of controls
-            controls = Controls(start_move_up=True, ability_1=True)
+            controls = Controls(key_presses=KeyPresses.START_MOVE_UP | KeyPresses.ABILITY_1)
             game_instance.process_next_frame(FRAME_DURATION_MS, controls)

@@ -1,10 +1,9 @@
 from sortedcontainers import SortedDict  # type: ignore
-from typing import Dict, List, Tuple, Iterable, ValuesView
+from typing import Iterable, ValuesView
 
 from src.config import Consts
-from src.models.components import Aura, UpcomingEvent, FinalizedEvent
+from src.models.events import Aura, UpcomingEvent, FinalizedEvent
 from src.models.handlers.event_log import EventLog
-from src.models.handlers.id_gen import IdGen
 
 
 class AuraHandler:

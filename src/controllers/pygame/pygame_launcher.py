@@ -1,7 +1,7 @@
 # pylint: disable=E1101
 import pygame
 import sys
-from src.models.managers.game_instance import GameInstance
+from src.models.managers.combat_instance import CombatInstance
 from .window_manager import WindowManager
 from .sprite_manager import SpriteManager
 from .audio_manager import AudioManager
@@ -24,7 +24,7 @@ class PygameLauncher:
         self.renderer = Renderer(self.window_manager, self.sprite_manager, self.animation_manager)
 
         # Initialize game instance
-        self.game_instance = GameInstance(setup_spell_ids=[300])
+        self.game_instance = CombatInstance(setup_spell_ids=[300])
 
     @staticmethod
     def run_game() -> None:

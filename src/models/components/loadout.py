@@ -1,68 +1,48 @@
 from typing import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.config import Consts
-from .controls import Controls
+from .controls import Controls, KeyPresses
+
+
+# Calculate once when the module is imported as a performance optimization.
+LOADOUT_KEY_TO_INDEX_MAP = {
+    key: key.value.bit_length() - 1
+    for key in KeyPresses if key != KeyPresses.NONE
+}
 
 @dataclass(slots=True)
 class Loadout:
-    """ Used by GameObjs to map controls inputs to spell events """
+    """Used by GameObjs to map controls inputs to spell events"""
 
-    # Ability movement slots
-    start_move_up_id: int = Consts.EMPTY_ID
-    stop_move_up_id: int = Consts.EMPTY_ID
-    start_move_left_id: int = Consts.EMPTY_ID
-    stop_move_left_id: int = Consts.EMPTY_ID
-    start_move_down_id: int = Consts.EMPTY_ID
-    stop_move_down_id: int = Consts.EMPTY_ID
-    start_move_right_id: int = Consts.EMPTY_ID
-    stop_move_right_id: int = Consts.EMPTY_ID
+    spawn_timestamp: int = Consts.EMPTY_TIMESTAMP
+    spell_ids: list[int] = field(default_factory=lambda: [Consts.EMPTY_ID] * len(LOADOUT_KEY_TO_INDEX_MAP))
+    ability_cds: list[int] = field(default_factory=lambda: [Consts.EMPTY_TIMESTAMP] * len(LOADOUT_KEY_TO_INDEX_MAP))
 
-    # Ability spell slots
-    next_target_id: int = Consts.EMPTY_ID
-    ability_1_id: int = Consts.EMPTY_ID
-    ability_2_id: int = Consts.EMPTY_ID
-    ability_3_id: int = Consts.EMPTY_ID
-    ability_4_id: int = Consts.EMPTY_ID
+    @classmethod
+    def create_from_bindings(cls, bindings: dict[KeyPresses, int]) -> 'Loadout':
+        """Creates and configures a Loadout from a dictionary of bindings."""
+        loadout = cls()
+        for key, spell_id in bindings.items():
+            loadout.bind_spell(key, spell_id)
+        return loadout
+
+    def bind_spell(self, key_presses: KeyPresses, spell_id: int) -> 'Loadout':
+        """Binds each keypress in key_presses to spell_id"""
+        for flag in LOADOUT_KEY_TO_INDEX_MAP:
+            if flag in key_presses:
+                index = LOADOUT_KEY_TO_INDEX_MAP[flag]
+                self.spell_ids[index] = spell_id
+        return self  # Returns self to allow chaining
 
     def convert_controls_to_spell_ids(self, controls: Controls, obj_id: int) -> Iterable[int]:
-        if controls.start_move_up:
-            assert Consts.is_valid_id(self.start_move_up_id), f"Invalid spell ID for {obj_id}: start_move_up_id"
-            yield self.start_move_up_id
-        if controls.stop_move_up:
-            assert Consts.is_valid_id(self.stop_move_up_id), f"Invalid spell ID for {obj_id}: stop_move_up_id"
-            yield self.stop_move_up_id
-        if controls.start_move_left:
-            assert Consts.is_valid_id(self.start_move_left_id), f"Invalid spell ID for {obj_id}: start_move_left_id"
-            yield self.start_move_left_id
-        if controls.stop_move_left:
-            assert Consts.is_valid_id(self.stop_move_left_id), f"Invalid spell ID for {obj_id}: stop_move_left_id"
-            yield self.stop_move_left_id
-        if controls.start_move_down:
-            assert Consts.is_valid_id(self.start_move_down_id), f"Invalid spell ID for {obj_id}: start_move_down_id"
-            yield self.start_move_down_id
-        if controls.stop_move_down:
-            assert Consts.is_valid_id(self.stop_move_down_id), f"Invalid spell ID for {obj_id}: stop_move_down_id"
-            yield self.stop_move_down_id
-        if controls.start_move_right:
-            assert Consts.is_valid_id(self.start_move_right_id), f"Invalid spell ID for {obj_id}: start_move_right_id"
-            yield self.start_move_right_id
-        if controls.stop_move_right:
-            assert Consts.is_valid_id(self.stop_move_right_id), f"Invalid spell ID for {obj_id}: stop_move_right_id"
-            yield self.stop_move_right_id
-        if controls.swap_target:
-            assert Consts.is_valid_id(self.next_target_id), f"Invalid spell ID for {obj_id}: next_target_id"
-            yield self.next_target_id
-        if controls.ability_1:
-            assert Consts.is_valid_id(self.ability_1_id), f"Invalid spell ID for {obj_id}: ability_1_id"
-            yield self.ability_1_id
-        if controls.ability_2:
-            assert Consts.is_valid_id(self.ability_2_id), f"Invalid spell ID for {obj_id}: ability_2_id"
-            yield self.ability_2_id
-        if controls.ability_3:
-            assert Consts.is_valid_id(self.ability_3_id), f"Invalid spell ID for {obj_id}: ability_3_id"
-            yield self.ability_3_id
-        if controls.ability_4:
-            assert Consts.is_valid_id(self.ability_4_id), f"Invalid spell ID for {obj_id}: ability_4_id"
-            yield self.ability_4_id
+        """Fast conversion using direct list indexing."""
         assert not controls.is_empty, f"Controls for {obj_id} is empty."
+
+        for key_flag in LOADOUT_KEY_TO_INDEX_MAP:
+            if key_flag in controls.key_presses:
+                idx = LOADOUT_KEY_TO_INDEX_MAP[key_flag]
+                spell_id = self.spell_ids[idx]
+
+                assert Consts.is_valid_id(spell_id), f"Invalid spell ID for {obj_id}: {key_flag.name}_id"
+                yield spell_id

@@ -1,5 +1,6 @@
 from src.config import AudioFiles, Colors, Consts, SpriteFiles
-from src.models.components import Behavior, Controls, GameObj, Loadout, Modifiers, Position, Resources, Views
+from src.models.components import Controls, GameObj, Faction, KeyPresses, Loadout, Position, Resources, BaseStats, Visuals
+from src.models.configs import Behavior, Targeting, Spell
 from src.models.services.spell_factory import SpellFactory, SpellTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting
@@ -43,17 +44,16 @@ class SpecWarlock:
                 x=0.0,
                 y=0.05,
             ),
-            mods=Modifiers(
+            stats=BaseStats(
                 movement_speed=5.0
             ),
             color=Colors.WHITE,
-            loadout=Loadout(
-                ability_1_id=BasicMovement.start_move_towards_target().spell_id,
-                ability_2_id=SpecWarlock.aura_shadowbolt().spell_id,
-            )
+            loadout=Loadout()
+                .bind_spell(KeyPresses.ABILITY_1, BasicMovement.start_move_towards_target().spell_id)
+                .bind_spell(KeyPresses.ABILITY_2, SpecWarlock.aura_shadowbolt().spell_id)
         )
         obj_controls = (
-            Controls(timeline_timestamp=0, ability_1=True, ability_2=True),
+            Controls(timeline_timestamp=0, key_presses=KeyPresses.ABILITY_1 | KeyPresses.ABILITY_2),
         )
         return (
             SpellFactory(41)
@@ -74,24 +74,21 @@ class SpecWarlock:
                 y=0.3,
             ),
             color=Colors.RED,
-            views=Views(
-                sprite_name=SpriteFiles.PORO_PLAYER,
-            ),
-            loadout=Loadout(
-                start_move_up_id=BasicMovement.start_move_up().spell_id,
-                stop_move_up_id=BasicMovement.stop_move_up().spell_id,
-                start_move_left_id=BasicMovement.start_move_left().spell_id,
-                stop_move_left_id=BasicMovement.stop_move_left().spell_id,
-                start_move_down_id=BasicMovement.start_move_down().spell_id,
-                stop_move_down_id=BasicMovement.stop_move_down().spell_id,
-                start_move_right_id=BasicMovement.start_move_right().spell_id,
-                stop_move_right_id=BasicMovement.stop_move_right().spell_id,
-                next_target_id=BasicTargeting.targetswap_to_next_tab_target().spell_id,
-                ability_1_id=SpecWarlock.fire_blast().spell_id,
-                ability_2_id=SpecWarlock.fire_aura_apply().spell_id,
-                ability_3_id=NpcHealingPowerup.spawn_healing_powerup().spell_id,
-                ability_4_id=SpecWarlock.shadowbolt_spawn().spell_id,
-            )
+            sprite_name=SpriteFiles.PORO_PLAYER,
+            loadout = Loadout()
+                .bind_spell(KeyPresses.START_MOVE_UP, BasicMovement.start_move_up().spell_id)
+                .bind_spell(KeyPresses.STOP_MOVE_UP, BasicMovement.stop_move_up().spell_id)
+                .bind_spell(KeyPresses.START_MOVE_LEFT, BasicMovement.start_move_left().spell_id)
+                .bind_spell(KeyPresses.STOP_MOVE_LEFT, BasicMovement.stop_move_left().spell_id)
+                .bind_spell(KeyPresses.START_MOVE_DOWN, BasicMovement.start_move_down().spell_id)
+                .bind_spell(KeyPresses.STOP_MOVE_DOWN, BasicMovement.stop_move_down().spell_id)
+                .bind_spell(KeyPresses.START_MOVE_RIGHT, BasicMovement.start_move_right().spell_id)
+                .bind_spell(KeyPresses.STOP_MOVE_RIGHT, BasicMovement.stop_move_right().spell_id)
+                .bind_spell(KeyPresses.SWAP_TARGET, BasicTargeting.targetswap_to_next_tab_target().spell_id)
+                .bind_spell(KeyPresses.ABILITY_1, SpecWarlock.fire_blast().spell_id)
+                .bind_spell(KeyPresses.ABILITY_2, SpecWarlock.fire_aura_apply().spell_id)
+                .bind_spell(KeyPresses.ABILITY_3, NpcHealingPowerup.spawn_healing_powerup().spell_id)
+                .bind_spell(KeyPresses.ABILITY_4, SpecWarlock.shadowbolt_spawn().spell_id)
         )
         return (
             SpellFactory(42)

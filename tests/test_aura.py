@@ -3,7 +3,7 @@ import os
 import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from src.models.components import Aura
+from src.models.events import Aura
 
 
 def test_get_timestamps_for_ticks_this_frame():
@@ -11,7 +11,6 @@ def test_get_timestamps_for_ticks_this_frame():
 
     # Test case 1: Aura with regular ticking, frame contains multiple ticks
     aura = Aura(
-        aura_id=1,
         source_id=1,
         target_id=1,
         start_time=0.0,

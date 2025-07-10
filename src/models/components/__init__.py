@@ -1,39 +1,25 @@
-from .aura import Aura
-from .behavior import Behavior
+from .base_stats import BaseStats
 from .controls import Controls
-from .default_ids import DefaultIDs
-from .event_outcome import EventOutcome
-from .finalized_event import FinalizedEvent
+from .faction import Faction
 from .game_obj import GameObj
-from .hostility import Hostility
+from .key_presses import KeyPresses
 from .loadout import Loadout
-from .modifiers import Modifiers
-from .obj_status import ObjStatus
 from .position import Position
 from .resources import Resources
-from .spell import Spell
-from .targeting import Targeting
-from .upcoming_event import UpcomingEvent
-from .views import Views
+from .status import Status
+from .visuals import Visuals
 from .waitouts import Waitouts
 
 __all__ = [
-    "Aura",
-    "Behavior",
+    "BaseStats",
     "Controls",
-    "DefaultIDs",
-    "EventOutcome",
-    "FinalizedEvent",
+    "Faction",
     "GameObj",
-    "Hostility",
+    "KeyPresses",
     "Loadout",
-    "Modifiers",
-    "ObjStatus",
     "Position",
     "Resources",
-    "Spell",
-    "Targeting",
-    "UpcomingEvent",
-    "Views",
+    "Status",
+    "Visuals",
     "Waitouts"
 ]

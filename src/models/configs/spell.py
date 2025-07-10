@@ -1,9 +1,9 @@
 from typing import Iterable, Optional
 from dataclasses import dataclass
+
 from src.config import Consts
+from src.models.components import Controls, GameObj
 from .behavior import Behavior
-from .controls import Controls
-from .game_obj import GameObj
 from .targeting import Targeting
 
 
@@ -51,6 +51,7 @@ class Spell:
     @property
     def should_play_audio(self) -> bool:
         return bool(self.audio_name)
+
     @property
     def should_play_animation(self) -> bool:
         return bool(self.animation_name)
