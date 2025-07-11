@@ -31,7 +31,7 @@ class Behavior(IntFlag):
 
     def modify_target(self, source_obj: GameObj, power: float, target_obj: GameObj) -> None:
         if self & (Behavior.STEP_UP | Behavior.STEP_LEFT | Behavior.STEP_DOWN | Behavior.STEP_RIGHT):
-            self._handle_movement(target_obj)
+            self._handle_movement(target_obj, power)
         if self & Behavior.DAMAGING:
             target_obj.res.hp -= power * source_obj.spell_modifier
         if self & Behavior.HEALING:
@@ -49,12 +49,13 @@ class Behavior(IntFlag):
         if self & Behavior.TELEPORT_TO_TARGET:
             source_obj.pos.teleport_to_position(target_obj.pos)
 
-    def _handle_movement(self, target_obj: GameObj) -> None:
+    def _handle_movement(self, target_obj: GameObj, power: float) -> None:
+        multiplier = power * target_obj.stats.movement_speed
         if self & Behavior.STEP_UP:
-            target_obj.pos.move_in_direction(Position(x=0.0, y=1.0), target_obj.stats.movement_speed)
+            target_obj.pos.move_up(multiplier)
         if self & Behavior.STEP_LEFT:
-            target_obj.pos.move_in_direction(Position(x=-1.0, y=0.0), target_obj.stats.movement_speed)
+            target_obj.pos.move_left(multiplier)
         if self & Behavior.STEP_DOWN:
-            target_obj.pos.move_in_direction(Position(x=0.0, y=-1.0), target_obj.stats.movement_speed)
+            target_obj.pos.move_down(multiplier)
         if self & Behavior.STEP_RIGHT:
-            target_obj.pos.move_in_direction(Position(x=1.0, y=0.0), target_obj.stats.movement_speed)
+            target_obj.pos.move_right(multiplier)

@@ -55,16 +55,8 @@ class GameObjHandler:
         template = f_event.spell.spawned_obj
         if template is None:
             return None
-        parent = f_event.source
-        child = template.create_copy()
-        child.obj_id = self._generate_new_game_obj_id()
-        child.parent_id=parent.obj_id
-        child.cds.spawn_timestamp=f_event.timestamp
-        child.current_target=f_event.target_id
-        child.state=Status.ALIVE
-        child.pos.x += parent.pos.x
-        child.pos.y += parent.pos.y
-        child.team = child.team.decide_team_based_on_parent(parent.team)
+        new_obj_id = self._generate_new_game_obj_id()
+        child = template.create_child(new_obj_id, f_event.source, f_event.timestamp, f_event.target_id)
         self.add_game_obj(child)
         self._update_default_ids(child, f_event.spell)
         return child

@@ -2,7 +2,7 @@ from typing import Iterable, Optional
 from dataclasses import dataclass
 
 from src.config import Consts
-from src.models.components import Controls, GameObj
+from src.models.components import Controls, ObjTemplate
 from .behavior import Behavior
 from .targeting import Targeting
 
@@ -28,8 +28,7 @@ class Spell:
     flags: Behavior = Behavior.NONE
     targeting: Targeting = Targeting.NONE
 
-    spawned_obj: Optional[GameObj] = None
-    obj_controls: Optional[tuple[Controls, ...]] = None
+    spawned_obj: Optional[ObjTemplate] = None
 
     # Audio properties
     audio_name: str = ""
@@ -44,9 +43,10 @@ class Spell:
 
     @property
     def copy_obj_controls(self) -> Iterable[Controls]:
-        if self.obj_controls is not None:
-            for controls in self.obj_controls:
-                yield controls.create_copy()
+        if self.spawned_obj is not None:
+            if self.spawned_obj.obj_controls is not None:
+                for controls in self.spawned_obj.obj_controls:
+                    yield controls.create_copy()
 
     @property
     def should_play_audio(self) -> bool:

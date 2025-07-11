@@ -51,7 +51,7 @@ class WorldState:
         return event_log
 
     def _fetch_cascading_events(self, f_event: FinalizedEvent, new_obj: Optional[GameObj]) -> Iterable[UpcomingEvent]:
-        if new_obj is not None and f_event.spell.obj_controls is not None:
+        if new_obj is not None and f_event.spell.spawned_obj is not None and f_event.spell.spawned_obj.obj_controls is not None:
             for controls in f_event.spell.copy_obj_controls:
                 controls.increase_offset(new_obj.cds.spawn_timestamp)
                 yield from UpcomingEvent.create_events_from_controls(new_obj, controls)

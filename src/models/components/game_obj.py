@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 import math
 
 from src.config import Colors, Consts
-from src.models.utils.copy_utils import CopyTools
 from .faction import Faction
 from .loadout import Loadout
 from .base_stats import BaseStats
@@ -39,10 +38,6 @@ class GameObj:
     color: tuple[int, int, int] = Colors.WHITE
     sprite_name: str = ""
     audio_name: str = ""
-
-
-    def create_copy(self) -> 'GameObj':
-        return CopyTools.full_copy(self)
 
     @classmethod
     def create_environment(cls, obj_id: int) -> 'GameObj':

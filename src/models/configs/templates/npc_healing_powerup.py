@@ -1,7 +1,7 @@
 from src.config import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, Faction, KeyPresses, Loadout, Position, Resources
+from src.models.components import Controls, Distance, GameObj, Faction, KeyPresses, Loadout, Position, Resources
 from src.models.configs import Behavior, Targeting, Spell
-from src.models.services.spell_factory import SpellFactory, SpellTemplates
+from src.models.services import SpellFactory, SpellTemplates, GameObjFactory, GameObjTemplates
 from .basic_targeting import BasicTargeting
 
 
@@ -19,26 +19,14 @@ class NpcHealingPowerup:
 
     @staticmethod
     def spawn_healing_powerup() -> SpellFactory:
-        game_obj = GameObj(
-            res=Resources(
-                hp=30.0,
-            ),
-            pos=Position(
-                x=0.2,
-                y=-0.2,
-            ),
-            color=Colors.GREEN,
-            loadout=Loadout()
-                .bind_spell(KeyPresses.SWAP_TARGET, BasicTargeting.targetswap_to_parent().spell_id)
-                .bind_spell(KeyPresses.ABILITY_1, NpcHealingPowerup.healing_burst_apply().spell_id)
-        )
-        obj_controls = (
-            Controls(timeline_timestamp=100, key_presses=KeyPresses.SWAP_TARGET),
-            Controls(timeline_timestamp=200, key_presses=KeyPresses.ABILITY_1),
-        )
+        timeline = {
+            100: BasicTargeting.targetswap_to_parent().spell_id,
+            200: NpcHealingPowerup.healing_burst_apply().spell_id,
+        }
+        obj_template = GameObjTemplates.create_enemy(timeline, x=0.2, y=-0.2, hp=30.0, color=Colors.GREEN)
         return (
             SpellFactory(171)
-            .spawn_minion(game_obj, obj_controls)
+            .spawn_minion(obj_template)
             .use_gcd()
             .set_audio(AudioFiles.REJUVENATION_APPLY)
         )

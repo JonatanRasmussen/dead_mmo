@@ -3,16 +3,23 @@ import math
 from dataclasses import dataclass
 
 from src.config import Consts
+from .distance import Distance
 
 @dataclass(slots=True)
 class Position:
     """Positional data for GameObjs"""
-    x: float = 0.0
-    y: float = 0.0
+    x: Distance = Distance(0.0)
+    y: Distance = Distance(0.0)
     angle: float = 0.0
 
+    @classmethod
+    def create_at(cls, x: float, y: float) -> 'Position':
+        return Position(x=Distance(x), y=Distance(y))
+
     def has_target_within_range(self, target: 'Position', range_limit: float) -> bool:
-        return (self.x - target.x) ** 2 + (self.y - target.y) ** 2 <= range_limit ** 2
+        dx = self.x - target.x
+        dy = self.y - target.y
+        return dx * dx + dy * dy <= range_limit * range_limit
 
     def teleport_to_position(self, new_pos: 'Position') -> None:
         self.x = new_pos.x
@@ -24,10 +31,26 @@ class Position:
         new_y = self.y + direction.y * move_speed * GLOBAL_MODIFIER
         self.teleport_to_position(Position(new_x, new_y))
 
+    def move_up(self, move_speed: float) -> None:
+        up = Position.create_at(0.0, 1.0)
+        self.move_in_direction(up, move_speed)
+
+    def move_left(self, move_speed: float) -> None:
+        left = Position.create_at(-1.0, 0.0)
+        self.move_in_direction(left, move_speed)
+
+    def move_down(self, move_speed: float) -> None:
+        down = Position.create_at(0.0, -1.0)
+        self.move_in_direction(down, move_speed)
+
+    def move_right(self, move_speed: float) -> None:
+        right = Position.create_at(1.0, 0.0)
+        self.move_in_direction(right, move_speed)
+
     def move_towards_destination(self, destination: 'Position', move_speed: float) -> None:
         dx = destination.x - self.x
         dy = destination.y - self.y
         distance = math.hypot(dx, dy)
-        if not distance == 0:
+        if not distance == 0.0:
             direction = Position(dx / distance, dy / distance)
             self.move_in_direction(direction, move_speed)

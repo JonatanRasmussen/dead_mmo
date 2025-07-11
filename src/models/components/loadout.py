@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Iterable, Union, Mapping
 from dataclasses import dataclass, field
 
 from src.config import Consts
@@ -6,9 +6,8 @@ from .controls import Controls, KeyPresses
 
 
 # Calculate once when the module is imported as a performance optimization.
-LOADOUT_KEY_TO_INDEX_MAP = {
-    key: key.value.bit_length() - 1
-    for key in KeyPresses if key != KeyPresses.NONE
+LOADOUT_KEY_TO_INDEX_MAP: dict[KeyPresses, int] = {
+    key: key.value.bit_length() - 1 for key in KeyPresses if key != KeyPresses.NONE
 }
 
 @dataclass(slots=True)
@@ -38,11 +37,9 @@ class Loadout:
     def convert_controls_to_spell_ids(self, controls: Controls, obj_id: int) -> Iterable[int]:
         """Fast conversion using direct list indexing."""
         assert not controls.is_empty, f"Controls for {obj_id} is empty."
-
         for key_flag in LOADOUT_KEY_TO_INDEX_MAP:
             if key_flag in controls.key_presses:
                 idx = LOADOUT_KEY_TO_INDEX_MAP[key_flag]
                 spell_id = self.spell_ids[idx]
-
                 assert Consts.is_valid_id(spell_id), f"Invalid spell ID for {obj_id}: {key_flag.name}_id"
                 yield spell_id
