@@ -4,6 +4,13 @@ from src.models.components import Controls, GameObj, Faction, ObjTemplate
 from src.models.data import Behavior, Targeting, Spell
 
 
+class SpellBuilder:
+    def __init__(self, spell_id: int) -> None:
+        self.spell: Spell = Spell(spell_id=spell_id)
+
+
+
+
 class SpellFactory:
     def __init__(self, spell_id: int) -> None:
         self.spell: Spell = Spell(spell_id=spell_id)
