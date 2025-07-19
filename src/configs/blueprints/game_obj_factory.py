@@ -1,45 +1,47 @@
 from typing import Union, Mapping
 
-from src.config import Colors
-from src.models.components import BaseStats, Controls, Distance, Faction, GameObj, KeyPresses, Loadout, ObjTemplate, Position, Resources, Status
+from src.settings import Colors
+from src.models.components import Controls, Distance, Faction, GameObj, KeyPresses, Loadout, ObjTemplate, Position, Resources, Status
 
 class GameObjFactory:
     """Uses a builder pattern to create GameObj templates."""
     def __init__(self) -> None:
         self.obj_template: ObjTemplate = ObjTemplate()
-        self.game_obj: GameObj = self.obj_template.game_obj
+        self._game_obj: GameObj = self.obj_template.game_obj
 
     def build(self) -> ObjTemplate:
         """Returns the configured GameObj template."""
         return self.obj_template
 
     def set_position(self, x: float, y: float, angle: float = 0.0) -> 'GameObjFactory':
-        self.game_obj.pos = Position(x=Distance(x), y=Distance(y), angle=angle)
+        self._game_obj.pos.x = Distance(x)
+        self._game_obj.pos.y = Distance(y)
+        self._game_obj.pos.angle = angle
         return self
 
     def set_resources(self, hp: float) -> 'GameObjFactory':
-        self.game_obj.res = Resources(hp=hp)
+        self._game_obj.res = Resources(hp=hp)
         return self
 
     def set_stats(self, movement_speed: float) -> 'GameObjFactory':
-        self.game_obj.stats = BaseStats(movement_speed=movement_speed)
+        self._game_obj.pos.movement_speed = movement_speed
         return self
 
     def make_attackable(self, is_attackable: bool = True) -> 'GameObjFactory':
-        self.game_obj.is_attackable = is_attackable
+        self._game_obj.is_attackable = is_attackable
         return self
 
     def set_color(self, color: tuple[int, int, int]) -> 'GameObjFactory':
-        self.game_obj.color = color
+        self._game_obj.color = color
         return self
 
     def set_sprite(self, sprite_name: str) -> 'GameObjFactory':
-        self.game_obj.sprite_name = sprite_name
+        self._game_obj.sprite_name = sprite_name
         return self
 
     def bind_spell(self, key_presses: KeyPresses, spell_id: int) -> 'GameObjFactory':
         """Binds a spell to a key in the object's loadout."""
-        self.game_obj.loadout.bind_spell(key_presses, spell_id)
+        self._game_obj.loadout.bind_spell(key_presses, spell_id)
         return self
 
 class GameObjTemplates:
@@ -53,8 +55,7 @@ class GameObjTemplates:
         loadout, obj_controls = GameObjTemplates._create_loadout_from_scripted_timeline(timeline)
         game_obj = GameObj(
             loadout=loadout,
-            pos=Position(x=Distance(0.0), y=Distance(0.05)),
-            stats=BaseStats(movement_speed=speed, base_size=size),
+            pos=Position(x=Distance(0.0), y=Distance(0.05), movement_speed=speed, base_size=size),
             color=color,
         )
         return ObjTemplate(game_obj=game_obj, obj_controls=obj_controls)

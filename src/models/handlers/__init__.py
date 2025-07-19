@@ -11,5 +11,5 @@ __all__ = [
     "GameObjHandler",
     "FrameHeap",
     "IdGen",
-    "SpellDatabase"
+    "SpellDatabase",
 ]

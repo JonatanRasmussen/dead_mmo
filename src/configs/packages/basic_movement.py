@@ -1,7 +1,7 @@
-from src.config import AudioFiles, Colors, Consts
+from src.settings import AudioFiles, Colors, Consts
 from src.models.components import Controls, GameObj, Faction
-from src.models.configs import Behavior, Targeting, Spell
-from src.models.services.spell_factory import SpellFactory, SpellTemplates
+from src.models.data import Behavior, Targeting, Spell
+from src.configs.blueprints import SpellFactory, SpellTemplates
 
 
 class BasicMovement:

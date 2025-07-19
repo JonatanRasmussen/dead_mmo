@@ -1,7 +1,7 @@
 from typing import Iterable, Union, Mapping
 from dataclasses import dataclass, field
 
-from src.config import Consts
+from src.settings import Consts
 from .controls import Controls, KeyPresses
 
 
@@ -17,6 +17,7 @@ class Loadout:
     spawn_timestamp: int = Consts.EMPTY_TIMESTAMP
     spell_ids: list[int] = field(default_factory=lambda: [Consts.EMPTY_ID] * len(LOADOUT_KEY_TO_INDEX_MAP))
     ability_cds: list[int] = field(default_factory=lambda: [Consts.EMPTY_TIMESTAMP] * len(LOADOUT_KEY_TO_INDEX_MAP))
+    gcd_start: int = -1_000
 
     @classmethod
     def create_from_bindings(cls, bindings: dict[KeyPresses, int]) -> 'Loadout':

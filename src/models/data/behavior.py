@@ -41,16 +41,16 @@ class Behavior(IntFlag):
         if self & Behavior.UPDATE_CURRENT_TARGET:
             source_obj.current_target = target_obj.obj_id
         if self & Behavior.TRIGGER_GCD:
-            source_obj.cds.gcd_start = timestamp
+            source_obj.loadout.gcd_start = timestamp
         if self & Behavior.DESPAWN_SELF:
             source_obj.state = Status.DESPAWNED
         if self & Behavior.MOVE_TOWARDS_TARGET:
-            source_obj.pos.move_towards_destination(target_obj.pos, source_obj.stats.movement_speed)
+            source_obj.pos.move_towards_destination(target_obj.pos, source_obj.pos.movement_speed)
         if self & Behavior.TELEPORT_TO_TARGET:
             source_obj.pos.teleport_to_position(target_obj.pos)
 
     def _handle_movement(self, target_obj: GameObj, power: float) -> None:
-        multiplier = power * target_obj.stats.movement_speed
+        multiplier = power * target_obj.pos.movement_speed
         if self & Behavior.STEP_UP:
             target_obj.pos.move_up(multiplier)
         if self & Behavior.STEP_LEFT:

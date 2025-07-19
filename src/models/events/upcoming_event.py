@@ -1,7 +1,7 @@
 from typing import Iterable
 from dataclasses import dataclass
 
-from src.config import Consts
+from src.settings import Consts
 from src.models.utils.copy_utils import CopyTools
 from src.models.components import Controls, GameObj
 from .aura import Aura

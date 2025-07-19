@@ -1,4 +1,4 @@
-src/assets/
+assets/
   audio/
     explosion.wav
     hit.ogg

@@ -1,7 +1,7 @@
 from sortedcontainers import SortedDict  # type: ignore
 from typing import Iterable, ValuesView
 
-from src.config import Consts
+from src.settings import Consts
 from src.models.events import Aura, UpcomingEvent, FinalizedEvent
 from src.models.handlers.event_log import EventLog
 

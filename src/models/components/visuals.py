@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.config import Colors
+from src.settings import Colors
 
 @dataclass(slots=True)
 class Visuals:

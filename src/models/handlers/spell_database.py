@@ -1,10 +1,10 @@
 from typing import Any, Type
 
-from src.models.configs import Spell
-from src.models.services import SpellFactory
-from src.models.configs.templates import BasicMovement, BasicTargeting
-from src.models.configs.templates import NpcBoss, NpcHealingPowerup, NpcLandmine, NpcTargetDummy
-from src.models.configs.templates import SpecWarlock, ZoneTestGround
+from src.models.data import Spell
+from src.configs.blueprints import SpellFactory
+from src.configs.packages import BasicMovement, BasicTargeting
+from src.configs.packages import NpcTargetDummy, NpcBoss, NpcHealingPowerup, NpcLandmine
+from src.configs.packages import SpecWarlock, ZoneTestGround
 
 class SpellDatabase:
     def __init__(self) -> None:

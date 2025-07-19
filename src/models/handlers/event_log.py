@@ -1,7 +1,7 @@
 from typing import ValuesView
 
 from src.models.components import GameObj
-from src.config import LogConfig
+from src.settings import LogConfig
 from src.models.events import Aura, FinalizedEvent
 from src.models.utils import Logger
 
@@ -77,8 +77,8 @@ class EventLog:
             Logger.debug(f"Obj {obj_id_fmt} STATUS update: {current.state} -> {updated.state}", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
         # Targeting
-        if current.team.is_allied != updated.team.is_allied:
-            Logger.debug(f"Obj {obj_id_fmt} ALLIANCE update: {current.team.is_allied} -> {updated.team.is_allied}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        if current.res.team.is_allied != updated.res.team.is_allied:
+            Logger.debug(f"Obj {obj_id_fmt} ALLIANCE update: {current.res.team.is_allied} -> {updated.res.team.is_allied}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.current_target != updated.current_target:
             Logger.debug(f"Obj {obj_id_fmt} TARGET update: {current.current_target:04d} -> {updated.current_target:04d}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.selected_spell != updated.selected_spell:
@@ -87,8 +87,8 @@ class EventLog:
         # Combat stats
         if current.res.hp != updated.res.hp:
             Logger.debug(f"Obj {obj_id_fmt} HP update: {fmt(current.res.hp)} -> {fmt(updated.res.hp)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.stats.movement_speed != updated.stats.movement_speed:
-            Logger.debug(f"Obj {obj_id_fmt} SPEED update: {fmt(current.stats.movement_speed)} -> {fmt(updated.stats.movement_speed)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        if current.pos.movement_speed != updated.pos.movement_speed:
+            Logger.debug(f"Obj {obj_id_fmt} SPEED update: {fmt(current.pos.movement_speed)} -> {fmt(updated.pos.movement_speed)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.is_attackable != updated.is_attackable:
             Logger.debug(f"Obj {obj_id_fmt} ATTACKABLE update: {current.is_attackable} -> {updated.is_attackable}", EventLog.FILENAME_OBJ_UPDATES_LOG)
         if current.gcd_mod != updated.gcd_mod:
@@ -107,12 +107,8 @@ class EventLog:
 
         # Cooldown timestamps
         cooldown_timestamps = [
-            ("SPAWN", current.cds.spawn_timestamp, updated.cds.spawn_timestamp),
-            ("GCD START", current.cds.gcd_start, updated.cds.gcd_start),
-            ("ABILITY 1 CD", current.cds.ability_1_cd_start, updated.cds.ability_1_cd_start),
-            ("ABILITY 2 CD", current.cds.ability_2_cd_start, updated.cds.ability_2_cd_start),
-            ("ABILITY 3 CD", current.cds.ability_3_cd_start, updated.cds.ability_3_cd_start),
-            ("ABILITY 4 CD", current.cds.ability_4_cd_start, updated.cds.ability_4_cd_start)
+            ("SPAWN", current.loadout.spawn_timestamp, updated.loadout.spawn_timestamp),
+            ("GCD START", current.loadout.gcd_start, updated.loadout.gcd_start)
         ]
 
         for name, old_timestamp, new_timestamp in cooldown_timestamps:

@@ -1,4 +1,3 @@
-from .base_stats import BaseStats
 from .controls import Controls
 from .distance import Distance
 from .faction import Faction
@@ -10,10 +9,8 @@ from .position import Position
 from .resources import Resources
 from .status import Status
 from .visuals import Visuals
-from .waitouts import Waitouts
 
 __all__ = [
-    "BaseStats",
     "Controls",
     "Distance",
     "Faction",
@@ -25,5 +22,4 @@ __all__ = [
     "Resources",
     "Status",
     "Visuals",
-    "Waitouts"
 ]

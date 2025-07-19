@@ -1,15 +1,13 @@
 from dataclasses import dataclass, field
 import math
 
-from src.config import Colors, Consts
+from src.settings import Colors, Consts
 from .faction import Faction
 from .loadout import Loadout
-from .base_stats import BaseStats
 from .status import Status
 from .position import Position
 from .resources import Resources
 from .visuals import Visuals
-from .waitouts import Waitouts
 
 
 @dataclass(slots=True)
@@ -20,13 +18,10 @@ class GameObj:
     spawned_from_spell: int = Consts.EMPTY_ID
 
     # Status
-    cds: Waitouts = field(default_factory=Waitouts)  # Cooldown timers for abilities and casts
     loadout: Loadout = field(default_factory=Loadout)  # Spells and cooldowns
-    stats: BaseStats = field(default_factory=BaseStats)  # Attack Powers, Damage Resistances, Move Speed etc.
     pos: Position = field(default_factory=Position)  # Coordinates and orientation in space
     res: Resources = field(default_factory=Resources)  # HP, Mana, Ability Charges, etc.
     state: Status = Status.EMPTY  # Alive, Dead, Despawned, Stunned, Casting, etc.
-    team: Faction = Faction.EMPTY  # Helps decide if GameObjs should target each other
     current_target: int = Consts.EMPTY_ID
     selected_spell: int = Consts.EMPTY_ID
 
@@ -41,12 +36,12 @@ class GameObj:
 
     @classmethod
     def create_environment(cls, obj_id: int) -> 'GameObj':
-        return GameObj(
-            obj_id=obj_id,
-            state=Status.ENVIRONMENT,
-            team=Faction.NEUTRAL,
-            current_target=obj_id,
-        )
+        env_obj = GameObj()
+        env_obj.obj_id=obj_id
+        env_obj.state=Status.ENVIRONMENT
+        env_obj.res.team=Faction.NEUTRAL
+        env_obj.current_target=obj_id
+        return env_obj
 
     @property
     def should_play_audio(self) -> bool:
@@ -78,4 +73,4 @@ class GameObj:
 
     def get_gcd_progress(self, current_time: int) -> float:
         gcd = Consts.BASE_GCD * self.gcd_mod
-        return min(1.0, (current_time - self.cds.gcd_start) / gcd)
+        return min(1.0, (current_time - self.loadout.gcd_start) / gcd)

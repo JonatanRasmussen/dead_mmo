@@ -1,6 +1,6 @@
 from typing import Iterable, ValuesView
 from enum import Enum, auto
-from src.config import Consts
+from src.settings import Consts
 from .default_ids import DefaultIDs
 from src.models.components import GameObj
 
@@ -24,13 +24,13 @@ class Targeting(Enum):
         if self in {Targeting.PARENT} and Consts.is_valid_id(source.parent_id):
             return source.parent_id
         if self in {Targeting.DEFAULT_ENEMY}:
-            if source.team.is_allied:
+            if source.res.team.is_allied:
                 return default_ids.boss1_id
             return default_ids.player_id
         if self in {Targeting.DEFAULT_FRIENDLY}:
             return source.obj_id
         if self in {Targeting.TAB_TO_NEXT}:
-            if not source.team.is_allied:
+            if not source.res.team.is_allied:
                 return default_ids.player_id
             elif source.current_target == default_ids.boss1_id and default_ids.boss2_exists:
                 return default_ids.boss2_id
@@ -44,6 +44,6 @@ class Targeting(Enum):
     @staticmethod
     def select_targets_for_aoe(source: GameObj, target: GameObj, all_game_objs: ValuesView[GameObj]) -> Iterable[int]:
         for obj in all_game_objs:
-            team_is_hit_by_aoe = obj.team.is_valid_aoe_target(source.team, target.team)
+            team_is_hit_by_aoe = obj.res.team.is_valid_aoe_target(source.res.team, target.res.team)
             if team_is_hit_by_aoe and obj.state.is_valid_target and obj.obj_id != target.obj_id:
                 yield obj.obj_id

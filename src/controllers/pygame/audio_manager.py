@@ -7,7 +7,7 @@ from src.models.components import GameObj
 from src.models.events import FinalizedEvent
 
 class AudioManager:
-    def __init__(self, assets_path: str = "src/assets/audio"):
+    def __init__(self, assets_path: str = "assets/audio"):
         pygame.mixer.init()
         self.assets_path = Path(assets_path)
         self.sounds: dict[str, pygame.mixer.Sound] = {}

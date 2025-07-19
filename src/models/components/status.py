@@ -6,6 +6,7 @@ class Status(Enum):
     EMPTY = 0  # Should never be used outside initialization
     ENVIRONMENT = auto()  # Special case used only by ENVIRONMENT objs
     ALIVE = auto()  # Default status used to indicate the absence of other status effects
+    INACTIVE = auto()  # Not yet engaged in combat, cannot be source or target of events
     DESPAWNED = auto()  # Permamently removed from combat, cannot be source or target of events
     BANISHED = auto()  # Temporarily removed from combat, cannot be source or target of events
     CASTING = auto()  # to-do: document this

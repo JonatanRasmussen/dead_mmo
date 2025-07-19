@@ -2,7 +2,7 @@ import math
 
 from dataclasses import dataclass
 
-from src.config import Consts
+from src.settings import Consts
 from .distance import Distance
 
 @dataclass(slots=True)
@@ -11,6 +11,8 @@ class Position:
     x: Distance = Distance(0.0)
     y: Distance = Distance(0.0)
     angle: float = 0.0
+    movement_speed: float = 1.0
+    base_size: float = 1.0
 
     @classmethod
     def create_at(cls, x: float, y: float) -> 'Position':

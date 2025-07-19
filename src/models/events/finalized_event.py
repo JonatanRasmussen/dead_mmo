@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 
-from src.config.consts import Consts
+from src.settings.consts import Consts
 from src.models.components import GameObj, Position
-from src.models.configs import Spell
+from src.models.data import Spell
 from .outcome import Outcome
 from .upcoming_event import UpcomingEvent
 

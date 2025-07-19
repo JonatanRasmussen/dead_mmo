@@ -1,7 +1,7 @@
 from typing import Set, Deque
 from collections import deque
 
-from src.config.consts import Consts
+from src.settings.consts import Consts
 
 
 class IdGen:

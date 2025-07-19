@@ -1,10 +1,11 @@
 from typing import Iterable, ValuesView, Optional
 
-from src.config import Consts
+from src.settings import Consts
 from src.models.components import Controls, GameObj
-from src.models.configs import DefaultIDs, Spell, Targeting
+from src.models.data import DefaultIDs, Spell, Targeting
 from src.models.events import FinalizedEvent, Outcome, UpcomingEvent
-from src.models.handlers import AuraHandler, EventLog, FrameHeap, GameObjHandler, IdGen, SpellDatabase
+from src.models.handlers import AuraHandler, EventLog, FrameHeap, GameObjHandler, IdGen
+from src.models.handlers import SpellDatabase
 
 
 class WorldState:
@@ -53,7 +54,7 @@ class WorldState:
     def _fetch_cascading_events(self, f_event: FinalizedEvent, new_obj: Optional[GameObj]) -> Iterable[UpcomingEvent]:
         if new_obj is not None and f_event.spell.spawned_obj is not None and f_event.spell.spawned_obj.obj_controls is not None:
             for controls in f_event.spell.copy_obj_controls:
-                controls.increase_offset(new_obj.cds.spawn_timestamp)
+                controls.increase_offset(new_obj.loadout.spawn_timestamp)
                 yield from UpcomingEvent.create_events_from_controls(new_obj, controls)
         if f_event.spell.is_area_of_effect and not f_event.upcoming_event.is_aoe_targeting:
             target_ids = Targeting.select_targets_for_aoe(f_event.source, f_event.target, self.view_game_objs)

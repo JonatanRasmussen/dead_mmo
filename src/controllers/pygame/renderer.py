@@ -2,7 +2,7 @@ import pygame
 import math
 from typing import ValuesView
 from src.models.components import GameObj, Position
-from src.config import Colors
+from src.settings import Colors
 from .window_manager import WindowManager
 from .sprite_manager import SpriteManager
 from .animation_manager import AnimationManager

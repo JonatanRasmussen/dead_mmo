@@ -1,7 +1,7 @@
 from enum import Enum, auto
 
 from src.models.components import GameObj
-from src.models.configs import Behavior, Spell
+from src.models.data import Behavior, Spell
 
 
 class Outcome(Enum):

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.config import Consts
+from src.settings import Consts
 
 @dataclass(slots=True)
 class DefaultIDs:

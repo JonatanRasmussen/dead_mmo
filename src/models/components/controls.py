@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.config import Consts
+from src.settings import Consts
 from src.models.utils.copy_utils import CopyTools
 from .key_presses import KeyPresses
 

@@ -1,7 +1,7 @@
 import heapq
 from typing import Optional
 
-from src.config import Consts
+from src.settings import Consts
 from src.models.events import UpcomingEvent
 
 

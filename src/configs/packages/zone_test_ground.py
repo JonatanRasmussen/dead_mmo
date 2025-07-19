@@ -1,7 +1,7 @@
-from src.config import AudioFiles, Colors, Consts
+from src.settings import AudioFiles, Colors, Consts
 from src.models.components import Controls, GameObj, Faction, Loadout, Position, Resources
-from src.models.configs import Behavior, Targeting, Spell
-from src.models.services.spell_factory import SpellFactory, SpellTemplates
+from src.models.data import Behavior, Targeting, Spell
+from src.configs.blueprints import SpellFactory, SpellTemplates, GameObjFactory, GameObjTemplates
 from .spec_warlock import SpecWarlock
 from .npc_boss import NpcBoss
 from .npc_target_dummy import NpcTargetDummy

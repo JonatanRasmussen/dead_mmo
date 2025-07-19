@@ -27,7 +27,7 @@ class ActiveAnimation:
     total_duration: float = 0.0
 
 class AnimationManager:
-    def __init__(self, assets_path: str = "src/assets/animations"):
+    def __init__(self, assets_path: str = "assets/animations"):
         self.assets_path = Path(assets_path)
         self.animations: dict[str, Animation] = {}
         self.active_animations: list[ActiveAnimation] = []
