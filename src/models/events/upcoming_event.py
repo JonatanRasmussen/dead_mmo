@@ -1,5 +1,6 @@
 from typing import Iterable
 from dataclasses import dataclass
+import json
 
 from src.settings import Consts
 from src.models.utils.copy_utils import CopyTools
@@ -22,6 +23,35 @@ class UpcomingEvent:
     aura_start_time: int = Consts.EMPTY_TIMESTAMP
     is_spell_sequence: bool = False
     is_aoe_targeting: bool = False
+
+    @classmethod
+    def deserialize(cls, data: str) -> 'UpcomingEvent':
+        d = json.loads(data) if isinstance(data, str) else data
+        return cls(
+            timestamp=d["ts"],
+            priority=d["pr"],
+            source_id=d["sid"],
+            spell_id=d["sp"],
+            target_id=d["tid"],
+            spell_modifier=d["sm"],
+            aura_origin_spell_id=d["aos"],
+            aura_start_time=d["ast"],
+            is_spell_sequence=d["seq"],
+            is_aoe_targeting=d["aoe"]
+        )
+    def serialize(self) -> str:
+        return json.dumps({
+            "ts": self.timestamp,
+            "pr": self.priority,
+            "sid": self.source_id,
+            "sp": self.spell_id,
+            "tid": self.target_id,
+            "sm": self.spell_modifier,
+            "aos": self.aura_origin_spell_id,
+            "ast": self.aura_start_time,
+            "seq": self.is_spell_sequence,
+            "aoe": self.is_aoe_targeting
+        })
 
     @property
     def key(self) -> tuple[int, int, int, int, int]:

@@ -1,5 +1,6 @@
 from typing import Iterable, Union, Mapping
 from dataclasses import dataclass, field
+import json
 
 from src.settings import Consts
 from .controls import Controls, KeyPresses
@@ -18,6 +19,23 @@ class Loadout:
     spell_ids: list[int] = field(default_factory=lambda: [Consts.EMPTY_ID] * len(LOADOUT_KEY_TO_INDEX_MAP))
     ability_cds: list[int] = field(default_factory=lambda: [Consts.EMPTY_TIMESTAMP] * len(LOADOUT_KEY_TO_INDEX_MAP))
     gcd_start: int = -1_000
+
+    @classmethod
+    def deserialize(cls, data: str) -> 'Loadout':
+        d = json.loads(data) if isinstance(data, str) else data
+        return cls(
+            spawn_timestamp=d["ts"],
+            spell_ids=d["ids"],
+            ability_cds=d["cds"],
+            gcd_start=d["gcd"]
+        )
+    def serialize(self) -> str:
+        return json.dumps({
+            "ts": self.spawn_timestamp,
+            "ids": self.spell_ids,
+            "cds": self.ability_cds,
+            "gcd": self.gcd_start
+        })
 
     @classmethod
     def create_from_bindings(cls, bindings: dict[KeyPresses, int]) -> 'Loadout':

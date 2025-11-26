@@ -1,12 +1,14 @@
+# input_handler.py (Updated)
 import pygame
 from src.models.components.controls import Controls, KeyPresses
 
+from src.frontend_client.pygame_renderer.pygame_renderer import IInputReader
 
-class InputHandler:
+class InputHandler(IInputReader):
     def __init__(self):
         self.running = True
 
-    def process_events(self) -> Controls:
+    def fetch_player_input(self) -> str:
         """Process pygame events and return a Controls object"""
         controls = Controls()
 
@@ -18,7 +20,7 @@ class InputHandler:
             elif event.type == pygame.KEYDOWN:
                 self._handle_keydown(event, controls)
 
-        return controls
+        return controls.serialize()
 
     def _handle_keyup(self, event: pygame.event.Event, controls: Controls) -> None:
         """Handle key release events"""

@@ -1,5 +1,6 @@
 from typing import Iterable, Optional
 from dataclasses import dataclass
+import json
 
 from src.settings import Consts
 from src.models.components import Controls, ObjTemplate
@@ -40,6 +41,63 @@ class Spell:
 
     # Effect placement
     animate_on_target: bool = True  # If False, animate on source
+
+    @classmethod
+    def deserialize(cls, data: str) -> 'Spell':
+        d = json.loads(data) if isinstance(data, str) else data
+
+        seq = None
+        if d["seq"] is not None:
+            seq = tuple(int(x) for x in d["seq"])
+
+        spawned = (
+            ObjTemplate.deserialize(d["spn"])
+            if d["spn"] is not None else None
+        )
+
+        return cls(
+            spell_id=d["sid"],
+            effect_id=d["eid"],
+            spell_sequence=seq,
+            power=d["pw"],
+            variance=d["var"],
+            range_limit=d["rl"],
+            cast_time=d["ct"],
+            duration=d["dur"],
+            ticks=d["tk"],
+            flags=Behavior(d["fl"]),
+            targeting=Targeting(d["tg"]),
+            spawned_obj=spawned,
+            audio_name=d["aud"],
+            spell_type=d["typ"],
+            animation_name=d["anm"],
+            animation_scale=d["asc"],
+            animate_on_target=d["aot"]
+        )
+    def serialize(self) -> str:
+        return json.dumps({
+            "sid": self.spell_id,
+            "eid": self.effect_id,
+            "seq": list(self.spell_sequence) if self.spell_sequence else None,
+            "pw": self.power,
+            "var": self.variance,
+            "rl": self.range_limit,
+            "ct": self.cast_time,
+            "dur": self.duration,
+            "tk": self.ticks,
+            "fl": self.flags.value,
+            "tg": self.targeting.value,
+            "spn": (
+                json.loads(self.spawned_obj.serialize())
+                if self.spawned_obj is not None else None
+            ),
+            "aud": self.audio_name,
+            "typ": self.spell_type,
+            "anm": self.animation_name,
+            "asc": self.animation_scale,
+            "aot": self.animate_on_target
+        })
+
 
     @property
     def copy_obj_controls(self) -> Iterable[Controls]:

@@ -1,6 +1,6 @@
 import math
-
 from dataclasses import dataclass
+import json
 
 from src.settings import Consts
 from .distance import Distance
@@ -13,6 +13,27 @@ class Position:
     angle: float = 0.0
     movement_speed: float = 1.0
     base_size: float = 1.0
+
+    @classmethod
+    def deserialize(cls, data: str) -> 'Position':
+        d = json.loads(data) if isinstance(data, str) else data
+        return cls(
+            x=Distance(d["x"]),
+            y=Distance(d["y"]),
+            angle=d["a"],
+            movement_speed=d["ms"],
+            base_size=d["bs"]
+        )
+    def serialize(self) -> str:
+        return json.dumps(
+            {
+                "x": self.x,
+                "y": self.y,
+                "a": self.angle,
+                "ms": self.movement_speed,
+                "bs": self.base_size
+            }
+        )
 
     @classmethod
     def create_at(cls, x: float, y: float) -> 'Position':

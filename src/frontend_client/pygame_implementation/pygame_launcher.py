@@ -44,7 +44,7 @@ class PygameLauncher:
         last_time = pygame.time.get_ticks()
         while self.input_handler.is_running():
             delta_time, last_time = self.fps_manager.get_delta_time(last_time)
-            controls = self.input_handler.process_events()
+            controls = self.input_handler.fetch_player_input()
             delta_time_in_ms = self.game_instance.convert_delta_time_to_int_in_ms(delta_time)
             self.game_instance.process_next_frame(delta_time_in_ms, controls)
             finalized_events = self.game_instance.view_all_events_this_frame

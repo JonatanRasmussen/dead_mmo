@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 
 from src.settings import Consts
@@ -12,6 +13,25 @@ class Controls:
     _offset: int = 0
 
     key_presses: KeyPresses = KeyPresses.NONE
+
+    @classmethod
+    def deserialize(cls, data: str) -> 'Controls':
+        d = json.loads(data) if isinstance(data, str) else data
+        return cls(
+            obj_id=d["oid"],
+            timeline_timestamp=d["ts"],
+            _offset=d["off"],
+            key_presses=KeyPresses(d["kp"])  # Cast the integer back to the KeyPresses Enum type
+        )
+    def serialize(self) -> str:
+        kp_value = self.key_presses.value if hasattr(self.key_presses, "value") else self.key_presses  # We extract the value from KeyPresses if it is an Enum, otherwise use it directly
+        data = {
+            "oid": self.obj_id,
+            "ts": self.timeline_timestamp,
+            "off": self._offset,
+            "kp": kp_value
+        }
+        return json.dumps(data)
 
     @property
     def get_key_for_controls(self) -> tuple[int, int]:

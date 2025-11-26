@@ -3,10 +3,9 @@ import os
 from typing import Dict, Optional, ValuesView
 from pathlib import Path
 
-from src.models.components import GameObj
-from src.models.events import FinalizedEvent
+from src.frontend_client.pygame_renderer.pygame_renderer import IAudioPlayer
 
-class AudioManager:
+class AudioManager(IAudioPlayer):
     def __init__(self, assets_path: str = "assets/audio"):
         pygame.mixer.init()
         self.assets_path = Path(assets_path)
@@ -14,12 +13,16 @@ class AudioManager:
         self.music_volume = 0.7
         self.sound_volume = 0.7
 
+    def play_sound(self, audio_name: str) -> None:
+        """Play a sound effect"""
+        sound = self.load_sound(audio_name)
+        if sound:
+            sound.play()
+
     def load_sound(self, audio_name: str) -> Optional[pygame.mixer.Sound]:
         """Load a sound from file or return cached version"""
         if audio_name in self.sounds:
             return self.sounds[audio_name]
-
-        # Try to load the sound
         for ext in ['.wav', '.ogg', '.mp3']:
             audio_path = self.assets_path / f"{audio_name}{ext}"
             if audio_path.exists():
@@ -31,21 +34,8 @@ class AudioManager:
                 except pygame.error as e:
                     print(f"Error loading sound '{audio_name}': {e}")
                     continue
-
         print(f"Warning: Sound '{audio_name}' not found in {self.assets_path}")
         return None
-
-    def process_events(self, finalized_events: ValuesView[FinalizedEvent]) -> None:
-        """Process all finalized events and play audio for events that should play audio"""
-        for event in finalized_events:
-            if event.should_play_audio:
-                self.play_sound(event.audio_name)
-
-    def play_sound(self, audio_name: str) -> None:
-        """Play a sound effect"""
-        sound = self.load_sound(audio_name)
-        if sound:
-            sound.play()
 
     def play_music(self, audio_name: str, loops: int = -1) -> None:
         """Play background music"""

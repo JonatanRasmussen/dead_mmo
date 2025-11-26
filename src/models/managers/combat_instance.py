@@ -21,10 +21,6 @@ class CombatInstance:
     def view_all_events_this_frame(self) -> ValuesView[FinalizedEvent]:
         return self._event_frame_logs[self.ingame_time].view_all_events
 
-    @property
-    def rounding_error(self) -> float:
-        return self._rounding_error
-
     def convert_delta_time_to_int_in_ms(self, delta_time: float) -> int:
         milliseconds = delta_time * 1000.0 + self._rounding_error
         rounded_ms = int(round(milliseconds))
@@ -49,5 +45,5 @@ class CombatInstance:
         num_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
         for _ in range(num_iterations):
             # example of controls
-            controls = Controls(key_presses=KeyPresses.START_MOVE_UP | KeyPresses.ABILITY_1)
-            game_instance.process_next_frame(FRAME_DURATION_MS, controls)
+            user_input = Controls(key_presses=KeyPresses.START_MOVE_UP | KeyPresses.ABILITY_1)
+            game_instance.process_next_frame(FRAME_DURATION_MS, user_input)

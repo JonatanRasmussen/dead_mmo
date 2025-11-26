@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import json
 
 from src.settings.consts import Consts
 from src.models.components import GameObj, Position
@@ -14,6 +15,27 @@ class FinalizedEvent:
     spell: Spell = field(default_factory=Spell)
     target: GameObj = field(default_factory=GameObj)
     outcome: Outcome = Outcome.EMPTY
+
+    @classmethod
+    def deserialize(cls, data: str) -> 'FinalizedEvent':
+        d = json.loads(data) if isinstance(data, str) else data
+        return cls(
+            event_id=d["eid"],
+            upcoming_event=UpcomingEvent.deserialize(d["ue"]),
+            source=GameObj.deserialize(d["src"]),
+            spell=Spell.deserialize(d["spl"]),
+            target=GameObj.deserialize(d["tgt"]),
+            outcome=Outcome(d["out"])
+        )
+    def serialize(self) -> str:
+        return json.dumps({
+            "eid": self.event_id,
+            "ue": json.loads(self.upcoming_event.serialize()),
+            "src": json.loads(self.source.serialize()),
+            "spl": json.loads(self.spell.serialize()),
+            "tgt": json.loads(self.target.serialize()),
+            "out": self.outcome.value
+        })
 
     @property
     def timestamp(self) -> int:
