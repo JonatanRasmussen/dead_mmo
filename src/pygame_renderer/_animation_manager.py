@@ -4,7 +4,6 @@ from typing import Dict, List, Optional, Tuple, ValuesView
 from pathlib import Path
 from dataclasses import dataclass
 
-from src.frontend_client.pygame_renderer.draw_manager.draw_manager import IAnimationManager
 from src.models.events import FinalizedEvent
 
 
@@ -26,7 +25,7 @@ class ActiveAnimation:
     time_elapsed: float = 0.0
     total_duration: float = 0.0
 
-class AnimationManager(IAnimationManager):
+class AnimationManager:
     def __init__(self, assets_path: str = "assets/animations"):
         self.assets_path = Path(assets_path)
         self.animations: dict[str, Animation] = {}

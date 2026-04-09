@@ -3,9 +3,7 @@ import os
 from typing import Dict, Optional, ValuesView
 from pathlib import Path
 
-from src.frontend_client.pygame_renderer.pygame_renderer import IAudioPlayer
-
-class AudioManager(IAudioPlayer):
+class AudioManager:
     def __init__(self, assets_path: str = "assets/audio"):
         pygame.mixer.init()
         self.assets_path = Path(assets_path)

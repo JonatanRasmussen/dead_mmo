@@ -1,7 +1,20 @@
 from enum import Enum, auto
 from typing import Iterable, Optional, Protocol
 from dataclasses import dataclass
-from src.frontend_client.frontend_client import IRenderAction, IUiManager
+
+class IRenderAction(Protocol):
+    pos_xy: tuple[float, float]
+    scale_xy: tuple[float, float]
+    color_rgb: tuple[int, int, int]
+    asset_name: str | None
+    text_to_display: str | None
+    def convert_scale_xy_to_scale(self) -> float: ...
+    def convert_scale_xy_to_font_size(self) -> int: ...
+    def is_type_circle(self) -> bool: ...
+    def is_type_rectangle(self) -> bool: ...
+    def is_type_animation(self) -> bool: ...
+    def is_type_text(self) -> bool: ...
+    def is_type_audio(self) -> bool: ...
 
 class IUiUpdate(Protocol):
     source_id: int
@@ -78,7 +91,7 @@ class IWeakAura(Protocol):
 
     def create_render_actions(self) -> Iterable[IRenderAction]: ...
 
-class UiManager(IUiManager):
+class UiManager:
     def __init__(self) -> None:
         self._current_frame_id: int = 0
         self._weakauras: list[IWeakAura] = []

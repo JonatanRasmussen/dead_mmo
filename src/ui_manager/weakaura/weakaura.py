@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from typing import Iterable, Optional, Protocol
 from dataclasses import dataclass
-from src.frontend_client.ui_manager.ui_manager import IRenderAction
+from ..ui_manager import IWeakAura
 
 class RenderActionType(Enum):
     EMPTY = auto()
@@ -11,8 +11,7 @@ class RenderActionType(Enum):
     TEXT = auto()
     AUDIO = auto()
 
-@dataclass(slots=True, frozen=True)
-class RenderAction(IRenderAction):
+class Weakaura(IWeakAura):
     _render_action_type: RenderActionType = RenderActionType.EMPTY
     pos_xy: tuple[float, float] = (0.0, 0.0)
     scale_xy: tuple[float, float] = (1.0, 1.0)

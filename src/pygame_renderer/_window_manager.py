@@ -1,7 +1,6 @@
 import pygame
-from src.frontend_client.pygame_renderer.draw_manager.draw_manager import IWindowManager
 
-class WindowManager(IWindowManager):
+class WindowManager:
     def __init__(self, width: int = 1920, height: int = 1080):
         self.WINDOW_WIDTH = width
         self.WINDOW_HEIGHT = height

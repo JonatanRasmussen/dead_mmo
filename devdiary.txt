@@ -291,3 +291,14 @@
 [2025-11-26 04:29:33] {BudoB}: Iskold om sommeren men brandvarm om vinteren
 [2025-11-26 04:29:41] {BudoB}: U-u-ii
 [2025-11-26 04:29:46] {BudoB}: Code time: 2 hours
+
+[2026-02-15 15:54:06] {BudoB}: We are so back.
+[2026-02-15 15:54:10] {BudoB}: More updates to come.
+[2026-02-15 15:54:17] {BudoB}: I am thinking about doing a simulated 37h work week at DTU.
+[2026-02-15 15:54:33] {BudoB}: Getting this game OUT THERE!!!!!1
+[2026-02-15 15:54:41] {BudoB}: We will see... For now I am sitting in the train, working.
+[2026-02-15 15:54:55] {BudoB}: This config dependency injection stuff is a bit wild.
+[2026-02-15 15:55:09] {BudoB}: Code time: 1 hours.
+
+[2026-04-08 17:44:38] {BudoB}: We back at it. WoW gaming delayed my development slightly.
+[2026-04-08 17:44:55] {BudoB}: Code time: 4 hours.

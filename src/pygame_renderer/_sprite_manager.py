@@ -1,8 +1,7 @@
 import pygame
 from pathlib import Path
-from src.frontend_client.pygame_renderer.draw_manager.draw_manager import ISpriteManager
 
-class SpriteManager(ISpriteManager):
+class SpriteManager:
     def __init__(self, assets_path: str = "assets/images"):
         self.assets_path = Path(assets_path)
         self.sprites: dict[str, pygame.Surface] = {}

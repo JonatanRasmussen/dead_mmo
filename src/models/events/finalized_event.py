@@ -49,6 +49,9 @@ class FinalizedEvent:
     @property
     def target_id(self) -> int:
         return self.target.obj_id
+    @property
+    def spell_modifier(self) -> float:
+        return self.upcoming_event.spell_modifier
 
     @property
     def outcome_is_valid(self) -> bool:

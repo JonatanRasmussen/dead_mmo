@@ -1,4 +1,5 @@
-from collections.abc import ValuesView
+from typing import List, ValuesView
+import math
 
 from src.models.components import Controls, GameObj, KeyPresses
 from src.models.events import FinalizedEvent
@@ -6,7 +7,7 @@ from src.models.handlers import EventLog
 from src.models.managers.world_state import WorldState
 
 
-class CombatInstance:
+class GameInstance:
     def __init__(self, setup_spell_ids: list[int]) -> None:
         self.ingame_time: int = 0
         self._rounding_error: float = 0.0
@@ -37,7 +38,7 @@ class CombatInstance:
 
     @staticmethod
     def simulate_game_in_console(setup_spell_ids: list[int]) -> None:
-        game_instance = CombatInstance(setup_spell_ids)
+        game_instance = GameInstance(setup_spell_ids)
         SIMULATION_DURATION_MS = 6000
         UPDATES_PER_SECOND = 50
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND

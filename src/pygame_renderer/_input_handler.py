@@ -2,9 +2,7 @@
 import pygame
 from src.models.components.controls import Controls, KeyPresses
 
-from src.frontend_client.pygame_renderer.pygame_renderer import IInputReader
-
-class InputHandler(IInputReader):
+class InputHandler:
     def __init__(self):
         self.running = True
 
