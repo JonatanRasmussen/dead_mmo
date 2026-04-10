@@ -1,97 +1,136 @@
-from _collections_abc import Iterable
-from typing import Protocol
-from typing_extensions import override
+from src.models.components.controls import Controls
+from typing import ValuesView
+
 from .models.data import Spell
-from .models.handlers.spell_database import SpellDatabase
-from .backend_server import BackendServer
+from .models.components import Controls, GameObj, KeyPresses
+from .models.events.finalized_event import FinalizedEvent
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
-
+from .world_state import WorldState
 
 class IngameLoop:
+    TEST_SETUP_SPELL_IDS: list[int] = [300]
 
     def __init__(self) -> None:
-        self._server = BackendServer()
+        self._state: WorldState = WorldState()
         self._rendering_framework = PygameRenderer()
         self._ui_manager = UiManager()
-        self._cached_time: float = self._rendering_framework.get_current_time()
-        self._temp_spell_db: SpellDatabase = SpellDatabase()
 
-    def run(self) -> None:
+    def simulate_game_in_console(self, setup_spell_ids: list[int]) -> None:
+        ingame_time = 0
+        self._state.process_setup_events(ingame_time, setup_spell_ids)
+        SIMULATION_DURATION_MS = 6000
+        UPDATES_PER_SECOND = 50
+        FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
+        num_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
+        for _ in range(num_iterations):
+            simulated_player_input = Controls(key_presses=KeyPresses.START_MOVE_UP | KeyPresses.ABILITY_1)
+            ingame_time += FRAME_DURATION_MS
+            player_inputs_this_frame: list[Controls] = [simulated_player_input]
+            self._state.process_frame(player_inputs_this_frame, ingame_time)
+
+    def play_game_in_pygame(self, setup_spell_ids: list[int]) -> None:
         self._rendering_framework.launch_rendering_framework()
+        ingame_time = 0
+        cached_time = self._rendering_framework.get_current_time()
+        self._state.process_setup_events(ingame_time, setup_spell_ids)
         while self._rendering_framework.is_running():
-            player_input = self._rendering_framework.fetch_player_input()
-            self._server.send_player_input(player_input)
-            elapsed_time = self._get_elapsed_time()
-            self._server.simulate_next_frame(elapsed_time)
 
+            # Fetch player input and send it to server
+            serialized_input = self._rendering_framework.fetch_player_input()
+            current_player_input = Controls.deserialize(serialized_input)
+
+            # Update time
+            current_time = self._rendering_framework.get_current_time()
+            rounding_error = 0.0
+            exact_delta_time_ms = (current_time - cached_time) * 1000.0 + rounding_error
+            rounded_delta_time_ms = int(round(exact_delta_time_ms))  # smallest in-game time unit is 1ms
+            rounding_error = exact_delta_time_ms - rounded_delta_time_ms
+            if rounded_delta_time_ms < 1:
+                rounding_error += exact_delta_time_ms - 1
+                rounded_delta_time_ms = 1
+            cached_time = current_time
+
+            # Simulate next frame
+            ingame_time += rounded_delta_time_ms
+            player_inputs_this_frame: list[Controls] = [current_player_input]
+            self._state.process_frame(player_inputs_this_frame, ingame_time)
+
+            # Render this frame
             self._rendering_framework.begin_frame()
-            while True:
-                event_tuple = self._server.request_updated_event()
-                if event_tuple is None:
-                    break
-                self._apply_event(*event_tuple)
-            while True:
-                game_obj_update = self._server.request_updated_obj()
-                if game_obj_update is None:
-                    break
-                self._render_game_obj(*game_obj_update)
+            events_view: ValuesView[FinalizedEvent] = self._state.view_all_frame_events(ingame_time)
+            for event in events_view:
+                self._apply_event(event)
+            game_objs_view: ValuesView[GameObj] = self._state.view_game_objs
+            for game_obj in game_objs_view:
+                self._render_game_obj(game_obj)
             self._render_frame_actions()
             self._rendering_framework.end_frame()
 
+        # Cleanup when exiting game
         self._rendering_framework.terminate_rendering_framework()
 
-    def _get_elapsed_time(self) -> float:
-        current_time = self._rendering_framework.get_current_time()
-        elapsed_time = current_time - self._cached_time
-        self._cached_time = current_time
-        return elapsed_time
+    def _apply_event(self, event: FinalizedEvent) -> None:
+        spell: Spell = self._state.spell_database.get_spell(event.spell_id)
 
-    def _apply_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int, modifier: float, succesful_outcome: bool) -> None:
-        # NOT YET FULLY IMPLEMENTED
-        #self._ui_manager.apply_ui_update(serialized_event)
-        spell: Spell = self._temp_spell_db.get_spell(spell_id)
-        if spell.should_play_audio and succesful_outcome:
+        if spell.should_play_audio and event.outcome_is_valid:
             self._rendering_framework.play_sound(spell.audio_name)
-        if spell.should_play_animation and succesful_outcome:
-            pos = (0.0, 0.0) #pos = (f_event.effect_position.x, f_event.effect_position.y)
+
+        if spell.should_play_animation and event.outcome_is_valid:
+            pos = (0.0, 0.0)  # Replace with real effect position later
             self._rendering_framework.play_animation(
                 pos_xy=pos,
                 scale=spell.animation_scale,
                 asset_name=spell.animation_name
             )
 
-    def _render_game_obj(self, pos_xy: tuple[float, float], obj_size: float, color: tuple[int, int, int], sprite_name: str | None, is_visible: bool) -> None:
-        if is_visible:
+    def _render_game_obj(self, game_obj: GameObj) -> None:
+        if game_obj.is_visible:
             self._rendering_framework.draw_blinking_circle(
-                pos_xy=pos_xy,
-                scale=obj_size,
-                color_rgb=color,
+                pos_xy=(game_obj.pos.x, game_obj.pos.y),
+                scale=game_obj.size,
+                color_rgb=game_obj.color,
                 time_ms=self._rendering_framework.get_current_time(),
-                asset_name=sprite_name
+                asset_name=game_obj.sprite_name
             )
 
-    def _render_frame(self) -> None:
-        self._rendering_framework.begin_frame()
-        self._render_frame_actions()
-        self._rendering_framework.end_frame()
-
     def _render_frame_actions(self) -> None:
-        # temp obj draw logic, remove later
-        pass
-        # continue with the proper (but not yet implemented) logic
         for rend_act in self._ui_manager.get_render_actions():
             if rend_act.is_type_circle():
                 scale = rend_act.convert_scale_xy_to_scale()
-                self._rendering_framework.draw_circle(rend_act.pos_xy, scale, rend_act.color_rgb, rend_act.asset_name)
+                self._rendering_framework.draw_circle(
+                    rend_act.pos_xy,
+                    scale,
+                    rend_act.color_rgb,
+                    rend_act.asset_name
+                )
+
             elif rend_act.is_type_rectangle():
-                self._rendering_framework.draw_rectangle(rend_act.pos_xy, rend_act.scale_xy, rend_act.color_rgb, rend_act.asset_name)
+                self._rendering_framework.draw_rectangle(
+                    rend_act.pos_xy,
+                    rend_act.scale_xy,
+                    rend_act.color_rgb,
+                    rend_act.asset_name
+                )
+
             elif rend_act.is_type_animation():
                 scale = rend_act.convert_scale_xy_to_scale()
-                self._rendering_framework.play_animation(rend_act.pos_xy, scale, rend_act.asset_name)
+                self._rendering_framework.play_animation(
+                    rend_act.pos_xy,
+                    scale,
+                    rend_act.asset_name
+                )
+
             elif rend_act.is_type_text():
                 font_size = rend_act.convert_scale_xy_to_font_size()
-                self._rendering_framework.display_text(rend_act.pos_xy, font_size, rend_act.color_rgb, rend_act.text_to_display)
+                self._rendering_framework.display_text(
+                    rend_act.pos_xy,
+                    font_size,
+                    rend_act.color_rgb,
+                    rend_act.text_to_display
+                )
+
             elif rend_act.is_type_audio():
                 self._rendering_framework.play_sound(rend_act.asset_name)
+
         self._ui_manager.clear_current_frame_event_cache()

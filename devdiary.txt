@@ -302,3 +302,7 @@
 
 [2026-04-08 17:44:38] {BudoB}: We back at it. WoW gaming delayed my development slightly.
 [2026-04-08 17:44:55] {BudoB}: Code time: 4 hours.
+
+[2026-04-10 04:22:03] {BudoB}: Another one. Working till late. Probably shouldn'd do that.
+[2026-04-10 04:22:21] {BudoB}: Fewer classes is probably better code.
+[2026-04-10 04:22:33] {BudoB}: Code time: 5 hours.

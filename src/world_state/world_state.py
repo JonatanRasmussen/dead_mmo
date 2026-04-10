@@ -1,22 +1,27 @@
-from typing import Iterable, ValuesView, Optional
+from typing import Any, Iterable, ValuesView, Optional
 
 from src.settings import Consts
 from src.models.components import Controls, GameObj
 from src.models.data import DefaultIDs, Spell, Targeting
 from src.models.events import FinalizedEvent, Outcome, UpcomingEvent
-from src.models.handlers import AuraHandler, EventLog, FrameHeap, GameObjHandler, IdGen
-from src.models.handlers import SpellDatabase
+from ._event_log import EventLog
+from ._aura_handler import AuraHandler
+from ._frame_heap import FrameHeap
+from ._game_obj_handler import GameObjHandler
+from ._id_gen import IdGen
+from ._spell_database import SpellDatabase
 
 
 class WorldState:
     """ The entire game state of the save file that is currently in use """
 
     def __init__(self) -> None:
+        self.spell_database: SpellDatabase = SpellDatabase()
         self._auras: AuraHandler = AuraHandler()
         self._game_objs: GameObjHandler = GameObjHandler()
-        self._spell_database: SpellDatabase = SpellDatabase()
         self._event_heap: FrameHeap = FrameHeap()
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
+        self._event_log_for_each_frame: dict[int, EventLog] = {}
 
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
@@ -25,17 +30,20 @@ class WorldState:
     def default_ids(self) -> DefaultIDs:
         return self._game_objs.default_ids
 
-    def try_add_player_input(self, player_input: Controls, timestamp: int) -> None:
-        if player_input.is_empty:
-            return
-        player_input.timeline_timestamp = timestamp
-        player_input.obj_id = self.default_ids.player_id
-        player_obj = self._game_objs.get_game_obj(player_input.obj_id)
-        for controls_event in UpcomingEvent.create_events_from_controls(player_obj, player_input):
-            self._event_heap.insert_event(controls_event)
+    def view_all_frame_events(self, frame_index: int) -> ValuesView[FinalizedEvent]:
+        return self._event_log_for_each_frame[frame_index].view_all_events
 
-    def process_frame(self, frame_end: int) -> EventLog:
+    def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
+        source_id = self.default_ids.environment_id
+        for setup_event in UpcomingEvent.create_setup_events(ingame_time, source_id, setup_spell_ids):
+            self._event_heap.insert_event(setup_event)
+        empty_list_of_player_input: list[Controls] = []
+        self.process_frame(empty_list_of_player_input, ingame_time)
+
+    def process_frame(self, player_inputs: list[Controls], frame_end: int) -> None:
         """Execute state updates for current frame"""
+        for player_input in player_inputs:
+            self._try_add_player_input(player_input, frame_end)
         event_log = EventLog()
         while self._event_heap.has_unprocessed_events(frame_end):
             u_event = self._event_heap.pop_next_event()
@@ -49,7 +57,7 @@ class WorldState:
                     for cascading_event in self._fetch_cascading_events(f_event, new_obj):
                         self._event_heap.insert_event(cascading_event)
                 self._game_objs.modify_game_obj(f_event)
-        return event_log
+        self._event_log_for_each_frame[frame_end] = event_log
 
     def _fetch_cascading_events(self, f_event: FinalizedEvent, new_obj: Optional[GameObj]) -> Iterable[UpcomingEvent]:
         if new_obj is not None and f_event.spell.spawned_obj is not None and f_event.spell.spawned_obj.obj_controls is not None:
@@ -67,7 +75,7 @@ class WorldState:
 
     def _finalize_event(self, event: UpcomingEvent, event_id: int) -> FinalizedEvent:
         source_obj = self._game_objs.get_game_obj(event.source_id)
-        spell = self._spell_database.get_spell(event.spell_id)
+        spell = self.spell_database.get_spell(event.spell_id)
         target_obj = self._decide_event_target(event, source_obj, spell)
         if event.is_aura_tick and not self._auras.aura_exists(event):
             outcome = Outcome.AURA_NO_LONGER_EXISTS
@@ -93,9 +101,11 @@ class WorldState:
                 target_id = self.default_ids.missing_target_id
         return self._game_objs.get_game_obj(target_id)
 
-    def _process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> dict[int, EventLog]:
-        source_id = self.default_ids.environment_id
-        for setup_event in UpcomingEvent.create_setup_events(ingame_time, source_id, setup_spell_ids):
-            self._event_heap.insert_event(setup_event)
-        event_log = self.process_frame(ingame_time)
-        return {ingame_time: event_log}
+    def _try_add_player_input(self, player_input: Controls, timestamp: int) -> None:
+        if player_input.is_empty:
+            return
+        player_input.timeline_timestamp = timestamp
+        player_input.obj_id = self.default_ids.player_id
+        player_obj = self._game_objs.get_game_obj(player_input.obj_id)
+        for controls_event in UpcomingEvent.create_events_from_controls(player_obj, player_input):
+            self._event_heap.insert_event(controls_event)

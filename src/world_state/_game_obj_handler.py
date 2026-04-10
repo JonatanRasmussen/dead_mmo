@@ -3,8 +3,8 @@ from typing import ValuesView, Optional
 from src.models.components import GameObj, Status
 from src.models.data import Behavior, DefaultIDs, Spell
 from src.models.events import FinalizedEvent
-from src.models.handlers.event_log import EventLog
-from src.models.handlers.id_gen import IdGen
+from ._event_log import EventLog
+from ._id_gen import IdGen
 
 
 class GameObjHandler:

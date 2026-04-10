@@ -3,13 +3,13 @@ from typing import Iterable, ValuesView
 
 from src.settings import Consts
 from src.models.events import Aura, UpcomingEvent, FinalizedEvent
-from src.models.handlers.event_log import EventLog
+from ._event_log import EventLog
 
 
 class AuraHandler:
 
     def __init__(self) -> None:
-        self._auras: SortedDict[tuple[int, int, int], Aura] = SortedDict()
+        self._auras: SortedDict = SortedDict()
 
     @property
     def view_auras(self) -> ValuesView[Aura]:
