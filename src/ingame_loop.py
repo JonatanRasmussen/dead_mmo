@@ -7,58 +7,88 @@ from .models.events.finalized_event import FinalizedEvent
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
 from .world_state import WorldState
+from ._sim_validation import SimValidation
 
 class IngameLoop:
     TEST_SETUP_SPELL_IDS: list[int] = [300]
+    SCRIPTED_PLAYER_INPUT_FOR_TESTING: dict[int, Controls] = {
+        200: Controls(key_presses=KeyPresses.START_MOVE_UP),
+        300: Controls(key_presses=KeyPresses.START_MOVE_RIGHT),
+        400: Controls(key_presses=KeyPresses.STOP_MOVE_RIGHT | KeyPresses.START_MOVE_DOWN),
+        500: Controls(key_presses=KeyPresses.STOP_MOVE_UP | KeyPresses.ABILITY_4),
+        600: Controls(key_presses=KeyPresses.STOP_MOVE_DOWN | KeyPresses.SWAP_TARGET),
+        700: Controls(key_presses=KeyPresses.ABILITY_4),
+        1800: Controls(key_presses=KeyPresses.START_MOVE_DOWN | KeyPresses.START_MOVE_RIGHT| KeyPresses.ABILITY_3),
+        3800: Controls(key_presses=KeyPresses.STOP_MOVE_DOWN | KeyPresses.ABILITY_1),
+        5300: Controls(key_presses=KeyPresses.STOP_MOVE_RIGHT | KeyPresses.ABILITY_2),
+    }
 
     def __init__(self) -> None:
         self._state: WorldState = WorldState()
         self._rendering_framework = PygameRenderer()
         self._ui_manager = UiManager()
 
-    def simulate_game_in_console(self, setup_spell_ids: list[int]) -> None:
+    def simulate_game_in_console(self, setup_spell_ids: list[int], scripted_player_input: dict[int, Controls]) -> None:
         ingame_time = 0
         self._state.process_setup_events(ingame_time, setup_spell_ids)
-        SIMULATION_DURATION_MS = 6000
+
+        SIMULATION_DURATION_MS = 10000
         UPDATES_PER_SECOND = 50
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
-        num_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
-        for _ in range(num_iterations):
-            simulated_player_input = Controls(key_presses=KeyPresses.START_MOVE_UP | KeyPresses.ABILITY_1)
+        number_of_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
+
+        player_inputs_this_frame: list[Controls] = []
+
+        for _ in range(number_of_iterations):
             ingame_time += FRAME_DURATION_MS
-            player_inputs_this_frame: list[Controls] = [simulated_player_input]
+
+            player_inputs_this_frame.clear()
+            for timestamp, controls in scripted_player_input.items():
+                if (ingame_time - FRAME_DURATION_MS) < timestamp <= ingame_time:
+                    player_inputs_this_frame.append(controls)
             self._state.process_frame(player_inputs_this_frame, ingame_time)
 
-    def play_game_in_pygame(self, setup_spell_ids: list[int]) -> None:
+        SimValidation.run_snapshot_test(self._state, snapshot_name=str(setup_spell_ids))
+
+    def play_game_in_pygame(self, setup_spell_ids: list[int], scripted_player_input: dict[int, Controls] | None = None) -> None:
         self._rendering_framework.launch_rendering_framework()
         ingame_time = 0
         cached_time = self._rendering_framework.get_current_time()
         self._state.process_setup_events(ingame_time, setup_spell_ids)
+        player_inputs_this_frame: list[Controls] = []
         while self._rendering_framework.is_running():
-
-            # Fetch player input and send it to server
-            serialized_input = self._rendering_framework.fetch_player_input()
-            current_player_input = Controls.deserialize(serialized_input)
-
             # Update time
             current_time = self._rendering_framework.get_current_time()
             rounding_error = 0.0
             exact_delta_time_ms = (current_time - cached_time) * 1000.0 + rounding_error
-            rounded_delta_time_ms = int(round(exact_delta_time_ms))  # smallest in-game time unit is 1ms
+            rounded_delta_time_ms = int(round(exact_delta_time_ms))  # round to smallest allowed in-game time unit
             rounding_error = exact_delta_time_ms - rounded_delta_time_ms
             if rounded_delta_time_ms < 1:
                 rounding_error += exact_delta_time_ms - 1
                 rounded_delta_time_ms = 1
             cached_time = current_time
+            ingame_time += rounded_delta_time_ms
+
+            # Fetch player input and send it to server
+            player_inputs_this_frame.clear()
+            if scripted_player_input is None:
+                # Player is controlling the game
+                serialized_input = self._rendering_framework.fetch_player_input()
+                current_player_input = Controls.deserialize(serialized_input)
+                player_inputs_this_frame.append(current_player_input)
+            else:
+                # Player is NOT controlling game; scripted player input is used instead (for testing purposes)
+                unused_player_input = self._rendering_framework.fetch_player_input()  # Only called to allow Escape keypress to close game
+                for timestamp, controls in scripted_player_input.items():
+                    if (ingame_time - rounded_delta_time_ms) < timestamp <= ingame_time:
+                        player_inputs_this_frame.append(controls)
 
             # Simulate next frame
-            ingame_time += rounded_delta_time_ms
-            player_inputs_this_frame: list[Controls] = [current_player_input]
             self._state.process_frame(player_inputs_this_frame, ingame_time)
 
             # Render this frame
             self._rendering_framework.begin_frame()
-            events_view: ValuesView[FinalizedEvent] = self._state.view_all_frame_events(ingame_time)
+            events_view: ValuesView[FinalizedEvent] = self._state.view_event_logs[ingame_time].view_all_events
             for event in events_view:
                 self._apply_event(event)
             game_objs_view: ValuesView[GameObj] = self._state.view_game_objs

@@ -29,10 +29,9 @@ class WorldState:
     @property
     def default_ids(self) -> DefaultIDs:
         return self._game_objs.default_ids
-
-    def view_all_frame_events(self, frame_index: int) -> ValuesView[FinalizedEvent]:
-        return self._event_log_for_each_frame[frame_index].view_all_events
-
+    @property
+    def view_event_logs(self) -> dict[int, EventLog]:
+        return self._event_log_for_each_frame
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         source_id = self.default_ids.environment_id
         for setup_event in UpcomingEvent.create_setup_events(ingame_time, source_id, setup_spell_ids):

@@ -18,20 +18,26 @@ class Controls:
     def deserialize(cls, data: str) -> 'Controls':
         d = json.loads(data) if isinstance(data, str) else data
         return cls(
-            obj_id=d["oid"],
-            timeline_timestamp=d["ts"],
-            _offset=d["off"],
-            key_presses=KeyPresses(d["kp"])  # Cast the integer back to the KeyPresses Enum type
+            obj_id=d["obj_id"],
+            timeline_timestamp=d["timestamp"],
+            _offset=d["offset"],
+            key_presses=KeyPresses(d["keypress"])  # Cast the integer back to the KeyPresses Enum type
         )
     def serialize(self) -> str:
         kp_value = self.key_presses.value if hasattr(self.key_presses, "value") else self.key_presses  # We extract the value from KeyPresses if it is an Enum, otherwise use it directly
         data = {
-            "oid": self.obj_id,
-            "ts": self.timeline_timestamp,
-            "off": self._offset,
-            "kp": kp_value
+            "obj_id": self.obj_id,
+            "timestamp": self.timeline_timestamp,
+            "offset": self._offset,
+            "keypress": kp_value
         }
         return json.dumps(data)
+
+    def debug_print(self) -> None:
+        """Displays the value of a Controls object for terminal debugging purposes."""
+        kp_value = self.key_presses.value if hasattr(self.key_presses, "value") else self.key_presses
+        kp_readable = self.key_presses.name if self.key_presses.name else str(self.key_presses)
+        print(f"Controls(obj_id={self.obj_id}, timestamp={self.timeline_timestamp}, time_offset={self._offset}, keypress={kp_readable}[{kp_value}])")
 
     @property
     def get_key_for_controls(self) -> tuple[int, int]:
