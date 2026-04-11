@@ -8,7 +8,7 @@ def main() -> None:
     simulated_ingame_loop = IngameLoop()
     simulated_ingame_loop.simulate_game_in_console(setup_spell_ids,scripted_player_input_for_testing)
     rendered_ingame_loop = IngameLoop()
-    #ingame_loop.play_game_in_pygame(setup_spell_ids, scripted_player_input_for_testing)
+    #rendered_ingame_loop.play_game_in_pygame(setup_spell_ids, scripted_player_input_for_testing)
     rendered_ingame_loop.play_game_in_pygame(setup_spell_ids)
 
 if __name__ == "__main__":

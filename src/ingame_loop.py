@@ -1,4 +1,3 @@
-from src.models.components.controls import Controls
 from typing import ValuesView
 
 from .models.data import Spell
@@ -11,16 +10,16 @@ from ._sim_validation import SimValidation
 
 class IngameLoop:
     TEST_SETUP_SPELL_IDS: list[int] = [300]
-    SCRIPTED_PLAYER_INPUT_FOR_TESTING: dict[int, Controls] = {
-        200: Controls(key_presses=KeyPresses.START_MOVE_UP),
-        300: Controls(key_presses=KeyPresses.START_MOVE_RIGHT),
-        400: Controls(key_presses=KeyPresses.STOP_MOVE_RIGHT | KeyPresses.START_MOVE_DOWN),
-        500: Controls(key_presses=KeyPresses.STOP_MOVE_UP | KeyPresses.ABILITY_4),
-        600: Controls(key_presses=KeyPresses.STOP_MOVE_DOWN | KeyPresses.SWAP_TARGET),
-        700: Controls(key_presses=KeyPresses.ABILITY_4),
-        1800: Controls(key_presses=KeyPresses.START_MOVE_DOWN | KeyPresses.START_MOVE_RIGHT| KeyPresses.ABILITY_3),
-        3800: Controls(key_presses=KeyPresses.STOP_MOVE_DOWN | KeyPresses.ABILITY_1),
-        5300: Controls(key_presses=KeyPresses.STOP_MOVE_RIGHT | KeyPresses.ABILITY_2),
+    SCRIPTED_PLAYER_INPUT_FOR_TESTING: dict[int, KeyPresses] = {
+        200: KeyPresses.START_MOVE_UP,
+        300: KeyPresses.START_MOVE_RIGHT,
+        400: KeyPresses.STOP_MOVE_RIGHT | KeyPresses.START_MOVE_DOWN,
+        500: KeyPresses.STOP_MOVE_UP | KeyPresses.ABILITY_4,
+        600: KeyPresses.STOP_MOVE_DOWN | KeyPresses.SWAP_TARGET,
+        700: KeyPresses.ABILITY_4,
+        1800: KeyPresses.START_MOVE_DOWN | KeyPresses.START_MOVE_RIGHT | KeyPresses.ABILITY_3,
+        3800: KeyPresses.STOP_MOVE_DOWN | KeyPresses.ABILITY_1,
+        5300: KeyPresses.STOP_MOVE_RIGHT | KeyPresses.ABILITY_2,
     }
 
     def __init__(self) -> None:
@@ -28,7 +27,7 @@ class IngameLoop:
         self._rendering_framework = PygameRenderer()
         self._ui_manager = UiManager()
 
-    def simulate_game_in_console(self, setup_spell_ids: list[int], scripted_player_input: dict[int, Controls]) -> None:
+    def simulate_game_in_console(self, setup_spell_ids: list[int], scripted_player_input: dict[int, KeyPresses]) -> None:
         ingame_time = 0
         self._state.process_setup_events(ingame_time, setup_spell_ids)
 
@@ -37,25 +36,25 @@ class IngameLoop:
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
         number_of_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
 
-        player_inputs_this_frame: list[Controls] = []
+        player_inputs_this_frame: list[KeyPresses] = []
 
         for _ in range(number_of_iterations):
             ingame_time += FRAME_DURATION_MS
 
             player_inputs_this_frame.clear()
-            for timestamp, controls in scripted_player_input.items():
+            for timestamp, key_presses in scripted_player_input.items():
                 if (ingame_time - FRAME_DURATION_MS) < timestamp <= ingame_time:
-                    player_inputs_this_frame.append(controls)
+                    player_inputs_this_frame.append(key_presses)
             self._state.process_frame(player_inputs_this_frame, ingame_time)
 
         SimValidation.run_snapshot_test(self._state, snapshot_name=str(setup_spell_ids))
 
-    def play_game_in_pygame(self, setup_spell_ids: list[int], scripted_player_input: dict[int, Controls] | None = None) -> None:
+    def play_game_in_pygame(self, setup_spell_ids: list[int], scripted_player_input: dict[int, KeyPresses] | None = None) -> None:
         self._rendering_framework.launch_rendering_framework()
         ingame_time = 0
         cached_time = self._rendering_framework.get_current_time()
         self._state.process_setup_events(ingame_time, setup_spell_ids)
-        player_inputs_this_frame: list[Controls] = []
+        player_inputs_this_frame: list[KeyPresses] = []
         while self._rendering_framework.is_running():
             # Update time
             current_time = self._rendering_framework.get_current_time()
@@ -73,15 +72,15 @@ class IngameLoop:
             player_inputs_this_frame.clear()
             if scripted_player_input is None:
                 # Player is controlling the game
-                serialized_input = self._rendering_framework.fetch_player_input()
-                current_player_input = Controls.deserialize(serialized_input)
-                player_inputs_this_frame.append(current_player_input)
+                current_player_input: KeyPresses = self._rendering_framework.fetch_player_input()
+                if current_player_input != KeyPresses.NONE:
+                    player_inputs_this_frame.append(current_player_input)
             else:
                 # Player is NOT controlling game; scripted player input is used instead (for testing purposes)
                 unused_player_input = self._rendering_framework.fetch_player_input()  # Only called to allow Escape keypress to close game
-                for timestamp, controls in scripted_player_input.items():
+                for timestamp, key_presses in scripted_player_input.items():
                     if (ingame_time - rounded_delta_time_ms) < timestamp <= ingame_time:
-                        player_inputs_this_frame.append(controls)
+                        player_inputs_this_frame.append(key_presses)
 
             # Simulate next frame
             self._state.process_frame(player_inputs_this_frame, ingame_time)

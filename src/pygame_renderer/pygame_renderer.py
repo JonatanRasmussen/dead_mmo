@@ -1,4 +1,3 @@
-# pygame_renderer.py
 import pygame
 import math
 import os
@@ -9,6 +8,7 @@ from ._sprite_manager import SpriteManager
 from ._window_manager import WindowManager
 from ._audio_manager import AudioManager
 from ._input_handler import InputHandler
+from src.models.components.controls import KeyPresses
 
 
 class PygameRenderer:
@@ -43,7 +43,7 @@ class PygameRenderer:
     def is_running(self) -> bool:
         return self._input_handler.is_running()
 
-    def fetch_player_input(self) -> str:
+    def fetch_player_input(self) -> KeyPresses:
         return self._input_handler.fetch_player_input()
 
     def get_current_time(self) -> float:

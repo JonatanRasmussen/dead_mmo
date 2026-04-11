@@ -1,7 +1,7 @@
 from typing import Any, Iterable, ValuesView, Optional
 
 from src.settings import Consts
-from src.models.components import Controls, GameObj
+from src.models.components import Controls, KeyPresses, GameObj
 from src.models.data import DefaultIDs, Spell, Targeting
 from src.models.events import FinalizedEvent, Outcome, UpcomingEvent
 from ._event_log import EventLog
@@ -32,17 +32,22 @@ class WorldState:
     @property
     def view_event_logs(self) -> dict[int, EventLog]:
         return self._event_log_for_each_frame
+
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         source_id = self.default_ids.environment_id
         for setup_event in UpcomingEvent.create_setup_events(ingame_time, source_id, setup_spell_ids):
             self._event_heap.insert_event(setup_event)
-        empty_list_of_player_input: list[Controls] = []
+        empty_list_of_player_input: list[KeyPresses] = []
         self.process_frame(empty_list_of_player_input, ingame_time)
 
-    def process_frame(self, player_inputs: list[Controls], frame_end: int) -> None:
+    def process_frame(self, player_inputs: list[KeyPresses], frame_end: int) -> None:
         """Execute state updates for current frame"""
-        for player_input in player_inputs:
-            self._try_add_player_input(player_input, frame_end)
+        for key_presses in player_inputs:
+            if key_presses != KeyPresses.NONE:
+                controls = Controls(obj_id=self.default_ids.player_id, timeline_timestamp=frame_end, key_presses=key_presses)
+                player_obj = self._game_objs.get_game_obj(controls.obj_id)
+                for controls_event in UpcomingEvent.create_events_from_controls(player_obj, controls):
+                    self._event_heap.insert_event(controls_event)
         event_log = EventLog()
         while self._event_heap.has_unprocessed_events(frame_end):
             u_event = self._event_heap.pop_next_event()
@@ -99,12 +104,3 @@ class WorldState:
             else:
                 target_id = self.default_ids.missing_target_id
         return self._game_objs.get_game_obj(target_id)
-
-    def _try_add_player_input(self, player_input: Controls, timestamp: int) -> None:
-        if player_input.is_empty:
-            return
-        player_input.timeline_timestamp = timestamp
-        player_input.obj_id = self.default_ids.player_id
-        player_obj = self._game_objs.get_game_obj(player_input.obj_id)
-        for controls_event in UpcomingEvent.create_events_from_controls(player_obj, player_input):
-            self._event_heap.insert_event(controls_event)
