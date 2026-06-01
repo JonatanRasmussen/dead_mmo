@@ -1,8 +1,10 @@
+import json
 from typing import ValuesView
 
 from src.models.components import GameObj
+from src.models.events.upcoming_event import UpcomingEvent
 from src.settings import LogConfig
-from src.models.events import Aura, FinalizedEvent
+from src.models.events import Aura
 from src.models.utils import Logger
 
 
@@ -20,19 +22,19 @@ class EventLog:
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES
 
     def __init__(self) -> None:
-        self._combat_event_log: dict[int, FinalizedEvent] = {}
+        self._combat_event_log: dict[int, UpcomingEvent] = {}
 
     @property
-    def view_all_events(self) -> ValuesView[FinalizedEvent]:
+    def view_all_events(self) -> ValuesView[UpcomingEvent]:
         return self._combat_event_log.values()
 
-    def log_event(self, event: FinalizedEvent) -> None:
+    def log_event(self, u_event: UpcomingEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
-            if not event.upcoming_event.is_aura_tick or self.DEBUG_PRINT_AURA_TICKS:
-                if event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
-                    Logger.debug(event.event_summary, self.FILENAME_COMBAT_EVENT_LOG)
-        assert event.event_id not in self._combat_event_log, f"Event with ID {event.event_id} already exists in event_log."
-        self._combat_event_log[event.event_id] = event
+            if not u_event.is_aura_tick or self.DEBUG_PRINT_AURA_TICKS:
+                if u_event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
+                    Logger.debug(u_event.event_summary, self.FILENAME_COMBAT_EVENT_LOG)
+        assert u_event.event_id not in self._combat_event_log, f"Event with ID {u_event.event_id} already exists in event_log."
+        self._combat_event_log[u_event.event_id] = u_event
 
     @staticmethod
     def summarize_new_obj_creation(new_obj: GameObj) -> None:
@@ -58,59 +60,61 @@ class EventLog:
             return
 
         def fmt(value):
-            """ Helper function to format floats with 3 decimal places """
             if isinstance(value, float):
                 return f"{value:.3f}"
-            if isinstance(value, int) and value > 1000: # Heuristic to guess if it's a timestamp
+            if isinstance(value, int) and value > 1000:
                 return f"{value / 1000.0:.3f}s"
-            return str(value) # Convert all to string for consistency
+            return str(value)
 
-        # Format object ID with 4 digits and leading zeros
+        def diff_dict(d1: dict, d2: dict, path: str = ""):
+            """Recursively find differences between two dicts"""
+            diffs = []
+
+            keys = set(d1.keys()) | set(d2.keys())
+
+            for key in keys:
+                new_path = f"{path}.{key}" if path else key
+
+                v1 = d1.get(key)
+                v2 = d2.get(key)
+
+                if isinstance(v1, dict) and isinstance(v2, dict):
+                    diffs.extend(diff_dict(v1, v2, new_path))
+
+                elif isinstance(v1, list) and isinstance(v2, list):
+                    max_len = max(len(v1), len(v2))
+                    for i in range(max_len):
+                        item_path = f"{new_path}[{i}]"
+                        try:
+                            item1 = v1[i]
+                        except IndexError:
+                            item1 = None
+                        try:
+                            item2 = v2[i]
+                        except IndexError:
+                            item2 = None
+
+                        if isinstance(item1, dict) and isinstance(item2, dict):
+                            diffs.extend(diff_dict(item1, item2, item_path))
+                        elif item1 != item2:
+                            diffs.append((item_path, item1, item2))
+
+                else:
+                    if v1 != v2:
+                        diffs.append((new_path, v1, v2))
+
+            return diffs
+
         obj_id_fmt = f"{current.obj_id:04d}"
 
-        # Appearance
-        if current.color != updated.color:
-            Logger.debug(f"Obj {obj_id_fmt} COLOR update: {current.color} -> {updated.color}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        # Serialize to dicts
+        current_dict = json.loads(current.serialize())
+        updated_dict = json.loads(updated.serialize())
 
-        # Status effects
-        if current.state != updated.state:
-            Logger.debug(f"Obj {obj_id_fmt} STATUS update: {current.state} -> {updated.state}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        diffs = diff_dict(current_dict, updated_dict)
 
-        # Targeting
-        if current.res.team.is_allied != updated.res.team.is_allied:
-            Logger.debug(f"Obj {obj_id_fmt} ALLIANCE update: {current.res.team.is_allied} -> {updated.res.team.is_allied}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.current_target != updated.current_target:
-            Logger.debug(f"Obj {obj_id_fmt} TARGET update: {current.current_target:04d} -> {updated.current_target:04d}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.selected_spell != updated.selected_spell:
-            Logger.debug(f"Obj {obj_id_fmt} SELECTED SPELL update: {current.selected_spell} -> {updated.selected_spell}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-
-        # Combat stats
-        if current.res.hp != updated.res.hp:
-            Logger.debug(f"Obj {obj_id_fmt} HP update: {fmt(current.res.hp)} -> {fmt(updated.res.hp)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.pos.movement_speed != updated.pos.movement_speed:
-            Logger.debug(f"Obj {obj_id_fmt} SPEED update: {fmt(current.pos.movement_speed)} -> {fmt(updated.pos.movement_speed)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.is_attackable != updated.is_attackable:
-            Logger.debug(f"Obj {obj_id_fmt} ATTACKABLE update: {current.is_attackable} -> {updated.is_attackable}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-        if current.gcd_mod != updated.gcd_mod:
-            Logger.debug(f"Obj {obj_id_fmt} GCD update: {fmt(current.gcd_mod)} -> {fmt(updated.gcd_mod)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-
-        # Positional data
-        if EventLog.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES:
-            if current.pos.x != updated.pos.x or current.pos.y != updated.pos.y or current.pos.angle != updated.pos.angle:
-                Logger.debug(f"Obj {obj_id_fmt} POSITION update: ({fmt(current.pos.x)}, {fmt(current.pos.y)}, {fmt(current.pos.angle)}) -> ({fmt(updated.pos.x)}, {fmt(updated.pos.y)}, {fmt(updated.pos.angle)}) (x, y, angle)", EventLog.FILENAME_OBJ_UPDATES_LOG)
-
-        for i in range (len(current.loadout.spell_ids)):
-            if current.loadout.spell_ids[i] != updated.loadout.spell_ids[i]:
-                old_id = current.loadout.spell_ids[i]
-                new_id = updated.loadout.spell_ids[i]
-                Logger.debug(f"Obj {obj_id_fmt} loadout update at index {i}: {old_id:04d} -> {new_id:04d}", EventLog.FILENAME_OBJ_UPDATES_LOG)
-
-        # Cooldown timestamps
-        cooldown_timestamps = [
-            ("SPAWN", current.loadout.spawn_timestamp, updated.loadout.spawn_timestamp),
-            ("GCD START", current.loadout.gcd_start, updated.loadout.gcd_start)
-        ]
-
-        for name, old_timestamp, new_timestamp in cooldown_timestamps:
-            if old_timestamp != new_timestamp:
-                Logger.debug(f"Obj {obj_id_fmt} {name} update: {fmt(old_timestamp)} -> {fmt(new_timestamp)}", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        for path, old, new in diffs:
+            Logger.debug(
+                f"Obj {obj_id_fmt} {path} update: {fmt(old)} -> {fmt(new)}",
+                EventLog.FILENAME_OBJ_UPDATES_LOG
+            )

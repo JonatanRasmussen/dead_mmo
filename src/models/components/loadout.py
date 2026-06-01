@@ -58,7 +58,6 @@ class Loadout:
         assert not controls.is_empty, f"Controls for {obj_id} is empty."
         for key_flag in LOADOUT_KEY_TO_INDEX_MAP:
             if key_flag in controls.key_presses:
-                idx = LOADOUT_KEY_TO_INDEX_MAP[key_flag]
-                spell_id = self.spell_ids[idx]
+                spell_id = self.spell_ids[LOADOUT_KEY_TO_INDEX_MAP[key_flag]]
                 assert Consts.is_valid_id(spell_id), f"Invalid spell ID for {obj_id}: {key_flag.name}_id"
                 yield spell_id

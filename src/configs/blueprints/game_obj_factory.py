@@ -14,17 +14,16 @@ class GameObjFactory:
         return self.obj_template
 
     def set_position(self, x: float, y: float, angle: float = 0.0) -> 'GameObjFactory':
-        self._game_obj.pos.x = Distance(x)
-        self._game_obj.pos.y = Distance(y)
-        self._game_obj.pos.angle = angle
+        self._game_obj.set_position_xy(x, y)
+        self._game_obj.set_angle(angle)
         return self
 
     def set_resources(self, hp: float) -> 'GameObjFactory':
-        self._game_obj.res = Resources(hp=hp)
+        self._game_obj.reset_resources(hp)
         return self
 
     def set_stats(self, movement_speed: float) -> 'GameObjFactory':
-        self._game_obj.pos.movement_speed = movement_speed
+        self._game_obj.set_movement_speed(movement_speed)
         return self
 
     def make_attackable(self, is_attackable: bool = True) -> 'GameObjFactory':
@@ -40,8 +39,7 @@ class GameObjFactory:
         return self
 
     def bind_spell(self, key_presses: KeyPresses, spell_id: int) -> 'GameObjFactory':
-        """Binds a spell to a key in the object's loadout."""
-        self._game_obj.loadout.bind_spell(key_presses, spell_id)
+        self._game_obj.bind_spell(key_presses, spell_id)
         return self
 
 class GameObjTemplates:
@@ -54,8 +52,8 @@ class GameObjTemplates:
         ) -> ObjTemplate:
         loadout, obj_controls = GameObjTemplates._create_loadout_from_scripted_timeline(timeline)
         game_obj = GameObj(
-            loadout=loadout,
-            pos=Position(x=Distance(0.0), y=Distance(0.05), movement_speed=speed, base_size=size),
+            _loadout=loadout,
+            _pos=Position(x=Distance(0.0), y=Distance(0.05), movement_speed=speed, base_size=size),
             color=color,
         )
         return ObjTemplate(game_obj=game_obj, obj_controls=obj_controls)
@@ -70,9 +68,9 @@ class GameObjTemplates:
         ) -> ObjTemplate:
         loadout, obj_controls = GameObjTemplates._create_loadout_from_scripted_timeline(timeline)
         game_obj = GameObj(
-            loadout=loadout,
-            pos=Position(x=Distance(x), y=Distance(y)),
-            res=Resources(hp=hp),
+            _loadout=loadout,
+            _pos=Position(x=Distance(x), y=Distance(y)),
+            _res=Resources(hp=hp),
             color=color,
         )
         return ObjTemplate(game_obj=game_obj, obj_controls=obj_controls)
@@ -87,9 +85,9 @@ class GameObjTemplates:
             sprite_name: str,
         ) -> ObjTemplate:
         game_obj = GameObj(
-            loadout=loadout,
-            pos=Position(x=Distance(x), y=Distance(y)),
-            res=Resources(hp=hp),
+            _loadout=loadout,
+            _pos=Position(x=Distance(x), y=Distance(y)),
+            _res=Resources(hp=hp),
             color=color,
             sprite_name=sprite_name,
         )

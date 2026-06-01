@@ -34,14 +34,7 @@ class ObjTemplate:
 
     def create_child(self, obj_id: int, parent: GameObj, spawn_timestamp: int, current_target: int) -> GameObj:
         child = self.create_obj_from_template()
-        child.obj_id = obj_id
-        child.parent_id=parent.obj_id
-        child.loadout.spawn_timestamp=spawn_timestamp
-        child.current_target=current_target
-        child.state=Status.ALIVE
-        child.pos.x += parent.pos.x
-        child.pos.y += parent.pos.y
-        child.res.team = child.res.team.decide_team_based_on_parent(parent.res.team)
+        child.initialize_as_child(obj_id, parent, spawn_timestamp, current_target)
         return child
 
     def create_obj_from_template(self) -> GameObj:

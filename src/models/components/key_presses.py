@@ -19,4 +19,3 @@ class KeyPresses(IntFlag):
     STOP_MOVE_DOWN = auto()
     START_MOVE_RIGHT = auto()
     STOP_MOVE_RIGHT = auto()
-

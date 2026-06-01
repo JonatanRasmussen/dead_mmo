@@ -7,6 +7,7 @@ from src.settings import Consts
 @dataclass(slots=True)
 class Aura:
     """ The effect of a previously cast spell that periodically ticks over a time span. """
+    aura_id: int = Consts.EMPTY_ID  # unique id for each aura
     source_id: int = Consts.EMPTY_ID  # game_obj source
     target_id: int = Consts.EMPTY_ID  # game_obj target
     origin_spell_id: int = Consts.EMPTY_ID  # spell that applied aura

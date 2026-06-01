@@ -2,9 +2,9 @@ from typing import ValuesView, Optional
 
 from src.models.components import GameObj, Status
 from src.models.data import Behavior, DefaultIDs, Spell
-from src.models.events import FinalizedEvent
 from ._event_log import EventLog
 from ._id_gen import IdGen
+from ._spell_effect_applier import SpellEffectApplier
 
 
 class GameObjHandler:
@@ -46,19 +46,18 @@ class GameObjHandler:
         assert updated_game_obj.obj_id in self._game_objs, f"GameObj with ID {updated_game_obj.obj_id} does not exist."
         self._game_objs[updated_game_obj.obj_id] = updated_game_obj
 
-    def modify_game_obj(self, f_event: FinalizedEvent) -> None:
-        spell = f_event.spell
-        spell.flags.modify_source(f_event.timestamp, f_event.source, f_event.target)
-        spell.flags.modify_target(f_event.source, spell.power, f_event.target)
+    def modify_game_obj(self, timestamp: int, source: GameObj, spell: Spell, target: GameObj) -> None:
+        SpellEffectApplier.apply_source_effects(spell, timestamp, source, target)
+        SpellEffectApplier.apply_target_effects(spell, source, target)
 
-    def handle_spawn(self, f_event: FinalizedEvent) -> Optional[GameObj]:
-        template = f_event.spell.spawned_obj
+    def handle_spawn(self, timestamp: int, source: GameObj, spell: Spell, target_id: int) -> Optional[GameObj]:
+        template = spell.spawned_obj
         if template is None:
             return None
         new_obj_id = self._generate_new_game_obj_id()
-        child = template.create_child(new_obj_id, f_event.source, f_event.timestamp, f_event.target_id)
+        child = template.create_child(new_obj_id, source, timestamp, target_id)
         self.add_game_obj(child)
-        self._update_default_ids(child, f_event.spell)
+        self._update_default_ids(child, spell)
         return child
 
     def _create_environment_obj(self) -> None:

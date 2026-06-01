@@ -18,7 +18,7 @@ class FrameHeap:
         return event_heap
 
     def has_unprocessed_events(self, timestamp_to_stop_after: float) -> bool:
-        next_event = self._peek_next_event()
+        next_event = self.peek_next_event()
         return next_event is not None and next_event.timestamp <= timestamp_to_stop_after
 
     def insert_event(self, event: UpcomingEvent) -> None:
@@ -31,7 +31,7 @@ class FrameHeap:
         _, _, _, _, _, event = heapq.heappop(self._event_heap)
         return event
 
-    def _peek_next_event(self) -> Optional[UpcomingEvent]:
+    def peek_next_event(self) -> Optional[UpcomingEvent]:
         if len(self._event_heap) > 0:
             return self._event_heap[0][-1]
         return None

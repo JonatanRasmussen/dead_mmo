@@ -1,59 +1,54 @@
-# input_handler.py (Updated)
 import pygame
-from src.models.components.controls import KeyPresses
+from src.consts import HardwareInputConsts
 
 class InputHandler:
+
     def __init__(self):
         self.running = True
 
-    def fetch_player_input(self) -> KeyPresses:
-        """Process pygame events and return a KeyPresses object"""
-        key_presses: KeyPresses = KeyPresses.NONE
+    def fetch_player_input(self) -> list[str]:
+        """Process pygame events and return a list of input constants"""
+        inputs: list[str] = []
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 self.running = False
             elif event.type == pygame.KEYUP:
-                key_presses = self._handle_keyup(event, key_presses)
+                self._handle_keyup(event, inputs)
             elif event.type == pygame.KEYDOWN:
-                key_presses = self._handle_keydown(event, key_presses)
+                self._handle_keydown(event, inputs)
 
-        return key_presses
+        return inputs
 
-    def _handle_keyup(self, event: pygame.event.Event, key_presses: KeyPresses) -> KeyPresses:
-        """Handle key release events"""
+    def _handle_keyup(self, event: pygame.event.Event, inputs: list[str]) -> None:
         if event.key == pygame.K_w:
-            key_presses |= KeyPresses.STOP_MOVE_UP
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYUP_ARROW_UP)
         elif event.key == pygame.K_a:
-            key_presses |= KeyPresses.STOP_MOVE_LEFT
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYUP_ARROW_LEFT)
         elif event.key == pygame.K_s:
-            key_presses |= KeyPresses.STOP_MOVE_DOWN
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYUP_ARROW_DOWN)
         elif event.key == pygame.K_d:
-            key_presses |= KeyPresses.STOP_MOVE_RIGHT
-        return key_presses
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYUP_ARROW_RIGHT)
 
-    def _handle_keydown(self, event: pygame.event.Event, key_presses: KeyPresses) -> KeyPresses:
-        """Handle key press events"""
+    def _handle_keydown(self, event: pygame.event.Event, inputs: list[str]) -> None:
         if event.key == pygame.K_w:
-            key_presses |= KeyPresses.START_MOVE_UP
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_UP)
         elif event.key == pygame.K_a:
-            key_presses |= KeyPresses.START_MOVE_LEFT
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_LEFT)
         elif event.key == pygame.K_s:
-            key_presses |= KeyPresses.START_MOVE_DOWN
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_DOWN)
         elif event.key == pygame.K_d:
-            key_presses |= KeyPresses.START_MOVE_RIGHT
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_RIGHT)
         elif event.key == pygame.K_TAB:
-            key_presses |= KeyPresses.SWAP_TARGET
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_TAB)
         elif event.key == pygame.K_1:
-            key_presses |= KeyPresses.ABILITY_1
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_1)
         elif event.key == pygame.K_2:
-            key_presses |= KeyPresses.ABILITY_2
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_2)
         elif event.key == pygame.K_3:
-            key_presses |= KeyPresses.ABILITY_3
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_3)
         elif event.key == pygame.K_4:
-            key_presses |= KeyPresses.ABILITY_4
-        return key_presses
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_4)
 
     def is_running(self) -> bool:
-        """Check if the game should continue running"""
         return self.running

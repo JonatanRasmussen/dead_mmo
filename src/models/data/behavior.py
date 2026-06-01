@@ -1,8 +1,5 @@
 from enum import IntFlag, auto
 
-from src.models.components import GameObj, Status, Position
-
-
 class Behavior(IntFlag):
     """ Various bitflags that define spell behavior. """
     NONE = 0
@@ -28,34 +25,3 @@ class Behavior(IntFlag):
     DESPAWN_SELF = auto()
     AURA_APPLY = auto()
     AURA_CANCEL = auto()
-
-    def modify_target(self, source_obj: GameObj, power: float, target_obj: GameObj) -> None:
-        if self & (Behavior.STEP_UP | Behavior.STEP_LEFT | Behavior.STEP_DOWN | Behavior.STEP_RIGHT):
-            self._handle_movement(target_obj, power)
-        if self & Behavior.DAMAGING:
-            target_obj.res.hp -= power * source_obj.spell_modifier
-        if self & Behavior.HEALING:
-            target_obj.res.hp += power * source_obj.spell_modifier
-
-    def modify_source(self, timestamp: int, source_obj: GameObj, target_obj: GameObj) -> None:
-        if self & Behavior.UPDATE_CURRENT_TARGET:
-            source_obj.current_target = target_obj.obj_id
-        if self & Behavior.TRIGGER_GCD:
-            source_obj.loadout.gcd_start = timestamp
-        if self & Behavior.DESPAWN_SELF:
-            source_obj.state = Status.DESPAWNED
-        if self & Behavior.MOVE_TOWARDS_TARGET:
-            source_obj.pos.move_towards_destination(target_obj.pos, source_obj.pos.movement_speed)
-        if self & Behavior.TELEPORT_TO_TARGET:
-            source_obj.pos.teleport_to_position(target_obj.pos)
-
-    def _handle_movement(self, target_obj: GameObj, power: float) -> None:
-        multiplier = power * target_obj.pos.movement_speed
-        if self & Behavior.STEP_UP:
-            target_obj.pos.move_up(multiplier)
-        if self & Behavior.STEP_LEFT:
-            target_obj.pos.move_left(multiplier)
-        if self & Behavior.STEP_DOWN:
-            target_obj.pos.move_down(multiplier)
-        if self & Behavior.STEP_RIGHT:
-            target_obj.pos.move_right(multiplier)

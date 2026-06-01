@@ -111,11 +111,11 @@ class SpellFactory:
         return self._spawn_obj(obj_template).cast_on_target()
 
     def spawn_player(self, obj_template: ObjTemplate) -> 'SpellFactory':
-        obj_template.game_obj.res.team = Faction.ALLIED
+        obj_template.game_obj._res.team = Faction.ALLIED
         return self._spawn_obj(obj_template).add_flag(Behavior.SPAWN_PLAYER).cast_on_self()
 
     def spawn_boss(self, obj_template: ObjTemplate) -> 'SpellFactory':
-        obj_template.game_obj.res.team = Faction.ENEMY
+        obj_template.game_obj._res.team = Faction.ENEMY
         return self.add_flag(Behavior.SPAWN_BOSS).spawn_minion(obj_template)
 
     def _spawn_obj(self, obj_template: ObjTemplate) -> 'SpellFactory':

@@ -2,7 +2,9 @@ import json
 import os
 
 from .world_state import WorldState
-from .models.events.finalized_event import FinalizedEvent
+
+ALL_CHECKS = {"events_by_frame", "game_objs"}
+#ALL_CHECKS = {"events_by_frame", "game_objs"}
 
 
 class SimValidation:
@@ -13,7 +15,34 @@ class SimValidation:
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def run_snapshot_test(state: WorldState, snapshot_name: str = "default") -> None:
+    def run_snapshot_test(
+        state: WorldState,
+        snapshot_name: str = "default",
+        checks: set[str] | None = None,
+    ) -> None:
+        if checks is None:
+            checks = ALL_CHECKS
+
+        skipped = ALL_CHECKS - checks
+        if skipped:
+            warning_lines = [
+                "",
+                "╔══════════════════════════════════════════════════════════════╗",
+                "║                  ⚠  SNAPSHOT WARNING  ⚠                     ║",
+                "║                                                              ║",
+               f"║  The following checks are DISABLED for '{snapshot_name}':".ljust(63) + "║",
+            ]
+            for section in sorted(skipped):
+                warning_lines.append(f"║    - {section}".ljust(63) + "║")
+            warning_lines += [
+                "║                                                              ║",
+                "║  This snapshot test is NOT a full validation.                ║",
+                "║  Re-enable all checks before merging.                        ║",
+                "╚══════════════════════════════════════════════════════════════╝",
+                "",
+            ]
+            print("\n".join(warning_lines))
+
         current_snapshot = SimValidation._capture_snapshot(state)
         snapshot_path = SimValidation._snapshot_path(snapshot_name)
 
@@ -24,10 +53,12 @@ class SimValidation:
             return
 
         golden_snapshot = SimValidation._load_snapshot(snapshot_path)
-        diffs = SimValidation._diff_snapshots(golden_snapshot, current_snapshot)
+        diffs = SimValidation._diff_snapshots(golden_snapshot, current_snapshot, checks)
 
         if not diffs:
             print(f"[Snapshot] ✓ Simulation matches golden master '{snapshot_name}'. No differences found.")
+            if skipped:
+                print(f"[Snapshot] ⚠ Skipped checks: {sorted(skipped)}. This was NOT a full validation.")
         else:
             print(f"[Snapshot] ✗ Simulation DIFFERS from golden master '{snapshot_name}'.")
             print(f"[Snapshot] {len(diffs)} difference(s) found:\n")
@@ -86,10 +117,12 @@ class SimValidation:
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def _diff_snapshots(golden: dict, current: dict) -> list[str]:
+    def _diff_snapshots(golden: dict, current: dict, checks: set[str]) -> list[str]:
         diffs: list[str] = []
-        SimValidation._diff_game_objs(golden.get("game_objs", {}), current.get("game_objs", {}), diffs)
-        SimValidation._diff_events(golden.get("events_by_frame", {}), current.get("events_by_frame", {}), diffs)
+        if "game_objs" in checks:
+            SimValidation._diff_game_objs(golden.get("game_objs", {}), current.get("game_objs", {}), diffs)
+        if "events_by_frame" in checks:
+            SimValidation._diff_events(golden.get("events_by_frame", {}), current.get("events_by_frame", {}), diffs)
         return diffs
 
     @staticmethod
