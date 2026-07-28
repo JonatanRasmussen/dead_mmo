@@ -79,8 +79,14 @@ class SpellFactory:
     def cast_on_target(self) -> 'SpellFactory':
         return self.set_targeting(Targeting.TARGET)
 
+    def cast_on_target_of_target(self) -> 'SpellFactory':
+        return self.set_targeting(Targeting.TARGET_OF_TARGET)
+
     def cast_on_parent(self) -> 'SpellFactory':
         return self.set_targeting(Targeting.PARENT)
+
+    def cast_on_target_of_parent(self) -> 'SpellFactory':
+        return self.set_targeting(Targeting.TARGET_OF_PARENT)
 
     def cast_on_default_friendly(self) -> 'SpellFactory':
         return self.set_targeting(Targeting.DEFAULT_FRIENDLY)
@@ -93,9 +99,6 @@ class SpellFactory:
 
     def update_current_target(self) -> 'SpellFactory':
         return self.add_flag(Behavior.UPDATE_CURRENT_TARGET)
-
-    def cast_on_target_of_target(self) -> 'SpellFactory':
-        return self.set_targeting(Targeting.TARGET).add_flag(Behavior.TARGET_OF_TARGET)
 
     def spawn_minion(self, obj_template: ObjTemplate) -> 'SpellFactory':
         return self._spawn_obj(obj_template).cast_on_self()

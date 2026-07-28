@@ -127,10 +127,6 @@ class Spell:
         return Behavior.AURA_CANCEL in self.flags
 
     @property
-    def is_target_of_target(self) -> bool:
-        return Behavior.TARGET_OF_TARGET in self.flags
-
-    @property
     def is_area_of_effect(self) -> bool:
         return Behavior.AOE in self.flags
 

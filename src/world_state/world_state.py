@@ -3,7 +3,7 @@ from webbrowser import Galeon
 
 from src.settings import Consts
 from src.models.components import Controls, KeyPresses, GameObj
-from src.world_state.spell_system import DefaultIDs, Spell
+from src.world_state.spell_system import DefaultIDs, Spell, Targeting
 from src.models.events import Outcome, UpcomingEvent, Aura
 from src.world_state.spell_system import Behavior
 from ._aura_handler import AuraHandler
@@ -61,8 +61,8 @@ class WorldState:
     def _finalize_and_process_event(self, u_event: UpcomingEvent) -> UpcomingEvent:
         source_obj = self._game_objs.get_game_obj(u_event.source_id)
         spell = self.spell_database.get_spell(u_event.spell_id)
-        target_obj = self._decide_event_target(u_event.target_id, u_event.is_aoe_targeting, source_obj, spell)
-        expired_aura = u_event.is_aura_tick and not self._auras.aura_exists(u_event)
+        target_obj = self._decide_targeting(u_event.target_id, u_event.is_aoe_targeting, source_obj, u_event.spell_id)
+        expired_aura = u_event.is_aura_tick and not self._auras.aura_exists(u_event.aura_id)
         outcome = WorldState._decide_outcome(u_event.timestamp, source_obj, spell, target_obj, expired_aura, u_event.is_aoe_targeting)
         f_event = u_event.finalize_event(source_obj.obj_id, target_obj.obj_id, outcome)
         self._process_event(f_event, source_obj, spell, target_obj)
@@ -99,21 +99,6 @@ class WorldState:
             #aura = self._auras.get_aura_by_key(source.obj_id, spell.spell_id, target.obj_id)
             aura = self._auras.get_aura_by_id(new_aura_id)
             yield from self._create_aura_tick_events(aura)
-
-    def _decide_event_target(self, aoe_target_id: int, is_aoe_targeting: bool, source_obj: GameObj, spell: Spell) -> GameObj:
-        if is_aoe_targeting:
-            target_id = aoe_target_id
-        else:
-            target_id = spell.targeting.select_target(source_obj, self.default_ids)
-        if target_id == source_obj.obj_id:
-            return source_obj
-        if spell.is_target_of_target and Consts.is_valid_id(target_id):
-            obj_with_target_to_copy = self._game_objs.get_game_obj(target_id)
-            if Consts.is_valid_id(obj_with_target_to_copy.current_target):
-                target_id = obj_with_target_to_copy.current_target
-            else:
-                target_id = self.default_ids.missing_target_id
-        return self._game_objs.get_game_obj(target_id)
 
     # The below methods are for upcoming_event creation
     def _create_aoe_events(self, u_event: UpcomingEvent, target_ids: Iterable[int]) -> Iterable[UpcomingEvent]:
@@ -162,7 +147,6 @@ class WorldState:
         )
 
     def _create_aura_tick_events(self, aura: Aura) -> Iterable[UpcomingEvent]:
-        """ Return an event for each tick happening this frame, excluding frame_start, including frame_end """
         priority = 0
         for tick_timestamp in aura.tick_timestamps:
             priority += 1
@@ -206,6 +190,48 @@ class WorldState:
             if team_is_hit_by_aoe and obj.is_valid_target and obj.obj_id != target.obj_id:
                 yield obj.obj_id
 
+    def _decide_targeting(self, aoe_target_id: int, is_aoe_targeting: bool, source_obj: GameObj, spell_id: int) -> GameObj:
+        targeting = self._get_spell_targeting(spell_id)
+        assert targeting not in {Targeting.NONE}, f"obj {source_obj.obj_id} is casting a spell with targeting=NONE"
+        if targeting in {Targeting.SELF, Targeting.DEFAULT_FRIENDLY}:
+            target_id = source_obj.obj_id
+        elif targeting in {Targeting.TARGET, Targeting.TARGET_OF_TARGET} and Consts.is_valid_id(source_obj.current_target):
+            target_id = source_obj.current_target
+        elif targeting in {Targeting.PARENT, Targeting.TARGET_OF_PARENT} and Consts.is_valid_id(source_obj.parent_id):
+            target_id = source_obj.parent_id
+        elif targeting in {Targeting.DEFAULT_ENEMY}:
+            if source_obj.is_on_players_team:
+                target_id = self.default_ids.boss1_id
+            else:
+                target_id = self.default_ids.player_id
+        elif targeting in {Targeting.TAB_TO_NEXT}:
+            if not source_obj.is_on_players_team:
+                target_id = self.default_ids.player_id
+            elif source_obj.current_target == self.default_ids.boss1_id and self.default_ids.boss2_exists:
+                target_id = self.default_ids.boss2_id
+            elif Consts.is_valid_id(self.default_ids.boss1_id):
+                target_id = self.default_ids.boss1_id
+            else:
+                # Not implemented. For now, let's assume boss1 always exist.
+                target_id = self.default_ids.player_id
+        else:
+            target_id = self.default_ids.missing_target_id
+        # If targeting the target of some external object, we must look it up
+        if targeting in {targeting.TARGET_OF_TARGET, targeting.TARGET_OF_PARENT} and Consts.is_valid_id(target_id):
+            obj_with_target_to_copy = self._game_objs.get_game_obj(target_id)
+            if Consts.is_valid_id(obj_with_target_to_copy.current_target):
+                target_id = obj_with_target_to_copy.current_target
+            else:
+                target_id = self.default_ids.missing_target_id
+        # If the following is true, ignore everything we just did (the target was already predetermined)
+        if is_aoe_targeting:
+            target_id = aoe_target_id
+        # Finally return the GameObj associated with target_id
+        if target_id == source_obj.obj_id:
+            return source_obj
+        return self._game_objs.get_game_obj(target_id)
+
+
     @staticmethod
     def _decide_outcome(timestamp: int, source_obj: GameObj, spell: Spell, target_obj: GameObj, expired_aura: bool, is_aoe_targeting: bool) -> Outcome:
         # If triggered from aura, ensure aura is still active
@@ -237,3 +263,8 @@ class WorldState:
         if not spell.flags & Behavior.TRIGGER_GCD:
             return True
         return source_obj.get_gcd_progress(timestamp) >= 1.0
+
+
+    def _get_spell_targeting(self, spell_id: int) -> Targeting:
+        spell = self.spell_database.get_spell(spell_id)
+        return spell.targeting

@@ -10,33 +10,9 @@ class Targeting(Enum):
     NONE = 0
     SELF = auto()
     TARGET = auto()
+    TARGET_OF_TARGET = auto()
     PARENT = auto()
+    TARGET_OF_PARENT = auto()
     DEFAULT_FRIENDLY = auto()
     DEFAULT_ENEMY = auto()
     TAB_TO_NEXT = auto()
-
-    def select_target(self, source: GameObj, default_ids: DefaultIDs) -> int:
-        assert self not in {Targeting.NONE}, f"obj {source.obj_id} is casting a spell with targeting=NONE"
-        if self in {Targeting.SELF}:
-            return source.obj_id
-        if self in {Targeting.TARGET} and Consts.is_valid_id(source.current_target):
-            return source.current_target
-        if self in {Targeting.PARENT} and Consts.is_valid_id(source.parent_id):
-            return source.parent_id
-        if self in {Targeting.DEFAULT_ENEMY}:
-            if source.is_on_players_team:
-                return default_ids.boss1_id
-            return default_ids.player_id
-        if self in {Targeting.DEFAULT_FRIENDLY}:
-            return source.obj_id
-        if self in {Targeting.TAB_TO_NEXT}:
-            if not source.is_on_players_team:
-                return default_ids.player_id
-            elif source.current_target == default_ids.boss1_id and default_ids.boss2_exists:
-                return default_ids.boss2_id
-            elif Consts.is_valid_id(default_ids.boss1_id):
-                return default_ids.boss1_id
-            else:
-                # Not implemented. For now, let's assume boss1 always exist.
-                return default_ids.player_id
-        return default_ids.missing_target_id

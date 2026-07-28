@@ -335,3 +335,18 @@
 [2026-07-28 17:14:43] {BudoB}: Oh I see my code time addon is broken. It shows 0min.
 [2026-07-28 17:14:56] {BudoB}: So uhhhh here we go:
 [2026-07-28 17:15:02] {BudoB}: Code time: 6 hours.
+
+[2026-07-28 23:19:45] {BudoB}: Back at it, later same day.
+[2026-07-28 23:19:57] {BudoB}: Dunno why I wanna break up world_state so bad.
+[2026-07-28 23:20:13] {BudoB}: I mean, of course game_objs and spells are tightly coupled.
+[2026-07-28 23:20:53] {BudoB}: One act on the other. How can that be changed?
+[2026-07-28 23:21:03] {BudoB}: I can split up game_obj and spell to smaller components.
+[2026-07-28 23:21:12] {BudoB}: And either expose them, or give up on game_obj and spell
+[2026-07-28 23:21:42] {BudoB}: Let's imagine doing SpellValidation, SpellMovementFlags, etc.
+[2026-07-28 23:24:25] {BudoB}: And splitting up GameObj into smaller systems.
+[2026-07-28 23:25:09] {BudoB}: Would that be cleaner? It would be many more data lookups.
+[2026-07-28 23:25:38] {BudoB}: It would also be less clean to pass around.
+[2026-07-28 23:25:48] {BudoB}: The real bottleneck is the access to Aura/objs/spell handlers.
+[2026-07-28 23:27:34] {BudoB}: I mean what can I do. Other than leave the state together.
+[2026-07-28 23:27:58] {BudoB}: A problem for tomorrow me. U-u-iii. Gucci and Emil.
+[2026-07-28 23:28:21] {BudoB}: Code time: 1 hour.

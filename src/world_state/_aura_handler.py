@@ -19,13 +19,13 @@ class AuraHandler:
     def view_auras(self) -> ValuesView[Aura]:
         return self._auras.values()
 
-    def aura_exists(self, u_event: UpcomingEvent) -> bool:
+    def aura_exists(self, aura_id: int) -> bool:
         #key = self._create_aura_key(u_event.source_id, u_event.aura_origin_spell_id, u_event.target_id)
         #if key not in self._auras:
         #    return False
         #aura = self.get_aura_by_key(*key)
         #return aura.start_time == u_event.aura_start_time
-        return u_event.aura_id in self._aura_id_mappings
+        return aura_id in self._aura_id_mappings
 
     def get_aura_by_id(self, aura_id: int) -> Aura:
         assert aura_id in self._aura_id_mappings, f"Aura with ID {aura_id} does not exist."

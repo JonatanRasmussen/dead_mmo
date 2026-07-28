@@ -13,7 +13,6 @@ class Behavior(IntFlag):
     DAMAGING = auto()
     HEALING = auto()
     AOE = auto()
-    TARGET_OF_TARGET = auto()
     DENY_IF_CASTING = auto()
     IS_CHANNEL = auto()
     TRY_MOVE = auto()

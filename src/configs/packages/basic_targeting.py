@@ -17,11 +17,3 @@ class BasicTargeting:
             .cast_on_parent()
             .update_current_target()
         )
-    @staticmethod
-    def targetswap_to_parents_current_target() -> SpellFactory:
-        return (
-            SpellFactory(17)
-            .cast_on_parent()
-            .add_flag(Behavior.TARGET_OF_TARGET)
-            .update_current_target()
-        )

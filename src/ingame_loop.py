@@ -34,6 +34,7 @@ class IngameLoop:
         rendering_framework = PygameRenderer()
         rendering_framework.launch_rendering_framework()
         ingame_time = 0
+        rounding_error = 0.0
         cached_time = rendering_framework.get_current_time()
         world_state = WorldState()
         world_state.process_setup_events(ingame_time, setup_spell_ids)
@@ -44,7 +45,6 @@ class IngameLoop:
         while rendering_framework.is_running():
             # Update time (and because smallest in-game timeunit is 1ms, ensure rounding error stays +/- 1ms throughout the game)
             current_time = rendering_framework.get_current_time()
-            rounding_error = 0.0
             exact_delta_time_ms = (current_time - cached_time) * 1000.0 + rounding_error
             rounded_delta_time_ms = int(round(exact_delta_time_ms))  # round to smallest allowed in-game time unit
             rounding_error = exact_delta_time_ms - rounded_delta_time_ms
