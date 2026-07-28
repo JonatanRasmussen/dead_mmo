@@ -1,6 +1,5 @@
 from src.settings import AudioFiles, Colors, Consts, SpriteFiles
 from src.models.components import Controls, Distance, GameObj, Faction, KeyPresses, Loadout, Position, Resources, Visuals
-from src.models.data import Behavior, Targeting, Spell
 from src.configs.blueprints import SpellFactory, SpellTemplates, GameObjFactory, GameObjTemplates
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting

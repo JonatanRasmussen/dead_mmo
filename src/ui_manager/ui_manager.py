@@ -1,6 +1,48 @@
 from enum import Enum, auto
 from typing import Iterable, Optional, Protocol
 from dataclasses import dataclass
+from src.settings import Colors
+
+
+class SpellCosmetics:
+    def __init__(self) -> None:
+        self._spell_tooltip_name: dict[int, str] = {}
+        self._spell_audio_name: dict[int, str] = {}
+        self._spell_animation_name: dict[int, str] = {}
+        self._spell_obj_color: dict[int, tuple[int, int, int]] = {}
+        self._spell_obj_sprite_name: dict[int, str] = {}
+
+    def get_tooltip_name(self, spell_id: int) -> str:
+        return self._spell_tooltip_name.get(spell_id, f"SPELL_{spell_id}")
+    def set_tooltip_name(self, spell_id: int, tooltip_name: str) -> None:
+        assert spell_id not in self._spell_tooltip_name
+        self._spell_tooltip_name[spell_id] = tooltip_name
+
+    def get_audio_name(self, spell_id: int) -> str:
+        return self._spell_audio_name.get(spell_id, "")
+    def set_audio_name(self, spell_id: int, audio_name: str) -> None:
+        assert spell_id not in self._spell_audio_name
+        self._spell_audio_name[spell_id] = audio_name
+
+    def get_animation_name(self, spell_id: int) -> str:
+        return self._spell_animation_name.get(spell_id, "")
+    def set_animation_name(self, spell_id: int, animation_name: str) -> None:
+        assert spell_id not in self._spell_animation_name
+        self._spell_animation_name[spell_id] = animation_name
+
+    def get_obj_color(self, spell_id: int) -> tuple[int, int, int]:
+        return self._spell_obj_color.get(spell_id, Colors.WHITE)
+    def set_obj_color(self, spell_id: int, color: tuple[int, int, int]) -> None:
+        assert spell_id not in self._spell_obj_color
+        self._spell_obj_color[spell_id] = color
+
+    def get_obj_sprite_name(self, spell_id: int) -> str:
+        return self._spell_obj_sprite_name.get(spell_id, "")
+    def set_obj_sprite_name(self, spell_id: int, sprite_name: str) -> None:
+        assert spell_id not in self._spell_obj_sprite_name
+        self._spell_obj_sprite_name[spell_id] = sprite_name
+
+
 
 class IRenderAction(Protocol):
     pos_xy: tuple[float, float]

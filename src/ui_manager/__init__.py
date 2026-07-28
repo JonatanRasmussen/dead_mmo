@@ -1,3 +1,6 @@
-from .ui_manager import UiManager
+from .ui_manager import  SpellCosmetics, UiManager
 
-__all__ = ["UiManager"]
+__all__ = [
+    "SpellCosmetics",
+    "UiManager",
+]

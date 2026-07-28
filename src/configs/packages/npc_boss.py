@@ -1,7 +1,5 @@
-from src.settings import AudioFiles, Colors, Consts
-from src.models.components import Controls, Distance, GameObj, Faction, KeyPresses, Loadout, Position, Resources
-from src.models.data import Behavior, Targeting, Spell
-from src.configs.blueprints import SpellFactory, SpellTemplates, GameObjFactory, GameObjTemplates
+from src.settings import Colors
+from src.configs.blueprints import GameObjTemplates, SpellFactory
 from .basic_movement import BasicMovement
 from .basic_targeting import BasicTargeting
 from .spec_warlock import SpecWarlock

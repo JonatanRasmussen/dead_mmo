@@ -306,3 +306,32 @@
 [2026-04-10 04:22:03] {BudoB}: Another one. Working till late. Probably shouldn'd do that.
 [2026-04-10 04:22:21] {BudoB}: Fewer classes is probably better code.
 [2026-04-10 04:22:33] {BudoB}: Code time: 5 hours.
+
+[2026-07-27 22:46:17] {BudoB}: Wooptiedoo we back at it.
+[2026-07-27 22:46:24] {BudoB}: Code base appears a mess at first, but order is emerging.
+[2026-07-27 22:46:47] {BudoB}: How stupid of me to creat so many classes.
+[2026-07-27 22:46:57] {BudoB}: I am thinking about doing an Entity Component System.
+[2026-07-27 22:47:10] {BudoB}: ...And deleting both GameObj class and Spell class.
+[2026-07-27 22:47:19] {BudoB}: I have a feeling that is a huge f-ing mistake.
+[2026-07-27 22:47:30] {BudoB}: Let me ask ChatGPT actually... brb.
+[2026-07-27 23:12:06] {BudoB}: Oookay. That took a little while of thinking (by me).
+[2026-07-27 23:12:22] {BudoB}: I guess a dict of GameObjs = many dicts of components.
+[2026-07-27 23:13:09] {BudoB}: At least in terms of how I will access the data in code.
+[2026-07-27 23:13:25] {BudoB}: So memory improvements aside, it will not clean up code.
+[2026-07-27 23:15:54] {BudoB}: I need to go to sleep. New bed times and all. Good for me.
+[2026-07-27 23:16:10] {BudoB}: Code time: 5 hours.
+
+[2026-07-28 17:08:49] {BudoB}: Well today was interesting.
+[2026-07-28 17:08:54] {BudoB}: Broke code so bad that I had to Ctrl+Z to four hours back.
+[2026-07-28 17:09:14] {BudoB}: That is certainly a way to thrown work down the drain.
+[2026-07-28 17:09:30] {BudoB}: But we learned something. RUN. CODE. EVERY. 5. MINUTES!!!
+[2026-07-28 17:09:54] {BudoB}: We cannot just mass-delete and press "run code" hours later.
+[2026-07-28 17:10:22] {BudoB}: I think the idea of doing FrameLoop and EventLoop is good.
+[2026-07-28 17:11:34] {BudoB}: ...But we DO need spell data to be generally accessible.
+[2026-07-28 17:12:20] {BudoB}: Kinda stupid to try and hide away targeting data from spells.
+[2026-07-28 17:13:13] {BudoB}: Maybe the cleanest design is to have layers.
+[2026-07-28 17:13:51] {BudoB}: That way we have a handful of non-overlap classes for each.
+[2026-07-28 17:14:29] {BudoB}: That could definitely work!!!!!
+[2026-07-28 17:14:43] {BudoB}: Oh I see my code time addon is broken. It shows 0min.
+[2026-07-28 17:14:56] {BudoB}: So uhhhh here we go:
+[2026-07-28 17:15:02] {BudoB}: Code time: 6 hours.

@@ -1,7 +1,5 @@
-from src.settings import AudioFiles, Colors, Consts
-from src.models.components import Controls, GameObj, Faction
-from src.models.data import Behavior, Targeting, Spell
-from src.configs.blueprints import SpellFactory, SpellTemplates
+from src.world_state.spell_system import Behavior
+from src.configs.blueprints import SpellFactory
 
 
 class BasicTargeting:

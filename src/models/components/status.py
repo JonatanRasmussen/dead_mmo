@@ -5,6 +5,8 @@ class Status(Enum):
     """ Various status effects that game objects can have. """
     EMPTY = 0  # Should never be used outside initialization
     ENVIRONMENT = auto()  # Special case used only by ENVIRONMENT objs
+    NEW_PLAYER_OBJ = auto()  # Special case used temporarily by newly spawned players
+    NEW_BOSS_OBJ = auto()  # Special case used temporarily by newly spawned bosses
     ALIVE = auto()  # Default status used to indicate the absence of other status effects
     INACTIVE = auto()  # Not yet engaged in combat, cannot be source or target of events
     DESPAWNED = auto()  # Permamently removed from combat, cannot be source or target of events

@@ -3,11 +3,11 @@ from webbrowser import Galeon
 
 from src.settings import Consts
 from src.models.components import Controls, KeyPresses, GameObj
-from src.models.data import DefaultIDs, Spell, Targeting
+from src.world_state.spell_system import DefaultIDs, Spell
 from src.models.events import Outcome, UpcomingEvent, Aura
-from src.models.data import Behavior
-from ._event_log import EventLog
+from src.world_state.spell_system import Behavior
 from ._aura_handler import AuraHandler
+from ._event_log import EventLog
 from ._frame_heap import FrameHeap
 from ._game_obj_handler import GameObjHandler
 from ._id_gen import IdGen
@@ -68,6 +68,7 @@ class WorldState:
         self._process_event(f_event, source_obj, spell, target_obj)
         return f_event
 
+
     def _process_event(self, f_event: UpcomingEvent, source_obj: GameObj, spell: Spell, target_obj: GameObj) -> None:
         timestamp = f_event.timestamp
         source_id = source_obj.obj_id
@@ -82,7 +83,7 @@ class WorldState:
             if spell.has_cascading_events:
                 for cascading_event in self._fetch_cascading_events(f_event, new_obj, source_obj, spell, target_obj, new_aura_id):
                     self._event_heap.insert_event(cascading_event)
-            self._game_objs.modify_game_obj(timestamp, source_obj, spell, target_obj)
+            GameObjHandler.modify_game_obj(timestamp, source_obj, spell, target_obj)
 
     def _fetch_cascading_events(self, u_event: UpcomingEvent, new_obj: Optional[GameObj], source: GameObj, spell: Spell, target: GameObj, new_aura_id: int) -> Iterable[UpcomingEvent]:
         if new_obj is not None and spell.spawned_obj is not None and spell.spawned_obj.obj_controls is not None:

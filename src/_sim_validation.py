@@ -2,6 +2,8 @@ import json
 import os
 
 from .world_state import WorldState
+from ._input_translator import InputTranslator
+from .models.components import KeyPresses
 
 ALL_CHECKS = {"events_by_frame", "game_objs"}
 #ALL_CHECKS = {"events_by_frame", "game_objs"}
@@ -15,11 +17,32 @@ class SimValidation:
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def run_snapshot_test(
-        state: WorldState,
-        snapshot_name: str = "default",
-        checks: set[str] | None = None,
-    ) -> None:
+    def simulate_game_in_console(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]]) -> None:
+        ingame_time = 0
+        world_state = WorldState()
+        world_state.process_setup_events(ingame_time, setup_spell_ids)
+
+        SIMULATION_DURATION_MS = 10000
+        UPDATES_PER_SECOND = 50
+        FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
+        number_of_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
+
+        player_inputs_this_frame: list[KeyPresses] = []
+
+        for _ in range(number_of_iterations):
+            ingame_time += FRAME_DURATION_MS
+
+            player_inputs_this_frame.clear()
+            for timestamp, inputs in scripted_player_input.items():
+                if (ingame_time - FRAME_DURATION_MS) < timestamp <= ingame_time:
+                    keypresses = InputTranslator.translate_to_keypresses(inputs)
+                    player_inputs_this_frame.append(keypresses)
+            world_state.process_frame(player_inputs_this_frame, ingame_time)
+
+        SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_ids))
+
+    @staticmethod
+    def _run_snapshot_test(state: WorldState, snapshot_name: str = "default", checks: set[str] | None = None) -> None:
         if checks is None:
             checks = ALL_CHECKS
 

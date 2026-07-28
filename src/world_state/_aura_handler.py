@@ -5,7 +5,7 @@ from src.settings import Consts
 from src.models.events import Aura, UpcomingEvent
 from ._event_log import EventLog
 from ._id_gen import IdGen
-from src.models.data import Spell
+from src.world_state.spell_system import Spell
 
 
 class AuraHandler:

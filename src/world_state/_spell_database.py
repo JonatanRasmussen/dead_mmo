@@ -1,6 +1,6 @@
 from typing import Any, Type
 
-from src.models.data import Spell
+from src.world_state.spell_system import Spell
 from src.configs.blueprints import SpellFactory
 from src.configs.packages import BasicMovement, BasicTargeting
 from src.configs.packages import NpcTargetDummy, NpcBoss, NpcHealingPowerup, NpcLandmine

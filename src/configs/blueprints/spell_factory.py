@@ -1,14 +1,7 @@
 from typing import Optional, Tuple
 from src.settings import Consts
-from src.models.components import Controls, GameObj, Faction, ObjTemplate
-from src.models.data import Behavior, Targeting, Spell
-
-
-class SpellBuilder:
-    def __init__(self, spell_id: int) -> None:
-        self.spell: Spell = Spell(spell_id=spell_id)
-
-
+from src.models.components import Faction, ObjTemplate
+from src.world_state.spell_system import Behavior, Targeting, Spell
 
 
 class SpellFactory:

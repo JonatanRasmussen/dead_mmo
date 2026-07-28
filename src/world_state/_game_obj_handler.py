@@ -1,11 +1,9 @@
 from typing import ValuesView, Optional
 
 from src.models.components import GameObj, Status
-from src.models.data import Behavior, DefaultIDs, Spell
+from src.world_state.spell_system import Behavior, DefaultIDs, Spell
 from ._event_log import EventLog
 from ._id_gen import IdGen
-from ._spell_effect_applier import SpellEffectApplier
-
 
 class GameObjHandler:
 
@@ -22,9 +20,6 @@ class GameObjHandler:
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
         return self._game_objs.values()
-
-    def _generate_new_game_obj_id(self) -> int:
-        return self._game_obj_id_gen.generate_new_id()
 
     def has_game_obj(self, obj_id: int) -> bool:
         return obj_id in self._game_objs
@@ -46,10 +41,6 @@ class GameObjHandler:
         assert updated_game_obj.obj_id in self._game_objs, f"GameObj with ID {updated_game_obj.obj_id} does not exist."
         self._game_objs[updated_game_obj.obj_id] = updated_game_obj
 
-    def modify_game_obj(self, timestamp: int, source: GameObj, spell: Spell, target: GameObj) -> None:
-        SpellEffectApplier.apply_source_effects(spell, timestamp, source, target)
-        SpellEffectApplier.apply_target_effects(spell, source, target)
-
     def handle_spawn(self, timestamp: int, source: GameObj, spell: Spell, target_id: int) -> Optional[GameObj]:
         template = spell.spawned_obj
         if template is None:
@@ -59,6 +50,46 @@ class GameObjHandler:
         self.add_game_obj(child)
         self._update_default_ids(child, spell)
         return child
+
+    @staticmethod
+    def modify_game_obj(timestamp: int, source: GameObj, spell: Spell, target: GameObj) -> None:
+        GameObjHandler._apply_source_effects(spell, timestamp, source, target)
+        GameObjHandler._apply_target_effects(spell, source, target)
+
+    @staticmethod
+    def _apply_source_effects(spell: Spell, timestamp: int, source: GameObj, target: GameObj) -> None:
+        flags = spell.flags
+        if flags & Behavior.UPDATE_CURRENT_TARGET:
+            source.set_current_target(target.obj_id)
+        if flags & Behavior.TRIGGER_GCD:
+            source.set_gcd_start(timestamp)
+        if flags & Behavior.DESPAWN_SELF:
+            source.despawn()
+        if flags & Behavior.MOVE_TOWARDS_TARGET:
+            source.move_towards_target(target)
+        if flags & Behavior.TELEPORT_TO_TARGET:
+            source.teleport_to_target(target)
+
+    @staticmethod
+    def _apply_target_effects(spell: Spell, source: GameObj, target: GameObj) -> None:
+        flags = spell.flags
+        if flags & (Behavior.STEP_UP | Behavior.STEP_LEFT | Behavior.STEP_DOWN | Behavior.STEP_RIGHT):
+            speed = spell.power * target.get_movement_speed()
+            if flags & Behavior.STEP_UP:
+                target.move_up(speed)
+            if flags & Behavior.STEP_LEFT:
+                target.move_left(speed)
+            if flags & Behavior.STEP_DOWN:
+                target.move_down(speed)
+            if flags & Behavior.STEP_RIGHT:
+                target.move_right(speed)
+        if flags & Behavior.DAMAGING:
+            target.apply_damage(spell.power * source.spell_modifier)
+        if flags & Behavior.HEALING:
+            target.apply_healing(spell.power * source.spell_modifier)
+
+    def _generate_new_game_obj_id(self) -> int:
+        return self._game_obj_id_gen.generate_new_id()
 
     def _create_environment_obj(self) -> None:
         assert not self.default_ids.environment_exists, f"Environment is already initialized (ID={self._default_ids.environment_id})"
