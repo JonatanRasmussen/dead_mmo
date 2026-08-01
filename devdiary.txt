@@ -350,3 +350,17 @@
 [2026-07-28 23:27:34] {BudoB}: I mean what can I do. Other than leave the state together.
 [2026-07-28 23:27:58] {BudoB}: A problem for tomorrow me. U-u-iii. Gucci and Emil.
 [2026-07-28 23:28:21] {BudoB}: Code time: 1 hour.
+
+[2026-08-01 15:56:04] {BudoB}: Yo, I coded yesterday but wrote no devdiary. I want my hours!
+[2026-08-01 15:56:16] {BudoB}: Code time: 6 hours.
+
+[2026-08-01 15:56:20] {BudoB}: Aaaand now for today. Made big progress in migrating game_obj.
+[2026-08-01 15:56:37] {BudoB}: Movement system using dead_reckoning was more complex.
+[2026-08-01 15:56:48] {BudoB}: I guess you have to let that system know about key_up events.
+[2026-08-01 15:57:00] {BudoB}: Oopsie, good thing Claude was smart on that one.
+[2026-08-01 15:57:09] {BudoB}: Gotta use the clever AIs to save brain compute.
+[2026-08-01 15:57:19] {BudoB}: ...Because the less clever AIs add max_hp when not asked.
+[2026-08-01 15:57:43] {BudoB}: So the healing trigger fails, because the game_obj is max_hp.
+[2026-08-01 15:58:02] {BudoB}: Which creates a hp discrepency. Nice to bughunt that one.
+[2026-08-01 15:58:27] {BudoB}: Anyway, good progress. Now the systems behave similar.
+[2026-08-01 15:58:37] {BudoB}: Code time: 5 hours.

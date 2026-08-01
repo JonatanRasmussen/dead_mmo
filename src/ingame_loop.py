@@ -155,7 +155,7 @@ class IngameLoop:
 
 
     @staticmethod
-    def _temp_testing_delete_later() -> None:
+    def temp_testing_delete_later() -> None:
         SimValidation.simulate_game_in_console(
             LevelSetupConsts.TEST_SETUP_SPELL_IDS,
             LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING

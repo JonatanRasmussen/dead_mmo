@@ -90,7 +90,7 @@ class GameObj:
         env_obj = GameObj()
         env_obj.obj_id=obj_id
         env_obj._state=Status.ENVIRONMENT
-        env_obj._res.team=Faction.NEUTRAL
+        env_obj._res.team=Faction.ALLIED
         env_obj.current_target=obj_id
         return env_obj
 
@@ -204,7 +204,7 @@ class GameObj:
         px, py = parent.get_position_xy()
         sx, sy = self.get_position_xy()
         self.set_position_xy(sx + px, sy + py)
-        self._res.team = self._res.team if parent._res.team == Faction.NEUTRAL else parent._res.team  # pylint: disable=protected-access
+        self._res.team = self._res.team if parent._state == Status.ENVIRONMENT else parent._res.team  # pylint: disable=protected-access
 
     # For GameObjFactory specifically
     def set_angle(self, angle: float) -> None:

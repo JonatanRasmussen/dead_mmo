@@ -1,19 +1,18 @@
 from typing import Any, Iterable, ValuesView, Optional
 from webbrowser import Galeon
+import math
 
 from src.settings import Consts
 from src.models.components import Controls, KeyPresses, GameObj
-from src.world_state.spell_system import DefaultIDs, Spell, Targeting
+from src.world_state.spell_system import Behavior, DefaultIDs, Spell, Targeting
 from src.models.events import Outcome, UpcomingEvent, Aura
-from src.world_state.spell_system import Behavior
 from ._aura_handler import AuraHandler
 from ._event_log import EventLog
 from ._frame_heap import FrameHeap
-from ._game_obj_handler import GameObjHandler
 from ._id_gen import IdGen
 from ._spell_database import SpellDatabase
-from ._combat_system import CombatSystem
-from ._movement_system import MovementSystem
+from ._combat_system import CombatSystem, ObjCombatData
+from ._movement_system import MovementSystem, ObjMovementData
 
 
 class WorldState:
@@ -22,7 +21,6 @@ class WorldState:
     def __init__(self) -> None:
         self.spell_database: SpellDatabase = SpellDatabase()
         self._auras: AuraHandler = AuraHandler()
-        self._game_objs: GameObjHandler = GameObjHandler()
         self._event_heap: FrameHeap = FrameHeap()
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 100_000)
         self._event_log_for_each_frame: dict[int, EventLog] = {}
@@ -31,13 +29,16 @@ class WorldState:
         self._combat_system = CombatSystem(spell_database=self.spell_database)
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._default_ids: DefaultIDs = DefaultIDs()
+        #
+        self._game_objs: dict[int, GameObj] = {}
+        self._create_environment_obj()
 
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
-        return self._game_objs.view_game_objs
+        return self._game_objs.values()
     @property
     def default_ids(self) -> DefaultIDs:
-        return self._game_objs.default_ids
+        return self._default_ids
     @property
     def view_event_logs(self) -> dict[int, EventLog]:
         return self._event_log_for_each_frame
@@ -54,7 +55,7 @@ class WorldState:
         for key_presses in player_inputs:
             if key_presses != KeyPresses.NONE:
                 controls = Controls(obj_id=self.default_ids.player_id, timeline_timestamp=frame_end, key_presses=key_presses)
-                player_obj = self._game_objs.get_game_obj(controls.obj_id)
+                player_obj = self.get_game_obj(controls.obj_id)
                 for controls_event in self._create_events_from_controls(player_obj, controls):
                     self._event_heap.insert_event(controls_event)
         event_log = EventLog()
@@ -64,9 +65,12 @@ class WorldState:
             f_event = self._finalize_and_process_event(u_event)
             event_log.log_event(f_event)
         self._event_log_for_each_frame[frame_end] = event_log
+        for game_obj in self.view_game_objs:
+            obj_id = game_obj.obj_id
+            WorldState.debug_compare_ecs_to_gameobj(self._combat_system.game_obj_combat_dct[obj_id], self._movement_system.game_obj_positions_dct[obj_id], game_obj, frame_end)
 
     def _finalize_and_process_event(self, u_event: UpcomingEvent) -> UpcomingEvent:
-        source_obj = self._game_objs.get_game_obj(u_event.source_id)
+        source_obj = self.get_game_obj(u_event.source_id)
         spell = self.spell_database.get_spell(u_event.spell_id)
         target_obj = self._decide_targeting(u_event.target_id, u_event.is_aoe_targeting, source_obj, u_event.spell_id)
         expired_aura = u_event.is_aura_tick and not self._auras.aura_exists(u_event.aura_id)
@@ -81,7 +85,7 @@ class WorldState:
         source_id = source_obj.obj_id
         target_id = target_obj.obj_id
         if f_event.outcome_is_valid:
-            new_obj = self._game_objs.handle_spawn(timestamp, source_obj, spell, target_id)
+            new_obj = self.handle_spawn(timestamp, source_obj, spell, target_id)
             if spell.has_aura_cancel:
                 self._auras.remove_aura(source_id, spell.effect_id, target_id)
             new_aura_id = Consts.EMPTY_ID
@@ -90,9 +94,10 @@ class WorldState:
             if spell.has_cascading_events:
                 for cascading_event in self._fetch_cascading_events(f_event, new_obj, source_obj, spell, target_obj, new_aura_id):
                     self._event_heap.insert_event(cascading_event)
-            self._movement_system.apply_spell_event(timestamp, source_id, spell.spell_id, target_id)
             self._combat_system.apply_combat_event(timestamp, source_id, spell.spell_id, target_id)
-            GameObjHandler.modify_game_obj(timestamp, source_obj, spell, target_obj)
+            self._movement_system.apply_movement_event(timestamp, source_id, spell.spell_id, target_id)
+            self.modify_game_obj(timestamp, source_obj, spell, target_obj)
+
 
     def _fetch_cascading_events(self, u_event: UpcomingEvent, new_obj: Optional[GameObj], source: GameObj, spell: Spell, target: GameObj, new_aura_id: int) -> Iterable[UpcomingEvent]:
         if new_obj is not None and spell.spawned_obj is not None and spell.spawned_obj.obj_controls is not None:
@@ -227,7 +232,7 @@ class WorldState:
             target_id = self.default_ids.missing_target_id
         # If targeting the target of some external object, we must look it up
         if targeting in {targeting.TARGET_OF_TARGET, targeting.TARGET_OF_PARENT} and Consts.is_valid_id(target_id):
-            obj_with_target_to_copy = self._game_objs.get_game_obj(target_id)
+            obj_with_target_to_copy = self.get_game_obj(target_id)
             if Consts.is_valid_id(obj_with_target_to_copy.current_target):
                 target_id = obj_with_target_to_copy.current_target
             else:
@@ -238,7 +243,7 @@ class WorldState:
         # Finally return the GameObj associated with target_id
         if target_id == source_obj.obj_id:
             return source_obj
-        return self._game_objs.get_game_obj(target_id)
+        return self.get_game_obj(target_id)
 
 
     @staticmethod
@@ -283,6 +288,106 @@ class WorldState:
 
     ######
 
+    def has_game_obj(self, obj_id: int) -> bool:
+        return obj_id in self._game_objs
+
+    def get_game_obj(self, obj_id: int) -> GameObj:
+        assert obj_id in self._game_objs, f"GameObj with ID {obj_id} does not exist."
+        return self._game_objs.get(obj_id, GameObj())
+
+    def add_game_obj(self, game_obj: GameObj) -> None:
+        if EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
+            EventLog.summarize_new_obj_creation(game_obj)
+        assert game_obj.obj_id not in self._game_objs, f"GameObj with ID {game_obj.obj_id} already exists."
+        self._game_objs[game_obj.obj_id] = game_obj
+
+    def update_game_obj(self, updated_game_obj: GameObj) -> None:
+        if EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
+            pre_update_obj = self.get_game_obj(updated_game_obj.obj_id)
+            EventLog.summarize_state_update(pre_update_obj, updated_game_obj)
+        assert updated_game_obj.obj_id in self._game_objs, f"GameObj with ID {updated_game_obj.obj_id} does not exist."
+        self._game_objs[updated_game_obj.obj_id] = updated_game_obj
+
+    def handle_spawn(self, timestamp: int, source: GameObj, spell: Spell, target_id: int) -> Optional[GameObj]:
+        template = spell.spawned_obj
+        if template is None:
+            return None
+        new_obj_id = self._generate_new_game_obj_id()
+        child = template.create_child(new_obj_id, source, timestamp, target_id)
+        self.add_game_obj(child)
+
+        parent_id = source.obj_id
+        self._movement_system.spawn_game_obj(timestamp, parent_id, child.obj_id, spell.spell_id)
+        self._combat_system.spawn_game_obj(timestamp, parent_id, child.obj_id, spell.spell_id, target_id)
+        self._update_default_ids(child, spell)
+        return child
+
+    @staticmethod
+    def modify_game_obj(timestamp: int, source: GameObj, spell: Spell, target: GameObj) -> None:
+        WorldState._apply_source_effects(spell, timestamp, source, target)
+        WorldState._apply_target_effects(spell, source, target)
+
+    @staticmethod
+    def _apply_source_effects(spell: Spell, timestamp: int, source: GameObj, target: GameObj) -> None:
+        flags = spell.flags
+        if flags & Behavior.UPDATE_CURRENT_TARGET:
+            source.set_current_target(target.obj_id)
+        if flags & Behavior.TRIGGER_GCD:
+            source.set_gcd_start(timestamp)
+        if flags & Behavior.DESPAWN_SELF:
+            source.despawn()
+        if flags & Behavior.MOVE_TOWARDS_TARGET:
+            source.move_towards_target(target)
+        if flags & Behavior.TELEPORT_TO_TARGET:
+            source.teleport_to_target(target)
+
+    @staticmethod
+    def _apply_target_effects(spell: Spell, source: GameObj, target: GameObj) -> None:
+        flags = spell.flags
+        if flags & (Behavior.STEP_UP | Behavior.STEP_LEFT | Behavior.STEP_DOWN | Behavior.STEP_RIGHT):
+            speed = spell.power * target.get_movement_speed()
+            if flags & Behavior.STEP_UP:
+                target.move_up(speed)
+            if flags & Behavior.STEP_LEFT:
+                target.move_left(speed)
+            if flags & Behavior.STEP_DOWN:
+                target.move_down(speed)
+            if flags & Behavior.STEP_RIGHT:
+                target.move_right(speed)
+        if flags & Behavior.DAMAGING:
+            target.apply_damage(spell.power * source.spell_modifier)
+        if flags & Behavior.HEALING:
+            target.apply_healing(spell.power * source.spell_modifier)
+
+    def _generate_new_game_obj_id(self) -> int:
+        return self._game_obj_id_gen.generate_new_id()
+
+    def _create_environment_obj(self) -> None:
+        assert not self.default_ids.environment_exists, f"Environment is already initialized (ID={self._default_ids.environment_id})"
+        obj_id: int = self._generate_new_game_obj_id()
+        game_obj = GameObj.create_environment(obj_id)
+        self.add_game_obj(game_obj)
+        self._combat_system.create_environment_obj(obj_id)
+        self._movement_system.create_environment_obj(obj_id)
+        self.default_ids.environment_id = game_obj.obj_id
+
+    def _update_default_ids(self, new_obj: GameObj, spell: Spell) -> None:
+        if spell.flags & Behavior.SPAWN_BOSS:
+            if not self._default_ids.boss1_exists:
+                self._default_ids.boss1_id = new_obj.obj_id
+            else:
+                assert not self._default_ids.boss2_exists, "Second boss already exists."
+                self._default_ids.boss2_id = new_obj.obj_id
+        if spell.flags & Behavior.SPAWN_PLAYER:
+            assert not self._default_ids.player_exists, "Player already exists."
+            self._default_ids.player_id = new_obj.obj_id
+
+
+
+
+
+
+    """
     def handle_spawn(self, timestamp: int, source: GameObj, spell: Spell, target_id: int) -> Optional[GameObj]:
         template = spell.spawned_obj
         if template is None:
@@ -305,3 +410,143 @@ class WorldState:
         if spell.flags & Behavior.SPAWN_PLAYER:
             assert not self._default_ids.player_exists, "Player already exists."
             self._default_ids.player_id = new_obj.obj_id
+    """
+
+    @staticmethod
+    def debug_compare_ecs_to_gameobj(
+        combat_data: 'ObjCombatData',
+        movement_data: 'ObjMovementData',
+        external_obj: 'GameObj',
+        current_time: Optional[int] = None
+    ) -> bool:
+        """
+        Constructs a GameObj from ECS components and compares it to an external GameObj.
+        Ignores small differences in dead-reckoned position caused by update timing.
+
+        Handles independent X/Y timestamps from the new MovementSystem.
+        """
+
+        POSITION_ERROR_THRESHOLD = 0.011
+
+        reconstructed = GameObj(obj_id=external_obj.obj_id)
+
+        # Copy non-ECS fields
+        reconstructed.spawned_from_spell = external_obj.spawned_from_spell
+        reconstructed._loadout = external_obj._loadout
+        reconstructed.selected_spell = external_obj.selected_spell
+        reconstructed.is_attackable = external_obj.is_attackable
+        reconstructed.color = external_obj.color
+        reconstructed.sprite_name = external_obj.sprite_name
+        reconstructed.audio_name = external_obj.audio_name
+
+        reconstructed._pos.angle = external_obj._pos.angle
+        reconstructed._pos.base_size = external_obj._pos.base_size
+        reconstructed._res.team = external_obj._res.team
+
+        # Combat data
+        reconstructed.parent_id = combat_data.parent_id
+        reconstructed._state = combat_data.status
+        reconstructed.gcd_mod = combat_data.gcd_mod
+        reconstructed.current_target = combat_data.current_target_id
+        reconstructed._res.hp = combat_data.hp
+
+        # Movement data
+        # The old system's aura step for `current_time` has not been applied to
+        # the GameObj yet at the point this hook runs, so read the ECS one tick
+        # earlier to compare like with like. This is an observer artefact only —
+        # it must NOT be baked into MovementSystem itself.
+        OBSERVER_TICK_LAG_MS = MovementSystem.MS_PER_MOVEMENT_TICK if MovementSystem.CONSTRAIN_TO_TICK_RATE else 0
+        if current_time is not None:#
+            sample_time = max(
+                movement_data.x_timestamp,
+                movement_data.y_timestamp,
+                current_time - OBSERVER_TICK_LAG_MS,
+            )
+            calc_x, calc_y = MovementSystem.extrapolate(movement_data, sample_time)
+        else:
+            calc_x = movement_data.x_pos
+            calc_y = movement_data.y_pos
+
+        DistanceType = type(external_obj._pos.x)
+        reconstructed._pos.x = DistanceType(calc_x)
+        reconstructed._pos.y = DistanceType(calc_y)
+        reconstructed._pos.movement_speed = movement_data.movespeed
+
+        # Compare base data
+        base_matches = (
+            reconstructed.gcd_mod == external_obj.gcd_mod and
+            reconstructed.current_target == external_obj.current_target
+        )
+
+        resources_match = reconstructed._res == external_obj._res
+
+        dx = float(reconstructed._pos.x) - float(external_obj._pos.x)
+        dy = float(reconstructed._pos.y) - float(external_obj._pos.y)
+
+        position_error = math.hypot(dx, dy)
+
+        position_within_threshold = position_error <= POSITION_ERROR_THRESHOLD
+        angle_matches = reconstructed._pos.angle == external_obj._pos.angle
+        movespeed_matches = reconstructed._pos.movement_speed == external_obj._pos.movement_speed
+        base_size_matches = reconstructed._pos.base_size == external_obj._pos.base_size
+
+        position_matches = (
+            position_within_threshold and
+            angle_matches and
+            movespeed_matches and
+            base_size_matches
+        )
+
+        is_identical = base_matches and resources_match and position_matches
+
+        # Single-line debug output
+        if is_identical:
+            pass
+            #print(
+            #    f"{current_time} [DEBUG] OK id={external_obj.obj_id} "
+            #    f"pos=({float(reconstructed._pos.x):.3f},{float(reconstructed._pos.y):.3f})"
+            #)
+        else:
+            issues = []
+
+            if not base_matches:
+                if reconstructed.gcd_mod != external_obj.gcd_mod:
+                    issues.append(
+                        f"gcd_mod mismatch: ECS={reconstructed.gcd_mod} != OBJ={external_obj.gcd_mod}"
+                    )
+                if reconstructed.current_target != external_obj.current_target:
+                    issues.append(
+                        f"current_target mismatch: ECS={reconstructed.current_target} != OBJ={external_obj.current_target}"
+                    )
+
+            if not resources_match:
+                issues.append(
+                    f"resources mismatch: ECS={reconstructed._res!r} != OBJ={external_obj._res!r}"
+                )
+
+            if not position_within_threshold:
+                issues.append(
+                    f"position exceeds threshold: delta=({dx:.4f},{dy:.4f}) "
+                    f"err={position_error:.4f} > {POSITION_ERROR_THRESHOLD} "
+                    f"(ECS=({float(reconstructed._pos.x):.3f},{float(reconstructed._pos.y):.3f}) "
+                    f"OBJ=({float(external_obj._pos.x):.3f},{float(external_obj._pos.y):.3f}))"
+                )
+            if not angle_matches:
+                issues.append(
+                    f"angle mismatch: ECS={reconstructed._pos.angle} != OBJ={external_obj._pos.angle}"
+                )
+            if not movespeed_matches:
+                issues.append(
+                    f"movement_speed mismatch: ECS={reconstructed._pos.movement_speed} != OBJ={external_obj._pos.movement_speed}"
+                )
+            if not base_size_matches:
+                issues.append(
+                    f"base_size mismatch: ECS={reconstructed._pos.base_size} != OBJ={external_obj._pos.base_size}"
+                )
+
+            print(
+                f"[{current_time} DEBUG] FAIL id={external_obj.obj_id} :: "
+                f"{' | '.join(issues)}"
+            )
+
+        return is_identical
