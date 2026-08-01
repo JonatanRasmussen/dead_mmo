@@ -6,12 +6,21 @@ from src.models.utils.copy_utils import CopyTools
 from .controls import Controls
 from .game_obj import GameObj
 from .status import Status
+from src.models.components import game_obj
 
 @dataclass(slots=True)
 class ObjTemplate:
     """Positional data for GameObjs"""
     game_obj: GameObj = field(default_factory=GameObj)
     obj_controls: Optional[tuple[Controls, ...]] = None
+
+    @property
+    def get_position_xy(self) -> tuple[float, float]:
+        return self.game_obj.get_position_xy()
+
+    @property
+    def get_movespeed(self) -> float:
+        return self.game_obj.get_movement_speed()
 
     @classmethod
     def deserialize(cls, data: str) -> 'ObjTemplate':

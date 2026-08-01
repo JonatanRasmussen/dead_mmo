@@ -12,6 +12,8 @@ from ._frame_heap import FrameHeap
 from ._game_obj_handler import GameObjHandler
 from ._id_gen import IdGen
 from ._spell_database import SpellDatabase
+from ._combat_system import CombatSystem
+from ._movement_system import MovementSystem
 
 
 class WorldState:
@@ -24,6 +26,11 @@ class WorldState:
         self._event_heap: FrameHeap = FrameHeap()
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 100_000)
         self._event_log_for_each_frame: dict[int, EventLog] = {}
+        #
+        self._movement_system = MovementSystem(self.spell_database)
+        self._combat_system = CombatSystem(spell_database=self.spell_database)
+        self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
+        self._default_ids: DefaultIDs = DefaultIDs()
 
     @property
     def view_game_objs(self) -> ValuesView[GameObj]:
@@ -83,6 +90,8 @@ class WorldState:
             if spell.has_cascading_events:
                 for cascading_event in self._fetch_cascading_events(f_event, new_obj, source_obj, spell, target_obj, new_aura_id):
                     self._event_heap.insert_event(cascading_event)
+            self._movement_system.apply_spell_event(timestamp, source_id, spell.spell_id, target_id)
+            self._combat_system.apply_combat_event(timestamp, source_id, spell.spell_id, target_id)
             GameObjHandler.modify_game_obj(timestamp, source_obj, spell, target_obj)
 
     def _fetch_cascading_events(self, u_event: UpcomingEvent, new_obj: Optional[GameObj], source: GameObj, spell: Spell, target: GameObj, new_aura_id: int) -> Iterable[UpcomingEvent]:
@@ -268,3 +277,31 @@ class WorldState:
     def _get_spell_targeting(self, spell_id: int) -> Targeting:
         spell = self.spell_database.get_spell(spell_id)
         return spell.targeting
+
+
+
+
+    ######
+
+    def handle_spawn(self, timestamp: int, source: GameObj, spell: Spell, target_id: int) -> Optional[GameObj]:
+        template = spell.spawned_obj
+        if template is None:
+            return None
+        new_obj_id = self._game_obj_id_gen.generate_new_id()
+        child = template.create_child(new_obj_id, source, timestamp, target_id)
+        parent_id = source.obj_id
+        self._movement_system.spawn_game_obj(timestamp, parent_id, child.obj_id, spell.spell_id)
+        self._combat_system.spawn_game_obj(timestamp, parent_id, child.obj_id, spell.spell_id, target_id)
+        self._update_default_ids(child, spell)
+        return child
+
+    def _update_default_ids(self, new_obj: GameObj, spell: Spell) -> None:
+        if spell.flags & Behavior.SPAWN_BOSS:
+            if not self._default_ids.boss1_exists:
+                self._default_ids.boss1_id = new_obj.obj_id
+            else:
+                assert not self._default_ids.boss2_exists, "Second boss already exists."
+                self._default_ids.boss2_id = new_obj.obj_id
+        if spell.flags & Behavior.SPAWN_PLAYER:
+            assert not self._default_ids.player_exists, "Player already exists."
+            self._default_ids.player_id = new_obj.obj_id

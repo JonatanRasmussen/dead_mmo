@@ -1,4 +1,4 @@
-from typing import Any, Type
+from typing import Any, Iterable, Type
 
 from src.world_state.spell_system import Spell
 from src.configs.blueprints import SpellFactory
@@ -13,6 +13,10 @@ class SpellDatabase:
     def get_spell(self, spell_id: int) -> Spell:
         assert spell_id in self.spells_loaded_into_memory, f"Spell with ID {spell_id} not found."
         return self.spells_loaded_into_memory.get(spell_id, Spell())
+
+    def get_all_spells(self) -> Iterable[Spell]:
+        """Helper to yield all spells for system initializations."""
+        return self.spells_loaded_into_memory.values()
 
     @staticmethod
     def _load_spells_into_memory() -> dict[int, Spell]:

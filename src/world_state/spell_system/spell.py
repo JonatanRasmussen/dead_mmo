@@ -13,12 +13,16 @@ from .targeting import Targeting
 class Spell:
     """ An action that can be performed by a game object. """
     spell_id: int = Consts.EMPTY_ID
-    effect_id: int = Consts.EMPTY_ID
     spell_sequence: Optional[tuple[int, ...]] = None
 
+    ### SPELL RESOURCES
     power: float = 1.0
     variance: float = 0.0
+    spawned_obj: Optional[ObjTemplate] = None
 
+
+    ### TARGETING AND VALIDATION
+    targeting: Targeting = Targeting.NONE
     range_limit: float = 0.0
     #self.cost: float = 0 #not yet implemented
     #self.gcd_mod: float = 0.0 #not yet implemented
@@ -28,10 +32,12 @@ class Spell:
     #max_stacks: int = 1 #not yet implemented
 
     flags: Behavior = Behavior.NONE
-    targeting: Targeting = Targeting.NONE
 
-    spawned_obj: Optional[ObjTemplate] = None
+    # SPAWN LOGIC
 
+
+    ### COSMETIC PROPERTIES
+    effect_id: int = Consts.EMPTY_ID
     # Audio properties
     audio_name: str = ""
     spell_type: str = ""
@@ -138,3 +144,15 @@ class Spell:
             self.spawned_obj is not None or
             self.spell_sequence is not None
         )
+
+    @property
+    def get_spawned_obj_pos_xy_speed(self) -> tuple[float, float]:
+        if self.spawned_obj is not None:
+            return self.spawned_obj.get_position_xy
+        return (0.0, 0.0)
+
+    @property
+    def get_spawned_obj_movespeed(self) -> float:
+        if self.spawned_obj is not None:
+            return self.spawned_obj.get_movespeed
+        return 0.0
