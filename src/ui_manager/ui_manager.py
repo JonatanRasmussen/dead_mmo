@@ -133,6 +133,17 @@ class IWeakAura(Protocol):
 
     def create_render_actions(self) -> Iterable[IRenderAction]: ...
 
+
+class EventType(Enum):
+    EMPTY = 0
+    SUCCESS = auto()
+    OUT_OF_RANGE = auto()
+    GCD_NOT_READY = auto()
+    NO_TARGET_WAS_SELECTED = auto()
+    SOURCE_IS_DISABLED = auto()
+    TARGET_IS_INVALID = auto()
+    AURA_NO_LONGER_EXISTS = auto()
+
 class UiManager:
     def __init__(self) -> None:
         self._current_frame_id: int = 0

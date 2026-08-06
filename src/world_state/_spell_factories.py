@@ -1,7 +1,91 @@
-from typing import Optional, Tuple
 from src.settings import Consts
-from src.models.components import Faction, ObjTemplate
-from src.world_state.spell_system import Behavior, Targeting, Spell
+from src.world_state import Behavior, Targeting, Spell
+from typing import Union, Mapping
+from src.world_state import Controls, KeyPresses, Loadout
+from src.world_state._game_obj_system import Distance, Faction, GameObj, ObjTemplate, Position, Resources
+
+
+class GameObjTemplates:
+    @staticmethod
+    def create_projectile(
+            timeline: Mapping[int, Union[int, tuple[int, ...]]],
+            speed: float,
+            size: float,
+            color: tuple[int, int, int]
+        ) -> ObjTemplate:
+        loadout, obj_controls = GameObjTemplates._create_loadout_from_scripted_timeline(timeline)
+        game_obj = GameObj(
+            _loadout=loadout,
+            _pos=Position(x=Distance(0.0), y=Distance(0.05), movement_speed=speed, base_size=size),
+            color=color,
+        )
+        return ObjTemplate(game_obj=game_obj, obj_controls=obj_controls)
+
+    @staticmethod
+    def create_enemy(
+            timeline: Mapping[int, Union[int, tuple[int, ...]]],
+            x: float,
+            y: float,
+            hp: float,
+            color: tuple[int, int, int]
+        ) -> ObjTemplate:
+        loadout, obj_controls = GameObjTemplates._create_loadout_from_scripted_timeline(timeline)
+        game_obj = GameObj(
+            _loadout=loadout,
+            _pos=Position(x=Distance(x), y=Distance(y)),
+            _res=Resources(hp=hp),
+            color=color,
+        )
+        return ObjTemplate(game_obj=game_obj, obj_controls=obj_controls)
+
+    @staticmethod
+    def create_player(
+            loadout: Loadout,
+            x: float,
+            y: float,
+            hp: float,
+            color: tuple[int, int, int],
+            sprite_name: str,
+        ) -> ObjTemplate:
+        game_obj = GameObj(
+            _loadout=loadout,
+            _pos=Position(x=Distance(x), y=Distance(y)),
+            _res=Resources(hp=hp),
+            color=color,
+            sprite_name=sprite_name,
+        )
+        return ObjTemplate(game_obj=game_obj)
+
+
+    @staticmethod
+    def _create_loadout_from_scripted_timeline(
+            scripted_timeline: Mapping[int, Union[int, tuple[int, ...]]]
+        ) -> tuple['Loadout', tuple[Controls, ...]]:
+        """Automatically generates a Loadout and Controls timeline from a {timestamp: (spell_id, ...)} dictionary."""
+        available_keys = [key for key in KeyPresses if key != KeyPresses.NONE]
+        all_spell_ids: list[int] = []
+        for value in scripted_timeline.values():
+            if isinstance(value, tuple):
+                all_spell_ids.extend(value) # Add all spell_ids from the tuple.
+            else:
+                all_spell_ids.append(value) # Add the single spell_id.
+        unique_spell_ids = sorted(list(set(all_spell_ids)))  # Ensure timeline is sorted such that key assignment is deterministic.
+        if len(unique_spell_ids) > len(available_keys):
+            raise ValueError(f"Timeline has {len(unique_spell_ids)} unique spell_ids but the limit is {len(available_keys)}.")
+        spell_to_key_map: dict[int, KeyPresses] = dict(zip(unique_spell_ids, available_keys))  # Map each unique spell ID to an available key.
+        loadout = Loadout()
+        for spell_id, key_press in spell_to_key_map.items():  # Build the Loadout by binding the spells to their assigned keys.
+            loadout.bind_spell(key_press, spell_id)
+        controls_list = []
+        for timestamp, value in scripted_timeline.items():  # Build the Controls timeline.
+            spell_id_tuple = value if isinstance(value, tuple) else (value,)  # Normalize the value to always be a tuple.
+            combined_keys = KeyPresses.NONE
+            for spell_id in spell_id_tuple:  # For each spell at this timestamp, find its key and combine it.
+                combined_keys |= spell_to_key_map[spell_id]
+            if combined_keys != KeyPresses.NONE:
+                controls_list.append(Controls(timeline_timestamp=timestamp, key_presses=combined_keys))
+        controls_list.sort(key=lambda c: c.timeline_timestamp)  # Sort the controls by timestamp to ensure they are in chronological order.
+        return loadout, tuple(controls_list)
 
 
 class SpellFactory:

@@ -1,5 +1,5 @@
 import pygame
-from src.consts import HardwareInputConsts
+from src.settings import HardwareInputConsts
 
 class InputHandler:
 

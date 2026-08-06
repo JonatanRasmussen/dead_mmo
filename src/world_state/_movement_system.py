@@ -5,8 +5,7 @@ from enum import IntFlag, auto
 
 from src.settings import Consts
 from ._spell_database import SpellDatabase
-from src.world_state.spell_system import Spell, Behavior
-from src.models.components import Position
+from src.world_state import Behavior
 # Assuming Behavior is importable from your project structure (e.g., src.world_state.behavior)
 
 

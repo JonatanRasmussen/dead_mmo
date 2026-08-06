@@ -2,7 +2,7 @@ import heapq
 from typing import Optional
 
 from src.settings import Consts
-from src.models.events import UpcomingEvent
+from src.world_state._event_system import UpcomingEvent
 
 
 class FrameHeap:

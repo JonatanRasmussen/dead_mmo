@@ -1,12 +1,12 @@
-import math
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, Optional, Iterable
 from enum import IntFlag, auto
+import math
 
 from src.settings import Consts
 from ._spell_database import SpellDatabase
-from src.world_state.spell_system import Spell, Behavior
-from src.models.components.status import Status
+from src.world_state import Behavior
+from src.world_state._game_obj_system import Status
 
 class CombatBehavior(IntFlag):
     """ Various bitflags that define spell combat behavior. """
@@ -193,3 +193,23 @@ class CombatSystem:
         if obj_id in self.game_obj_combat_dct:
             return self.game_obj_combat_dct[obj_id].status
         return Status.EMPTY
+
+    def get_size(self, obj_id: int) -> float:
+        """Returns the rendering scale/hitbox size based on current HP."""
+        if obj_id not in self.game_obj_combat_dct:
+            return 0.0
+        data = self.game_obj_combat_dct[obj_id]
+        if data.is_environment:
+            return 0.0
+        return 0.01 + math.sqrt(0.0001 * abs(data.hp))
+
+    def is_visible(self, obj_id: int) -> bool:
+        """Checks if an object should be actively rendered on screen."""
+        if obj_id not in self.game_obj_combat_dct:
+            return False
+        data = self.game_obj_combat_dct[obj_id]
+        return not data.is_environment and data.status != Status.DESPAWNED
+
+    def get_all_active_obj_ids(self) -> Iterable[int]:
+        """Returns a collection of all objects currently registered in combat."""
+        return self.game_obj_combat_dct.keys()

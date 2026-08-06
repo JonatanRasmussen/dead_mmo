@@ -1,10 +1,8 @@
 from typing import Any, Iterable, Type
 
-from src.world_state.spell_system import Spell
-from src.configs.blueprints import SpellFactory
-from src.configs.packages import BasicMovement, BasicTargeting
-from src.configs.packages import NpcTargetDummy, NpcBoss, NpcHealingPowerup, NpcLandmine
-from src.configs.packages import SpecWarlock, ZoneTestGround
+from src.world_state import Spell
+from src.world_state._spell_factories import SpellFactory
+from src.world_state._spell_configs import BasicMovement, BasicTargeting, NpcTargetDummy, NpcBoss, NpcHealingPowerup, NpcLandmine, SpecWarlock, ZoneTestGround
 
 class SpellDatabase:
     def __init__(self) -> None:

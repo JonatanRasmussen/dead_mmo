@@ -1,11 +1,46 @@
 from sortedcontainers import SortedDict  # type: ignore
 from typing import Iterable, ValuesView
+from dataclasses import dataclass
 
 from src.settings import Consts
-from src.models.events import Aura, UpcomingEvent
 from ._event_log import EventLog
 from ._id_gen import IdGen
-from src.world_state.spell_system import Spell
+from src.world_state import Spell
+
+
+@dataclass(slots=True)
+class Aura:
+    """ The effect of a previously cast spell that periodically ticks over a time span. """
+    aura_id: int = Consts.EMPTY_ID  # unique id for each aura
+    source_id: int = Consts.EMPTY_ID  # game_obj source
+    target_id: int = Consts.EMPTY_ID  # game_obj target
+    origin_spell_id: int = Consts.EMPTY_ID  # spell that applied aura
+    periodic_spell_id: int = Consts.EMPTY_ID  # spell to be cast each tick
+    start_time: int = 0
+    duration: int = 0
+    ticks: int = 1
+
+    @property
+    def key(self) -> tuple[int, int, int]:
+        return (self.source_id, self.origin_spell_id, self.target_id)
+
+    @property
+    def tick_timestamps(self) -> Iterable[int]:
+        """Yield timestamps for all ticks occuring during the aura's lifetime. """
+        if self.ticks > 0:
+            assert self.duration % self.ticks == 0, f"Non-integer tick interval: duration={self.duration}, ticks={self.ticks}"
+            tick_interval = self.duration // self.ticks
+            for i in range(1, self.ticks + 1):
+                timestamp = self.start_time + i * tick_interval
+                assert isinstance(timestamp, int), f"Non-int tick timestamp: {timestamp}"
+                yield timestamp
+
+    def is_expired(self, current_time: int) -> bool:
+        end_time = self.start_time + self.duration
+        return current_time > end_time
+
+    def ticks_remaining(self, current_time: int) -> int:
+        return sum(1 for t in self.tick_timestamps if t > current_time)
 
 
 class AuraHandler:
@@ -51,7 +86,7 @@ class AuraHandler:
         )
 
         if EventLog.DEBUG_PRINT_AURA_UPDATES:
-            EventLog.summarize_new_aura_creation(aura)
+            EventLog.summarize_new_aura_creation(aura.key)
 
         key = aura.key
 
@@ -71,7 +106,7 @@ class AuraHandler:
         aura = self._auras[key]
 
         if EventLog.DEBUG_PRINT_AURA_UPDATES:
-            EventLog.summarize_aura_deletion(aura)
+            EventLog.summarize_aura_deletion(aura.key)
 
         # Remove from both structures
         del self._auras[key]

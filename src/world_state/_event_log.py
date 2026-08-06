@@ -1,11 +1,10 @@
 import json
-from typing import ValuesView
+from typing import Iterable, ValuesView
 
-from src.models.components import GameObj
-from src.models.events.upcoming_event import UpcomingEvent
+from src.world_state._game_obj_system import GameObj
+from src.world_state._event_system import UpcomingEvent
 from src.settings import LogConfig
-from src.models.events import Aura
-from src.models.utils import Logger
+from src.utils import Logger
 
 
 class EventLog:
@@ -22,19 +21,23 @@ class EventLog:
     DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES = LogConfig.DEBUG_PRINT_GAME_OBJ_POSITIONAL_UPDATES
 
     def __init__(self) -> None:
-        self._combat_event_log: dict[int, UpcomingEvent] = {}
+        self._event_log: dict[int, UpcomingEvent] = {}
 
     @property
     def view_all_events(self) -> ValuesView[UpcomingEvent]:
-        return self._combat_event_log.values()
+        return self._event_log.values()
+
+    @property
+    def get_successful_spell_ids(self) -> Iterable[int]:
+        return (event.spell_id for event in self._event_log.values() if event.outcome_is_valid)
 
     def log_event(self, u_event: UpcomingEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
             if not u_event.is_aura_tick or self.DEBUG_PRINT_AURA_TICKS:
                 if u_event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
                     Logger.debug(u_event.event_summary, self.FILENAME_COMBAT_EVENT_LOG)
-        assert u_event.event_id not in self._combat_event_log, f"Event with ID {u_event.event_id} already exists in event_log."
-        self._combat_event_log[u_event.event_id] = u_event
+        assert u_event.event_id not in self._event_log, f"Event with ID {u_event.event_id} already exists in event_log."
+        self._event_log[u_event.event_id] = u_event
 
     @staticmethod
     def summarize_new_obj_creation(new_obj: GameObj) -> None:
@@ -43,16 +46,16 @@ class EventLog:
         Logger.debug(f"Obj {new_obj.obj_id:04d} WAS CREATED", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
     @staticmethod
-    def summarize_new_aura_creation(new_aura: Aura) -> None:
+    def summarize_new_aura_creation(new_aura_key: tuple[int, int, int]) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
-        Logger.debug(f"Aura {new_aura.key} WAS CREATED", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        Logger.debug(f"Aura {new_aura_key} WAS CREATED", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
     @staticmethod
-    def summarize_aura_deletion(aura_to_be_deleted: Aura) -> None:
+    def summarize_aura_deletion(aura_to_be_deleted_key: tuple[int, int, int]) -> None:
         if not EventLog.DEBUG_PRINT_GAME_OBJ_UPDATES:
             return
-        Logger.debug(f"Aura {aura_to_be_deleted.key} WAS DELETED.", EventLog.FILENAME_OBJ_UPDATES_LOG)
+        Logger.debug(f"Aura {aura_to_be_deleted_key} WAS DELETED.", EventLog.FILENAME_OBJ_UPDATES_LOG)
 
     @staticmethod
     def summarize_state_update(current: GameObj, updated: GameObj) -> None:

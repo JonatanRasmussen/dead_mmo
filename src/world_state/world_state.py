@@ -3,16 +3,19 @@ from webbrowser import Galeon
 import math
 
 from src.settings import Consts
-from src.models.components import Controls, KeyPresses, GameObj
-from src.world_state.spell_system import Behavior, DefaultIDs, Spell, Targeting
-from src.models.events import Outcome, UpcomingEvent, Aura
-from ._aura_handler import AuraHandler
+from src.world_state import Controls, KeyPresses
+from src.world_state._controls_system import ControlsSystem
+from src.world_state._game_obj_system import GameObj
+from src.world_state import Behavior, DefaultIDs, Spell, Targeting
+from src.world_state._event_system import UpcomingEvent, Outcome
+from ._aura_handler import Aura, AuraHandler
 from ._event_log import EventLog
 from ._frame_heap import FrameHeap
 from ._id_gen import IdGen
 from ._spell_database import SpellDatabase
 from ._combat_system import CombatSystem, ObjCombatData
 from ._movement_system import MovementSystem, ObjMovementData
+
 
 
 class WorldState:
@@ -25,8 +28,9 @@ class WorldState:
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 100_000)
         self._event_log_for_each_frame: dict[int, EventLog] = {}
         #
+        self._controls_system = ControlsSystem(self.spell_database)
         self._movement_system = MovementSystem(self.spell_database)
-        self._combat_system = CombatSystem(spell_database=self.spell_database)
+        self._combat_system = CombatSystem(self.spell_database)
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._default_ids: DefaultIDs = DefaultIDs()
         #
@@ -43,21 +47,13 @@ class WorldState:
     def view_event_logs(self) -> dict[int, EventLog]:
         return self._event_log_for_each_frame
 
-    def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
-        source_id = self.default_ids.environment_id
-        for setup_event in self._create_setup_events(ingame_time, source_id, setup_spell_ids):
-            self._event_heap.insert_event(setup_event)
-        empty_list_of_player_inputs: list[KeyPresses] = []
-        self.process_frame(empty_list_of_player_inputs, ingame_time)
+    def get_spell_ids_for_successful_events(self, timestamp: int) -> Iterable[int]:
+        return (self._event_log_for_each_frame[timestamp].get_successful_spell_ids)
 
-    def process_frame(self, player_inputs: list[KeyPresses], frame_end: int) -> None:
+    def process_frame(self, player_inputs: list[str], frame_end: int) -> None:
         """Execute state updates for current frame"""
-        for key_presses in player_inputs:
-            if key_presses != KeyPresses.NONE:
-                controls = Controls(obj_id=self.default_ids.player_id, timeline_timestamp=frame_end, key_presses=key_presses)
-                player_obj = self.get_game_obj(controls.obj_id)
-                for controls_event in self._create_events_from_controls(player_obj, controls):
-                    self._event_heap.insert_event(controls_event)
+        for controls_event in self._create_events_from_controls(player_inputs, frame_end):
+            self._event_heap.insert_event(controls_event)
         event_log = EventLog()
         while self._event_heap.has_unprocessed_events(frame_end):
             u_event = self._event_heap.pop_next_event()
@@ -65,9 +61,17 @@ class WorldState:
             f_event = self._finalize_and_process_event(u_event)
             event_log.log_event(f_event)
         self._event_log_for_each_frame[frame_end] = event_log
+        # debug sanity check
         for game_obj in self.view_game_objs:
             obj_id = game_obj.obj_id
             WorldState.debug_compare_ecs_to_gameobj(self._combat_system.game_obj_combat_dct[obj_id], self._movement_system.game_obj_positions_dct[obj_id], game_obj, frame_end)
+
+    def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
+        source_id = self.default_ids.environment_id
+        for setup_event in self._create_setup_events(ingame_time, source_id, setup_spell_ids):
+            self._event_heap.insert_event(setup_event)
+        empty_list_of_player_inputs: list[str] = []
+        self.process_frame(empty_list_of_player_inputs, ingame_time)
 
     def _finalize_and_process_event(self, u_event: UpcomingEvent) -> UpcomingEvent:
         source_obj = self.get_game_obj(u_event.source_id)
@@ -100,10 +104,9 @@ class WorldState:
 
 
     def _fetch_cascading_events(self, u_event: UpcomingEvent, new_obj: Optional[GameObj], source: GameObj, spell: Spell, target: GameObj, new_aura_id: int) -> Iterable[UpcomingEvent]:
-        if new_obj is not None and spell.spawned_obj is not None and spell.spawned_obj.obj_controls is not None:
-            for controls in spell.copy_obj_controls:
-                controls.increase_offset(new_obj.get_spawn_timestamp())
-                yield from self._create_events_from_controls(new_obj, controls)
+        if new_obj is not None:
+            scripted_spells = self._controls_system.get_scripted_spells(new_obj.obj_id, new_obj.get_spawn_timestamp())
+            yield from self._create_control_events(new_obj.obj_id, new_obj.current_target, scripted_spells)
         if spell.is_area_of_effect and not u_event.is_aoe_targeting:
             target_ids = self._select_targets_for_aoe(source, target, self.view_game_objs)
             yield from self._create_aoe_events(u_event, target_ids)
@@ -113,6 +116,10 @@ class WorldState:
             #aura = self._auras.get_aura_by_key(source.obj_id, spell.spell_id, target.obj_id)
             aura = self._auras.get_aura_by_id(new_aura_id)
             yield from self._create_aura_tick_events(aura)
+
+    def _create_control_events(self, source_id: int, target_id: int, scripted_spells: Iterable[tuple[int, int, int]]) -> Iterable[UpcomingEvent]:
+        for spell_id, timestamp, priority in scripted_spells:
+            yield self._helper_for_create_event_from_control(source_id, target_id, timestamp, spell_id, priority)
 
     # The below methods are for upcoming_event creation
     def _create_aoe_events(self, u_event: UpcomingEvent, target_ids: Iterable[int]) -> Iterable[UpcomingEvent]:
@@ -143,12 +150,18 @@ class WorldState:
         seq_copy.is_spell_sequence = True
         return seq_copy
 
-    def _create_events_from_controls(self, source: GameObj, controls: Controls) -> Iterable[UpcomingEvent]:
+    def _create_events_from_controls(self, player_inputs: list[str], timestamp: int) -> Iterable[UpcomingEvent]:
+        player_id = self.default_ids.player_id
         input_event_order = 0
-        for spell_id in source.convert_controls_to_spell_ids(controls, source.obj_id):
+        if not player_inputs or player_id == Consts.EMPTY_ID:
+            return
+        player_obj = self.get_game_obj(player_id)
+        spell_ids = self._controls_system.get_spell_ids_for_inputs(player_id, player_inputs, timestamp)
+        for spell_id in spell_ids:
             input_event_order += 1
-            assert spell_id != Consts.EMPTY_ID, f"Controls for {source.obj_id} is casting empty spell ID, fix spell configs."
-            yield self._helper_for_create_event_from_control(source.obj_id, source.current_target, controls.ingame_time, spell_id, input_event_order)
+            assert spell_id != Consts.EMPTY_ID, f"Controls for {player_obj.obj_id} is casting empty spell ID, fix spell configs."
+            yield self._helper_for_create_event_from_control(player_id, player_obj.current_target, timestamp, spell_id, input_event_order)
+
 
     def _helper_for_create_event_from_control(self, source_obj_id: int, source_current_target: int, controls_ingame_time: int, spell_id: int, priority: int) -> UpcomingEvent:
         return UpcomingEvent(
@@ -197,10 +210,7 @@ class WorldState:
     @staticmethod
     def _select_targets_for_aoe(source: GameObj, target: GameObj, all_game_objs: ValuesView[GameObj]) -> Iterable[int]:
         for obj in all_game_objs:
-            team_is_hit_by_aoe = (
-                (obj.is_on_players_team == source.is_on_players_team)
-                == (source.is_on_players_team == target.is_on_players_team)
-            )
+            team_is_hit_by_aoe = (obj.is_on_players_team == source.is_on_players_team) == (source.is_on_players_team == target.is_on_players_team)
             if team_is_hit_by_aoe and obj.is_valid_target and obj.obj_id != target.obj_id:
                 yield obj.obj_id
 
@@ -319,6 +329,7 @@ class WorldState:
         parent_id = source.obj_id
         self._movement_system.spawn_game_obj(timestamp, parent_id, child.obj_id, spell.spell_id)
         self._combat_system.spawn_game_obj(timestamp, parent_id, child.obj_id, spell.spell_id, target_id)
+        self._controls_system.spawn_game_obj(child.obj_id, spell.spell_id)
         self._update_default_ids(child, spell)
         return child
 
@@ -426,7 +437,7 @@ class WorldState:
         Handles independent X/Y timestamps from the new MovementSystem.
         """
 
-        POSITION_ERROR_THRESHOLD = 0.011
+        POSITION_ERROR_THRESHOLD = 0.012
 
         reconstructed = GameObj(obj_id=external_obj.obj_id)
 

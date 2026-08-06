@@ -1,9 +1,8 @@
 import json
 import os
 
-from .world_state import WorldState
-from ._input_translator import InputTranslator
-from .models.components import KeyPresses
+from src.world_state import KeyPresses, WorldState
+from src.world_state._controls_data import InputTranslator
 
 ALL_CHECKS = {"events_by_frame", "game_objs"}
 #ALL_CHECKS = {"events_by_frame", "game_objs"}
@@ -27,7 +26,7 @@ class SimValidation:
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
         number_of_iterations = SIMULATION_DURATION_MS // FRAME_DURATION_MS
 
-        player_inputs_this_frame: list[KeyPresses] = []
+        player_inputs_this_frame: list[str] = []
 
         for _ in range(number_of_iterations):
             ingame_time += FRAME_DURATION_MS
@@ -35,8 +34,8 @@ class SimValidation:
             player_inputs_this_frame.clear()
             for timestamp, inputs in scripted_player_input.items():
                 if (ingame_time - FRAME_DURATION_MS) < timestamp <= ingame_time:
-                    keypresses = InputTranslator.translate_to_keypresses(inputs)
-                    player_inputs_this_frame.append(keypresses)
+                    for player_input in inputs:
+                        player_inputs_this_frame.append(player_input)
             world_state.process_frame(player_inputs_this_frame, ingame_time)
 
         SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_ids))

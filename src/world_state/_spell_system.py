@@ -1,12 +1,101 @@
 from typing import Iterable, Optional
 from dataclasses import dataclass
-from enum import IntFlag, auto
+from enum import Enum, IntFlag, auto
 import json
 
 from src.settings import Consts
-from src.models.components import Controls, ObjTemplate
-from .behavior import Behavior
-from .targeting import Targeting
+from src.world_state._game_obj_system import ObjTemplate
+from src.world_state import Controls
+
+@dataclass(slots=True)
+class DefaultIDs:
+    environment_id: int = Consts.EMPTY_ID
+    player_id: int = Consts.EMPTY_ID
+    boss1_id: int = Consts.EMPTY_ID
+    boss2_id: int = Consts.EMPTY_ID
+
+    @property
+    def missing_target_id(self) -> int:
+        return self.environment_id
+    @property
+    def default_allied_id(self) -> int:
+        if self.player_exists:
+            return self.player_id
+        return self.missing_target_id
+    @property
+    def default_hostile_id(self) -> int:
+        if self.boss1_exists:
+            return self.boss1_id
+        return self.missing_target_id
+
+    @property
+    def environment_exists(self) -> bool:
+        return Consts.is_valid_id(self.environment_id)
+    @property
+    def player_exists(self) -> bool:
+        return Consts.is_valid_id(self.player_id)
+    @property
+    def boss1_exists(self) -> bool:
+        return Consts.is_valid_id(self.boss1_id)
+    @property
+    def boss2_exists(self) -> bool:
+        return Consts.is_valid_id(self.boss2_id)
+
+
+
+
+class Targeting(Enum):
+    """ Defines targeting behavior for spell """
+    NONE = 0
+    SELF = auto()
+    TARGET = auto()
+    TARGET_OF_TARGET = auto()
+    PARENT = auto()
+    TARGET_OF_PARENT = auto()
+    DEFAULT_FRIENDLY = auto()
+    DEFAULT_ENEMY = auto()
+    TAB_TO_NEXT = auto()
+
+
+
+class Behavior(IntFlag):
+    """ Various bitflags that define spell behavior. """
+    NONE = 0
+
+    # MOVEMENT
+    STEP_UP = auto()
+    STEP_LEFT = auto()
+    STEP_DOWN = auto()
+    STEP_RIGHT = auto()
+    MOVE_TOWARDS_TARGET = auto()
+    TELEPORT_TO_TARGET = auto()
+    FORCE_MOVE = auto()
+    TRY_MOVE = auto()
+
+    # COMBATSTATS
+    DAMAGING = auto()
+    HEALING = auto()
+
+    # STATE UPDATE
+    IS_CHANNEL = auto()
+
+    # TARGETING
+    AOE = auto()
+    UPDATE_CURRENT_TARGET = auto()
+
+    # VALIDATION
+    TRIGGER_GCD = auto()
+    DENY_IF_CASTING = auto()
+
+    # OBJ SPAWN
+    SPAWN_BOSS = auto()
+    SPAWN_PLAYER = auto()
+    SPAWN_OBJ = auto()
+    DESPAWN_SELF = auto()
+
+    # AURA FLAGS
+    AURA_APPLY = auto()
+    AURA_CANCEL = auto()
 
 
 @dataclass(slots=True)
