@@ -364,3 +364,10 @@
 [2026-08-01 15:58:02] {BudoB}: Which creates a hp discrepency. Nice to bughunt that one.
 [2026-08-01 15:58:27] {BudoB}: Anyway, good progress. Now the systems behave similar.
 [2026-08-01 15:58:37] {BudoB}: Code time: 5 hours.
+
+[2026-08-06 17:01:27] {BudoB}: Absolutely huge clean-up today. We are in the end-game.
+[2026-08-06 17:01:42] {BudoB}: Few files are better than many files.
+[2026-08-06 17:02:29] {BudoB}: Shallow is better than deep.
+[2026-08-06 17:02:39] {BudoB}: Systems all the way. Until I start hating that too.
+[2026-08-06 17:02:54] {BudoB}: AI is nice as well for debugging my spaghetti.
+[2026-08-06 17:03:45] {BudoB}: Code time: 6 hours.
