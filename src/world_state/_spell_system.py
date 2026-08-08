@@ -85,6 +85,7 @@ class Behavior(IntFlag):
 
     # VALIDATION
     TRIGGER_GCD = auto()
+    TRIGGER_COOLDOWN = auto()
     DENY_IF_CASTING = auto()
 
     # OBJ SPAWN
@@ -115,6 +116,7 @@ class Spell:
     range_limit: float = 0.0
     #self.cost: float = 0 #not yet implemented
     #self.gcd_mod: float = 0.0 #not yet implemented
+    cooldown: int = 0
     cast_time: int = 0
     duration: int = 0
     ticks: int = 1

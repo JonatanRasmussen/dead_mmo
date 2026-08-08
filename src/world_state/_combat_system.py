@@ -22,6 +22,7 @@ class CombatBehavior(IntFlag):
     # VALIDATION
     TRIGGER_GCD = auto()
     DENY_IF_CASTING = auto()
+
     @classmethod
     def from_behavior(cls, behavior: Behavior) -> "CombatBehavior":
         """Extract the combat-related flags from a Behavior."""
@@ -30,19 +31,23 @@ class CombatBehavior(IntFlag):
             if flag is not cls.NONE and flag.name is not None and behavior & getattr(Behavior, flag.name):
                 result |= flag
         return result
-@dataclass(slots=True)
-class SpellCombatTemplate:
-    """Stores the extracted combat stats from a Spell's spawned_obj template."""
-    hp: float
-    gcd_mod: float
-    is_enemy: bool
-    is_boss_or_player: bool
+
+
 @dataclass(slots=True)
 class SpellCombatData:
-    """Stores only the combat-relevant data extracted from a Spell."""
+    """Stores only the combat-relevant data extracted from a Spell.
+
+    hp/gcd_mod/is_enemy/is_boss_or_player are only meaningful for spells that
+    spawn an object (SPAWN_OBJ flag); they default to inert values otherwise.
+    """
     power: float
     flags: CombatBehavior
-    spawn_template: Optional[SpellCombatTemplate] = None
+    hp: float = 0.0
+    gcd_mod: float = 1.0
+    is_enemy: bool = False
+    is_boss_or_player: bool = False
+
+
 @dataclass(slots=True)
 class ObjCombatData:
     """ECS-style component storing combat and resource data for a GameObj."""
@@ -57,6 +62,8 @@ class ObjCombatData:
     is_boss_or_player: bool = False
     is_environment: bool = False
     status: Status = Status.EMPTY
+
+
 class CombatSystem:
     """
     Manages all combat-related logic, resources, damage/healing, and GCDs.
@@ -66,32 +73,37 @@ class CombatSystem:
         self.spell_data_dct: Dict[int, SpellCombatData] = self._create_initialized_spell_data_dct(spell_database)
         # Maps obj_id -> ObjCombatData
         self.game_obj_combat_dct: Dict[int, ObjCombatData] = {}
+
     @staticmethod
     def _create_initialized_spell_data_dct(spell_database: SpellDatabase) -> Dict[int, SpellCombatData]:
         """
         Loads combat-relevant data from a SpellDatabase into memory.
-        Extracts spawn templates so the CombatSystem can handle spawning internally.
+        Extracts spawn-relevant fields directly onto SpellCombatData so the
+        CombatSystem can handle spawning internally without a separate template type.
         """
         spell_data_dct = {}
         for spell in spell_database.get_all_spells():
-            spawn_template = None
-            # Extract template data if the spell spawns an object
+            hp = 0.0
+            gcd_mod = 1.0
+            is_enemy = False
+            is_boss_or_player = bool(spell.flags & (Behavior.SPAWN_BOSS | Behavior.SPAWN_PLAYER))
+
             if spell.spawned_obj is not None and spell.spawned_obj.game_obj is not None:
                 spawned_obj = spell.spawned_obj.game_obj
-                # Determine if it's a boss or player based on spell flags
-                is_boss_or_player = bool(spell.flags & (Behavior.SPAWN_BOSS | Behavior.SPAWN_PLAYER))
-                spawn_template = SpellCombatTemplate(
-                    hp=spawned_obj._res.hp,
-                    gcd_mod=spawned_obj.gcd_mod,
-                    is_enemy=not spawned_obj.is_on_players_team,
-                    is_boss_or_player=is_boss_or_player,
-                )
+                hp = spawned_obj._res.hp
+                gcd_mod = spawned_obj.gcd_mod
+                is_enemy = not spawned_obj.is_on_players_team
+
             spell_data_dct[spell.spell_id] = SpellCombatData(
                 power=spell.power,
                 flags=CombatBehavior.from_behavior(spell.flags),
-                spawn_template=spawn_template
+                hp=hp,
+                gcd_mod=gcd_mod,
+                is_enemy=is_enemy,
+                is_boss_or_player=is_boss_or_player,
             )
         return spell_data_dct
+
     def create_environment_obj(self, obj_id: int) -> None:
         """
         Creates the base environment object.
@@ -110,42 +122,44 @@ class CombatSystem:
             is_environment=True,
             status=Status.ENVIRONMENT,
         )
+
     def spawn_game_obj(self, timestamp: int, parent_obj_id: int, new_obj_id: int, spell_id: int, target_id: int) -> None:
         """
         Registers a GameObj into the combat system.
-        Fully handles the spawn logic by looking up the spell's spawn template.
+        Fully handles the spawn logic by looking up the spell's flattened spawn data.
         """
         if spell_id not in self.spell_data_dct:
             return
         spell_data = self.spell_data_dct[spell_id]
-        if spell_data.spawn_template is None:
+        parent_data = self.game_obj_combat_dct.get(parent_obj_id)
+        if parent_data is None:
             return
-        template = spell_data.spawn_template
         # Inherit team/enemy status from parent if applicable
-        parent_data = self.game_obj_combat_dct[parent_obj_id]
         if parent_data.is_environment:
-            is_enemy = template.is_enemy
+            is_enemy = spell_data.is_enemy
         else:
             is_enemy = parent_data.is_enemy
         self.game_obj_combat_dct[new_obj_id] = ObjCombatData(
-            hp=template.hp,
-            max_hp=template.hp,
-            gcd_mod=template.gcd_mod,
+            hp=spell_data.hp,
+            max_hp=spell_data.hp,
+            gcd_mod=spell_data.gcd_mod,
             spell_modifier=1.0,
             gcd_start=timestamp,
             parent_id=parent_obj_id,
             current_target_id=target_id,
             is_enemy=is_enemy,
-            is_boss_or_player=template.is_boss_or_player,
+            is_boss_or_player=spell_data.is_boss_or_player,
             is_environment=False,
             status=Status.ALIVE,
         )
+
     def despawn_game_obj(self, obj_id: int) -> None:
         """Removes an object from the combat system (e.g., on despawn)."""
         self.game_obj_combat_dct.pop(obj_id, None)
+
     def apply_combat_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         """
-        Applies a spell's combat behavior (damage, healing, GCD, targeting) to objects.
+        Applies a spell's combat behavior (damage, healing, GCD, targeting, spawn/despawn) to objects.
         """
         if spell_id not in self.spell_data_dct:
             return
@@ -170,6 +184,7 @@ class CombatSystem:
                 # Optional: Clamp HP to max_hp
                 #if target_data.hp > target_data.max_hp:
                 #    target_data.hp = target_data.max_hp
+
     def get_gcd_progress(self, obj_id: int, current_time: int) -> float:
         """Returns the GCD progress of an object as a float between 0.0 and 1.0."""
         if obj_id not in self.game_obj_combat_dct:
@@ -213,3 +228,39 @@ class CombatSystem:
     def get_all_active_obj_ids(self) -> Iterable[int]:
         """Returns a collection of all objects currently registered in combat."""
         return self.game_obj_combat_dct.keys()
+
+# ---- id-only queries needed by TargetingSystem / validation ----
+    def get_current_target(self, obj_id: int) -> int:
+        data = self.game_obj_combat_dct.get(obj_id)
+        return data.current_target_id if data is not None else Consts.EMPTY_ID
+
+    def get_parent_id(self, obj_id: int) -> int:
+        data = self.game_obj_combat_dct.get(obj_id)
+        return data.parent_id if data is not None else Consts.EMPTY_ID
+
+    def is_on_players_team(self, obj_id: int) -> bool:
+        data = self.game_obj_combat_dct.get(obj_id)
+        return bool(data is not None and not data.is_enemy)
+
+    def is_valid_source(self, obj_id: int) -> bool:
+        data = self.game_obj_combat_dct.get(obj_id)
+        return bool(data is not None and data.status.is_valid_source)
+
+    def is_valid_target(self, obj_id: int) -> bool:
+        data = self.game_obj_combat_dct.get(obj_id)
+        return bool(data is not None and data.status.is_valid_target)
+
+    def set_despawned(self, obj_id: int) -> None:
+        data = self.game_obj_combat_dct.get(obj_id)
+        if data is not None:
+            data.status = Status.DESPAWNED
+
+    def select_aoe_target_ids(self, source_id: int, primary_target_id: int) -> Iterable[int]:
+        """ECS replacement of WorldState._select_targets_for_aoe()."""
+        source_allied = self.is_on_players_team(source_id)
+        target_allied = self.is_on_players_team(primary_target_id)
+        for obj_id, data in self.game_obj_combat_dct.items():
+            obj_allied = not data.is_enemy
+            team_is_hit = (obj_allied == source_allied) == (source_allied == target_allied)
+            if team_is_hit and data.status.is_valid_target and obj_id != primary_target_id:
+                yield obj_id

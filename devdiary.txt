@@ -371,3 +371,22 @@
 [2026-08-06 17:02:39] {BudoB}: Systems all the way. Until I start hating that too.
 [2026-08-06 17:02:54] {BudoB}: AI is nice as well for debugging my spaghetti.
 [2026-08-06 17:03:45] {BudoB}: Code time: 6 hours.
+
+[2026-08-08 18:25:46] {BudoB}: Dizzy mc lizzy. Another day with very limited progress.
+[2026-08-08 18:26:00] {BudoB}: I thought having systems handle their own spawning was smart.
+[2026-08-08 18:26:15] {BudoB}: Then I remembered they need an externally managed new_obj_id.
+[2026-08-08 18:26:35] {BudoB}: So basically, stuff broke, and I needed to revert a lot.
+[2026-08-08 18:27:01] {BudoB}: I think I burned 25 kr. worth of Claude credits.
+[2026-08-08 18:27:14] {BudoB}: Why is it hard, I wonder? Spending a week deleting game_obj.
+[2026-08-08 18:27:43] {BudoB}: Am I just bad at software, or is my code deceptively hard?
+[2026-08-08 18:28:18] {BudoB}: Am I too committed to make sure tests keep on passing?
+[2026-08-08 18:28:38] {BudoB}: Should I take the plunge and mass-delete.
+[2026-08-08 18:28:46] {BudoB}: Every experience I've had doing that has been unsuccessful.
+[2026-08-08 18:29:06] {BudoB}: Dunno. A little work is better than 0 work I guess.
+[2026-08-08 18:29:47] {BudoB}: Actually, some major thing I did was locking away my wow.
+[2026-08-08 18:30:03] {BudoB}: That probably did so much for my future progress.
+[2026-08-08 18:30:43] {BudoB}: I am a bit self-concious right now, about this diary format.
+[2026-08-08 18:30:59] {BudoB}: I am forced to express myself in these small lines, briefly.
+[2026-08-08 18:31:19] {BudoB}: Maybe I think too much, and this is a good way of reflecting.
+[2026-08-08 18:31:41] {BudoB}: Now I will go for a bike ride. Enjoying myself. Take care!
+[2026-08-08 18:32:04] {BudoB}: Code time: 4 hours.

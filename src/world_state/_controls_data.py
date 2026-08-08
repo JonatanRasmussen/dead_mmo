@@ -131,7 +131,7 @@ class Loadout:
 
     spawn_timestamp: int = Consts.EMPTY_TIMESTAMP
     spell_ids: list[int] = field(default_factory=lambda: [Consts.EMPTY_ID] * len(LOADOUT_KEY_TO_INDEX_MAP))
-    ability_cds: list[int] = field(default_factory=lambda: [Consts.EMPTY_TIMESTAMP] * len(LOADOUT_KEY_TO_INDEX_MAP))
+    ability_cd_start: list[int] = field(default_factory=lambda: [Consts.EMPTY_TIMESTAMP] * len(LOADOUT_KEY_TO_INDEX_MAP))
     gcd_start: int = -1_000
 
     @classmethod
@@ -140,14 +140,14 @@ class Loadout:
         return cls(
             spawn_timestamp=d["ts"],
             spell_ids=d["ids"],
-            ability_cds=d["cds"],
+            ability_cd_start=d["cds"],
             gcd_start=d["gcd"]
         )
     def serialize(self) -> str:
         return json.dumps({
             "ts": self.spawn_timestamp,
             "ids": self.spell_ids,
-            "cds": self.ability_cds,
+            "cds": self.ability_cd_start,
             "gcd": self.gcd_start
         })
 

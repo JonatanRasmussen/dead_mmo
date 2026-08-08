@@ -28,13 +28,13 @@ class WorldState:
         self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 100_000)
         self._event_log_for_each_frame: dict[int, EventLog] = {}
         #
-        self._controls_system = ControlsSystem(self.spell_database)
-        self._movement_system = MovementSystem(self.spell_database)
-        self._combat_system = CombatSystem(self.spell_database)
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._default_ids: DefaultIDs = DefaultIDs()
         #
         self._game_objs: dict[int, GameObj] = {}
+        self._controls_system = ControlsSystem(self.spell_database)
+        self._movement_system = MovementSystem(self.spell_database)
+        self._combat_system = CombatSystem(self.spell_database)
         self._create_environment_obj()
 
     @property
@@ -98,6 +98,7 @@ class WorldState:
             if spell.has_cascading_events:
                 for cascading_event in self._fetch_cascading_events(f_event, new_obj, source_obj, spell, target_obj, new_aura_id):
                     self._event_heap.insert_event(cascading_event)
+            self._controls_system.apply_controls_event(timestamp, source_id, spell.spell_id)
             self._combat_system.apply_combat_event(timestamp, source_id, spell.spell_id, target_id)
             self._movement_system.apply_movement_event(timestamp, source_id, spell.spell_id, target_id)
             self.modify_game_obj(timestamp, source_obj, spell, target_obj)
@@ -378,6 +379,7 @@ class WorldState:
         obj_id: int = self._generate_new_game_obj_id()
         game_obj = GameObj.create_environment(obj_id)
         self.add_game_obj(game_obj)
+        self._controls_system.create_environment_obj(obj_id)
         self._combat_system.create_environment_obj(obj_id)
         self._movement_system.create_environment_obj(obj_id)
         self.default_ids.environment_id = game_obj.obj_id
