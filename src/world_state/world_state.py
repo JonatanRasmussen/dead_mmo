@@ -191,7 +191,6 @@ class WorldState:
             priority=priority,
             aura_id=aura.aura_id,
             aura_origin_spell_id=aura.origin_spell_id,
-            aura_start_time=aura.start_time,
         )
 
 

@@ -38,7 +38,7 @@ class UpcomingEvent:
 
     aura_id: int = Consts.EMPTY_ID
     aura_origin_spell_id: int = Consts.EMPTY_ID
-    aura_start_time: int = Consts.EMPTY_TIMESTAMP
+    #aura_start_time: int = Consts.EMPTY_TIMESTAMP
     is_spell_sequence: bool = False
     is_aoe_targeting: bool = False
 
@@ -55,7 +55,6 @@ class UpcomingEvent:
             spell_modifier=d["sm"],
             aura_id=d["aid"],
             aura_origin_spell_id=d["aos"],
-            aura_start_time=d["ast"],
             is_spell_sequence=d["seq"],
             is_aoe_targeting=d["aoe"]
         )
@@ -70,7 +69,6 @@ class UpcomingEvent:
             "sm": self.spell_modifier,
             "aid": self.aura_id,
             "aos": self.aura_origin_spell_id,
-            "ast": self.aura_start_time,
             "seq": self.is_spell_sequence,
             "aoe": self.is_aoe_targeting
         })
