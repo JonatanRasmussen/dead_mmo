@@ -1,14 +1,14 @@
 import json
 import os
-import dataclasses
-from enum import Enum
 
-from src.world_state.world_state import WorldState
+from src.world_state.old_world_state import OldWorldState
+from src.world_state._controls_data import InputTranslator
 
 ALL_CHECKS = {"events_by_frame", "game_objs"}
+#ALL_CHECKS = {"events_by_frame", "game_objs"}
 
 
-class SimValidation:
+class OldSimValidation:
     SNAPSHOT_DIR = "test_snapshots"
 
     # ------------------------------------------------------------------ #
@@ -18,7 +18,7 @@ class SimValidation:
     @staticmethod
     def simulate_game_in_console(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]]) -> None:
         ingame_time = 0
-        world_state = WorldState()
+        world_state = OldWorldState()
         world_state.process_setup_events(ingame_time, setup_spell_ids)
 
         SIMULATION_DURATION_MS = 10000
@@ -38,10 +38,10 @@ class SimValidation:
                         player_inputs_this_frame.append(player_input)
             world_state.process_frame(player_inputs_this_frame, ingame_time)
 
-        SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_ids))
+        OldSimValidation._run_snapshot_test(world_state, snapshot_name=f"[{str(setup_spell_ids)}]")
 
     @staticmethod
-    def _run_snapshot_test(state: WorldState, snapshot_name: str = "default", checks: set[str] | None = None) -> None:
+    def _run_snapshot_test(state: OldWorldState, snapshot_name: str = "default", checks: set[str] | None = None) -> None:
         if checks is None:
             checks = ALL_CHECKS
 
@@ -65,17 +65,17 @@ class SimValidation:
             ]
             print("\n".join(warning_lines))
 
-        current_snapshot = SimValidation._capture_snapshot(state)
-        snapshot_path = SimValidation._snapshot_path(snapshot_name)
+        current_snapshot = OldSimValidation._capture_snapshot(state)
+        snapshot_path = OldSimValidation._snapshot_path(snapshot_name)
 
         if not os.path.exists(snapshot_path):
-            SimValidation._save_snapshot(current_snapshot, snapshot_path)
+            OldSimValidation._save_snapshot(current_snapshot, snapshot_path)
             print(f"[Snapshot] No existing snapshot found. Golden master saved to: {snapshot_path}")
             print("[Snapshot] Re-run the simulation to validate against it.")
             return
 
-        golden_snapshot = SimValidation._load_snapshot(snapshot_path)
-        diffs = SimValidation._diff_snapshots(golden_snapshot, current_snapshot, checks)
+        golden_snapshot = OldSimValidation._load_snapshot(snapshot_path)
+        diffs = OldSimValidation._diff_snapshots(golden_snapshot, current_snapshot, checks)
 
         if not diffs:
             print(f"[Snapshot] ✓ Simulation matches golden master '{snapshot_name}'. No differences found.")
@@ -94,7 +94,7 @@ class SimValidation:
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def _capture_snapshot(state: WorldState) -> dict:
+    def _capture_snapshot(state: OldWorldState) -> dict:
         events_by_frame: dict[str, list[dict]] = {}
         for frame_time in sorted(state.view_event_logs.keys()):
             event_log = state.view_event_logs[frame_time]
@@ -105,16 +105,9 @@ class SimValidation:
             if serialized_events:
                 events_by_frame[str(frame_time)] = serialized_events
 
-        # Gather all unique object IDs across all ECS systems
-        all_obj_ids: set[int] = set()
-        all_obj_ids.update(state._combat_system.game_obj_combat_dct.keys())
-        all_obj_ids.update(state._movement_system.game_obj_positions_dct.keys())
-        all_obj_ids.update(state._targeting_system.game_obj_targeting_dct.keys())
-        all_obj_ids.update(state._controls_system.game_obj_controls_dct.keys())
-
         game_objs: dict[str, dict] = {
-            str(obj_id): SimValidation._serialize_ecs_entity(state, obj_id)
-            for obj_id in sorted(all_obj_ids)
+            str(obj.obj_id): json.loads(obj.serialize())
+            for obj in sorted(state.view_game_objs, key=lambda o: o.obj_id)
         }
 
         return {
@@ -122,55 +115,14 @@ class SimValidation:
             "game_objs": game_objs,
         }
 
-    @staticmethod
-    def _serialize_ecs_entity(state: WorldState, obj_id: int) -> dict:
-        """Helper to fetch and stringify all components for a specific entity."""
-        def sanitize(val):
-            if isinstance(val, Enum):
-                return val.name
-            elif isinstance(val, dict):
-                return {k: sanitize(v) for k, v in val.items()}
-            elif isinstance(val, (list, tuple)):
-                return [sanitize(v) for v in val]
-            return val
-
-        data = {}
-
-        # 1. Combat Component
-        combat = state._combat_system.game_obj_combat_dct.get(obj_id)
-        if combat:
-            data['combat'] = sanitize(dataclasses.asdict(combat))
-
-        # 2. Movement Component
-        movement = state._movement_system.game_obj_positions_dct.get(obj_id)
-        if movement:
-            data['movement'] = sanitize(dataclasses.asdict(movement))
-
-        # 3. Targeting Component
-        targeting = state._targeting_system.game_obj_targeting_dct.get(obj_id)
-        if targeting:
-            data['targeting'] = sanitize(dataclasses.asdict(targeting))
-
-        # 4. Controls Component
-        controls = state._controls_system.game_obj_controls_dct.get(obj_id)
-        if controls:
-            ctrl_dict = {}
-            if controls.loadout:
-                ctrl_dict['loadout'] = json.loads(controls.loadout.serialize())
-            if controls.controls:
-                ctrl_dict['controls'] = [json.loads(c.serialize()) for c in controls.controls]
-            data['controls'] = sanitize(ctrl_dict)
-
-        return data
-
     # ------------------------------------------------------------------ #
     #  Save / Load                                                         #
     # ------------------------------------------------------------------ #
 
     @staticmethod
     def _snapshot_path(snapshot_name: str) -> str:
-        os.makedirs(SimValidation.SNAPSHOT_DIR, exist_ok=True)
-        return os.path.join(SimValidation.SNAPSHOT_DIR, f"{snapshot_name}.json")
+        os.makedirs(OldSimValidation.SNAPSHOT_DIR, exist_ok=True)
+        return os.path.join(OldSimValidation.SNAPSHOT_DIR, f"{snapshot_name}.json")
 
     @staticmethod
     def _save_snapshot(snapshot: dict, path: str) -> None:
@@ -190,9 +142,9 @@ class SimValidation:
     def _diff_snapshots(golden: dict, current: dict, checks: set[str]) -> list[str]:
         diffs: list[str] = []
         if "game_objs" in checks:
-            SimValidation._diff_game_objs(golden.get("game_objs", {}), current.get("game_objs", {}), diffs)
+            OldSimValidation._diff_game_objs(golden.get("game_objs", {}), current.get("game_objs", {}), diffs)
         if "events_by_frame" in checks:
-            SimValidation._diff_events(golden.get("events_by_frame", {}), current.get("events_by_frame", {}), diffs)
+            OldSimValidation._diff_events(golden.get("events_by_frame", {}), current.get("events_by_frame", {}), diffs)
         return diffs
 
     @staticmethod
@@ -200,15 +152,15 @@ class SimValidation:
         all_ids = sorted(set(golden_objs.keys()) | set(current_objs.keys()), key=int)
         for obj_id in all_ids:
             if obj_id not in golden_objs:
-                diffs.append(f"[Entity {obj_id}] ADDED in current run")
+                diffs.append(f"[GameObj {obj_id}] ADDED in current run")
                 continue
             if obj_id not in current_objs:
-                diffs.append(f"[Entity {obj_id}] REMOVED in current run")
+                diffs.append(f"[GameObj {obj_id}] REMOVED in current run")
                 continue
-            SimValidation._diff_dict(
+            OldSimValidation._diff_dict(
                 golden_objs[obj_id],
                 current_objs[obj_id],
-                prefix=f"[Entity {obj_id}]",
+                prefix=f"[GameObj {obj_id}]",
                 diffs=diffs
             )
 
@@ -235,7 +187,7 @@ class SimValidation:
                 )
 
             for i, (g_evt, c_evt) in enumerate(zip(golden_events, current_events)):
-                SimValidation._diff_dict(g_evt, c_evt, prefix=f"[Frame {frame_time}][Event {i}]", diffs=diffs)
+                OldSimValidation._diff_dict(g_evt, c_evt, prefix=f"[Frame {frame_time}][Event {i}]", diffs=diffs)
 
     @staticmethod
     def _diff_dict(golden: dict, current: dict, prefix: str, diffs: list[str]) -> None:
@@ -247,6 +199,6 @@ class SimValidation:
             elif key not in current:
                 diffs.append(f"{full_key}: REMOVED (was {golden[key]!r})")
             elif isinstance(golden[key], dict) and isinstance(current[key], dict):
-                SimValidation._diff_dict(golden[key], current[key], prefix=full_key, diffs=diffs)
+                OldSimValidation._diff_dict(golden[key], current[key], prefix=full_key, diffs=diffs)
             elif golden[key] != current[key]:
                 diffs.append(f"{full_key}: {golden[key]!r} → {current[key]!r}")

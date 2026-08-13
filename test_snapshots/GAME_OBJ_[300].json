@@ -57264,622 +57264,500 @@
   },
   "game_objs": {
     "1": {
-      "combat": {
+      "oid": 1,
+      "pid": 0,
+      "sfs": 0,
+      "l": {
+        "ts": -999,
+        "ids": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": -1000
+      },
+      "p": {
+        "x": 0.0,
+        "y": 0.0,
+        "a": 0.0,
+        "ms": 1.0,
+        "bs": 1.0
+      },
+      "r": {
         "hp": 0.0,
-        "max_hp": 0.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": -10000,
-        "parent_id": 0,
-        "current_target_id": 1,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "ENVIRONMENT"
+        "tm": 1
       },
-      "movement": {
-        "x_pos": 0.0,
-        "y_pos": 0.0,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 0,
-        "y_timestamp": 0,
-        "movespeed": 1.0
-      },
-      "targeting": {
-        "parent_id": 0,
-        "current_target_id": 1,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "ENVIRONMENT"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": -1000
-        }
-      }
+      "st": 1,
+      "tgt": 1,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        255,
+        255,
+        255
+      ],
+      "spr": "",
+      "aud": ""
     },
     "2": {
-      "combat": {
+      "oid": 2,
+      "pid": 1,
+      "sfs": 69,
+      "l": {
+        "ts": 0,
+        "ids": [
+          15,
+          70,
+          71,
+          111,
+          113,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": 3000
+      },
+      "p": {
+        "x": 0.7,
+        "y": 0.7,
+        "a": 0.0,
+        "ms": 1.0,
+        "bs": 1.0
+      },
+      "r": {
         "hp": -17.0,
-        "max_hp": 30.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 3000,
-        "parent_id": 1,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": true,
-        "status": "ALIVE"
+        "tm": 2
       },
-      "movement": {
-        "x_pos": 0.7,
-        "y_pos": 0.7,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 0,
-        "y_timestamp": 0,
-        "movespeed": 1.0
-      },
-      "targeting": {
-        "parent_id": 1,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": true,
-        "status": "ALIVE"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            15,
-            70,
-            71,
-            111,
-            113,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": 3000
-        },
-        "controls": [
-          {
-            "obj_id": 0,
-            "timestamp": 400,
-            "offset": 0,
-            "keypress": 2
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 800,
-            "offset": 0,
-            "keypress": 4
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 1000,
-            "offset": 0,
-            "keypress": 1
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 3000,
-            "offset": 0,
-            "keypress": 8
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 5000,
-            "offset": 0,
-            "keypress": 16
-          }
-        ]
-      }
+      "st": 4,
+      "tgt": 3,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        0,
+        255,
+        0
+      ],
+      "spr": "",
+      "aud": ""
     },
     "3": {
-      "combat": {
+      "oid": 3,
+      "pid": 1,
+      "sfs": 42,
+      "l": {
+        "ts": 0,
+        "ids": [
+          111,
+          113,
+          171,
+          41,
+          15,
+          92,
+          93,
+          182,
+          183,
+          272,
+          273,
+          2,
+          3
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": 3800
+      },
+      "p": {
+        "x": 0.6560000000000002,
+        "y": 0.11199999999999982,
+        "a": 0.0,
+        "ms": 1.0,
+        "bs": 1.0
+      },
+      "r": {
         "hp": 154.0,
-        "max_hp": 30.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 3800,
-        "parent_id": 1,
-        "current_target_id": 2,
-        "is_enemy": false,
-        "is_boss_or_player": true,
-        "status": "ALIVE"
+        "tm": 1
       },
-      "movement": {
-        "x_pos": 0.6600000000000003,
-        "y_pos": 0.10999999999999982,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 5300,
-        "y_timestamp": 3800,
-        "movespeed": 1.0
-      },
-      "targeting": {
-        "parent_id": 1,
-        "current_target_id": 2,
-        "is_enemy": false,
-        "is_boss_or_player": true,
-        "status": "ALIVE"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            111,
-            113,
-            171,
-            41,
-            15,
-            92,
-            93,
-            182,
-            183,
-            272,
-            273,
-            2,
-            3
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": 3800
-        }
-      }
+      "st": 4,
+      "tgt": 2,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        255,
+        0,
+        0
+      ],
+      "spr": "Poro",
+      "aud": ""
     },
     "4": {
-      "combat": {
+      "oid": 4,
+      "pid": 2,
+      "sfs": 70,
+      "l": {
+        "ts": 400,
+        "ids": [
+          15,
+          111,
+          362,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": 4400
+      },
+      "p": {
+        "x": 0.5574940433584302,
+        "y": 0.5464365267269314,
+        "a": 0.0,
+        "ms": 1.0,
+        "bs": 1.0
+      },
+      "r": {
         "hp": 33.0,
-        "max_hp": 80.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 4400,
-        "parent_id": 2,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": true,
-        "status": "ALIVE"
+        "tm": 2
       },
-      "movement": {
-        "x_pos": 0.5582797443607165,
-        "y_pos": 0.5486686024443992,
-        "x_vel": 2.2589048201829284e-05,
-        "y_vel": -9.741527037038616e-05,
-        "x_timestamp": 10000,
-        "y_timestamp": 10000,
-        "movespeed": 1.0
-      },
-      "targeting": {
-        "parent_id": 2,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": true,
-        "status": "ALIVE"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            15,
-            111,
-            362,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": 4400
-        },
-        "controls": [
-          {
-            "obj_id": 0,
-            "timestamp": 1500,
-            "offset": 0,
-            "keypress": 1
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 4000,
-            "offset": 0,
-            "keypress": 2
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 7000,
-            "offset": 0,
-            "keypress": 4
-          }
-        ]
-      }
+      "st": 4,
+      "tgt": 3,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        0,
+        0,
+        255
+      ],
+      "spr": "",
+      "aud": ""
     },
     "5": {
-      "combat": {
+      "oid": 5,
+      "pid": 3,
+      "sfs": 41,
+      "l": {
+        "ts": 700,
+        "ids": [
+          117,
+          362,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": -1000
+      },
+      "p": {
+        "x": 0.6630543014177637,
+        "y": 0.6679552614337746,
+        "a": 0.0,
+        "ms": 5.0,
+        "bs": 7.0
+      },
+      "r": {
         "hp": 0.0,
-        "max_hp": 0.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 700,
-        "parent_id": 3,
-        "current_target_id": 2,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "DESPAWNED"
+        "tm": 1
       },
-      "movement": {
-        "x_pos": 0.6642731830566597,
-        "y_pos": 0.6688535442032416,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 1675,
-        "y_timestamp": 1675,
-        "movespeed": 5.0
-      },
-      "targeting": {
-        "parent_id": 3,
-        "current_target_id": 2,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "DESPAWNED"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            117,
-            362,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": -1000
-        },
-        "controls": [
-          {
-            "obj_id": 0,
-            "timestamp": 0,
-            "offset": 0,
-            "keypress": 3
-          }
-        ]
-      }
+      "st": 6,
+      "tgt": 2,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        255,
+        255,
+        255
+      ],
+      "spr": "",
+      "aud": ""
     },
     "6": {
-      "combat": {
+      "oid": 6,
+      "pid": 3,
+      "sfs": 41,
+      "l": {
+        "ts": 700,
+        "ids": [
+          117,
+          362,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": -1000
+      },
+      "p": {
+        "x": 0.4839755606469692,
+        "y": 0.7632773264826379,
+        "a": 0.0,
+        "ms": 5.0,
+        "bs": 7.0
+      },
+      "r": {
         "hp": 0.0,
-        "max_hp": 0.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 700,
-        "parent_id": 3,
-        "current_target_id": 4,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "DESPAWNED"
+        "tm": 1
       },
-      "movement": {
-        "x_pos": 0.48443184717187576,
-        "y_pos": 0.7639474355559229,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 1600,
-        "y_timestamp": 1600,
-        "movespeed": 5.0
-      },
-      "targeting": {
-        "parent_id": 3,
-        "current_target_id": 4,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "DESPAWNED"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            117,
-            362,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": -1000
-        },
-        "controls": [
-          {
-            "obj_id": 0,
-            "timestamp": 0,
-            "offset": 0,
-            "keypress": 3
-          }
-        ]
-      }
+      "st": 6,
+      "tgt": 4,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        255,
+        255,
+        255
+      ],
+      "spr": "",
+      "aud": ""
     },
     "7": {
-      "combat": {
+      "oid": 7,
+      "pid": 2,
+      "sfs": 71,
+      "l": {
+        "ts": 800,
+        "ids": [
+          115,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": -1000
+      },
+      "p": {
+        "x": 0.19999999999999996,
+        "y": 0.7999999999999999,
+        "a": 0.0,
+        "ms": 1.0,
+        "bs": 1.0
+      },
+      "r": {
         "hp": 7.0,
-        "max_hp": 20.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 800,
-        "parent_id": 2,
-        "current_target_id": 2,
-        "is_enemy": true,
-        "is_boss_or_player": false,
-        "status": "ALIVE"
+        "tm": 2
       },
-      "movement": {
-        "x_pos": 0.19999999999999996,
-        "y_pos": 0.7999999999999999,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 800,
-        "y_timestamp": 800,
-        "movespeed": 1.0
-      },
-      "targeting": {
-        "parent_id": 2,
-        "current_target_id": 2,
-        "is_enemy": true,
-        "is_boss_or_player": false,
-        "status": "ALIVE"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            115,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": -1000
-        },
-        "controls": [
-          {
-            "obj_id": 0,
-            "timestamp": 1500,
-            "offset": 0,
-            "keypress": 1
-          }
-        ]
-      }
+      "st": 4,
+      "tgt": 2,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        255,
+        0,
+        255
+      ],
+      "spr": "",
+      "aud": ""
     },
     "8": {
-      "combat": {
+      "oid": 8,
+      "pid": 3,
+      "sfs": 171,
+      "l": {
+        "ts": 1800,
+        "ids": [
+          16,
+          215,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "cds": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd": -1000
+      },
+      "p": {
+        "x": 0.508,
+        "y": 0.10999999999999999,
+        "a": 0.0,
+        "ms": 1.0,
+        "bs": 1.0
+      },
+      "r": {
         "hp": 17.0,
-        "max_hp": 30.0,
-        "gcd_mod": 1.0,
-        "spell_modifier": 1.0,
-        "gcd_start": 1800,
-        "parent_id": 3,
-        "current_target_id": 3,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "DESPAWNED"
+        "tm": 1
       },
-      "movement": {
-        "x_pos": 0.51,
-        "y_pos": 0.10999999999999999,
-        "x_vel": 0.0,
-        "y_vel": 0.0,
-        "x_timestamp": 3100,
-        "y_timestamp": 3100,
-        "movespeed": 1.0
-      },
-      "targeting": {
-        "parent_id": 3,
-        "current_target_id": 3,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "status": "DESPAWNED"
-      },
-      "controls": {
-        "loadout": {
-          "ts": -999,
-          "ids": [
-            16,
-            215,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
-          ],
-          "cds": [
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999,
-            -999
-          ],
-          "gcd": -1000
-        },
-        "controls": [
-          {
-            "obj_id": 0,
-            "timestamp": 100,
-            "offset": 0,
-            "keypress": 1
-          },
-          {
-            "obj_id": 0,
-            "timestamp": 200,
-            "offset": 0,
-            "keypress": 2
-          }
-        ]
-      }
+      "st": 6,
+      "tgt": 3,
+      "sel": 0,
+      "atk": false,
+      "gm": 1.0,
+      "c": [
+        0,
+        255,
+        0
+      ],
+      "spr": "",
+      "aud": ""
     }
   }
 }

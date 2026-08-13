@@ -39,6 +39,7 @@ class SpellMovementData:
     """Stores only the movement-relevant data extracted from a Spell."""
     power: float
     range_limit: float
+    cast_time: int
     flags: MovementBehavior
     spawned_x_offset: float
     spawned_y_offset: float
@@ -163,6 +164,7 @@ class MovementSystem:
             flags=MovementBehavior.from_behavior(spell.flags),
             power=spell.power,
             range_limit=spell.range_limit,
+            cast_time=spell.cast_time,
             spawned_x_offset=spell.get_spawned_obj_pos_xy_speed[0],
             spawned_y_offset=spell.get_spawned_obj_pos_xy_speed[1],
             spawned_movespeed=spell.get_spawned_obj_movespeed,
@@ -365,6 +367,20 @@ class MovementSystem:
                 objects_in_range.append(obj_id)
 
         return objects_in_range
+
+    def is_within_range(self,  current_time: int, source_id: int, spell_id: int, target_id: int) -> bool:
+        """Returns whether two objects are within range of each other."""
+        spell_data = self.spell_data_dct[spell_id]
+        range_limit = spell_data.range_limit
+        if range_limit <= 0.0:
+            return True
+        if (source_id not in self.game_obj_positions_dct or target_id not in self.game_obj_positions_dct):
+            return False
+        source_x, source_y = self.get_position(source_id, current_time)
+        target_x, target_y = self.get_position(target_id, current_time)
+        dx = source_x - target_x
+        dy = source_y - target_y
+        return dx * dx + dy * dy <= range_limit * range_limit
 
     def check_collision(self, obj_id_1: int, obj_id_2: int, current_time: int, range_limit: float) -> bool:
         """Checks if two objects' hitboxes are overlapping."""

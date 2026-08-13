@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 import json
 from src.settings import HardwareInputConsts
 
-
 class KeyPresses(IntFlag):
     """ Various bitflags representing a set of keypress game inputs. """
     NONE = 0
@@ -175,3 +174,7 @@ class Loadout:
                 spell_id = self.spell_ids[LOADOUT_KEY_TO_INDEX_MAP[key_flag]]
                 assert Consts.is_valid_id(spell_id), f"Invalid spell ID for {obj_id}: {key_flag.name}_id"
                 yield spell_id
+
+    def copy(self) -> "Loadout":
+        """Returns a fully independent copy of this Loadout."""
+        return CopyTools.full_copy(self)

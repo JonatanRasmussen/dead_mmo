@@ -390,3 +390,9 @@
 [2026-08-08 18:31:19] {BudoB}: Maybe I think too much, and this is a good way of reflecting.
 [2026-08-08 18:31:41] {BudoB}: Now I will go for a bike ride. Enjoying myself. Take care!
 [2026-08-08 18:32:04] {BudoB}: Code time: 4 hours.
+
+[2026-08-13 16:17:19] {BudoB}: We did it? WE ACTUALLY DID IT! GameObj is NO MORE!!!
+[2026-08-13 16:17:32] {BudoB}: Suddenly it just happened. All old code, now gone.
+[2026-08-13 16:17:42] {BudoB}: Not that I feel done for today, just wanted to celebrate.
+[2026-08-13 16:17:54] {BudoB}: Now I have to actually start working on the game. Scary!
+[2026-08-13 16:18:09] {BudoB}: Code time: 3 hours.

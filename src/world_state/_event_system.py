@@ -1,10 +1,12 @@
-from typing import Iterable
+from typing import Optional
 from dataclasses import dataclass
 import json
-from enum import Enum, auto
+from enum import IntFlag, Enum, auto
 
 from src.settings import Consts
 from src.utils.copy_utils import CopyTools
+from src.world_state._spell_system import Behavior
+from src.world_state._spell_database import SpellDatabase
 
 
 class Outcome(Enum):
@@ -102,3 +104,67 @@ class UpcomingEvent:
 
     def create_copy(self) -> 'UpcomingEvent':
         return CopyTools.full_copy(self)
+
+
+class EventBehavior(IntFlag):
+    """ Various bitflags that define spell combat behavior. """
+    NONE = 0
+    # OBJ SPAWN
+    SPAWN_BOSS = auto()
+    SPAWN_PLAYER = auto()
+    SPAWN_OBJ = auto()
+    DESPAWN_SELF = auto()
+    # AURA FLAGS
+    AURA_APPLY = auto()
+    AURA_CANCEL = auto()
+    # AoE
+    AOE = auto()
+
+    @classmethod
+    def from_behavior(cls, behavior: Behavior) -> "EventBehavior":
+        """Extract the combat-related flags from a Behavior."""
+        result = cls.NONE
+        for flag in cls:
+            if flag is not cls.NONE and flag.name is not None and behavior & getattr(Behavior, flag.name):
+                result |= flag
+        return result
+
+@dataclass(slots=True)
+class SpellEventData:
+    spell_id: int = Consts.EMPTY_ID
+    flags: EventBehavior = EventBehavior.NONE
+
+class EventSystem:
+    def __init__(self, spell_database: SpellDatabase) -> None:
+        self._spell_data_dct: dict[int, SpellEventData] = self._create_initialized_spell_data_dct(spell_database)
+
+    @staticmethod
+    def _create_initialized_spell_data_dct(spell_database: SpellDatabase) -> dict[int, SpellEventData]:
+        spell_data_dct = {}
+        for spell in spell_database.get_all_spells():
+            spell_data_dct[spell.spell_id] = SpellEventData(
+                spell_id = spell.spell_id,
+                flags=EventBehavior.from_behavior(spell.flags),
+        )
+        return spell_data_dct
+
+    def is_spawn_boss(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_BOSS)
+
+    def is_spawn_player(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_PLAYER)
+
+    def is_spawn_obj(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_OBJ)
+
+    def is_despawn_self(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.DESPAWN_SELF)
+
+    def has_aura_apply(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.AURA_APPLY)
+
+    def has_aura_cancel(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.AURA_CANCEL)
+
+    def is_aoe(self, spell_id: int) -> bool:
+        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.AOE)

@@ -16,6 +16,7 @@ class CombatBehavior(IntFlag):
     HEALING = auto()
     # STATE UPDATE
     IS_CHANNEL = auto()
+    DESPAWN_SELF = auto()
     # TARGETING
     AOE = auto()
     UPDATE_CURRENT_TARGET = auto()
@@ -40,8 +41,8 @@ class SpellCombatData:
     hp/gcd_mod/is_enemy/is_boss_or_player are only meaningful for spells that
     spawn an object (SPAWN_OBJ flag); they default to inert values otherwise.
     """
-    power: float
-    flags: CombatBehavior
+    power: float = 1.0
+    flags: CombatBehavior = CombatBehavior.NONE
     hp: float = 0.0
     gcd_mod: float = 1.0
     is_enemy: bool = False
@@ -60,7 +61,6 @@ class ObjCombatData:
     current_target_id: int = Consts.EMPTY_ID
     is_enemy: bool = False
     is_boss_or_player: bool = False
-    is_environment: bool = False
     status: Status = Status.EMPTY
 
 
@@ -119,7 +119,6 @@ class CombatSystem:
             current_target_id=obj_id, # Mirrors original: env_obj.current_target = obj_id
             is_enemy=False,           # Mirrors original: Faction.NEUTRAL
             is_boss_or_player=False,
-            is_environment=True,
             status=Status.ENVIRONMENT,
         )
 
@@ -135,7 +134,7 @@ class CombatSystem:
         if parent_data is None:
             return
         # Inherit team/enemy status from parent if applicable
-        if parent_data.is_environment:
+        if parent_data.status == Status.ENVIRONMENT:
             is_enemy = spell_data.is_enemy
         else:
             is_enemy = parent_data.is_enemy
@@ -149,7 +148,6 @@ class CombatSystem:
             current_target_id=target_id,
             is_enemy=is_enemy,
             is_boss_or_player=spell_data.is_boss_or_player,
-            is_environment=False,
             status=Status.ALIVE,
         )
 
@@ -173,6 +171,8 @@ class CombatSystem:
                 source_data.current_target_id = target_id
             if flags & CombatBehavior.TRIGGER_GCD:
                 source_data.gcd_start = timestamp
+            if flags & CombatBehavior.DESPAWN_SELF:
+                source_data.status = Status.DESPAWNED
         # Apply Target Effects (Requires both source and target to calculate modifiers)
         if source_data and target_data:
             if flags & CombatBehavior.DAMAGING:
@@ -214,7 +214,7 @@ class CombatSystem:
         if obj_id not in self.game_obj_combat_dct:
             return 0.0
         data = self.game_obj_combat_dct[obj_id]
-        if data.is_environment:
+        if data.status == Status.ENVIRONMENT:
             return 0.0
         return 0.01 + math.sqrt(0.0001 * abs(data.hp))
 
@@ -223,7 +223,7 @@ class CombatSystem:
         if obj_id not in self.game_obj_combat_dct:
             return False
         data = self.game_obj_combat_dct[obj_id]
-        return not data.is_environment and data.status != Status.DESPAWNED
+        return data.status != Status.ENVIRONMENT and data.status != Status.DESPAWNED
 
     def get_all_active_obj_ids(self) -> Iterable[int]:
         """Returns a collection of all objects currently registered in combat."""

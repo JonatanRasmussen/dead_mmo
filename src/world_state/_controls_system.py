@@ -50,10 +50,10 @@ class ObjControlsData:
 
 class ControlsSystem:
     # Legacy path shared the template's Loadout object; keep that for snapshot parity.
-    INDEPENDENT_LOADOUT_PER_OBJ = False
+    INDEPENDENT_LOADOUT_PER_OBJ = True
     def __init__(self, spell_database: SpellDatabase) -> None:
         self._templates: dict[int, SpellControlsData] = ControlsSystem._create_initialized_spell_data_dct(spell_database)
-        self._active_controls: dict[int, ObjControlsData] = {}
+        self.game_obj_controls_dct: dict[int, ObjControlsData] = {}
     @staticmethod
     def _create_initialized_spell_data_dct(spell_database: SpellDatabase) -> dict[int, SpellControlsData]:
         templates = {}
@@ -79,20 +79,22 @@ class ControlsSystem:
         template = self._templates.get(spell_id)
         if template is None or template.loadout is None:
             return
-        if new_obj_id in self._active_controls:   # idempotent: never double-register
+        if new_obj_id in self.game_obj_controls_dct:   # idempotent: never double-register
             return
-        loadout = copy.deepcopy(template.loadout) if ControlsSystem.INDEPENDENT_LOADOUT_PER_OBJ else template.loadout
-        self._active_controls[new_obj_id] = ObjControlsData(
-            loadout=loadout,
+        new_loadout = template.loadout.copy() if ControlsSystem.INDEPENDENT_LOADOUT_PER_OBJ else template.loadout
+        self.game_obj_controls_dct[new_obj_id] = ObjControlsData(
+            loadout=new_loadout,
             controls=template.controls,
         )
 
     def despawn_game_obj(self, obj_id: int) -> None:
-        self._active_controls.pop(obj_id, None)
+        self.game_obj_controls_dct.pop(obj_id, None)
 
     def create_environment_obj(self, obj_id: int) -> None:
-        """No controls state needed for the environment object; present for symmetry."""
-        return
+        self.game_obj_controls_dct[obj_id] = ObjControlsData(
+            loadout=Loadout(),
+            controls=()
+        )
 
     def apply_controls_event(self, timestamp: int, source_id: int, spell_id: int) -> None:
         """
@@ -103,7 +105,7 @@ class ControlsSystem:
             return
         flags = spell_data.flags
 
-        controls_data = self._active_controls.get(source_id)
+        controls_data = self.game_obj_controls_dct.get(source_id)
         if controls_data is not None:
             if flags & ControlsBehavior.TRIGGER_GCD:
                 controls_data.loadout.gcd_start = timestamp
@@ -121,7 +123,7 @@ class ControlsSystem:
         if key_presses == KeyPresses.NONE:
             yield from []
             return
-        controls_data = self._active_controls.get(obj_id)
+        controls_data = self.game_obj_controls_dct.get(obj_id)
         if not controls_data:
             yield from []
         else:
@@ -129,7 +131,7 @@ class ControlsSystem:
             yield from controls_data.loadout.convert_controls_to_spell_ids(controls, obj_id)
 
     def get_scripted_spells(self, obj_id: int, spawn_timestamp: int) -> Iterable[tuple[int, int, int]]:
-        controls_data = self._active_controls.get(obj_id)
+        controls_data = self.game_obj_controls_dct.get(obj_id)
         if not controls_data or not controls_data.controls:
             return
 
@@ -149,7 +151,7 @@ class ControlsSystem:
         spell_data = self._templates.get(spell_id)
         if spell_data is None or not (spell_data.flags & ControlsBehavior.TRIGGER_GCD):
             return 1.0
-        controls_data = self._active_controls.get(obj_id)
+        controls_data = self.game_obj_controls_dct.get(obj_id)
         if controls_data is None:
             return 1.0
         gcd_duration = spell_data.base_gcd
@@ -168,7 +170,7 @@ class ControlsSystem:
         spell_data = self._templates.get(spell_id)
         if spell_data is None or not (spell_data.flags & ControlsBehavior.TRIGGER_COOLDOWN):
             return 1.0
-        controls_data = self._active_controls.get(obj_id)
+        controls_data = self.game_obj_controls_dct.get(obj_id)
         if controls_data is None:
             return 1.0
         loadout = controls_data.loadout

@@ -1,11 +1,11 @@
 from sortedcontainers import SortedDict  # type: ignore
-from typing import Iterable, ValuesView
+from typing import Iterable, ValuesView, Dict
 from dataclasses import dataclass
 
 from src.settings import Consts
 from ._event_log import EventLog
 from ._id_gen import IdGen
-from src.world_state import Spell
+from ._spell_database import SpellDatabase
 
 
 @dataclass(slots=True)
@@ -43,12 +43,32 @@ class Aura:
         return sum(1 for t in self.tick_timestamps if t > current_time)
 
 
+
+@dataclass(slots=True)
+class SpellAuraData:
+    effect_id: int = Consts.EMPTY_ID
+    duration: int = 0
+    ticks: int = 1
+
+
 class AuraHandler:
 
-    def __init__(self) -> None:
+    def __init__(self, spell_database: SpellDatabase) -> None:
         self._auras: SortedDict = SortedDict()
+        self._spell_data_dct: dict[int, SpellAuraData] = self._create_initialized_spell_data_dct(spell_database)
         self._aura_id_mappings: dict[int, tuple[int, int, int]] = {}
         self._aura_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
+
+    @staticmethod
+    def _create_initialized_spell_data_dct(spell_database: SpellDatabase) -> dict[int, SpellAuraData]:
+        spell_data_dct = {}
+        for spell in spell_database.get_all_spells():
+            spell_data_dct[spell.spell_id] = SpellAuraData(
+            effect_id=spell.effect_id,
+            duration=spell.duration,
+            ticks=spell.ticks,
+        )
+        return spell_data_dct
 
     @property
     def view_auras(self) -> ValuesView[Aura]:
@@ -72,17 +92,18 @@ class AuraHandler:
         assert key in self._auras, f"Aura with ID {key} does not exist."
         return self._auras[key]
 
-    def add_aura(self, timestamp: int, source_id: int, spell: Spell, target_id: int) -> int:
+    def add_aura(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
         new_aura_id = self._aura_id_gen.generate_new_id()
+        spell_data = self._spell_data_dct[spell_id]
         aura = Aura(
             aura_id=new_aura_id,
             source_id=source_id,
-            origin_spell_id=spell.spell_id,
-            periodic_spell_id=spell.effect_id,
+            origin_spell_id=spell_id,
+            periodic_spell_id=spell_data.effect_id,
             target_id=target_id,
             start_time=timestamp,
-            duration=spell.duration,
-            ticks=spell.ticks,
+            duration=spell_data.duration,
+            ticks=spell_data.ticks,
         )
 
         if EventLog.DEBUG_PRINT_AURA_UPDATES:
