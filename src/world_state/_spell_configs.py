@@ -27,52 +27,46 @@ class BasicMovement:
     @staticmethod
     def step_towards_target() -> SpellFactory:
         return SpellFactory(361).cast_on_target().add_flag(Behavior.MOVE_TOWARDS_TARGET)
+
     @staticmethod
     def start_move_up() -> SpellFactory:
-        return SpellTemplates.start_move_self(92, BasicMovement.step_up().spell_id)
+        return SpellTemplates.start_move_self(92, BasicMovement.step_up().spell_id).add_flag(Behavior.STEP_UP)
 
     @staticmethod
     def start_move_left() -> SpellFactory:
-        return SpellTemplates.start_move_self(182, BasicMovement.step_left().spell_id)
+        return SpellTemplates.start_move_self(182, BasicMovement.step_left().spell_id).add_flag(Behavior.STEP_LEFT)
 
     @staticmethod
     def start_move_down() -> SpellFactory:
-        return SpellTemplates.start_move_self(272, BasicMovement.step_down().spell_id)
+        return SpellTemplates.start_move_self(272, BasicMovement.step_down().spell_id).add_flag(Behavior.STEP_DOWN)
 
     @staticmethod
     def start_move_right() -> SpellFactory:
-        return SpellTemplates.start_move_self(2, BasicMovement.step_right().spell_id)
+        return SpellTemplates.start_move_self(2, BasicMovement.step_right().spell_id).add_flag(Behavior.STEP_RIGHT)
 
     @staticmethod
     def start_move_towards_target() -> SpellFactory:
-        return SpellTemplates.start_move_self(362, BasicMovement.step_towards_target().spell_id)
+        return SpellTemplates.start_move_self(362, BasicMovement.step_towards_target().spell_id).add_flag(Behavior.MOVE_TOWARDS_TARGET)
 
     @staticmethod
     def stop_move_up() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(93, BasicMovement.start_move_up().spell_id)
+        return SpellTemplates.cancel_aura_on_self(93, BasicMovement.start_move_up().spell_id).add_flag(Behavior.STOP_MOVE_UP)
 
     @staticmethod
     def stop_move_left() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(183, BasicMovement.start_move_left().spell_id)
+        return SpellTemplates.cancel_aura_on_self(183, BasicMovement.start_move_left().spell_id).add_flag(Behavior.STOP_MOVE_LEFT)
 
     @staticmethod
     def stop_move_down() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(273, BasicMovement.start_move_down().spell_id)
+        return SpellTemplates.cancel_aura_on_self(273, BasicMovement.start_move_down().spell_id).add_flag(Behavior.STOP_MOVE_DOWN)
 
     @staticmethod
     def stop_move_right() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(3, BasicMovement.start_move_right().spell_id)
+        return SpellTemplates.cancel_aura_on_self(3, BasicMovement.start_move_right().spell_id).add_flag(Behavior.STOP_MOVE_RIGHT)
 
     @staticmethod
     def stop_move_towards_target() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(363, BasicMovement.start_move_towards_target().spell_id)
-
-    @staticmethod
-    def teleport_to_parent() -> SpellFactory:
-        return (
-            SpellFactory(451)
-            .teleport_to_parent()
-        )
+        return SpellTemplates.cancel_aura_on_self(363, BasicMovement.start_move_towards_target().spell_id).add_flag(Behavior.STOP_MOVE_TOWARDS_TARGET)
 
 class BasicTargeting:
     @staticmethod

@@ -68,6 +68,13 @@ class Behavior(IntFlag):
     STEP_DOWN = auto()
     STEP_RIGHT = auto()
     MOVE_TOWARDS_TARGET = auto()
+    # STOP MOVEMENT
+    STOP_MOVE_UP = auto()
+    STOP_MOVE_LEFT = auto()
+    STOP_MOVE_DOWN = auto()
+    STOP_MOVE_RIGHT = auto()
+    STOP_MOVE_TOWARDS_TARGET = auto()
+    # OTHER MOVEMENT
     TELEPORT_TO_TARGET = auto()
     FORCE_MOVE = auto()
     TRY_MOVE = auto()
@@ -97,7 +104,8 @@ class Behavior(IntFlag):
     # AURA FLAGS
     AURA_APPLY = auto()
     AURA_CANCEL = auto()
-
+    START_CHANNEL = auto()
+    STOP_CHANNEL = auto()
 
 @dataclass(slots=True)
 class Spell:

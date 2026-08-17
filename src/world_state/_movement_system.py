@@ -18,7 +18,14 @@ class MovementBehavior(IntFlag):
     STEP_LEFT = auto()
     STEP_DOWN = auto()
     STEP_RIGHT = auto()
+    STOP_MOVE_UP = auto()
+    STOP_MOVE_LEFT = auto()
+    STOP_MOVE_DOWN = auto()
+    STOP_MOVE_RIGHT = auto()
+
     MOVE_TOWARDS_TARGET = auto()
+    STOP_MOVE_TOWARDS_TARGET = auto()
+
     TELEPORT_TO_TARGET = auto()
     FORCE_MOVE = auto()
     TRY_MOVE = auto()
@@ -69,67 +76,13 @@ class MovementSystem:
     """
     Manages all movement-related logic, geometry, and hitboxes using a dead reckoning design.
     Positional data is calculated via time-deltas rather than per-frame updates.
-
-    OLD INSTRUCTIONS FOR CLASS CREATION (DELETE LATER)
-    # Everything that happens in my (for now, 2D) game is driven by events that have a spell_id and a target_id (game_obj)
-    # At the start of the game, the behavior of each spell is loaded into memory via load_spell (managed by an external script).
-    # For now, this spell behavior data is provided via a Spell class which I will delete in the future. The Spell class should not be used elsewhere in this class.
-    # Throughout the game, spell_ids are provided via events as well as a target game_obj. This class should look up and apply the spell to the game_obj.
-    # Spells can be something as simple as "Move_Left". Everything is a spell. All movement will happen via some spell_id.
-    # Beyond containing spell behavior data for each spell_id, it also contains all movement-related data for each game_obj, indexed by obj_id (entity component system -inspired design)
-    # The game_obj movement data should use a dead reckoning design. x_pos, y_pos, x_vel, y_vel (floats) as well as a timestamp (int) at which the movement started
-    # A game_objs positional data is then accessed via an obj_id and a timestamp. 1 timestamp unit = 1 ms. Calculate an objs position based on time-delta. We are not updating positional data each frame, only when changing movement velocity or pos.
-    # This class should also handle geometry and distance-based logic and hitboxes, for example "return obj_ids that are within some_variable range of some_obj_id.
     """
-
-    # --- BAND-AID: react to raw spell_ids directly instead of MovementBehavior flags. ---
-    # Mirrors BasicMovement in the spell templates. Replace with flag-based dispatch later.
-    SPELL_ID_STEP_RIGHT: int = 1
-    SPELL_ID_START_MOVE_RIGHT: int = 2
-    SPELL_ID_STOP_MOVE_RIGHT: int = 3
-    SPELL_ID_STEP_UP: int = 91
-    SPELL_ID_START_MOVE_UP: int = 92
-    SPELL_ID_STOP_MOVE_UP: int = 93
-    SPELL_ID_STEP_LEFT: int = 181
-    SPELL_ID_START_MOVE_LEFT: int = 182
-    SPELL_ID_STOP_MOVE_LEFT: int = 183
-    SPELL_ID_STEP_DOWN: int = 271
-    SPELL_ID_START_MOVE_DOWN: int = 272
-    SPELL_ID_STOP_MOVE_DOWN: int = 273
-    SPELL_ID_STEP_TOWARDS_TARGET: int = 361
-    SPELL_ID_START_MOVE_TOWARDS_TARGET: int = 362
-    SPELL_ID_STOP_MOVE_TOWARDS_TARGET: int = 363
-
-    # spell_id -> direction multiplier for that ONE axis. A spell listed here
-    # touches only its own axis; the other axis keeps its velocity and timestamp.
-    X_AXIS_SPELLS: Dict[int, float] = {
-        SPELL_ID_STEP_RIGHT: 1.0,
-        SPELL_ID_START_MOVE_RIGHT: 1.0,
-        SPELL_ID_STOP_MOVE_RIGHT: 0.0,
-        SPELL_ID_STEP_LEFT: -1.0,
-        SPELL_ID_START_MOVE_LEFT: -1.0,
-        SPELL_ID_STOP_MOVE_LEFT: 0.0,
-    }
-    Y_AXIS_SPELLS: Dict[int, float] = {
-        SPELL_ID_STEP_UP: 1.0,
-        SPELL_ID_START_MOVE_UP: 1.0,
-        SPELL_ID_STOP_MOVE_UP: 0.0,
-        SPELL_ID_STEP_DOWN: -1.0,
-        SPELL_ID_START_MOVE_DOWN: -1.0,
-        SPELL_ID_STOP_MOVE_DOWN: 0.0,
-    }
 
     GLOBAL_MOVESPEED_TO_USE = Consts.MOVEMENT_DISTANCE_PER_SECOND
 
     # --- FEATURE FLAG ---
-    # The old movement system moves via an aura that ticks MOVEMENT_UPDATES_PER_SECOND
-    # times per second, and that ticks instantly when applied. While True, dead
-    # reckoning is quantised to the same staircase so the two systems agree.
-    # Set to False for true continuous dead reckoning.
     CONSTRAIN_TO_TICK_RATE: bool = True
     MS_PER_MOVEMENT_TICK: float = 1000.0 / Consts.MOVEMENT_UPDATES_PER_SECOND
-
-    # Note for later (not yet implemented): step_* events arriving 50×/sec each call set_x_velocity → bake → same value. Harmless and exact, just a bit of pointless float churn. An if data.x_vel != vx guard would skip it, but it also changes the tick phase behaviour, so for now its unchanged.
 
     def __init__(self, spell_database: SpellDatabase) -> None:
         # Maps spell_id -> SpellMovementData
@@ -288,12 +241,7 @@ class MovementSystem:
 
     def apply_movement_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         """
-        Applies a spell's movement behavior.
-        Matches old logic: Move/Teleport applies to SOURCE. Steps apply to TARGET.
-
-        Dispatches on raw spell_id. The start_move_* / step_* / stop_move_* triplet
-        all map to the same axis: start_ and step_ set the velocity (step_ arrives
-        every aura tick and is idempotent), stop_ zeroes it.
+        Applies a spell's movement behavior using dynamic bitflags.
         """
         if spell_id not in self.spell_data_dct:
             return
@@ -306,9 +254,7 @@ class MovementSystem:
             source_data = self.game_obj_positions_dct[source_id]
             speed_per_ms = (source_data.movespeed * spell_data.power) * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
 
-            if spell_id in (MovementSystem.SPELL_ID_STEP_TOWARDS_TARGET,
-                            MovementSystem.SPELL_ID_START_MOVE_TOWARDS_TARGET) \
-                    and target_id in self.game_obj_positions_dct:
+            if flags & MovementBehavior.MOVE_TOWARDS_TARGET and target_id in self.game_obj_positions_dct:
                 tar_x, tar_y = self.get_position(target_id, timestamp)
                 src_x, src_y = self.get_position(source_id, timestamp)
                 dx = tar_x - src_x
@@ -320,32 +266,40 @@ class MovementSystem:
                     self.set_velocity(source_id, vx, vy, timestamp)
                 return
 
-            if spell_id == MovementSystem.SPELL_ID_STOP_MOVE_TOWARDS_TARGET:
+            if flags & MovementBehavior.STOP_MOVE_TOWARDS_TARGET:
                 self.set_velocity(source_id, 0.0, 0.0, timestamp)
                 return
 
-            # No spell_id constant exists for teleports yet, so this one stays flag-based.
-            if flags & MovementBehavior.TELEPORT_TO_TARGET.value and target_id in self.game_obj_positions_dct:
+            if flags & MovementBehavior.TELEPORT_TO_TARGET and target_id in self.game_obj_positions_dct:
                 tar_x, tar_y = self.get_position(target_id, timestamp)
                 self.teleport(source_id, tar_x, tar_y, timestamp)
                 return
 
-            if flags & MovementBehavior.DESPAWN_SELF.value:
+            if flags & MovementBehavior.DESPAWN_SELF:
                 self.set_velocity(source_id, 0.0, 0.0, timestamp)
                 return
-
 
         # Apply Target Effects (Step Up, Down, Left, Right)
         if target_id in self.game_obj_positions_dct:
             target_data = self.game_obj_positions_dct[target_id]
             speed_per_ms = (target_data.movespeed * spell_data.power) * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
 
-            # Only ever touch the axis this spell belongs to. This is the fix for
-            # a horizontal step wiping out vertical movement (and vice versa).
-            if spell_id in MovementSystem.X_AXIS_SPELLS:
-                self.set_x_velocity(target_id, MovementSystem.X_AXIS_SPELLS[spell_id] * speed_per_ms, timestamp)
-            elif spell_id in MovementSystem.Y_AXIS_SPELLS:
-                self.set_y_velocity(target_id, MovementSystem.Y_AXIS_SPELLS[spell_id] * speed_per_ms, timestamp)
+            # X Axis Evaluator
+            if flags & MovementBehavior.STEP_RIGHT:
+                self.set_x_velocity(target_id, speed_per_ms, timestamp)
+            elif flags & MovementBehavior.STEP_LEFT:
+                self.set_x_velocity(target_id, -speed_per_ms, timestamp)
+            elif flags & (MovementBehavior.STOP_MOVE_RIGHT | MovementBehavior.STOP_MOVE_LEFT):
+                self.set_x_velocity(target_id, 0.0, timestamp)
+
+            # Y Axis Evaluator
+            if flags & MovementBehavior.STEP_UP:
+                self.set_y_velocity(target_id, speed_per_ms, timestamp)
+            elif flags & MovementBehavior.STEP_DOWN:
+                self.set_y_velocity(target_id, -speed_per_ms, timestamp)
+            elif flags & (MovementBehavior.STOP_MOVE_UP | MovementBehavior.STOP_MOVE_DOWN):
+                self.set_y_velocity(target_id, 0.0, timestamp)
+
 
     def get_objects_in_range(self, origin_obj_id: int, range_limit: float, current_time: int) -> List[int]:
         """Returns a list of obj_ids that are within range_limit of the origin_obj_id."""

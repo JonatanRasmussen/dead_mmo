@@ -107,11 +107,11 @@ class SimValidation:
 
         # Gather all unique object IDs across all ECS systems
         all_obj_ids: set[int] = set()
-        all_obj_ids.update(state._combat_system.game_obj_combat_dct.keys())
-        all_obj_ids.update(state._movement_system.game_obj_positions_dct.keys())
-        all_obj_ids.update(state._targeting_system.game_obj_targeting_dct.keys())
-        all_obj_ids.update(state._event_system.game_obj_data_dct.keys())
-        all_obj_ids.update(state._cooldown_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._systems_manager._combat_system.game_obj_combat_dct.keys())
+        all_obj_ids.update(state._systems_manager._movement_system.game_obj_positions_dct.keys())
+        all_obj_ids.update(state._systems_manager._targeting_system.game_obj_targeting_dct.keys())
+        all_obj_ids.update(state._systems_manager._event_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._systems_manager._cooldown_system.game_obj_data_dct.keys())
 
         game_objs: dict[str, dict] = {
             str(obj_id): SimValidation._serialize_ecs_entity(state, obj_id)
@@ -138,22 +138,22 @@ class SimValidation:
         data = {}
 
         # 1. Combat Component
-        combat = state._combat_system.game_obj_combat_dct.get(obj_id)
+        combat = state._systems_manager._combat_system.game_obj_combat_dct.get(obj_id)
         if combat:
             data['combat'] = sanitize(dataclasses.asdict(combat))
 
         # 2. Movement Component
-        movement = state._movement_system.game_obj_positions_dct.get(obj_id)
+        movement = state._systems_manager._movement_system.game_obj_positions_dct.get(obj_id)
         if movement:
             data['movement'] = sanitize(dataclasses.asdict(movement))
 
         # 3. Targeting Component
-        targeting = state._targeting_system.game_obj_targeting_dct.get(obj_id)
+        targeting = state._systems_manager._targeting_system.game_obj_targeting_dct.get(obj_id)
         if targeting:
             data['targeting'] = sanitize(dataclasses.asdict(targeting))
 
         # 4. Event System Data (Input Mapping & Scripted Controls)
-        event_data = state._event_system.game_obj_data_dct.get(obj_id)
+        event_data = state._systems_manager._event_system.game_obj_data_dct.get(obj_id)
         if event_data:
             evt_dict = {}
             if event_data.spell_bindings:
@@ -163,7 +163,7 @@ class SimValidation:
             data['events'] = sanitize(evt_dict)
 
         # 5. Cooldown System Data (GCD and Ability Cooldowns)
-        cooldown_data = state._cooldown_system.game_obj_data_dct.get(obj_id)
+        cooldown_data = state._systems_manager._cooldown_system.game_obj_data_dct.get(obj_id)
         if cooldown_data:
             # ObjCooldownData is a simple dataclass with standard types,
             # so dataclasses.asdict will serialize it perfectly

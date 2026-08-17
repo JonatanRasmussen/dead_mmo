@@ -51,7 +51,7 @@ class IngameLoop:
             rendering_framework.begin_frame()
             for spell_id in world_state.get_spell_ids_for_successful_events(ingame_time):
                 # Render this frame using the new vfx_and_sfx_system
-                spell_vfx = world_state._vfx_and_sfx_system.get_spell_visuals(spell_id)
+                spell_vfx = world_state._systems_manager._vfx_and_sfx_system.get_spell_visuals(spell_id)
                 if spell_vfx is not None:
                     IngameLoop._new_display_spell(rendering_framework, spell_vfx)
             for obj_id in world_state.view_obj_ids:
@@ -79,7 +79,7 @@ class IngameLoop:
     @staticmethod
     def _new_render_game_obj(
         rendering_framework: PygameRenderer, state: WorldState, obj_id: int, current_time: int) -> None:
-        display_obj = state.get_display_obj(obj_id=obj_id, timestamp=current_time)
+        display_obj = state._systems_manager.get_display_obj(obj_id=obj_id, timestamp=current_time)
 
         if display_obj is None:
             return

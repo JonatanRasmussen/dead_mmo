@@ -57475,7 +57475,7 @@
         "gcd_start": 3800,
         "obj_spawn_timestamp": 0,
         "current_spell_cast": 0,
-        "cast_start_time": 5300,
+        "cast_start_time": 0,
         "spell_bindings": [
           111,
           113,

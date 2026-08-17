@@ -1,3 +1,4 @@
+'''
 import copy
 from typing import Iterable, Optional
 from dataclasses import dataclass
@@ -187,3 +188,4 @@ class ControlsSystem:
     def is_cooldown_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
         """Checks if obj_id's cooldown is finished for spell_id (or if spell_id doesn't use a cooldown)."""
         return self.get_cooldown_progress(obj_id, spell_id, current_timestamp) >= 1.0
+'''

@@ -396,3 +396,6 @@
 [2026-08-13 16:17:42] {BudoB}: Not that I feel done for today, just wanted to celebrate.
 [2026-08-13 16:17:54] {BudoB}: Now I have to actually start working on the game. Scary!
 [2026-08-13 16:18:09] {BudoB}: Code time: 3 hours.
+
+[2026-08-17 18:45:37] {BudoB}: Messy everything. But progress.
+[2026-08-17 18:45:43] {BudoB}: Code time: 6 hours.

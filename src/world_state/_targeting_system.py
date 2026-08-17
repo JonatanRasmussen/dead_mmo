@@ -226,6 +226,12 @@ class TargetingSystem:
         data = self.game_obj_targeting_dct.get(obj_id)
         return bool(data is not None and not data.is_enemy)
 
+    def get_current_target_for_obj(self, obj_id) -> int:
+        obj_data = self.game_obj_targeting_dct.get(obj_id)
+        if obj_data is None:
+            return Consts.EMPTY_ID
+        return obj_data.current_target_id
+
     def select_aoe_target_ids(self, source_id: int, primary_target_id: int) -> Iterable[int]:
         """ECS replacement of WorldState._select_targets_for_aoe()."""
         source_allied = self._is_on_players_team(source_id)
@@ -238,10 +244,10 @@ class TargetingSystem:
 
     def decide_targeting(
         self,
-        aoe_target_id: int,
-        is_aoe_targeting: bool,
         source_id: int,
         spell_id: int,
+        aoe_target_id: int,
+        is_aoe_targeting: bool,
     ) -> int:
         spell_data = self.spell_data_dct[spell_id]
         targeting = spell_data.targeting

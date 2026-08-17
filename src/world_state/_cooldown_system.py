@@ -10,8 +10,8 @@ from src.world_state._spell_database import SpellDatabase
 class CooldownBehavior(IntFlag):
     """ Various bitflags that define spell cooldown behavior. """
     NONE = 0
-    AURA_APPLY = auto()
-    AURA_CANCEL = auto()
+    START_CHANNEL = auto()
+    STOP_CHANNEL = auto()
     TRIGGER_GCD = auto()
     TRIGGER_COOLDOWN = auto()
 
@@ -38,7 +38,6 @@ class SpellCooldownData:
     duration: int = 0
     ticks: int = 1
     spell_bindings: list[int] = field(default_factory=list)
-
 
 @dataclass(slots=True)
 class ObjCooldownData:
@@ -91,14 +90,10 @@ class CooldownSystem:
         if new_obj_id in self.game_obj_data_dct:   # idempotent: never double-register
             return
 
-        if template.flags & CooldownBehavior.AURA_APPLY:
-            current_spell_cast = self._spell_data_dct[spell_id].effect_id
-        else:
-            current_spell_cast = Consts.EMPTY_ID
         self.game_obj_data_dct[new_obj_id] = ObjCooldownData(
             gcd_start=-1000,
             obj_spawn_timestamp=timestamp,
-            current_spell_cast = current_spell_cast,
+            current_spell_cast = Consts.EMPTY_ID,
             cast_start_time = timestamp,
             spell_bindings=list(template.spell_bindings),
             ability_cd_start=[Consts.EMPTY_TIMESTAMP] * len(template.spell_bindings)
@@ -131,7 +126,11 @@ class CooldownSystem:
         obj_data = self.game_obj_data_dct.get(source_id)
 
         if obj_data is not None:
-            if flags & CooldownBehavior.AURA_CANCEL:
+            if flags & CooldownBehavior.START_CHANNEL:
+                obj_data.cast_start_time = timestamp
+                obj_data.current_spell_cast = self._spell_data_dct[spell_id].effect_id
+
+            if flags & CooldownBehavior.STOP_CHANNEL:
                 obj_data.cast_start_time = timestamp
                 obj_data.current_spell_cast = Consts.EMPTY_ID
 
@@ -145,8 +144,16 @@ class CooldownSystem:
 
     def is_aura_active(self, current_timestamp: int, obj_id: int, spell_id: int) -> bool:
         obj_data = self.game_obj_data_dct.get(obj_id)
-        if obj_data is None or obj_data.cast_start_time < current_timestamp or obj_data.current_spell_cast != spell_id:
+        if obj_data is None:
             return False
+        spell_data = self._spell_data_dct.get(spell_id)
+        # Determine if it has surpassed its duration
+        if spell_data and current_timestamp > (obj_data.cast_start_time + spell_data.duration):
+            return False
+        # Ensure spell cast wasn't canceled
+        if obj_data.current_spell_cast != self._spell_data_dct[spell_id].effect_id:
+            return False
+
         return True
 
 
