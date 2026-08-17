@@ -1,4 +1,4 @@
-from typing import Set, Deque
+from typing import Set, Deque, Iterable
 from collections import deque
 
 from src.settings.consts import Consts
@@ -33,5 +33,3 @@ class IdGen:
     def reserve_id(self, reserved_id: int) -> None:
         self._reserved_ids.add(reserved_id)
         self._assigned_ids = deque(id_num for id_num in self._assigned_ids if id_num != reserved_id)
-
-

@@ -197,6 +197,20 @@ class TargetingSystem:
             return True
         return False
 
+    def has_aura_cancel(self, spell_id) -> bool:
+        spell_data = self.spell_data_dct[spell_id]
+        flags = spell_data.flags
+        if flags & TargetingBehavior.AURA_CANCEL:
+            return True
+        return False
+
+    def is_obj_spawn(self, spell_id) -> bool:
+        spell_data = self.spell_data_dct[spell_id]
+        flags = spell_data.flags
+        if flags & TargetingBehavior.SPAWN_OBJ or flags & TargetingBehavior.SPAWN_BOSS or flags & TargetingBehavior.SPAWN_PLAYER:
+            return True
+        return False
+
     def is_visible(self, obj_id: int) -> bool:
         """Checks if an object should be actively rendered on screen."""
         if obj_id not in self.game_obj_targeting_dct:

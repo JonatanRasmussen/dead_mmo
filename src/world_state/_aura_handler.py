@@ -74,6 +74,10 @@ class AuraHandler:
     def view_auras(self) -> ValuesView[Aura]:
         return self._auras.values()
 
+    def get_effect_id(self, spell_id: int) -> int:
+        data = self._spell_data_dct[spell_id]
+        return data.effect_id
+
     def aura_exists(self, aura_id: int) -> bool:
         #key = self._create_aura_key(u_event.source_id, u_event.aura_origin_spell_id, u_event.target_id)
         #if key not in self._auras:

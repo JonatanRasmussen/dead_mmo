@@ -1,12 +1,14 @@
-from typing import Optional
-from dataclasses import dataclass
+import copy
 import json
+from typing import Iterable, Optional
+from dataclasses import dataclass, field
 from enum import IntFlag, Enum, auto
 
 from src.settings import Consts
 from src.utils.copy_utils import CopyTools
 from src.world_state._spell_system import Behavior
 from src.world_state._spell_database import SpellDatabase
+from ._controls_data import Controls, InputTranslator, KeyPresses, LOADOUT_KEY_TO_INDEX_MAP
 
 
 class Outcome(Enum):
@@ -40,7 +42,6 @@ class UpcomingEvent:
 
     aura_id: int = Consts.EMPTY_ID
     aura_origin_spell_id: int = Consts.EMPTY_ID
-    #aura_start_time: int = Consts.EMPTY_TIMESTAMP
     is_spell_sequence: bool = False
     is_aoe_targeting: bool = False
 
@@ -60,6 +61,7 @@ class UpcomingEvent:
             is_spell_sequence=d["seq"],
             is_aoe_targeting=d["aoe"]
         )
+
     def serialize(self) -> str:
         return json.dumps({
             "eid": self.event_id,
@@ -107,7 +109,7 @@ class UpcomingEvent:
 
 
 class EventBehavior(IntFlag):
-    """ Various bitflags that define spell combat behavior. """
+    """ Various bitflags that define spell combat and spawn behavior. """
     NONE = 0
     # OBJ SPAWN
     SPAWN_BOSS = auto()
@@ -122,40 +124,136 @@ class EventBehavior(IntFlag):
 
     @classmethod
     def from_behavior(cls, behavior: Behavior) -> "EventBehavior":
-        """Extract the combat-related flags from a Behavior."""
+        """Extract the combat/spawn-related flags from a Behavior."""
         result = cls.NONE
         for flag in cls:
-            if flag is not cls.NONE and flag.name is not None and behavior & getattr(Behavior, flag.name):
+            if flag is cls.NONE or flag.name is None:
+                continue
+            source_flag = getattr(Behavior, flag.name, None)
+            if source_flag is not None and behavior & source_flag:
                 result |= flag
         return result
+
 
 @dataclass(slots=True)
 class SpellEventData:
     spell_id: int = Consts.EMPTY_ID
+    aura_effect_id: int = Consts.EMPTY_ID
+
+    spell_sequence: tuple[int, ...] = ()
     flags: EventBehavior = EventBehavior.NONE
+
+    # Input/Script Controls Mapping
+    spell_bindings: list[int] = field(default_factory=list)
+    controls: tuple[Controls, ...] = ()
+
+
+@dataclass(slots=True)
+class ObjEventData:
+    """ECS-style component storing per-obj input-to-spell mappings and scripted controls."""
+    spell_bindings: list[int]
+    controls: tuple[Controls, ...] = ()
+
 
 class EventSystem:
     def __init__(self, spell_database: SpellDatabase) -> None:
         self._spell_data_dct: dict[int, SpellEventData] = self._create_initialized_spell_data_dct(spell_database)
+        self.game_obj_data_dct: dict[int, ObjEventData] = {}
 
     @staticmethod
     def _create_initialized_spell_data_dct(spell_database: SpellDatabase) -> dict[int, SpellEventData]:
         spell_data_dct = {}
         for spell in spell_database.get_all_spells():
+            spell_sequence = (
+                tuple(spell.spell_sequence)
+                if spell.spell_sequence
+                else ()
+            )
+
+            spell_bindings: list[int] = []
+            controls_tuple: tuple[Controls, ...] = ()
+
+            # Extract configuration from the game_obj loadout, strictly for initial setup.
+            if spell.spawned_obj is not None:
+                game_obj = spell.spawned_obj.game_obj
+                if getattr(game_obj, "_loadout", None) is not None:
+                    spell_bindings = list(game_obj._loadout.spell_ids)
+                controls_tuple = spell.spawned_obj.obj_controls or ()
+
             spell_data_dct[spell.spell_id] = SpellEventData(
-                spell_id = spell.spell_id,
+                spell_id=spell.spell_id,
+                aura_effect_id=spell.effect_id,
+                spell_sequence=spell_sequence,
                 flags=EventBehavior.from_behavior(spell.flags),
-        )
+                spell_bindings=spell_bindings,
+                controls=controls_tuple,
+            )
         return spell_data_dct
 
-    def is_spawn_boss(self, spell_id: int) -> bool:
-        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_BOSS)
+    def spawn_game_obj(self, new_obj_id: int, spell_id: int) -> None:
+        template = self._spell_data_dct.get(spell_id)
+        if template is None or not template.spell_bindings:
+            return
+        if new_obj_id in self.game_obj_data_dct:   # idempotent: never double-register
+            return
 
-    def is_spawn_player(self, spell_id: int) -> bool:
-        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_PLAYER)
+        self.game_obj_data_dct[new_obj_id] = ObjEventData(
+            spell_bindings=list(template.spell_bindings),
+            controls=template.controls,
+        )
 
-    def is_spawn_obj(self, spell_id: int) -> bool:
-        return bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_OBJ)
+    def despawn_game_obj(self, obj_id: int) -> None:
+        self.game_obj_data_dct.pop(obj_id, None)
+
+    def create_environment_obj(self, obj_id: int) -> None:
+        self.game_obj_data_dct[obj_id] = ObjEventData(
+            spell_bindings=[Consts.EMPTY_ID] * len(LOADOUT_KEY_TO_INDEX_MAP),
+            controls=()
+        )
+
+    def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str], timestamp: int) -> Iterable[int]:
+        if not hardware_inputs:
+            return
+
+        key_presses = InputTranslator.translate_to_keypresses(hardware_inputs)
+        if key_presses == KeyPresses.NONE:
+            return
+
+        obj_data = self.game_obj_data_dct.get(obj_id)
+        if not obj_data or not obj_data.spell_bindings:
+            return
+
+        # Direct translation without relying on Loadout objects
+        for key_flag, index in LOADOUT_KEY_TO_INDEX_MAP.items():
+            if key_flag & key_presses:
+                spell_id = obj_data.spell_bindings[index]
+                if Consts.is_valid_id(spell_id):
+                    yield spell_id
+
+    def get_scripted_spells(self, obj_id: int, spawn_timestamp: int) -> Iterable[tuple[int, int, int]]:
+        obj_data = self.game_obj_data_dct.get(obj_id)
+        if not obj_data or not obj_data.controls or not obj_data.spell_bindings:
+            return
+
+        for original_controls in obj_data.controls:
+            # Create a copy and apply the offset
+            controls = original_controls.create_copy()
+            controls.increase_offset(spawn_timestamp)
+
+            priority = 0
+            for key_flag, index in LOADOUT_KEY_TO_INDEX_MAP.items():
+                if key_flag in controls.key_presses:
+                    spell_id = obj_data.spell_bindings[index]
+                    if Consts.is_valid_id(spell_id):
+                        priority += 1
+                        yield spell_id, controls.ingame_time, priority
+
+    def is_obj_spawn(self, spell_id: int) -> bool:
+        return bool(
+            bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_OBJ) or
+            bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_PLAYER) or
+            bool(self._spell_data_dct[spell_id].flags & EventBehavior.SPAWN_BOSS)
+        )
 
     def is_despawn_self(self, spell_id: int) -> bool:
         return bool(self._spell_data_dct[spell_id].flags & EventBehavior.DESPAWN_SELF)
@@ -168,3 +266,7 @@ class EventSystem:
 
     def is_aoe(self, spell_id: int) -> bool:
         return bool(self._spell_data_dct[spell_id].flags & EventBehavior.AOE)
+
+    def get_spell_sequence(self, spell_id: int) -> tuple[int, ...]:
+        spell_data = self._spell_data_dct[spell_id]
+        return spell_data.spell_sequence

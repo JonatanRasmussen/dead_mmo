@@ -9,7 +9,7 @@ from ._frame_heap import FrameHeap
 from ._id_gen import IdGen
 from ._spell_database import SpellDatabase
 from ._event_system import EventSystem, UpcomingEvent, Outcome
-from ._controls_system import ControlsSystem
+from ._cooldown_system import CooldownSystem
 from ._combat_system import CombatSystem
 from ._movement_system import MovementSystem
 from ._targeting_system import TargetingSystem
@@ -36,10 +36,9 @@ class WorldState:
 
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
 
-        self._active_obj_ids: set[int] = set()
         self._auras: AuraHandler = AuraHandler(self.spell_database)
+        self._cooldown_system = CooldownSystem(self.spell_database)
         self._event_system = EventSystem(self.spell_database)
-        self._controls_system = ControlsSystem(self.spell_database)
         self._movement_system = MovementSystem(self.spell_database)
         self._combat_system = CombatSystem(self.spell_database)
         self._targeting_system = TargetingSystem(self.spell_database)
@@ -48,8 +47,8 @@ class WorldState:
         self._create_environment_obj()
 
     @property
-    def view_obj_ids(self) -> set[int]:
-        return self._active_obj_ids
+    def view_obj_ids(self) -> Iterable[int]:
+        yield from self._event_system.game_obj_data_dct.keys()
 
     @property
     def view_event_logs(self) -> dict[int, EventLog]:
@@ -95,30 +94,24 @@ class WorldState:
         """Execute state updates for current frame"""
         for controls_event in self._create_events_from_controls(player_inputs, frame_end):
             self._event_heap.insert_event(controls_event)
-
         event_log = EventLog()
-
         while self._event_heap.has_unprocessed_events(frame_end):
             u_event = self._event_heap.pop_next_event()
             assert u_event.timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {u_event}."
-
-            f_event = self._finalize_and_process_event(u_event)
+            f_event = self._finalize_event(u_event)
+            self._process_event(f_event)
             event_log.log_event(f_event)
-
         self._event_log_for_each_frame[frame_end] = event_log
 
-    def _finalize_and_process_event(self, u_event: UpcomingEvent) -> UpcomingEvent:
+    def _finalize_event(self, u_event: UpcomingEvent) -> UpcomingEvent:
         target_id = self._targeting_system.decide_targeting(
             u_event.target_id, u_event.is_aoe_targeting, u_event.source_id, u_event.spell_id
         )
-
         expired_aura = u_event.is_aura_tick and not self._auras.aura_exists(u_event.aura_id)
         outcome = self._decide_outcome(
             u_event.timestamp, u_event.source_id, u_event.spell_id, target_id, expired_aura, u_event.is_aoe_targeting
         )
-
         f_event = u_event.finalize_event(u_event.source_id, target_id, outcome)
-        self._process_event(f_event)
         return f_event
 
     def _process_event(self, f_event: UpcomingEvent) -> None:
@@ -130,27 +123,43 @@ class WorldState:
         if f_event.outcome_is_valid:
             # We duck-type the spell database to fetch data flags dynamically
             # without ever needing to import the actual `Spell` object definition.
-            spell = self.spell_database.get_spell(spell_id)
-
             new_obj_id = None
-            if spell.spawned_obj is not None:
-                new_obj_id = self.handle_spawn(timestamp, source_id, spell_id, target_id)
-
-            if spell.has_aura_cancel:
-                self._auras.remove_aura(source_id, spell.effect_id, target_id)
-
+            if self._event_system.is_obj_spawn(spell_id):
+                new_obj_id = self._handle_spawn(timestamp, source_id, spell_id, target_id)
+            if self._event_system.has_aura_cancel(spell_id):
+                effect_id = self._auras.get_effect_id(spell_id)
+                self._auras.remove_aura(source_id, effect_id, target_id)
             new_aura_id = Consts.EMPTY_ID
-            if spell.has_aura_apply:
+            if self._event_system.has_aura_apply(spell_id):
                 new_aura_id = self._auras.add_aura(timestamp, source_id, spell_id, target_id)
 
-            if spell.has_cascading_events:
+            if self._event_system.get_spell_sequence is not None:
                 for cascading_event in self._fetch_cascading_events(f_event, new_obj_id, source_id, spell_id, target_id, new_aura_id):
                     self._event_heap.insert_event(cascading_event)
 
-            self._controls_system.apply_controls_event(timestamp, source_id, spell_id)
+            self._cooldown_system.apply_cooldown_event(timestamp, source_id, spell_id)
             self._combat_system.apply_combat_event(timestamp, source_id, spell_id, target_id)
             self._movement_system.apply_movement_event(timestamp, source_id, spell_id, target_id)
             self._targeting_system.apply_targeting_event(timestamp, source_id, spell_id, target_id)
+
+    def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
+        new_obj_id = self._game_obj_id_gen.generate_new_id()
+        self._movement_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id)
+        self._combat_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
+        self._cooldown_system.spawn_game_obj(timestamp, new_obj_id, spell_id)
+        self._event_system.spawn_game_obj(new_obj_id, spell_id)
+        self._targeting_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
+        self._vfx_and_sfx_system.spawn_game_obj(new_obj_id, spell_id)
+        return new_obj_id
+
+    def _create_environment_obj(self) -> None:
+        obj_id: int = self._game_obj_id_gen.generate_new_id()
+        self._event_system.create_environment_obj(obj_id)
+        self._combat_system.create_environment_obj(obj_id)
+        self._movement_system.create_environment_obj(obj_id)
+        self._targeting_system.create_environment_obj(obj_id)
+        self._vfx_and_sfx_system.create_environment_obj(obj_id)
+        self._targeting_system.default_ids.environment_id = obj_id
 
     def _decide_outcome(self, timestamp: int, source_id: int, spell_id: int, target_id: int, expired_aura: bool, is_aoe_targeting: bool) -> Outcome:
         if expired_aura:
@@ -158,23 +167,13 @@ class WorldState:
         if not is_aoe_targeting:
             if not self._targeting_system.is_valid_source(source_id):
                 return Outcome.SOURCE_IS_DISABLED
-            if not self._controls_system.is_gcd_ready(source_id, spell_id, timestamp):
+            if not self._cooldown_system.is_gcd_ready(source_id, spell_id, timestamp):
                 return Outcome.GCD_NOT_READY
         if not self._targeting_system.is_valid_target(target_id) and not source_id == target_id:
             return Outcome.TARGET_IS_INVALID
         if not self._movement_system.is_within_range(timestamp, source_id, spell_id, target_id):
             return Outcome.OUT_OF_RANGE
         return Outcome.SUCCESS
-
-    def handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
-        new_obj_id = self._game_obj_id_gen.generate_new_id()
-        self._active_obj_ids.add(new_obj_id)
-        self._movement_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id)
-        self._combat_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
-        self._controls_system.spawn_game_obj(new_obj_id, spell_id)
-        self._targeting_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
-        self._vfx_and_sfx_system.spawn_game_obj(new_obj_id, spell_id)
-        return new_obj_id
 
     def _fetch_cascading_events(
         self,
@@ -189,7 +188,7 @@ class WorldState:
         # 1. Spawned Object Control Events
         if new_obj_id is not None:
             new_obj_target_id = self._targeting_system.game_obj_targeting_dct[new_obj_id].current_target_id
-            scripted_spells = self._controls_system.get_scripted_spells(new_obj_id, u_event.timestamp)
+            scripted_spells = self._event_system.get_scripted_spells(new_obj_id, u_event.timestamp)
 
             for s_id, trigger_timestamp, priority in scripted_spells:
                 yield UpcomingEvent(
@@ -202,7 +201,7 @@ class WorldState:
                 )
 
         # 2. Area of Effect (AoE) Events
-        if self._targeting_system.is_area_of_effect(spell_id) and not u_event.is_aoe_targeting:
+        if self._event_system.is_aoe(spell_id) and not u_event.is_aoe_targeting:
             target_ids = self._targeting_system.select_targets_for_aoe(source_id, target_id)
             priority = u_event.priority
 
@@ -216,7 +215,7 @@ class WorldState:
                 yield aoe_copy
 
         # 3. Spell Sequence Events
-        sequenced_spells = self._targeting_system.get_spell_sequence(spell_id)
+        sequenced_spells = self._event_system.get_spell_sequence(spell_id)
         if sequenced_spells is not None:
             priority = u_event.priority
 
@@ -230,7 +229,7 @@ class WorldState:
                 yield seq_copy
 
         # 4. Aura Tick Events
-        if self._targeting_system.has_aura_apply(spell_id):
+        if self._event_system.has_aura_apply(spell_id):
             aura = self._auras.get_aura_by_id(new_aura_id)
             priority = 0
 
@@ -254,7 +253,7 @@ class WorldState:
             return
 
         target_id = self._targeting_system.game_obj_targeting_dct[player_id].current_target_id
-        spell_ids = self._controls_system.get_spell_ids_for_inputs(player_id, player_inputs, timestamp)
+        spell_ids = self._event_system.get_spell_ids_for_inputs(player_id, player_inputs, timestamp)
 
         for spell_id in spell_ids:
             input_event_order += 1
@@ -266,15 +265,3 @@ class WorldState:
                 target_id=target_id,
                 priority=input_event_order,
             )
-
-    def _create_environment_obj(self) -> None:
-        obj_id: int = self._game_obj_id_gen.generate_new_id()
-
-        self._active_obj_ids.add(obj_id)
-        self._controls_system.create_environment_obj(obj_id)
-        self._combat_system.create_environment_obj(obj_id)
-        self._movement_system.create_environment_obj(obj_id)
-        self._targeting_system.create_environment_obj(obj_id)
-        self._vfx_and_sfx_system.create_environment_obj(obj_id)
-
-        self._targeting_system.default_ids.environment_id = obj_id
