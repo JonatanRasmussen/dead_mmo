@@ -136,9 +136,18 @@ class SpellFactory:
         self.spell.effect_id = periodic_spell_id
         return self.add_flag(Behavior.AURA_APPLY)
 
+    def start_channel(self, periodic_spell_id: int, duration: int, ticks: int) -> 'SpellFactory':
+        self.spell.duration = duration
+        self.spell.ticks = ticks
+        self.spell.effect_id = periodic_spell_id
+        return self.add_flag(Behavior.START_CHANNEL)
+
     def cancel_aura(self, periodic_spell_id: int) -> 'SpellFactory':
         self.spell.effect_id = periodic_spell_id
-        return self.add_flag(Behavior.AURA_CANCEL)
+        return self.add_flag(Behavior.AURA_CANCEL).add_flag(Behavior.STOP_CHANNEL)
+
+    def stop_channel(self) -> 'SpellFactory':
+        return self.add_flag(Behavior.STOP_CHANNEL)
 
     def inflict_damage(self, spell_power: float) -> 'SpellFactory':
         assert not (self.spell.flags & Behavior.HEALING), f"{self.spell.spell_id} with HEALING flag cannot be set to apply damage."
@@ -212,7 +221,7 @@ class SpellFactory:
 class SpellTemplates:
 
     @staticmethod
-    def step_move_self(spell_id: int, direction: Behavior) -> SpellFactory:
+    def directional_move_self(spell_id: int, direction: Behavior) -> SpellFactory:
         return (
             SpellFactory(spell_id)
             .cast_on_self()
@@ -228,9 +237,25 @@ class SpellTemplates:
         )
 
     @staticmethod
+    def start_channel_on_self(spell_id: int, periodic_spell_id: int, duration: int, ticks: int) -> SpellFactory:
+        return (
+            SpellFactory(spell_id)
+            .cast_on_self()
+            .start_channel(periodic_spell_id, duration, ticks)
+        )
+
+    @staticmethod
+    def cancel_channel_on_self(spell_id: int) -> SpellFactory:
+        return (
+            SpellFactory(spell_id)
+            .cast_on_self()
+            .stop_channel()
+        )
+
+    @staticmethod
     def start_move_self(spell_id: int, periodic_spell_id: int) -> SpellFactory:
         updates_per_second = Consts.MOVEMENT_UPDATES_PER_SECOND
-        return SpellTemplates.apply_aura_to_self(spell_id, periodic_spell_id, 60000, 60*updates_per_second)
+        return SpellTemplates.start_channel_on_self(spell_id, periodic_spell_id, 60000, 60*updates_per_second)
 
     @staticmethod
     def cancel_aura_on_self(spell_id: int, aura_spell_id: int) -> SpellFactory:

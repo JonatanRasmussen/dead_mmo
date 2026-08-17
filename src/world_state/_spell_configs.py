@@ -9,64 +9,41 @@ class BasicMovement:
         return SpellFactory(Consts.EMPTY_ID)
 
     @staticmethod
-    def step_up() -> SpellFactory:
-        return SpellTemplates.step_move_self(91, Behavior.STEP_UP)
-
+    def start_move_up() -> SpellFactory:
+        return SpellTemplates.directional_move_self(91, Behavior.MOVE_UP)
     @staticmethod
-    def step_left() -> SpellFactory:
-        return SpellTemplates.step_move_self(181, Behavior.STEP_LEFT)
-
+    def stop_move_up() -> SpellFactory:
+        return SpellTemplates.directional_move_self(92, Behavior.STOP_MOVE_UP)
     @staticmethod
-    def step_down() -> SpellFactory:
-        return SpellTemplates.step_move_self(271, Behavior.STEP_DOWN)
-
+    def start_move_left() -> SpellFactory:
+        return SpellTemplates.directional_move_self(181, Behavior.MOVE_LEFT)
     @staticmethod
-    def step_right() -> SpellFactory:
-        return SpellTemplates.step_move_self(1, Behavior.STEP_RIGHT)
+    def stop_move_left() -> SpellFactory:
+        return SpellTemplates.directional_move_self(182, Behavior.STOP_MOVE_LEFT)
+    @staticmethod
+    def start_move_down() -> SpellFactory:
+        return SpellTemplates.directional_move_self(271, Behavior.MOVE_DOWN)
+    @staticmethod
+    def stop_move_down() -> SpellFactory:
+        return SpellTemplates.directional_move_self(272, Behavior.STOP_MOVE_DOWN)
+    @staticmethod
+    def start_move_right() -> SpellFactory:
+        return SpellTemplates.directional_move_self(1, Behavior.MOVE_RIGHT)
+    @staticmethod
+    def stop_move_right() -> SpellFactory:
+        return SpellTemplates.directional_move_self(2, Behavior.STOP_MOVE_RIGHT)
 
     @staticmethod
     def step_towards_target() -> SpellFactory:
         return SpellFactory(361).cast_on_target().add_flag(Behavior.MOVE_TOWARDS_TARGET)
 
     @staticmethod
-    def start_move_up() -> SpellFactory:
-        return SpellTemplates.start_move_self(92, BasicMovement.step_up().spell_id).add_flag(Behavior.STEP_UP)
-
-    @staticmethod
-    def start_move_left() -> SpellFactory:
-        return SpellTemplates.start_move_self(182, BasicMovement.step_left().spell_id).add_flag(Behavior.STEP_LEFT)
-
-    @staticmethod
-    def start_move_down() -> SpellFactory:
-        return SpellTemplates.start_move_self(272, BasicMovement.step_down().spell_id).add_flag(Behavior.STEP_DOWN)
-
-    @staticmethod
-    def start_move_right() -> SpellFactory:
-        return SpellTemplates.start_move_self(2, BasicMovement.step_right().spell_id).add_flag(Behavior.STEP_RIGHT)
-
-    @staticmethod
     def start_move_towards_target() -> SpellFactory:
         return SpellTemplates.start_move_self(362, BasicMovement.step_towards_target().spell_id).add_flag(Behavior.MOVE_TOWARDS_TARGET)
 
     @staticmethod
-    def stop_move_up() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(93, BasicMovement.start_move_up().spell_id).add_flag(Behavior.STOP_MOVE_UP)
-
-    @staticmethod
-    def stop_move_left() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(183, BasicMovement.start_move_left().spell_id).add_flag(Behavior.STOP_MOVE_LEFT)
-
-    @staticmethod
-    def stop_move_down() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(273, BasicMovement.start_move_down().spell_id).add_flag(Behavior.STOP_MOVE_DOWN)
-
-    @staticmethod
-    def stop_move_right() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(3, BasicMovement.start_move_right().spell_id).add_flag(Behavior.STOP_MOVE_RIGHT)
-
-    @staticmethod
     def stop_move_towards_target() -> SpellFactory:
-        return SpellTemplates.cancel_aura_on_self(363, BasicMovement.start_move_towards_target().spell_id).add_flag(Behavior.STOP_MOVE_TOWARDS_TARGET)
+        return SpellTemplates.cancel_channel_on_self(363).add_flag(Behavior.STOP_MOVE_TOWARDS_TARGET)
 
 class BasicTargeting:
     @staticmethod
@@ -94,7 +71,7 @@ class NpcHealingPowerup:
 
     @staticmethod
     def healing_burst_apply() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(215, NpcHealingPowerup.healing_burst_tick().spell_id, 15000, 150)
+        return SpellTemplates.start_channel_on_self(215, NpcHealingPowerup.healing_burst_tick().spell_id, 15000, 150)
 
     @staticmethod
     def spawn_healing_powerup() -> SpellFactory:
@@ -120,7 +97,7 @@ class NpcLandmine:
 
     @staticmethod
     def landmine_explosion_apply() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(115, NpcLandmine.landmine_explosion_tick().spell_id, 15000, 150)
+        return SpellTemplates.start_channel_on_self(115, NpcLandmine.landmine_explosion_tick().spell_id, 15000, 150)
 
     @staticmethod
     def spawn_landmine() -> SpellFactory:
@@ -145,6 +122,20 @@ class NpcTargetDummy:
             .spawn_boss(obj_template)
         )
 
+    @staticmethod
+    def spawn_bravo_dummy() -> SpellFactory:
+        timeline = {
+            1500: BasicTargeting.targetswap_to_next_tab_target().spell_id,
+            2000: SpecWarlock.bravo_channel_shadowtick().spell_id,
+            4000: SpecWarlock.shadowbolt_spawn().spell_id,
+            7000: BasicMovement.start_move_towards_target().spell_id,
+        }
+        obj_template = GameObjTemplates.create_enemy(timeline, x=-0.2, y=0.1, hp=80.0, color=Colors.BLUE)
+        return (
+            SpellFactory(970)
+            .spawn_boss(obj_template)
+        )
+
 class SpecWarlock:
     @staticmethod
     def fire_blast() -> SpellFactory:
@@ -156,27 +147,53 @@ class SpecWarlock:
         )
 
     @staticmethod
-    def fire_aura_tick() -> SpellFactory:
+    def shadow_blast() -> SpellFactory:
+        return (
+            SpellTemplates.damage_current_target(911, 53.0)
+            .set_audio(AudioFiles.SHADOW_BOLT_BUILD)
+        )
+
+    @staticmethod
+    def fire_channel_tick() -> SpellFactory:
         return SpellTemplates.damage_enemies_within_range(112, 5.0, 0.2)
 
     @staticmethod
-    def fire_aura_apply() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(113, SpecWarlock.fire_aura_tick().spell_id, 3000, 30)
+    def fire_channel_apply() -> SpellFactory:
+        return SpellTemplates.start_channel_on_self(113, SpecWarlock.fire_channel_tick().spell_id, 3000, 30)
+
+    @staticmethod
+    def channel_shadowbolt() -> SpellFactory:
+        return SpellTemplates.start_move_self(131, SpecWarlock.shadowbolt_tick().spell_id)
+
     @staticmethod
     def shadowbolt_tick() -> SpellFactory:
+        spell_sequence = (
+            SpecWarlock.shadowbolt_movement_tick().spell_id,
+            SpecWarlock.shadowbolt_damage_tick().spell_id,
+        )
+        return (
+            SpellFactory(132)
+            .cast_on_self()
+            .set_spell_sequence(spell_sequence)
+        )
+
+    @staticmethod
+    def shadowbolt_damage_tick() -> SpellFactory:
         return (
             SpellTemplates.damage_current_target_when_within_range(116, 34.0, 0.05)
             .set_audio(AudioFiles.SHADOW_BOLT_HIT)
             .despawn_self()
         )
     @staticmethod
-    def aura_shadowbolt() -> SpellFactory:
-        return SpellTemplates.apply_aura_to_self(117, SpecWarlock.shadowbolt_tick().spell_id, 30000, 1200)
+    def shadowbolt_movement_tick() -> SpellFactory:
+        return (
+            SpellFactory(133).cast_on_target().add_flag(Behavior.MOVE_TOWARDS_TARGET)
+        )
+
     @staticmethod
     def shadowbolt_spawn() -> SpellFactory:
         timeline = {0: (
-            BasicMovement.start_move_towards_target().spell_id,
-            SpecWarlock.aura_shadowbolt().spell_id
+            SpecWarlock.channel_shadowbolt().spell_id
         )}
         obj_template = GameObjTemplates.create_projectile(timeline, speed=5.0, size=7.0, color=Colors.WHITE)
         return (
@@ -186,6 +203,14 @@ class SpecWarlock:
             .use_gcd()
             .set_audio(AudioFiles.SHADOW_BOLT_CAST)
         )
+    @staticmethod
+    def bravo_channel_shadowtick() -> SpellFactory:
+        return (
+            SpellFactory(941)
+            .cast_on_self()
+            .start_channel(SpecWarlock.shadow_blast().spell_id, 1220, 4)
+        )
+
 
     @staticmethod
     def spawn_player() -> SpellFactory:
@@ -201,7 +226,7 @@ class SpecWarlock:
             .bind_spell(KeyPresses.STOP_MOVE_RIGHT, BasicMovement.stop_move_right().spell_id)
             .bind_spell(KeyPresses.SWAP_TARGET, BasicTargeting.targetswap_to_next_tab_target().spell_id)
             .bind_spell(KeyPresses.ABILITY_1, SpecWarlock.fire_blast().spell_id)
-            .bind_spell(KeyPresses.ABILITY_2, SpecWarlock.fire_aura_apply().spell_id)
+            .bind_spell(KeyPresses.ABILITY_2, SpecWarlock.fire_channel_apply().spell_id)
             .bind_spell(KeyPresses.ABILITY_3, NpcHealingPowerup.spawn_healing_powerup().spell_id)
             .bind_spell(KeyPresses.ABILITY_4, SpecWarlock.shadowbolt_spawn().spell_id)
         )
@@ -219,11 +244,26 @@ class NpcBoss:
             800: NpcLandmine.spawn_landmine().spell_id,
             1000: BasicTargeting.targetswap_to_next_tab_target().spell_id,
             3000: SpecWarlock.fire_blast().spell_id,
-            5000: SpecWarlock.fire_aura_apply().spell_id,
+            5000: SpecWarlock.fire_channel_apply().spell_id,
         }
         obj_template = GameObjTemplates.create_enemy(timeline, x=0.7, y=0.7, hp=30.0, color=Colors.GREEN)
         return (
             SpellFactory(69)
+            .spawn_boss(obj_template)
+        )
+
+    @staticmethod
+    def spawn_bravo_boss() -> SpellFactory:
+        timeline = {
+            400: NpcTargetDummy.spawn_bravo_dummy().spell_id,
+            800: NpcLandmine.spawn_landmine().spell_id,
+            1000: BasicTargeting.targetswap_to_next_tab_target().spell_id,
+            3000: SpecWarlock.fire_blast().spell_id,
+            5000: SpecWarlock.fire_channel_apply().spell_id,
+        }
+        obj_template = GameObjTemplates.create_enemy(timeline, x=0.7, y=0.7, hp=30.0, color=Colors.GREEN)
+        return (
+            SpellFactory(969)
             .spawn_boss(obj_template)
         )
 
@@ -236,6 +276,18 @@ class ZoneTestGround:
         )
         return (
             SpellFactory(300)
+            .cast_on_self()
+            .set_spell_sequence(spell_sequence)
+        )
+
+    @staticmethod
+    def bravo_test_zone() -> SpellFactory:
+        spell_sequence = (
+            NpcBoss.spawn_bravo_boss().spell_id,
+            SpecWarlock.spawn_player().spell_id,
+        )
+        return (
+            SpellFactory(9001)
             .cast_on_self()
             .set_spell_sequence(spell_sequence)
         )

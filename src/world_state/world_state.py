@@ -7,7 +7,7 @@ from ._aura_handler import Aura, AuraHandler
 from ._event_log import EventLog
 from ._frame_heap import FrameHeap
 from ._id_gen import IdGen
-from ._event_system import EventSystem, UpcomingEvent, Outcome
+from ._event_system import UpcomingEvent, Outcome
 from ._cooldown_system import CooldownSystem
 from ._combat_system import CombatSystem
 from ._movement_system import MovementSystem
@@ -66,8 +66,7 @@ class WorldState:
 
     def _finalize_event(self, u_event: UpcomingEvent) -> UpcomingEvent:
         target_id = self._systems_manager.decide_event_target(u_event.source_id, u_event.spell_id, u_event.target_id, u_event.is_aoe_targeting)
-        expired_aura = u_event.is_aura_tick and not self._systems_manager._auras.aura_exists(u_event.aura_id)
-        outcome = self._systems_manager.decide_outcome(u_event.timestamp, u_event.source_id, u_event.spell_id, target_id, u_event.is_aoe_targeting, expired_aura)
+        outcome = self._systems_manager.decide_outcome(u_event.timestamp, u_event.source_id, u_event.spell_id, target_id, u_event.is_aoe_targeting)
         f_event = u_event.finalize_event(u_event.source_id, target_id, outcome)
         return f_event
 
@@ -78,17 +77,17 @@ class WorldState:
         spell_id = f_event.spell_id
         if f_event.outcome_is_valid:
             new_obj_id = self._systems_manager.handle_spawn(timestamp, source_id, spell_id, target_id)
-            new_aura_id = self._systems_manager.handle_aura(timestamp, source_id, spell_id, target_id)
-            for cascading_event in self._fetch_cascading_events(f_event, new_obj_id, source_id, spell_id, target_id, new_aura_id):
+            for cascading_event in self._fetch_cascading_events(f_event, new_obj_id, source_id, spell_id, target_id):
                 self._event_heap.insert_event(cascading_event)
             self._systems_manager.apply_event(timestamp, source_id, spell_id, target_id)
 
-    def _fetch_cascading_events(self, u_event: UpcomingEvent, new_obj_id: int, source_id: int, spell_id: int, target_id: int, new_aura_id: int) -> Iterable[UpcomingEvent]:
+    def _fetch_cascading_events(self, u_event: UpcomingEvent, new_obj_id: int, source_id: int, spell_id: int, target_id: int) -> Iterable[UpcomingEvent]:
 
         # 1. Spawned Object Control Events
         if new_obj_id != Consts.EMPTY_ID:
             new_obj_target_id = self._systems_manager.get_current_target_for_obj(new_obj_id)
-            scripted_spells = self._systems_manager._event_system.get_scripted_spells(new_obj_id, u_event.timestamp)
+
+            scripted_spells = self._systems_manager._cooldown_system.get_scripted_spells(new_obj_id, u_event.timestamp)
 
             for s_id, trigger_timestamp, priority in scripted_spells:
                 yield UpcomingEvent(
@@ -101,7 +100,7 @@ class WorldState:
                 )
 
         # 2. Area of Effect (AoE) Events
-        if self._systems_manager._event_system.is_aoe(spell_id) and not u_event.is_aoe_targeting:
+        if self._systems_manager._targeting_system.is_area_of_effect(spell_id) and not u_event.is_aoe_targeting:
             target_ids = self._systems_manager.select_targets_for_aoe(source_id, target_id)
             priority = u_event.priority
 
@@ -115,7 +114,7 @@ class WorldState:
                 yield aoe_copy
 
         # 3. Spell Sequence Events
-        sequenced_spells = self._systems_manager._event_system.get_spell_sequence(spell_id)
+        sequenced_spells = self._systems_manager._targeting_system.get_spell_sequence(spell_id)
         if sequenced_spells is not None:
             priority = u_event.priority
 
@@ -128,23 +127,21 @@ class WorldState:
                 seq_copy.is_spell_sequence = True
                 yield seq_copy
 
-        # 4. Aura Tick Events
-        if self._systems_manager._event_system.has_aura_apply(spell_id):
-            aura = self._systems_manager._auras.get_aura_by_id(new_aura_id)
+        # 4. Channel Tick Events
+        if self._systems_manager._targeting_system.has_channel_start(spell_id):
+            effect_id = self._systems_manager._targeting_system.get_periodic_effect(spell_id)
             priority = 0
-
-            for tick_timestamp in aura.tick_timestamps:
+            for tick_timestamp in self._systems_manager._targeting_system.get_tick_timestamps(u_event.timestamp, spell_id):
                 priority += 1
                 yield UpcomingEvent(
                     event_id=self._event_id_gen.generate_new_id(),
                     timestamp=tick_timestamp,
-                    source_id=aura.source_id,
-                    spell_id=aura.periodic_spell_id,
-                    target_id=aura.target_id,
+                    source_id=source_id,
+                    spell_id=effect_id,
+                    target_id=target_id,
                     priority=priority,
-                    aura_id=aura.aura_id,
-                    aura_origin_spell_id=aura.origin_spell_id,
                 )
+
 
     def _create_events_from_controls(self, player_inputs: list[str], timestamp: int) -> Iterable[UpcomingEvent]:
         player_id = self._systems_manager.player_id
@@ -153,7 +150,7 @@ class WorldState:
             return
 
         target_id = self._systems_manager.get_current_target_for_obj(self._systems_manager.player_id)
-        spell_ids = self._systems_manager._event_system.get_spell_ids_for_inputs(player_id, player_inputs, timestamp)
+        spell_ids = self._systems_manager._cooldown_system.get_spell_ids_for_inputs(player_id, player_inputs, timestamp)
 
         for spell_id in spell_ids:
             input_event_order += 1

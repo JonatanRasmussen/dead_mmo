@@ -14,10 +14,10 @@ class MovementBehavior(IntFlag):
     NONE = 0
 
     # MOVEMENT
-    STEP_UP = auto()
-    STEP_LEFT = auto()
-    STEP_DOWN = auto()
-    STEP_RIGHT = auto()
+    MOVE_UP = auto()
+    MOVE_LEFT = auto()
+    MOVE_DOWN = auto()
+    MOVE_RIGHT = auto()
     STOP_MOVE_UP = auto()
     STOP_MOVE_LEFT = auto()
     STOP_MOVE_DOWN = auto()
@@ -285,17 +285,17 @@ class MovementSystem:
             speed_per_ms = (target_data.movespeed * spell_data.power) * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
 
             # X Axis Evaluator
-            if flags & MovementBehavior.STEP_RIGHT:
+            if flags & MovementBehavior.MOVE_RIGHT:
                 self.set_x_velocity(target_id, speed_per_ms, timestamp)
-            elif flags & MovementBehavior.STEP_LEFT:
+            elif flags & MovementBehavior.MOVE_LEFT:
                 self.set_x_velocity(target_id, -speed_per_ms, timestamp)
             elif flags & (MovementBehavior.STOP_MOVE_RIGHT | MovementBehavior.STOP_MOVE_LEFT):
                 self.set_x_velocity(target_id, 0.0, timestamp)
 
             # Y Axis Evaluator
-            if flags & MovementBehavior.STEP_UP:
+            if flags & MovementBehavior.MOVE_UP:
                 self.set_y_velocity(target_id, speed_per_ms, timestamp)
-            elif flags & MovementBehavior.STEP_DOWN:
+            elif flags & MovementBehavior.MOVE_DOWN:
                 self.set_y_velocity(target_id, -speed_per_ms, timestamp)
             elif flags & (MovementBehavior.STOP_MOVE_UP | MovementBehavior.STOP_MOVE_DOWN):
                 self.set_y_velocity(target_id, 0.0, timestamp)

@@ -8,7 +8,7 @@ from ._event_log import EventLog
 from ._frame_heap import FrameHeap
 from ._id_gen import IdGen
 from ._spell_database import SpellDatabase
-from ._event_system import EventSystem, UpcomingEvent, Outcome
+from ._event_system import Outcome
 from ._cooldown_system import CooldownSystem
 from ._combat_system import CombatSystem
 from ._movement_system import MovementSystem
@@ -32,10 +32,8 @@ class SystemsManager:
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
 
         self.spell_database: SpellDatabase = SpellDatabase()
-        self._auras: AuraHandler = AuraHandler(self.spell_database)
         self._combat_system = CombatSystem(self.spell_database)
         self._cooldown_system = CooldownSystem(self.spell_database)
-        self._event_system = EventSystem(self.spell_database)
         self._movement_system = MovementSystem(self.spell_database)
         self._targeting_system = TargetingSystem(self.spell_database)
         self._vfx_and_sfx_system = VfxAndSfxSystem(self.spell_database)
@@ -51,7 +49,7 @@ class SystemsManager:
 
     @property
     def view_obj_ids(self) -> Iterable[int]:
-        yield from self._event_system.game_obj_data_dct.keys()
+        yield from self._combat_system.game_obj_combat_dct.keys()
 
     def get_display_obj(self, obj_id: int, timestamp: int) -> DisplayObj | None:
         if not self._combat_system.is_visible(obj_id):
@@ -81,9 +79,7 @@ class SystemsManager:
     def select_targets_for_aoe(self, source_id: int, target_id: int) -> Iterable[int]:
         return self._targeting_system.select_targets_for_aoe(source_id, target_id)
 
-    def decide_outcome(self, timestamp: int, source_id: int, spell_id: int, target_id: int, is_aoe_targeting: bool, expired_aura: bool) -> Outcome:
-        if expired_aura:
-            return Outcome.AURA_NO_LONGER_EXISTS
+    def decide_outcome(self, timestamp: int, source_id: int, spell_id: int, target_id: int, is_aoe_targeting: bool) -> Outcome:
         if not is_aoe_targeting:
             if not self._targeting_system.is_valid_source(source_id):
                 return Outcome.SOURCE_IS_DISABLED
@@ -101,30 +97,19 @@ class SystemsManager:
         self._movement_system.apply_movement_event(timestamp, source_id, spell_id, target_id)
         self._targeting_system.apply_targeting_event(timestamp, source_id, spell_id, target_id)
 
-    def handle_aura(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
-        if self._event_system.has_aura_cancel(spell_id):
-            effect_id = self._auras.get_effect_id(spell_id)
-            self._auras.remove_aura(source_id, effect_id, target_id)
-        new_aura_id = Consts.EMPTY_ID
-        if self._event_system.has_aura_apply(spell_id):
-            new_aura_id = self._auras.add_aura(timestamp, source_id, spell_id, target_id)
-        return new_aura_id
-
     def handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
         new_obj_id = Consts.EMPTY_ID
-        if self._event_system.is_obj_spawn(spell_id):
+        if self._targeting_system.is_obj_spawn(spell_id):
             new_obj_id = self._game_obj_id_gen.generate_new_id()
             self._movement_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id)
             self._combat_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
             self._cooldown_system.spawn_game_obj(timestamp, new_obj_id, spell_id)
-            self._event_system.spawn_game_obj(new_obj_id, spell_id)
             self._targeting_system.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
             self._vfx_and_sfx_system.spawn_game_obj(new_obj_id, spell_id)
         return new_obj_id
 
     def _create_environment_obj(self) -> None:
         obj_id: int = self._game_obj_id_gen.generate_new_id()
-        self._event_system.create_environment_obj(obj_id)
         self._combat_system.create_environment_obj(obj_id)
         self._movement_system.create_environment_obj(obj_id)
         self._targeting_system.create_environment_obj(obj_id)

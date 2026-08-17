@@ -63,10 +63,10 @@ class Behavior(IntFlag):
     NONE = 0
 
     # MOVEMENT
-    STEP_UP = auto()
-    STEP_LEFT = auto()
-    STEP_DOWN = auto()
-    STEP_RIGHT = auto()
+    MOVE_UP = auto()
+    MOVE_LEFT = auto()
+    MOVE_DOWN = auto()
+    MOVE_RIGHT = auto()
     MOVE_TOWARDS_TARGET = auto()
     # STOP MOVEMENT
     STOP_MOVE_UP = auto()

@@ -1,17 +1,16 @@
-from typing import Optional
+from typing import Iterable
 from dataclasses import dataclass, field
 from enum import IntFlag, auto
 
 from src.settings import Consts
 from src.world_state._spell_system import Behavior
 from src.world_state._spell_database import SpellDatabase
+from ._controls_data import Controls, InputTranslator, KeyPresses, LOADOUT_KEY_TO_INDEX_MAP
 
 
 class CooldownBehavior(IntFlag):
     """ Various bitflags that define spell cooldown behavior. """
     NONE = 0
-    START_CHANNEL = auto()
-    STOP_CHANNEL = auto()
     TRIGGER_GCD = auto()
     TRIGGER_COOLDOWN = auto()
 
@@ -34,20 +33,17 @@ class SpellCooldownData:
     flags: CooldownBehavior = CooldownBehavior.NONE
     base_gcd: float = 0.0
     base_cooldown: float = 0.0
-    effect_id: int = 0
-    duration: int = 0
-    ticks: int = 1
     spell_bindings: list[int] = field(default_factory=list)
+    controls: tuple[Controls, ...] = ()
 
 @dataclass(slots=True)
 class ObjCooldownData:
     """ECS-style component storing per-obj cooldown and GCD state."""
     gcd_start: int = -1000
     obj_spawn_timestamp: int = 0
-    current_spell_cast: int = Consts.EMPTY_ID
-    cast_start_time: int = 0
-    spell_bindings: list[int] = field(default_factory=list)
     ability_cd_start: list[int] = field(default_factory=list)
+    spell_bindings: list[int] = field(default_factory=list)
+    controls: tuple[Controls, ...] = ()
 
 
 class CooldownSystem:
@@ -62,12 +58,14 @@ class CooldownSystem:
 
         for spell in spell_database.get_all_spells():
             spell_bindings: list[int] = []
+            controls_tuple: tuple[Controls, ...] = ()
 
             # Extract configuration from the game_obj loadout, strictly for initial setup.
             if spell.spawned_obj is not None:
                 game_obj = spell.spawned_obj.game_obj
                 if getattr(game_obj, "_loadout", None) is not None:
                     spell_bindings = list(game_obj._loadout.spell_ids)
+                controls_tuple = spell.spawned_obj.obj_controls or ()
 
             gcd_mod = 1.0  # Room for future GCD modifiers
 
@@ -75,10 +73,8 @@ class CooldownSystem:
                 flags=CooldownBehavior.from_behavior(spell.flags),
                 base_gcd=base_gcd * gcd_mod,
                 base_cooldown=float(getattr(spell, "cooldown", 0.0) or 0.0),
-                effect_id = spell.effect_id,
-                duration=spell.duration,
-                ticks=spell.ticks,
                 spell_bindings=spell_bindings,
+                controls=controls_tuple,
             )
 
         return spell_data_dct
@@ -93,13 +89,10 @@ class CooldownSystem:
         self.game_obj_data_dct[new_obj_id] = ObjCooldownData(
             gcd_start=-1000,
             obj_spawn_timestamp=timestamp,
-            current_spell_cast = Consts.EMPTY_ID,
-            cast_start_time = timestamp,
             spell_bindings=list(template.spell_bindings),
-            ability_cd_start=[Consts.EMPTY_TIMESTAMP] * len(template.spell_bindings)
+            ability_cd_start=[Consts.EMPTY_TIMESTAMP] * len(template.spell_bindings),
+            controls=template.controls,
         )
-
-
 
     def despawn_game_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct.pop(obj_id, None)
@@ -108,10 +101,9 @@ class CooldownSystem:
         self.game_obj_data_dct[obj_id] = ObjCooldownData(
             gcd_start=-1000,
             obj_spawn_timestamp=0,
-            current_spell_cast = Consts.EMPTY_ID,
-            cast_start_time = 0,
-            spell_bindings=[],
-            ability_cd_start=[]
+            ability_cd_start=[],
+            spell_bindings=[Consts.EMPTY_ID] * len(LOADOUT_KEY_TO_INDEX_MAP),
+            controls=()
         )
 
     def apply_cooldown_event(self, timestamp: int, source_id: int, spell_id: int) -> None:
@@ -126,35 +118,12 @@ class CooldownSystem:
         obj_data = self.game_obj_data_dct.get(source_id)
 
         if obj_data is not None:
-            if flags & CooldownBehavior.START_CHANNEL:
-                obj_data.cast_start_time = timestamp
-                obj_data.current_spell_cast = self._spell_data_dct[spell_id].effect_id
-
-            if flags & CooldownBehavior.STOP_CHANNEL:
-                obj_data.cast_start_time = timestamp
-                obj_data.current_spell_cast = Consts.EMPTY_ID
-
             if flags & CooldownBehavior.TRIGGER_GCD:
                 obj_data.gcd_start = timestamp
-
             if flags & CooldownBehavior.TRIGGER_COOLDOWN:
                 if spell_id in obj_data.spell_bindings:
                     index = obj_data.spell_bindings.index(spell_id)
                     obj_data.ability_cd_start[index] = timestamp
-
-    def is_aura_active(self, current_timestamp: int, obj_id: int, spell_id: int) -> bool:
-        obj_data = self.game_obj_data_dct.get(obj_id)
-        if obj_data is None:
-            return False
-        spell_data = self._spell_data_dct.get(spell_id)
-        # Determine if it has surpassed its duration
-        if spell_data and current_timestamp > (obj_data.cast_start_time + spell_data.duration):
-            return False
-        # Ensure spell cast wasn't canceled
-        if obj_data.current_spell_cast != self._spell_data_dct[spell_id].effect_id:
-            return False
-
-        return True
 
 
     def get_gcd_progress(self, obj_id: int, spell_id: int, current_timestamp: int) -> float:
@@ -205,3 +174,40 @@ class CooldownSystem:
     def is_cooldown_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
         """Checks if obj_id's cooldown is finished for spell_id (or if spell_id doesn't use a cooldown)."""
         return self.get_cooldown_progress(obj_id, spell_id, current_timestamp) >= 1.0
+
+    def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str], timestamp: int) -> Iterable[int]:
+        if not hardware_inputs:
+            return
+
+        key_presses = InputTranslator.translate_to_keypresses(hardware_inputs)
+        if key_presses == KeyPresses.NONE:
+            return
+
+        obj_data = self.game_obj_data_dct.get(obj_id)
+        if not obj_data or not obj_data.spell_bindings:
+            return
+
+        # Direct translation without relying on Loadout objects
+        for key_flag, index in LOADOUT_KEY_TO_INDEX_MAP.items():
+            if key_flag & key_presses:
+                spell_id = obj_data.spell_bindings[index]
+                if Consts.is_valid_id(spell_id):
+                    yield spell_id
+
+    def get_scripted_spells(self, obj_id: int, spawn_timestamp: int) -> Iterable[tuple[int, int, int]]:
+        obj_data = self.game_obj_data_dct.get(obj_id)
+        if not obj_data or not obj_data.controls or not obj_data.spell_bindings:
+            return
+
+        for original_controls in obj_data.controls:
+            # Create a copy and apply the offset
+            controls = original_controls.create_copy()
+            controls.increase_offset(spawn_timestamp)
+
+            priority = 0
+            for key_flag, index in LOADOUT_KEY_TO_INDEX_MAP.items():
+                if key_flag in controls.key_presses:
+                    spell_id = obj_data.spell_bindings[index]
+                    if Consts.is_valid_id(spell_id):
+                        priority += 1
+                        yield spell_id, controls.ingame_time, priority

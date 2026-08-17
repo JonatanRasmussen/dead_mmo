@@ -33,9 +33,8 @@ class EventLog:
 
     def log_event(self, u_event: UpcomingEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
-            if not u_event.is_aura_tick or self.DEBUG_PRINT_AURA_TICKS:
-                if u_event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
-                    Logger.debug(u_event.event_summary, self.FILENAME_COMBAT_EVENT_LOG)
+            if u_event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
+                Logger.debug(u_event.event_summary, self.FILENAME_COMBAT_EVENT_LOG)
         assert u_event.event_id not in self._event_log, f"Event with ID {u_event.event_id} already exists in event_log."
         self._event_log[u_event.event_id] = u_event
 

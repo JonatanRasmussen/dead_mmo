@@ -57391,8 +57391,8 @@
       "cooldowns": {
         "gcd_start": 3000,
         "obj_spawn_timestamp": 0,
-        "current_spell_cast": 0,
-        "cast_start_time": 0,
+        "current_spell_cast": 112,
+        "cast_start_time": 5000,
         "spell_bindings": [
           15,
           70,
@@ -57577,8 +57577,8 @@
       "cooldowns": {
         "gcd_start": 4400,
         "obj_spawn_timestamp": 400,
-        "current_spell_cast": 0,
-        "cast_start_time": 400,
+        "current_spell_cast": 361,
+        "cast_start_time": 7400,
         "spell_bindings": [
           15,
           111,
@@ -57668,7 +57668,7 @@
       "cooldowns": {
         "gcd_start": -1000,
         "obj_spawn_timestamp": 700,
-        "current_spell_cast": 0,
+        "current_spell_cast": 361,
         "cast_start_time": 700,
         "spell_bindings": [
           117,
@@ -57759,7 +57759,7 @@
       "cooldowns": {
         "gcd_start": -1000,
         "obj_spawn_timestamp": 700,
-        "current_spell_cast": 0,
+        "current_spell_cast": 361,
         "cast_start_time": 700,
         "spell_bindings": [
           117,
@@ -57850,8 +57850,8 @@
       "cooldowns": {
         "gcd_start": -1000,
         "obj_spawn_timestamp": 800,
-        "current_spell_cast": 0,
-        "cast_start_time": 800,
+        "current_spell_cast": 114,
+        "cast_start_time": 2300,
         "spell_bindings": [
           115,
           0,
@@ -57947,8 +57947,8 @@
       "cooldowns": {
         "gcd_start": -1000,
         "obj_spawn_timestamp": 1800,
-        "current_spell_cast": 0,
-        "cast_start_time": 1800,
+        "current_spell_cast": 214,
+        "cast_start_time": 2000,
         "spell_bindings": [
           16,
           215,

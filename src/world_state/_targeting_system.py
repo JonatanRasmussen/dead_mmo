@@ -16,8 +16,8 @@ class TargetingBehavior(IntFlag):
     SPAWN_PLAYER = auto()
     SPAWN_OBJ = auto()
     DESPAWN_SELF = auto()
-    AURA_APPLY = auto()
-    AURA_CANCEL = auto()
+    START_CHANNEL = auto()
+    STOP_CHANNEL = auto()
     UPDATE_CURRENT_TARGET = auto()
 
     @classmethod
@@ -44,6 +44,9 @@ class SpellTargetingData:
     targeting: Targeting
     is_enemy: bool = False
     is_boss_or_player: bool = False
+    effect_id: int = 0
+    duration: int = 0
+    ticks: int = 1
     flags: TargetingBehavior = TargetingBehavior.NONE
 
 
@@ -54,6 +57,8 @@ class ObjTargetingData:
     current_target_id: int = Consts.EMPTY_ID
     is_enemy: bool = False
     is_boss_or_player: bool = False
+    current_spell_cast: int = Consts.EMPTY_ID
+    cast_start_time: int = 0
     status: Status = Status.EMPTY
 
 
@@ -100,6 +105,9 @@ class TargetingSystem:
                 targeting=spell.targeting,
                 is_enemy=is_enemy,
                 is_boss_or_player=is_boss_or_player,
+                effect_id = spell.effect_id,
+                duration=spell.duration,
+                ticks=spell.ticks,
                 flags=flags,
             )
 
@@ -114,9 +122,11 @@ class TargetingSystem:
         self.default_ids.environment_id = obj_id
         self.game_obj_targeting_dct[obj_id] = ObjTargetingData(
             parent_id=Consts.EMPTY_ID,
-            current_target_id=obj_id, # Mirrors original: env_obj.current_target = obj_id
-            is_enemy=False,           # Mirrors original: Faction.NEUTRAL
+            current_target_id=obj_id,
+            is_enemy=False,
             is_boss_or_player=False,
+            current_spell_cast = Consts.EMPTY_ID,
+            cast_start_time = 0,
             status=Status.ENVIRONMENT,
         )
 
@@ -155,6 +165,8 @@ class TargetingSystem:
             current_target_id=target_id,
             is_enemy=is_enemy,
             is_boss_or_player=spell_data.is_boss_or_player,
+            current_spell_cast = Consts.EMPTY_ID,
+            cast_start_time = timestamp,
             status=Status.ALIVE,
         )
         self._update_default_ids(new_obj_id, spell_id)
@@ -178,6 +190,12 @@ class TargetingSystem:
                 source_data.current_target_id = target_id
             if flags & TargetingBehavior.DESPAWN_SELF:
                 source_data.status = Status.DESPAWNED
+            if flags & TargetingBehavior.START_CHANNEL:
+                source_data.cast_start_time = timestamp
+                source_data.current_spell_cast = self.spell_data_dct[spell_id].effect_id
+            if flags & TargetingBehavior.STOP_CHANNEL:
+                source_data.cast_start_time = timestamp
+                source_data.current_spell_cast = Consts.EMPTY_ID
 
     def get_spell_sequence(self, spell_id: int) -> tuple[int, ...]:
         spell_data = self.spell_data_dct[spell_id]
@@ -187,20 +205,6 @@ class TargetingSystem:
         spell_data = self.spell_data_dct[spell_id]
         flags = spell_data.flags
         if flags & TargetingBehavior.AOE:
-            return True
-        return False
-
-    def has_aura_apply(self, spell_id) -> bool:
-        spell_data = self.spell_data_dct[spell_id]
-        flags = spell_data.flags
-        if flags & TargetingBehavior.AURA_APPLY:
-            return True
-        return False
-
-    def has_aura_cancel(self, spell_id) -> bool:
-        spell_data = self.spell_data_dct[spell_id]
-        flags = spell_data.flags
-        if flags & TargetingBehavior.AURA_CANCEL:
             return True
         return False
 
@@ -231,6 +235,36 @@ class TargetingSystem:
         if obj_data is None:
             return Consts.EMPTY_ID
         return obj_data.current_target_id
+
+    def get_periodic_effect(self, spell_id: int) -> int:
+        return self.spell_data_dct[spell_id].effect_id
+
+    def has_channel_start(self, spell_id: int) -> bool:
+        return bool(self.spell_data_dct[spell_id].flags & TargetingBehavior.START_CHANNEL)
+
+    def get_tick_timestamps(self, current_timestamp: int, spell_id: int) -> Iterable[int]:
+        """Yield timestamps for all ticks occuring during the aura's lifetime. """
+        spell_data = self.spell_data_dct[spell_id]
+        if spell_data.ticks > 0:
+            assert spell_data.duration % spell_data.ticks == 0, f"Non-integer tick interval: duration={spell_data.duration}, ticks={spell_data.ticks}"
+            tick_interval = spell_data.duration // spell_data.ticks
+            for i in range(1, spell_data.ticks + 1):
+                tick_timestamp = current_timestamp + i * tick_interval
+                assert isinstance(tick_timestamp, int), f"Non-int tick timestamp: {tick_timestamp}"
+                yield tick_timestamp
+
+    def is_aura_active(self, current_timestamp: int, obj_id: int, spell_id: int) -> bool:
+        obj_data = self.game_obj_targeting_dct.get(obj_id)
+        if obj_data is None:
+            return False
+        spell_data = self.spell_data_dct.get(spell_id)
+        # Determine if it has surpassed its duration
+        if spell_data and current_timestamp > (obj_data.cast_start_time + spell_data.duration):
+            return False
+        # Ensure spell cast wasn't canceled
+        if obj_data.current_spell_cast != self.spell_data_dct[spell_id].effect_id:
+            return False
+        return True
 
     def select_aoe_target_ids(self, source_id: int, primary_target_id: int) -> Iterable[int]:
         """ECS replacement of WorldState._select_targets_for_aoe()."""

@@ -110,7 +110,6 @@ class SimValidation:
         all_obj_ids.update(state._systems_manager._combat_system.game_obj_combat_dct.keys())
         all_obj_ids.update(state._systems_manager._movement_system.game_obj_positions_dct.keys())
         all_obj_ids.update(state._systems_manager._targeting_system.game_obj_targeting_dct.keys())
-        all_obj_ids.update(state._systems_manager._event_system.game_obj_data_dct.keys())
         all_obj_ids.update(state._systems_manager._cooldown_system.game_obj_data_dct.keys())
 
         game_objs: dict[str, dict] = {
@@ -152,22 +151,18 @@ class SimValidation:
         if targeting:
             data['targeting'] = sanitize(dataclasses.asdict(targeting))
 
-        # 4. Event System Data (Input Mapping & Scripted Controls)
-        event_data = state._systems_manager._event_system.game_obj_data_dct.get(obj_id)
-        if event_data:
-            evt_dict = {}
-            if event_data.spell_bindings:
-                evt_dict['spell_bindings'] = event_data.spell_bindings
-            if event_data.controls:
-                evt_dict['controls'] = [json.loads(c.serialize()) for c in event_data.controls]
-            data['events'] = sanitize(evt_dict)
-
-        # 5. Cooldown System Data (GCD and Ability Cooldowns)
+        # 4. Cooldown System Data (GCD and Ability Cooldowns)
         cooldown_data = state._systems_manager._cooldown_system.game_obj_data_dct.get(obj_id)
         if cooldown_data:
             # ObjCooldownData is a simple dataclass with standard types,
             # so dataclasses.asdict will serialize it perfectly
             data['cooldowns'] = sanitize(dataclasses.asdict(cooldown_data))
+            evt_dict = {}
+            if cooldown_data.spell_bindings:
+                evt_dict['spell_bindings'] = cooldown_data.spell_bindings
+            if cooldown_data.controls:
+                evt_dict['controls'] = [json.loads(c.serialize()) for c in cooldown_data.controls]
+            data['events'] = sanitize(evt_dict)
 
         return data
 
