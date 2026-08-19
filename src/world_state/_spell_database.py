@@ -1,40 +1,72 @@
-from typing import Any, Iterable, Type
+from typing import Iterable
+from src.world_state._spell_data_configs import LegacySpellConfig
+from src.world_state._spell_data import SpellData
 
-from src.world_state import Spell
-from src.world_state._spell_factories import SpellFactory
-from src.world_state._spell_configs import BasicMovement, BasicTargeting, NpcTargetDummy, NpcBoss, NpcHealingPowerup, NpcLandmine, SpecWarlock, ZoneTestGround
+from src.world_state._casting_system import CastingSystem
+from src.world_state._combat_system import CombatSystem
+from src.world_state._movement_system import MovementSystem
+from src.world_state._targeting_system import TargetingSystem
+from src.world_state._vfx_and_sfx_system import VfxAndSfxSystem
+
 
 class SpellDatabase:
     def __init__(self) -> None:
-        self.spells_loaded_into_memory: dict[int, Spell] = SpellDatabase._load_spells_into_memory()
+        self.spells_loaded_into_memory: dict[int, SpellData] = self._load_spells_into_memory()
 
-    def get_spell(self, spell_id: int) -> Spell:
+    def get_spell(self, spell_id: int) -> SpellData:
         assert spell_id in self.spells_loaded_into_memory, f"Spell with ID {spell_id} not found."
-        return self.spells_loaded_into_memory.get(spell_id, Spell())
+        return self.spells_loaded_into_memory[spell_id]
 
-    def get_all_spells(self) -> Iterable[Spell]:
-        """Helper to yield all spells for system initializations."""
+    def get_all_spells(self) -> Iterable[SpellData]:
+        """Yields all configured NewSpell instances."""
         return self.spells_loaded_into_memory.values()
 
-    @staticmethod
-    def _load_spells_into_memory() -> dict[int, Spell]:
-        spells_to_load: list[SpellFactory] = []
-        spells_to_load += SpellDatabase._load_collection(BasicMovement)
-        spells_to_load += SpellDatabase._load_collection(BasicTargeting)
-        spells_to_load += SpellDatabase._load_collection(NpcBoss)
-        spells_to_load += SpellDatabase._load_collection(NpcHealingPowerup)
-        spells_to_load += SpellDatabase._load_collection(NpcLandmine)
-        spells_to_load += SpellDatabase._load_collection(NpcTargetDummy)
-        spells_to_load += SpellDatabase._load_collection(SpecWarlock)
-        spells_to_load += SpellDatabase._load_collection(ZoneTestGround)
-        spells_loaded_into_memory: dict[int, Spell] = {}
-        for spell_factory in spells_to_load:
-            spell = spell_factory.build()
-            assert spell.spell_id not in spells_loaded_into_memory, f"Spell with ID {spell.spell_id} already exists."
-            spells_loaded_into_memory[spell.spell_id] = spell
-        return spells_loaded_into_memory
+    # --- System Factories ---
+
+    def create_casting_system(self) -> CastingSystem:
+        spell_data_dct = {
+            spell_id: spell.to_casting_data()
+            for spell_id, spell in self.spells_loaded_into_memory.items()
+        }
+        return CastingSystem(spell_data_dct)
+
+    def create_combat_system(self) -> CombatSystem:
+        spell_data_dct = {
+            spell_id: spell.to_combat_data()
+            for spell_id, spell in self.spells_loaded_into_memory.items()
+        }
+        return CombatSystem(spell_data_dct)
+
+    def create_movement_system(self) -> MovementSystem:
+        spell_data_dct = {
+            spell_id: spell.to_movement_data()
+            for spell_id, spell in self.spells_loaded_into_memory.items()
+        }
+        return MovementSystem(spell_data_dct)
+
+    def create_targeting_system(self) -> TargetingSystem:
+        spell_data_dct = {
+            spell_id: spell.to_targeting_data()
+            for spell_id, spell in self.spells_loaded_into_memory.items()
+        }
+        return TargetingSystem(spell_data_dct)
+
+    def create_vfx_and_sfx_system(self) -> VfxAndSfxSystem:
+        spell_data_dct = {
+            spell_id: spell.to_vfx_data()
+            for spell_id, spell in self.spells_loaded_into_memory.items()
+        }
+        return VfxAndSfxSystem(spell_data_dct)
+
+    # --- Internal Config Loader ---
 
     @staticmethod
-    def _load_collection(class_with_methods: Type[Any]) -> list[Any]:
-        static_methods = [name for name, attr in class_with_methods.__dict__.items() if isinstance(attr, staticmethod)]
-        return [getattr(class_with_methods, method)() for method in static_methods]
+    def _load_spells_into_memory() -> dict[int, SpellData]:
+        spells_loaded_into_memory: dict[int, SpellData] = {}
+
+        # Load exactly what is explicitly written in the config file
+        for spell in LegacySpellConfig.get_all_spells():
+            assert spell.spell_id not in spells_loaded_into_memory, f"Spell with ID {spell.spell_id} already exists."
+            spells_loaded_into_memory[spell.spell_id] = spell
+
+        return spells_loaded_into_memory

@@ -1,13 +1,13 @@
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
-from src.world_state.world_state import WorldState
+from src.world_state.world_state import DisplayObj, WorldState
 from src.world_state._vfx_and_sfx_system import SpellVfxData
 
 
 class IngameLoop:
 
     @staticmethod
-    def new_play_game_in_pygame(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]] | None = None) -> None:
+    def play_game_in_pygame(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]] | None = None) -> None:
 
         # Initialization
         rendering_framework = PygameRenderer()
@@ -47,15 +47,11 @@ class IngameLoop:
             # Simulate next frame
             world_state.process_frame(player_inputs_this_frame, ingame_time)
 
-            # Render this frame using the new vfx_and_sfx_system
             rendering_framework.begin_frame()
-            for spell_id in world_state.get_spell_ids_for_successful_events(ingame_time):
-                # Render this frame using the new vfx_and_sfx_system
-                spell_vfx = world_state._systems_manager._vfx_and_sfx_system.get_spell_visuals(spell_id)
-                if spell_vfx is not None:
-                    IngameLoop._new_display_spell(rendering_framework, spell_vfx)
-            for obj_id in world_state.view_obj_ids:
-                IngameLoop._new_render_game_obj(rendering_framework, world_state, obj_id, ingame_time)
+            for spell_vfx in world_state.get_spell_vfx_for_successful_events(ingame_time):
+                IngameLoop._display_spell(rendering_framework, spell_vfx)
+            for display_obj in world_state.view_display_objs(ingame_time):
+                IngameLoop._render_game_obj(rendering_framework, display_obj)
 
             IngameLoop._render_frame_actions(rendering_framework, ui_manager)
             rendering_framework.end_frame()
@@ -64,7 +60,7 @@ class IngameLoop:
         rendering_framework.terminate_rendering_framework()
 
     @staticmethod
-    def _new_display_spell(rendering_framework: PygameRenderer, spell_vfx: SpellVfxData) -> None:
+    def _display_spell(rendering_framework: PygameRenderer, spell_vfx: SpellVfxData) -> None:
         if spell_vfx.should_play_audio:
             rendering_framework.play_sound(spell_vfx.audio_name)
         if spell_vfx.should_play_animation:
@@ -77,13 +73,7 @@ class IngameLoop:
             )
 
     @staticmethod
-    def _new_render_game_obj(
-        rendering_framework: PygameRenderer, state: WorldState, obj_id: int, current_time: int) -> None:
-        display_obj = state._systems_manager.get_display_obj(obj_id=obj_id, timestamp=current_time)
-
-        if display_obj is None:
-            return
-
+    def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj) -> None:
         rendering_framework.draw_blinking_circle(
             pos_xy=display_obj.pos_xy,
             scale=display_obj.size,

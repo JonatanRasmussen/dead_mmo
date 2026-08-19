@@ -16398,8 +16398,32 @@
       "combat": {
         "hp": 0.0,
         "max_hp": 0.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": true
+        "gcd_start": -10000,
+        "parent_id": 0,
+        "current_target_id": 1,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "status": "ENVIRONMENT",
+        "obj_spawn_timestamp": 0,
+        "ability_cd_start": [],
+        "spell_bindings": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": []
       },
       "movement": {
         "x_pos": 0.0,
@@ -16415,16 +16439,86 @@
         "current_target_id": 1,
         "is_enemy": false,
         "is_boss_or_player": false,
-        "status": "ENVIRONMENT",
-        "obj_spawn_timestamp": 0
+        "current_spell_cast": 0,
+        "cast_start_time": 0,
+        "status": "ENVIRONMENT"
       }
     },
     "2": {
       "combat": {
         "hp": -17.0,
         "max_hp": 30.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": 3000,
+        "parent_id": 1,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": true,
+        "status": "ALIVE",
+        "obj_spawn_timestamp": 0,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          15,
+          71,
+          113,
+          128,
+          970,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 400,
+            "_offset": 0,
+            "key_presses": "SWAP_TARGET"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 800,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1000,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 3000,
+            "_offset": 0,
+            "key_presses": "ABILITY_4"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 5000,
+            "_offset": 0,
+            "key_presses": "ABILITY_3"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.7,
@@ -16440,16 +16534,55 @@
         "current_target_id": 3,
         "is_enemy": true,
         "is_boss_or_player": true,
-        "status": "ALIVE",
-        "obj_spawn_timestamp": 0
+        "current_spell_cast": 112,
+        "cast_start_time": 5000,
+        "status": "ALIVE"
       }
     },
     "3": {
       "combat": {
         "hp": -79.0,
         "max_hp": 30.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": 3800,
+        "parent_id": 1,
+        "current_target_id": 2,
+        "is_enemy": false,
+        "is_boss_or_player": true,
+        "status": "ALIVE",
+        "obj_spawn_timestamp": 0,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          128,
+          113,
+          171,
+          124,
+          15,
+          91,
+          92,
+          181,
+          182,
+          271,
+          272,
+          1,
+          2
+        ],
+        "controls": []
       },
       "movement": {
         "x_pos": 0.66,
@@ -16465,16 +16598,80 @@
         "current_target_id": 2,
         "is_enemy": false,
         "is_boss_or_player": true,
-        "status": "ALIVE",
-        "obj_spawn_timestamp": 0
+        "current_spell_cast": 112,
+        "cast_start_time": 5300,
+        "status": "ALIVE"
       }
     },
     "4": {
       "combat": {
         "hp": 33.0,
         "max_hp": 80.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": 4400,
+        "parent_id": 2,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": true,
+        "status": "ALIVE",
+        "obj_spawn_timestamp": 400,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          15,
+          124,
+          362,
+          941,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1500,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 2000,
+            "_offset": 0,
+            "key_presses": "ABILITY_4"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 4000,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 7000,
+            "_offset": 0,
+            "key_presses": "ABILITY_3"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.5582797443607164,
@@ -16490,16 +16687,62 @@
         "current_target_id": 3,
         "is_enemy": true,
         "is_boss_or_player": true,
-        "status": "ALIVE",
-        "obj_spawn_timestamp": 400
+        "current_spell_cast": 361,
+        "cast_start_time": 7400,
+        "status": "ALIVE"
       }
     },
     "5": {
       "combat": {
         "hp": 0.0,
         "max_hp": 0.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": -10000,
+        "parent_id": 3,
+        "current_target_id": 2,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "status": "DESPAWNED",
+        "obj_spawn_timestamp": 700,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.6642731830566597,
@@ -16515,16 +16758,62 @@
         "current_target_id": 2,
         "is_enemy": false,
         "is_boss_or_player": false,
-        "status": "DESPAWNED",
-        "obj_spawn_timestamp": 700
+        "current_spell_cast": 132,
+        "cast_start_time": 700,
+        "status": "DESPAWNED"
       }
     },
     "6": {
       "combat": {
         "hp": 0.0,
         "max_hp": 0.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": -10000,
+        "parent_id": 3,
+        "current_target_id": 4,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "status": "DESPAWNED",
+        "obj_spawn_timestamp": 700,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.48046748700887854,
@@ -16540,16 +16829,62 @@
         "current_target_id": 4,
         "is_enemy": false,
         "is_boss_or_player": false,
-        "status": "DESPAWNED",
-        "obj_spawn_timestamp": 700
+        "current_spell_cast": 132,
+        "cast_start_time": 700,
+        "status": "DESPAWNED"
       }
     },
     "7": {
       "combat": {
         "hp": 7.0,
         "max_hp": 20.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": -10000,
+        "parent_id": 2,
+        "current_target_id": 2,
+        "is_enemy": true,
+        "is_boss_or_player": false,
+        "status": "ALIVE",
+        "obj_spawn_timestamp": 800,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          115,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1500,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.19999999999999996,
@@ -16565,16 +16900,68 @@
         "current_target_id": 2,
         "is_enemy": true,
         "is_boss_or_player": false,
-        "status": "ALIVE",
-        "obj_spawn_timestamp": 800
+        "current_spell_cast": 114,
+        "cast_start_time": 2300,
+        "status": "ALIVE"
       }
     },
     "8": {
       "combat": {
         "hp": 17.0,
         "max_hp": 30.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": -10000,
+        "parent_id": 3,
+        "current_target_id": 3,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "status": "DESPAWNED",
+        "obj_spawn_timestamp": 1800,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          16,
+          215,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 100,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 200,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.51,
@@ -16590,16 +16977,62 @@
         "current_target_id": 3,
         "is_enemy": false,
         "is_boss_or_player": false,
-        "status": "DESPAWNED",
-        "obj_spawn_timestamp": 1800
+        "current_spell_cast": 214,
+        "cast_start_time": 2000,
+        "status": "DESPAWNED"
       }
     },
     "9": {
       "combat": {
         "hp": 0.0,
         "max_hp": 0.0,
+        "gcd_mod": 1.0,
         "spell_modifier": 1.0,
-        "is_environment": false
+        "gcd_start": -10000,
+        "parent_id": 4,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": false,
+        "status": "DESPAWNED",
+        "obj_spawn_timestamp": 4400,
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ]
       },
       "movement": {
         "x_pos": 0.6469698415279533,
@@ -16615,8 +17048,9 @@
         "current_target_id": 3,
         "is_enemy": true,
         "is_boss_or_player": false,
-        "status": "DESPAWNED",
-        "obj_spawn_timestamp": 4400
+        "current_spell_cast": 132,
+        "cast_start_time": 4400,
+        "status": "DESPAWNED"
       }
     }
   }

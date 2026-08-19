@@ -11,7 +11,7 @@ def main() -> None:
             LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
         )
     # Actually play the play
-    IngameLoop.new_play_game_in_pygame(
+    IngameLoop.play_game_in_pygame(
         LevelSetupConsts.BRAVO_SETUP_SPELL_IDS,
         LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
     )

@@ -7,7 +7,7 @@ from src.world_state._event_system import UpcomingEvent
 
 class FrameHeap:
     def __init__(self) -> None:
-        self._event_heap: list[tuple[int, int, int, int, int, UpcomingEvent]] = []
+        self._event_heap: list[tuple[int, int, UpcomingEvent]] = []
         self._iterations_remaining = Consts.EVENT_HEAP_MAX_ITERATIONS
 
     @classmethod
@@ -23,12 +23,12 @@ class FrameHeap:
 
     def insert_event(self, event: UpcomingEvent) -> None:
         heapq.heappush(self._event_heap, (*event.key, event))
-        # If two events have identical keys (should be impossible), we get '>' TypeError
+        # Events are inserted by timestamp (primary) and event_id (secondary)
 
     def pop_next_event(self) -> UpcomingEvent:
         assert self._iterations_remaining > 0, f"Event limit of {Consts.EVENT_HEAP_MAX_ITERATIONS} reached."
         self._iterations_remaining -= 1
-        _, _, _, _, _, event = heapq.heappop(self._event_heap)
+        _, _, event = heapq.heappop(self._event_heap)
         return event
 
     def peek_next_event(self) -> Optional[UpcomingEvent]:

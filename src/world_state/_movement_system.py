@@ -4,15 +4,12 @@ from typing import Dict, List, Tuple, Optional
 from enum import IntFlag, auto
 
 from src.settings import Consts
-from ._spell_database import SpellDatabase
-from src.world_state import Behavior
 # Assuming Behavior is importable from your project structure (e.g., src.world_state.behavior)
 
 
 class MovementBehavior(IntFlag):
     """ Various bitflags that define spell behavior. """
     NONE = 0
-
     # MOVEMENT
     MOVE_UP = auto()
     MOVE_LEFT = auto()
@@ -31,15 +28,6 @@ class MovementBehavior(IntFlag):
     TRY_MOVE = auto()
     DESPAWN_SELF = auto()
 
-    @classmethod
-    def from_behavior(cls, behavior: Behavior) -> "MovementBehavior":
-        """Extract the movement-related flags from a Behavior."""
-        result = cls.NONE
-        for flag in cls:
-            if flag is not cls.NONE and flag.name is not None and behavior & getattr(Behavior, flag.name):
-                result |= flag
-        return result
-
 
 @dataclass(slots=True)
 class SpellMovementData:
@@ -55,14 +43,7 @@ class SpellMovementData:
 
 @dataclass(slots=True)
 class ObjMovementData:
-    """ECS-style component storing positional and dead-reckoning data for a GameObj.
-
-    The X and Y axes are fully independent: each has its own base position,
-    velocity and timestamp. An event that only concerns the X axis must never
-    read or write any of the Y fields (and vice versa). This should be changed
-    in the future, but for now we need it like this to be identical in behavior
-    to the old movement system that relied on aura event ticks unique for x and y.
-    """
+    """ECS-style component storing positional and dead-reckoning data for a GameObj."""
     x_pos: float
     y_pos: float
     x_vel: float
@@ -71,29 +52,45 @@ class ObjMovementData:
     y_timestamp: int
     movespeed: float = 1.0
 
+    @classmethod
+    def create_environment(cls) -> 'ObjMovementData':
+        return cls(
+            x_pos=0.0,
+            y_pos=0.0,
+            x_vel=0.0,
+            y_vel=0.0,
+            x_timestamp=0,
+            y_timestamp=0,
+            movespeed=1.0
+        )
+
+    @classmethod
+    def create_from_spell(cls, timestamp: int, parent_x: float, parent_y: float, spell_data: SpellMovementData) -> 'ObjMovementData':
+        return cls(
+            x_pos=float(parent_x + spell_data.spawned_x_offset),
+            y_pos=float(parent_y + spell_data.spawned_y_offset),
+            x_vel=0.0,
+            y_vel=0.0,
+            x_timestamp=timestamp,
+            y_timestamp=timestamp,
+            movespeed=spell_data.spawned_movespeed,
+        )
+
 
 class MovementSystem:
     """
     Manages all movement-related logic, geometry, and hitboxes using a dead reckoning design.
-    Positional data is calculated via time-deltas rather than per-frame updates.
     """
-
     GLOBAL_MOVESPEED_TO_USE = Consts.MOVEMENT_DISTANCE_PER_SECOND
-
-    # --- FEATURE FLAG ---
     CONSTRAIN_TO_TICK_RATE: bool = True
     MS_PER_MOVEMENT_TICK: float = 1000.0 / Consts.MOVEMENT_UPDATES_PER_SECOND
 
-    def __init__(self, spell_database: SpellDatabase) -> None:
-        # Maps spell_id -> SpellMovementData
-        self.spell_data_dct: Dict[int, SpellMovementData] = MovementSystem._create_initialized_spell_data_dct(spell_database)
-        # Maps obj_id -> MovementData
-        self.game_obj_positions_dct: Dict[int, ObjMovementData] = {}
+    def __init__(self, spell_data_dct: Dict[int, SpellMovementData]) -> None:
+        self.spell_data_dct: Dict[int, SpellMovementData] = spell_data_dct
+        self.game_obj_data_dct: Dict[int, ObjMovementData] = {}
 
     @classmethod
     def extrapolate(cls, data: 'ObjMovementData', current_time: int | float) -> Tuple[float, float]:
-        """Pure dead-reckoning read of an ObjMovementData. Single source of truth
-        for the quantisation, shared by get_position and the debug harness."""
         x_dt = current_time - data.x_timestamp
         y_dt = current_time - data.y_timestamp
         assert x_dt >= 0, f"time went backwards on X ({current_time} < {data.x_timestamp})"
@@ -105,57 +102,21 @@ class MovementSystem:
             eff_x, eff_y = float(x_dt), float(y_dt)
         return data.x_pos + data.x_vel * eff_x, data.y_pos + data.y_vel * eff_y
 
-    @staticmethod
-    def _create_initialized_spell_data_dct(spell_database: SpellDatabase) -> Dict[int, SpellMovementData]:
-        """
-        Loads movement-relevant data from a SpellDatabase into memory.
-        The Spell object itself is discarded after extraction.
-        """
-        spell_data_dct = {}
-        for spell in spell_database.get_all_spells():
-            spell_data_dct[spell.spell_id] = SpellMovementData(
-            flags=MovementBehavior.from_behavior(spell.flags),
-            power=spell.power,
-            range_limit=spell.range_limit,
-            cast_time=spell.cast_time,
-            spawned_x_offset=spell.get_spawned_obj_pos_xy_speed[0],
-            spawned_y_offset=spell.get_spawned_obj_pos_xy_speed[1],
-            spawned_movespeed=spell.get_spawned_obj_movespeed,
-        )
-        return spell_data_dct
-
     def create_environment_obj(self, obj_id: int) -> None:
-        """
-        Creates the base environment object.
-        As the first object created, it bypasses parent positional lookups and spawns at origin.
-        """
-        self.game_obj_positions_dct[obj_id] = ObjMovementData(
-            x_pos=0.0,
-            y_pos=0.0,
-            x_vel=0.0,
-            y_vel=0.0,
-            x_timestamp=0,  # Safe to use 0 since velocity is 0 (dt won't affect position)
-            y_timestamp=0,
-            movespeed=1.0   # Environment is stationary
-        )
+        self.game_obj_data_dct[obj_id] = ObjMovementData.create_environment()
 
     def spawn_game_obj(self, timestamp: int, parent_obj_id: int, spawned_obj_id: int, spell_id: int) -> None:
-        """Registers a GameObj into the movement system, extracting its initial state."""
+        if spell_id not in self.spell_data_dct or spawned_obj_id in self.game_obj_data_dct:
+            return
         spell_data = self.spell_data_dct[spell_id]
         parent_x_pos, parent_y_pos = self.get_position(parent_obj_id, timestamp)
-        self.game_obj_positions_dct[spawned_obj_id] = ObjMovementData(
-            x_pos=float(parent_x_pos + spell_data.spawned_x_offset),
-            y_pos=float(parent_y_pos + spell_data.spawned_y_offset),
-            x_vel=0.0,
-            y_vel=0.0,
-            x_timestamp=timestamp,
-            y_timestamp=timestamp,
-            movespeed=spell_data.spawned_movespeed,
+        self.game_obj_data_dct[spawned_obj_id] = ObjMovementData.create_from_spell(
+            timestamp, parent_x_pos, parent_y_pos, spell_data
         )
 
     def despawn_game_obj(self, obj_id: int) -> None:
         """Removes an object from the movement system (e.g., on despawn)."""
-        self.game_obj_positions_dct.pop(obj_id, None)
+        self.game_obj_data_dct.pop(obj_id, None)
 
     def _effective_dt(self, dt: int) -> float:
         """
@@ -172,10 +133,10 @@ class MovementSystem:
 
     def get_position(self, obj_id: int, current_time: int) -> Tuple[float, float]:
         """Calculates the current (x, y) position of an object using dead reckoning."""
-        if obj_id not in self.game_obj_positions_dct:
+        if obj_id not in self.game_obj_data_dct:
             raise ValueError(f"Object {obj_id} not found in MovementSystem.")
 
-        data = self.game_obj_positions_dct[obj_id]
+        data = self.game_obj_data_dct[obj_id]
 
         # 1 timestamp unit = 1 ms. Events are guaranteed in order; going backwards is a bug.
         x_dt = current_time - data.x_timestamp
@@ -191,7 +152,7 @@ class MovementSystem:
 
     def _update_x_base_position(self, obj_id: int, current_time: int) -> None:
         """Bakes the current X velocity into the base X position and updates the X timestamp."""
-        data = self.game_obj_positions_dct[obj_id]
+        data = self.game_obj_data_dct[obj_id]
         dt = current_time - data.x_timestamp
         assert dt >= 0, f"Obj {obj_id}: time went backwards on X ({current_time} < {data.x_timestamp})"
         data.x_pos += data.x_vel * self._effective_dt(dt)
@@ -199,7 +160,7 @@ class MovementSystem:
 
     def _update_y_base_position(self, obj_id: int, current_time: int) -> None:
         """Bakes the current Y velocity into the base Y position and updates the Y timestamp."""
-        data = self.game_obj_positions_dct[obj_id]
+        data = self.game_obj_data_dct[obj_id]
         dt = current_time - data.y_timestamp
         assert dt >= 0, f"Obj {obj_id}: time went backwards on Y ({current_time} < {data.y_timestamp})"
         data.y_pos += data.y_vel * self._effective_dt(dt)
@@ -207,19 +168,19 @@ class MovementSystem:
 
     def set_x_velocity(self, obj_id: int, vx: float, current_time: int) -> None:
         """Updates ONLY the X velocity. The Y axis is left completely untouched."""
-        if obj_id not in self.game_obj_positions_dct:
+        if obj_id not in self.game_obj_data_dct:
             return
 
         self._update_x_base_position(obj_id, current_time)
-        self.game_obj_positions_dct[obj_id].x_vel = vx
+        self.game_obj_data_dct[obj_id].x_vel = vx
 
     def set_y_velocity(self, obj_id: int, vy: float, current_time: int) -> None:
         """Updates ONLY the Y velocity. The X axis is left completely untouched."""
-        if obj_id not in self.game_obj_positions_dct:
+        if obj_id not in self.game_obj_data_dct:
             return
 
         self._update_y_base_position(obj_id, current_time)
-        self.game_obj_positions_dct[obj_id].y_vel = vy
+        self.game_obj_data_dct[obj_id].y_vel = vy
 
     def set_velocity(self, obj_id: int, vx: float, vy: float, current_time: int) -> None:
         """Updates both velocities at once (for movement that is inherently 2D)."""
@@ -228,10 +189,10 @@ class MovementSystem:
 
     def teleport(self, obj_id: int, x: float, y: float, current_time: int) -> None:
         """Instantly moves an object to a new position, halting its velocity."""
-        if obj_id not in self.game_obj_positions_dct:
+        if obj_id not in self.game_obj_data_dct:
             return
 
-        data = self.game_obj_positions_dct[obj_id]
+        data = self.game_obj_data_dct[obj_id]
         data.x_pos = x
         data.y_pos = y
         data.x_vel = 0.0
@@ -250,11 +211,11 @@ class MovementSystem:
         flags = spell_data.flags
 
         # Apply Source Effects (Move Towards, Teleport)
-        if source_id in self.game_obj_positions_dct:
-            source_data = self.game_obj_positions_dct[source_id]
+        if source_id in self.game_obj_data_dct:
+            source_data = self.game_obj_data_dct[source_id]
             speed_per_ms = (source_data.movespeed * spell_data.power) * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
 
-            if flags & MovementBehavior.MOVE_TOWARDS_TARGET and target_id in self.game_obj_positions_dct:
+            if flags & MovementBehavior.MOVE_TOWARDS_TARGET and target_id in self.game_obj_data_dct:
                 tar_x, tar_y = self.get_position(target_id, timestamp)
                 src_x, src_y = self.get_position(source_id, timestamp)
                 dx = tar_x - src_x
@@ -270,7 +231,7 @@ class MovementSystem:
                 self.set_velocity(source_id, 0.0, 0.0, timestamp)
                 return
 
-            if flags & MovementBehavior.TELEPORT_TO_TARGET and target_id in self.game_obj_positions_dct:
+            if flags & MovementBehavior.TELEPORT_TO_TARGET and target_id in self.game_obj_data_dct:
                 tar_x, tar_y = self.get_position(target_id, timestamp)
                 self.teleport(source_id, tar_x, tar_y, timestamp)
                 return
@@ -280,8 +241,8 @@ class MovementSystem:
                 return
 
         # Apply Target Effects (Step Up, Down, Left, Right)
-        if target_id in self.game_obj_positions_dct:
-            target_data = self.game_obj_positions_dct[target_id]
+        if target_id in self.game_obj_data_dct:
+            target_data = self.game_obj_data_dct[target_id]
             speed_per_ms = (target_data.movespeed * spell_data.power) * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
 
             # X Axis Evaluator
@@ -303,14 +264,14 @@ class MovementSystem:
 
     def get_objects_in_range(self, origin_obj_id: int, range_limit: float, current_time: int) -> List[int]:
         """Returns a list of obj_ids that are within range_limit of the origin_obj_id."""
-        if origin_obj_id not in self.game_obj_positions_dct:
+        if origin_obj_id not in self.game_obj_data_dct:
             return []
 
         origin_x, origin_y = self.get_position(origin_obj_id, current_time)
         range_sq = range_limit * range_limit
         objects_in_range = []
 
-        for obj_id in self.game_obj_positions_dct:
+        for obj_id in self.game_obj_data_dct:
             if obj_id == origin_obj_id:
                 continue
 
@@ -328,7 +289,7 @@ class MovementSystem:
         range_limit = spell_data.range_limit
         if range_limit <= 0.0:
             return True
-        if (source_id not in self.game_obj_positions_dct or target_id not in self.game_obj_positions_dct):
+        if (source_id not in self.game_obj_data_dct or target_id not in self.game_obj_data_dct):
             return False
         source_x, source_y = self.get_position(source_id, current_time)
         target_x, target_y = self.get_position(target_id, current_time)
@@ -338,7 +299,7 @@ class MovementSystem:
 
     def check_collision(self, obj_id_1: int, obj_id_2: int, current_time: int, range_limit: float) -> bool:
         """Checks if two objects' hitboxes are overlapping."""
-        if obj_id_1 not in self.game_obj_positions_dct or obj_id_2 not in self.game_obj_positions_dct:
+        if obj_id_1 not in self.game_obj_data_dct or obj_id_2 not in self.game_obj_data_dct:
             return False
 
         x1, y1 = self.get_position(obj_id_1, current_time)
