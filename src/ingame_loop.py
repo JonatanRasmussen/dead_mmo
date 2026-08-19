@@ -1,7 +1,6 @@
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
-from src.world_state.world_state import DisplayObj, WorldState
-from src.world_state._vfx_and_sfx_system import SpellVfxData
+from src.world_state.world_state import DisplayObj, SpellVfxData, WorldState
 
 
 class IngameLoop:
@@ -46,13 +45,12 @@ class IngameLoop:
 
             # Simulate next frame
             world_state.process_frame(player_inputs_this_frame, ingame_time)
-
+            # Render the frame we just simulated
             rendering_framework.begin_frame()
             for spell_vfx in world_state.get_spell_vfx_for_successful_events(ingame_time):
                 IngameLoop._display_spell(rendering_framework, spell_vfx)
             for display_obj in world_state.view_display_objs(ingame_time):
                 IngameLoop._render_game_obj(rendering_framework, display_obj)
-
             IngameLoop._render_frame_actions(rendering_framework, ui_manager)
             rendering_framework.end_frame()
 

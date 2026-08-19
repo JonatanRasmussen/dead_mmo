@@ -1,0 +1,38 @@
+import heapq
+from typing import Optional
+
+from src.settings import Consts
+from ._combat_event import CombatEvent
+
+
+class FrameHeap:
+    def __init__(self) -> None:
+        self._event_heap: list[tuple[int, int, CombatEvent]] = []
+        self._iterations_remaining = Consts.EVENT_HEAP_MAX_ITERATIONS
+
+    @classmethod
+    def create_heap_from_list_of_events(cls, events: list[CombatEvent]) -> 'FrameHeap':
+        event_heap = FrameHeap()
+        for event in events:
+            event_heap.insert_event(event)
+        return event_heap
+
+    def has_unprocessed_events(self, timestamp_to_stop_after: float) -> bool:
+        next_event = self.peek_next_event()
+        return next_event is not None and next_event.timestamp <= timestamp_to_stop_after
+
+    def insert_event(self, event: CombatEvent) -> None:
+        event_key = (event.timestamp, event.event_id)
+        heapq.heappush(self._event_heap, (*event_key, event))
+        # Events are inserted by timestamp (primary) and event_id (secondary)
+
+    def pop_next_event(self) -> CombatEvent:
+        assert self._iterations_remaining > 0, f"Event limit of {Consts.EVENT_HEAP_MAX_ITERATIONS} reached."
+        self._iterations_remaining -= 1
+        _, _, event = heapq.heappop(self._event_heap)
+        return event
+
+    def peek_next_event(self) -> Optional[CombatEvent]:
+        if len(self._event_heap) > 0:
+            return self._event_heap[0][-1]
+        return None

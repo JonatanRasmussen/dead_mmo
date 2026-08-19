@@ -16395,7 +16395,30 @@
   },
   "game_objs": {
     "1": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [],
+        "gcd_start": -10000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [],
+        "current_spell_cast": 0,
+        "cast_start_time": 0
+      },
+      "health": {
         "hp": 0.0,
         "max_hp": 0.0,
         "spell_modifier": 1.0,
@@ -16420,7 +16443,75 @@
       }
     },
     "2": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": 3000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          15,
+          71,
+          113,
+          128,
+          970,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 400,
+            "_offset": 0,
+            "key_presses": "SWAP_TARGET"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 800,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1000,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 3000,
+            "_offset": 0,
+            "key_presses": "ABILITY_4"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 5000,
+            "_offset": 0,
+            "key_presses": "ABILITY_3"
+          }
+        ],
+        "current_spell_cast": 112,
+        "cast_start_time": 5000
+      },
+      "health": {
         "hp": -17.0,
         "max_hp": 30.0,
         "spell_modifier": 1.0,
@@ -16445,7 +16536,44 @@
       }
     },
     "3": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": 3800,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          128,
+          113,
+          171,
+          124,
+          15,
+          91,
+          92,
+          181,
+          182,
+          271,
+          272,
+          1,
+          2
+        ],
+        "controls": [],
+        "current_spell_cast": 112,
+        "cast_start_time": 5300
+      },
+      "health": {
         "hp": -79.0,
         "max_hp": 30.0,
         "spell_modifier": 1.0,
@@ -16470,7 +16598,69 @@
       }
     },
     "4": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": 4400,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          15,
+          124,
+          362,
+          941,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1500,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 2000,
+            "_offset": 0,
+            "key_presses": "ABILITY_4"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 4000,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 7000,
+            "_offset": 0,
+            "key_presses": "ABILITY_3"
+          }
+        ],
+        "current_spell_cast": 361,
+        "cast_start_time": 7400
+      },
+      "health": {
         "hp": 33.0,
         "max_hp": 80.0,
         "spell_modifier": 1.0,
@@ -16495,7 +16685,51 @@
       }
     },
     "5": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": -10000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 132,
+        "cast_start_time": 700
+      },
+      "health": {
         "hp": 0.0,
         "max_hp": 0.0,
         "spell_modifier": 1.0,
@@ -16520,7 +16754,51 @@
       }
     },
     "6": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": -10000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 132,
+        "cast_start_time": 700
+      },
+      "health": {
         "hp": 0.0,
         "max_hp": 0.0,
         "spell_modifier": 1.0,
@@ -16545,7 +16823,51 @@
       }
     },
     "7": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": -10000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          115,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1500,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 114,
+        "cast_start_time": 2300
+      },
+      "health": {
         "hp": 7.0,
         "max_hp": 20.0,
         "spell_modifier": 1.0,
@@ -16570,7 +16892,57 @@
       }
     },
     "8": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": -10000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          16,
+          215,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 100,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 200,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          }
+        ],
+        "current_spell_cast": 214,
+        "cast_start_time": 2000
+      },
+      "health": {
         "hp": 17.0,
         "max_hp": 30.0,
         "spell_modifier": 1.0,
@@ -16595,7 +16967,51 @@
       }
     },
     "9": {
-      "combat": {
+      "casting": {
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
+        "gcd_start": -10000,
+        "gcd_mod": 1.0,
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 132,
+        "cast_start_time": 4400
+      },
+      "health": {
         "hp": 0.0,
         "max_hp": 0.0,
         "spell_modifier": 1.0,

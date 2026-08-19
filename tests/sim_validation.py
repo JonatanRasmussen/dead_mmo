@@ -96,8 +96,9 @@ class SimValidation:
     @staticmethod
     def _capture_snapshot(state: WorldState) -> dict:
         events_by_frame: dict[str, list[dict]] = {}
-        for frame_time in sorted(state.view_event_logs.keys()):
-            event_log = state.view_event_logs[frame_time]
+        event_logs = state._event_handler._event_log_for_each_frame
+        for frame_time in sorted(event_logs.keys()):
+            event_log = event_logs[frame_time]
             serialized_events = [
                 json.loads(event.serialize())
                 for event in sorted(event_log.view_all_events, key=lambda e: e.event_id)
@@ -107,10 +108,10 @@ class SimValidation:
 
         # Gather all unique object IDs across all ECS systems
         all_obj_ids: set[int] = set()
-        all_obj_ids.update(state._casting_system.game_obj_data_dct.keys())
-        all_obj_ids.update(state._combat_system.game_obj_data_dct.keys())
-        all_obj_ids.update(state._movement_system.game_obj_data_dct.keys())
-        all_obj_ids.update(state._targeting_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._state_handler._casting_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._state_handler._health_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._state_handler._movement_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._state_handler._targeting_system.game_obj_data_dct.keys())
 
         game_objs: dict[str, dict] = {
             str(obj_id): SimValidation._serialize_ecs_entity(state, obj_id)
@@ -137,22 +138,22 @@ class SimValidation:
         data = {}
 
         # 0. Casting Component
-        casting = state._casting_system.game_obj_data_dct.get(obj_id)
+        casting = state._state_handler._casting_system.game_obj_data_dct.get(obj_id)
         if casting:
-            data['combat'] = sanitize(dataclasses.asdict(casting))
+            data['casting'] = sanitize(dataclasses.asdict(casting))
 
-        # 1. Combat Component
-        combat = state._combat_system.game_obj_data_dct.get(obj_id)
-        if combat:
-            data['combat'] = sanitize(dataclasses.asdict(combat))
+        # 1. Health Component
+        health = state._state_handler._health_system.game_obj_data_dct.get(obj_id)
+        if health:
+            data['health'] = sanitize(dataclasses.asdict(health))
 
         # 2. Movement Component
-        movement = state._movement_system.game_obj_data_dct.get(obj_id)
+        movement = state._state_handler._movement_system.game_obj_data_dct.get(obj_id)
         if movement:
             data['movement'] = sanitize(dataclasses.asdict(movement))
 
         # 3. Targeting Component
-        targeting = state._targeting_system.game_obj_data_dct.get(obj_id)
+        targeting = state._state_handler._targeting_system.game_obj_data_dct.get(obj_id)
         if targeting:
             data['targeting'] = sanitize(dataclasses.asdict(targeting))
 

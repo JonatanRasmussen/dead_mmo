@@ -1,3 +1,5 @@
 from .ingame_loop import IngameLoop
 
-__all__ = ["IngameLoop"]
+__all__ = [
+    "IngameLoop",
+]
