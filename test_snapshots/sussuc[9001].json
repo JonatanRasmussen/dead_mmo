@@ -59,7 +59,7 @@
         "eid": 11,
         "ts": 400,
         "sid": 3,
-        "sp": 2,
+        "sp": 92,
         "tid": 3,
         "sm": 1.0
       },
@@ -67,7 +67,7 @@
         "eid": 12,
         "ts": 400,
         "sid": 3,
-        "sp": 92,
+        "sp": 2,
         "tid": 3,
         "sm": 1.0
       }
@@ -77,16 +77,16 @@
         "eid": 17,
         "ts": 500,
         "sid": 3,
-        "sp": 271,
-        "tid": 3,
+        "sp": 124,
+        "tid": 1,
         "sm": 1.0
       },
       {
         "eid": 18,
         "ts": 500,
         "sid": 3,
-        "sp": 124,
-        "tid": 1,
+        "sp": 271,
+        "tid": 3,
         "sm": 1.0
       }
     ],
@@ -95,16 +95,16 @@
         "eid": 19,
         "ts": 600,
         "sid": 3,
-        "sp": 272,
-        "tid": 3,
+        "sp": 15,
+        "tid": 2,
         "sm": 1.0
       },
       {
         "eid": 20,
         "ts": 600,
         "sid": 3,
-        "sp": 15,
-        "tid": 2,
+        "sp": 272,
+        "tid": 3,
         "sm": 1.0
       }
     ],
@@ -2631,7 +2631,7 @@
         "eid": 6211,
         "ts": 1800,
         "sid": 3,
-        "sp": 271,
+        "sp": 171,
         "tid": 3,
         "sm": 1.0
       },
@@ -2639,7 +2639,7 @@
         "eid": 6212,
         "ts": 1800,
         "sid": 3,
-        "sp": 1,
+        "sp": 271,
         "tid": 3,
         "sm": 1.0
       },
@@ -2647,7 +2647,7 @@
         "eid": 6213,
         "ts": 1800,
         "sid": 3,
-        "sp": 171,
+        "sp": 1,
         "tid": 3,
         "sm": 1.0
       }
@@ -4815,16 +4815,16 @@
         "eid": 6522,
         "ts": 3800,
         "sid": 3,
-        "sp": 272,
-        "tid": 3,
+        "sp": 128,
+        "tid": 2,
         "sm": 1.0
       },
       {
         "eid": 6523,
         "ts": 3800,
         "sid": 3,
-        "sp": 128,
-        "tid": 2,
+        "sp": 272,
+        "tid": 3,
         "sm": 1.0
       },
       {
@@ -7565,7 +7565,7 @@
         "eid": 9647,
         "ts": 5300,
         "sid": 3,
-        "sp": 2,
+        "sp": 113,
         "tid": 3,
         "sm": 1.0
       },
@@ -7573,7 +7573,7 @@
         "eid": 9648,
         "ts": 5300,
         "sid": 3,
-        "sp": 113,
+        "sp": 2,
         "tid": 3,
         "sm": 1.0
       },
@@ -16396,10 +16396,25 @@
   "game_objs": {
     "1": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [],
         "gcd_start": -10000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
+        "spell_bindings": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [],
         "current_spell_cast": 0,
         "cast_start_time": 0
       },
@@ -16429,11 +16444,71 @@
     },
     "2": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": 3000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 113,
+        "spell_bindings": [
+          15,
+          71,
+          113,
+          128,
+          970,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 400,
+            "_offset": 0,
+            "key_presses": "SWAP_TARGET"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 800,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1000,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 3000,
+            "_offset": 0,
+            "key_presses": "ABILITY_4"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 5000,
+            "_offset": 0,
+            "key_presses": "ABILITY_3"
+          }
+        ],
+        "current_spell_cast": 112,
         "cast_start_time": 5000
       },
       "health": {
@@ -16462,25 +16537,40 @@
     },
     "3": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": 3800,
         "gcd_mod": 1.0,
-        "hardware_bindings": {
-          "BUILTIN_KEYBOARD_KEYDOWN_1": 128,
-          "BUILTIN_KEYBOARD_KEYDOWN_2": 113,
-          "BUILTIN_KEYBOARD_KEYDOWN_3": 171,
-          "BUILTIN_KEYBOARD_KEYDOWN_4": 124,
-          "BUILTIN_KEYBOARD_KEYDOWN_TAB": 15,
-          "BUILTIN_KEYBOARD_KEYDOWN_ARROW_UP": 91,
-          "BUILTIN_KEYBOARD_KEYUP_ARROW_UP": 92,
-          "BUILTIN_KEYBOARD_KEYDOWN_ARROW_LEFT": 181,
-          "BUILTIN_KEYBOARD_KEYUP_ARROW_LEFT": 182,
-          "BUILTIN_KEYBOARD_KEYDOWN_ARROW_DOWN": 271,
-          "BUILTIN_KEYBOARD_KEYUP_ARROW_DOWN": 272,
-          "BUILTIN_KEYBOARD_KEYDOWN_ARROW_RIGHT": 1,
-          "BUILTIN_KEYBOARD_KEYUP_ARROW_RIGHT": 2
-        },
-        "current_spell_cast": 113,
+        "spell_bindings": [
+          128,
+          113,
+          171,
+          124,
+          15,
+          91,
+          92,
+          181,
+          182,
+          271,
+          272,
+          1,
+          2
+        ],
+        "controls": [],
+        "current_spell_cast": 112,
         "cast_start_time": 5300
       },
       "health": {
@@ -16509,11 +16599,65 @@
     },
     "4": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": 4400,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 362,
+        "spell_bindings": [
+          15,
+          124,
+          362,
+          941,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1500,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 2000,
+            "_offset": 0,
+            "key_presses": "ABILITY_4"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 4000,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 7000,
+            "_offset": 0,
+            "key_presses": "ABILITY_3"
+          }
+        ],
+        "current_spell_cast": 361,
         "cast_start_time": 7400
       },
       "health": {
@@ -16542,11 +16686,47 @@
     },
     "5": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": -10000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 131,
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 132,
         "cast_start_time": 700
       },
       "health": {
@@ -16575,11 +16755,47 @@
     },
     "6": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": -10000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 131,
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 132,
         "cast_start_time": 700
       },
       "health": {
@@ -16608,11 +16824,47 @@
     },
     "7": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": -10000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 115,
+        "spell_bindings": [
+          115,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 1500,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 114,
         "cast_start_time": 2300
       },
       "health": {
@@ -16641,11 +16893,53 @@
     },
     "8": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": -10000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 215,
+        "spell_bindings": [
+          16,
+          215,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 100,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          },
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 200,
+            "_offset": 0,
+            "key_presses": "ABILITY_2"
+          }
+        ],
+        "current_spell_cast": 214,
         "cast_start_time": 2000
       },
       "health": {
@@ -16674,11 +16968,47 @@
     },
     "9": {
       "casting": {
-        "ability_cd_start": {},
+        "ability_cd_start": [
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999,
+          -999
+        ],
         "gcd_start": -10000,
         "gcd_mod": 1.0,
-        "hardware_bindings": {},
-        "current_spell_cast": 131,
+        "spell_bindings": [
+          131,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "controls": [
+          {
+            "obj_id": 0,
+            "timeline_timestamp": 0,
+            "_offset": 0,
+            "key_presses": "ABILITY_1"
+          }
+        ],
+        "current_spell_cast": 132,
         "cast_start_time": 4400
       },
       "health": {

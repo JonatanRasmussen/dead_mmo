@@ -1,4 +1,4 @@
-from typing import Iterable, Mapping, Union
+from typing import Iterable
 from dataclasses import dataclass
 
 from ._spell_database import SpellDatabase
@@ -61,26 +61,17 @@ class StateHandler:
     def get_current_target_for_obj(self, obj_id: int) -> int:
         return self._targeting_system.get_current_target_for_obj(obj_id)
 
-    def get_ability_timeline(self, spell_id: int) -> Mapping[int, Union[int, tuple[int, ...]]]:
+    def get_ability_timeline(self, spell_id: int) -> dict[int, list[int]]:
         return self._casting_system.get_ability_timeline(spell_id)
 
     def is_area_of_effect(self, spell_id: int) -> bool:
         return self._targeting_system.is_area_of_effect(spell_id)
 
-    def get_effect_id(self, spell_id: int) -> int:
-        return self._casting_system.get_effect_id(spell_id)
-
     def select_targets_for_aoe(self, source_id: int, target_id: int) -> Iterable[int]:
         return self._targeting_system.select_targets_for_aoe(source_id, target_id)
 
-    def get_spell_sequence(self, spell_id: int) -> Iterable[int] | None:
-        return self._casting_system.get_spell_sequence(spell_id)
-
     def has_channel_start(self, spell_id: int) -> bool:
         return self._casting_system.has_channel_start(spell_id)
-
-    def get_tick_timestamps(self, timestamp: int, spell_id: int) -> Iterable[int]:
-        return self._casting_system.get_tick_timestamps(timestamp, spell_id)
 
     def get_spell_ids_for_inputs(self, source_id: int, player_inputs: list[str]) -> Iterable[int]:
         return self._casting_system.get_spell_ids_for_inputs(source_id, player_inputs)

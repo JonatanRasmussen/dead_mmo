@@ -14,8 +14,8 @@ class Targeting(Enum):
     TARGET_OF_TARGET = auto()
     PARENT = auto()
     TARGET_OF_PARENT = auto()
-    DEFAULT_FRIENDLY = auto()
-    DEFAULT_ENEMY = auto()
+    DEFAULT_SAME_TEAM = auto()
+    DEFAULT_CROSS_TEAM = auto()
     TAB_TO_NEXT = auto()
 
 class Status(Enum):
@@ -254,7 +254,7 @@ class TargetingSystem:
         source_data = self.game_obj_data_dct[source_id]
         is_on_players_team = not source_data.is_enemy
 
-        if targeting in {Targeting.SELF, Targeting.DEFAULT_FRIENDLY}:
+        if targeting in {Targeting.SELF, Targeting.DEFAULT_SAME_TEAM}:
             target_id = source_id
         elif (
             targeting in {Targeting.TARGET, Targeting.TARGET_OF_TARGET}
@@ -266,7 +266,7 @@ class TargetingSystem:
             and Consts.is_valid_id(source_data.parent_id)
         ):
             target_id = source_data.parent_id
-        elif targeting == Targeting.DEFAULT_ENEMY:
+        elif targeting == Targeting.DEFAULT_CROSS_TEAM:
             if is_on_players_team:
                 target_id = self.default_ids.boss1_id
             else:

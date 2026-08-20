@@ -13,7 +13,7 @@ def main() -> None:
     # Actually play the play
     IngameLoop.play_game_in_pygame(
         LevelSetupConsts.BRAVO_SETUP_SPELL_IDS,
-        LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
+        #LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
     )
 
 if __name__ == "__main__":

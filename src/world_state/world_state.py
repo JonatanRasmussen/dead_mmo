@@ -5,7 +5,6 @@ from .event_handler import EventHandler, IdGen
 from .state_handler import StateHandler, SpellVfxData, DisplayObj
 
 
-
 class WorldState:
     """ The entirely ECS-driven game state of the save file that is currently in use """
 
@@ -30,7 +29,7 @@ class WorldState:
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         environment_id = self._state_handler.environment_id
         for spell_id in setup_spell_ids:
-            self._event_handler.create_upcoming_untargeted_event(ingame_time, environment_id, spell_id)
+            self._event_handler.dispatch_upcoming_untargeted_event(ingame_time, environment_id, spell_id)
         empty_list_of_player_inputs: list[str] = []
         self.process_frame(empty_list_of_player_inputs, ingame_time)
 
@@ -54,32 +53,26 @@ class WorldState:
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
 
     def _create_cascading_events(self, timestamp: int, new_obj_id: int, source_id: int, spell_id: int, target_id: int) -> None:
-        # 1. Spawned Object Control Events
+        timeline = self._state_handler.get_ability_timeline(spell_id)
+        if not timeline:
+            return
+        # Determine who casts the timeline events
         if new_obj_id != Consts.EMPTY_ID:
-            new_obj_target_id = self._state_handler.get_current_target_for_obj(new_obj_id)
-            timeline = self._state_handler.get_ability_timeline(spell_id)
-            for trigger_timestamp, timeline_spell_ids in timeline.items():
-                if isinstance(timeline_spell_ids, int):
-                    timeline_spell_ids = (timeline_spell_ids,)
-                for timeline_spell_id in timeline_spell_ids:
-                    new_timestamp = trigger_timestamp + timestamp
-                    self._event_handler.create_upcoming_targeted_event(new_timestamp, new_obj_id, timeline_spell_id, new_obj_target_id)
-        # 2. Area of Effect (AoE) Events
+            timeline_source = new_obj_id
+        else:
+            timeline_source = source_id
+        # Determine targets
         if self._state_handler.is_area_of_effect(spell_id):
-            effect_id = self._state_handler.get_effect_id(spell_id)
-            target_ids = self._state_handler.select_targets_for_aoe(source_id, target_id)
-            for aoe_target_id in target_ids:
-                self._event_handler.create_upcoming_targeted_event(timestamp, source_id, effect_id, aoe_target_id)
-        # 3. Spell Sequence Events
-        sequenced_spells = self._state_handler.get_spell_sequence(spell_id)
-        if sequenced_spells is not None:
-            for next_spell_id in sequenced_spells:
-                self._event_handler.create_upcoming_targeted_event(timestamp, source_id, next_spell_id, target_id)
-        # 4. Channel Tick Events
-        if self._state_handler.has_channel_start(spell_id):
-            effect_id = self._state_handler.get_effect_id(spell_id)
-            for tick_timestamp in self._state_handler.get_tick_timestamps(timestamp, spell_id):
-                self._event_handler.create_upcoming_targeted_event(tick_timestamp, source_id, effect_id, target_id)
+            timeline_targets = list(self._state_handler.select_targets_for_aoe(timeline_source, target_id))
+        else:
+            timeline_targets = [target_id]
+        # Dispatch
+        for trigger_timestamp, timeline_spell_ids in timeline.items():
+            for t_target in timeline_targets:
+                for t_spell in timeline_spell_ids:
+                    self._event_handler.dispatch_upcoming_targeted_event(
+                        timestamp + trigger_timestamp, timeline_source, t_spell, t_target
+                    )
 
     def _create_events_from_controls(self, player_inputs: list[str], timestamp: int) -> None:
         source_id = self._state_handler.player_id
@@ -88,7 +81,7 @@ class WorldState:
         target_id = self._state_handler.get_current_target_for_obj(self._state_handler.player_id)
         spell_ids = self._state_handler.get_spell_ids_for_inputs(source_id, player_inputs)
         for spell_id in spell_ids:
-            self._event_handler.create_upcoming_targeted_event(timestamp, source_id, spell_id, target_id)
+            self._event_handler.dispatch_upcoming_targeted_event(timestamp, source_id, spell_id, target_id)
 
     def _validate_event(self, timestamp: int, source_id: int, spell_id: int, finalized_target_id: int) -> bool:
         if not self._state_handler.is_valid_source(source_id):

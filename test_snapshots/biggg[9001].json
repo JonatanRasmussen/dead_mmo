@@ -16433,7 +16433,7 @@
         "gcd_start": 3000,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 113,
+        "current_spell_cast": 112,
         "cast_start_time": 5000
       },
       "health": {
@@ -16480,7 +16480,7 @@
           "BUILTIN_KEYBOARD_KEYDOWN_ARROW_RIGHT": 1,
           "BUILTIN_KEYBOARD_KEYUP_ARROW_RIGHT": 2
         },
-        "current_spell_cast": 113,
+        "current_spell_cast": 112,
         "cast_start_time": 5300
       },
       "health": {
@@ -16513,7 +16513,7 @@
         "gcd_start": 4400,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 362,
+        "current_spell_cast": 361,
         "cast_start_time": 7400
       },
       "health": {
@@ -16546,7 +16546,7 @@
         "gcd_start": -10000,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 131,
+        "current_spell_cast": 132,
         "cast_start_time": 700
       },
       "health": {
@@ -16579,7 +16579,7 @@
         "gcd_start": -10000,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 131,
+        "current_spell_cast": 132,
         "cast_start_time": 700
       },
       "health": {
@@ -16612,7 +16612,7 @@
         "gcd_start": -10000,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 115,
+        "current_spell_cast": 114,
         "cast_start_time": 2300
       },
       "health": {
@@ -16645,7 +16645,7 @@
         "gcd_start": -10000,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 215,
+        "current_spell_cast": 214,
         "cast_start_time": 2000
       },
       "health": {
@@ -16678,7 +16678,7 @@
         "gcd_start": -10000,
         "gcd_mod": 1.0,
         "hardware_bindings": {},
-        "current_spell_cast": 131,
+        "current_spell_cast": 132,
         "cast_start_time": 4400
       },
       "health": {

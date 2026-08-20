@@ -74,12 +74,12 @@ class EventHandler:
     def get_successful_spell_ids(self, current_frame_timestamp: int) -> Iterable[int]:
         return self._event_log_for_each_frame[current_frame_timestamp].get_successful_spell_ids
 
-    def create_upcoming_targeted_event(self, timestamp: int, source_id: int, spell_id: int, target_id) -> None:
+    def dispatch_upcoming_targeted_event(self, timestamp: int, source_id: int, spell_id: int, target_id) -> None:
         event_id=self._event_id_gen.generate_new_id()
         setup_event = CombatEvent(event_id, timestamp, source_id, spell_id, target_id)
         self._event_heap.insert_event(setup_event)
 
-    def create_upcoming_untargeted_event(self, timestamp: int, source_id: int, spell_id: int) -> None:
+    def dispatch_upcoming_untargeted_event(self, timestamp: int, source_id: int, spell_id: int) -> None:
         event_id=self._event_id_gen.generate_new_id()
         setup_event = CombatEvent(event_id, timestamp, source_id, spell_id)
         self._event_heap.insert_event(setup_event)

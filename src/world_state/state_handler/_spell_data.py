@@ -1,35 +1,88 @@
-from typing import Mapping, Union, Tuple, Optional
+from enum import Enum, IntFlag, auto
+from typing import Tuple, Optional
 from dataclasses import dataclass, field
 from src.settings import Consts
 
-# Import the refactored systems and components
-from ._casting_system import SpellCastingData, CastingBehavior, Controls
-from ._health_system import SpellHealthData, HealthBehavior
-from ._movement_system import SpellMovementData, MovementBehavior
-from ._targeting_system import SpellTargetingData, TargetingBehavior, Targeting
-from ._vfx_and_sfx_system import SpellVfxData, SpellVisualTemplate
+# ==========================================
+# Config-Level Spell Flags and Modes
+# ==========================================
+
+class CastingSpellFlags(IntFlag):
+    """ Various bitflags that define spell casting and cooldown behavior. """
+    NONE = 0
+    TRIGGER_GCD = auto()
+    TRIGGER_COOLDOWN = auto()
+    DENY_IF_CASTING = auto()
+    START_CHANNEL = auto()
+    STOP_CHANNEL = auto()
+
+class HealthSpellFlags(IntFlag):
+    """ Various bitflags that define spell health behavior. """
+    NONE = 0
+    DAMAGING = auto()
+    HEALING = auto()
+    IS_CHANNEL = auto()
+
+class MovementSpellFlags(IntFlag):
+    """ Various bitflags that define spell movement behavior. """
+    NONE = 0
+    MOVE_UP = auto()
+    MOVE_LEFT = auto()
+    MOVE_DOWN = auto()
+    MOVE_RIGHT = auto()
+    STOP_MOVE_UP = auto()
+    STOP_MOVE_LEFT = auto()
+    STOP_MOVE_DOWN = auto()
+    STOP_MOVE_RIGHT = auto()
+    MOVE_TOWARDS_TARGET = auto()
+    STOP_MOVE_TOWARDS_TARGET = auto()
+    TELEPORT_TO_TARGET = auto()
+    FORCE_MOVE = auto()
+    TRY_MOVE = auto()
+    DESPAWN_SELF = auto()
+    APPLY_VELOCITY = auto()
+    REMOVE_VELOCITY = auto()
+
+class TargetingSpellFlags(IntFlag):
+    """Non-combat, non-movement spell flags related to targeting."""
+    NONE = 0
+    AOE = auto()
+    SPAWN_BOSS = auto()
+    SPAWN_PLAYER = auto()
+    SPAWN_OBJ = auto()
+    DESPAWN_SELF = auto()
+    UPDATE_CURRENT_TARGET = auto()
+
+class TargetingSpellMode(Enum):
+    """ Defines targeting behavior for spell """
+    NONE = 0
+    SELF = auto()
+    USE_EVENT_TARGET = auto()
+    TARGET = auto()
+    TARGET_OF_TARGET = auto()
+    PARENT = auto()
+    TARGET_OF_PARENT = auto()
+    DEFAULT_SAME_TEAM = auto()
+    DEFAULT_CROSS_TEAM = auto()
+    TAB_TO_NEXT = auto()
 
 
 @dataclass(slots=True)
 class SpellData:
     """A flattened, system-agnostic configuration container for spells."""
     spell_id: int
+    name: str = ""
 
-    # Extracted Behaviors
-    casting_behavior: CastingBehavior = CastingBehavior.NONE
-    health_behavior: HealthBehavior = HealthBehavior.NONE
-    movement_behavior: MovementBehavior = MovementBehavior.NONE
-    targeting_behavior: TargetingBehavior = TargetingBehavior.NONE
+    # Extracted Behaviors (Now System-Agnostic)
+    casting_behavior: CastingSpellFlags = CastingSpellFlags.NONE
+    health_behavior: HealthSpellFlags = HealthSpellFlags.NONE
+    movement_behavior: MovementSpellFlags = MovementSpellFlags.NONE
+    targeting_behavior: TargetingSpellFlags = TargetingSpellFlags.NONE
 
     # Casting Data
-    spell_sequence: tuple[int, ...] = ()
-    timeline: Mapping[int, Union[int, tuple[int, ...]]] = field(default_factory=dict)
-    effect_id: int = Consts.EMPTY_ID
-    duration: int = 0
-    ticks: int = 1
+    timeline: dict[int, list[int]] = field(default_factory=dict)
     base_cooldown: float = 0.0
-    spell_bindings: list[int] = field(default_factory=list)
-    controls: tuple[Controls, ...] = ()
+    hardware_bindings: dict[str, int] = field(default_factory=dict)
     gcd_mod: float = 1.0
 
     # Health Data
@@ -44,7 +97,7 @@ class SpellData:
     spawned_movespeed: float = 1.0
 
     # Targeting Data
-    targeting: Targeting = Targeting.NONE
+    targeting: TargetingSpellMode = TargetingSpellMode.NONE
 
     # VFX/SFX Data
     audio_name: str = ""
@@ -56,68 +109,3 @@ class SpellData:
     spawn_color: Optional[Tuple[int, int, int]] = None
     spawn_sprite_name: str = ""
     spawn_audio_name: str = ""
-
-    # --- System Data Generators ---
-
-    def to_casting_data(self) -> SpellCastingData:
-        return SpellCastingData(
-            flags=self.casting_behavior,
-            spell_sequence=self.spell_sequence,
-            timeline=self.timeline,
-            effect_id=self.effect_id,
-            duration=self.duration,
-            ticks=self.ticks,
-            base_cooldown=self.base_cooldown,
-            spell_bindings=self.spell_bindings,
-            controls=self.controls,
-            gcd_mod=self.gcd_mod,
-        )
-
-    def to_health_data(self) -> SpellHealthData:
-        return SpellHealthData(
-            power=self.power,
-            flags=self.health_behavior,
-            hp=self.hp,
-        )
-
-    def to_movement_data(self) -> SpellMovementData:
-        return SpellMovementData(
-            power=self.power,
-            range_limit=self.range_limit,
-            cast_time=self.cast_time,
-            flags=self.movement_behavior,
-            spawned_x_offset=self.spawned_x_offset,
-            spawned_y_offset=self.spawned_y_offset,
-            spawned_movespeed=self.spawned_movespeed,
-        )
-
-    def to_targeting_data(self) -> SpellTargetingData:
-        is_enemy = bool(self.targeting_behavior & TargetingBehavior.SPAWN_BOSS)
-        is_boss_or_player = bool(
-            self.targeting_behavior & TargetingBehavior.SPAWN_BOSS or
-            self.targeting_behavior & TargetingBehavior.SPAWN_PLAYER
-        )
-        return SpellTargetingData(
-            spell_id=self.spell_id,
-            targeting=self.targeting,
-            is_enemy=is_enemy,
-            is_boss_or_player=is_boss_or_player,
-            flags=self.targeting_behavior,
-        )
-
-    def to_vfx_data(self) -> SpellVfxData:
-        spawn_template = None
-        if self.spawn_color is not None:
-            spawn_template = SpellVisualTemplate(
-                color=self.spawn_color,
-                sprite_name=self.spawn_sprite_name,
-                audio_name=self.spawn_audio_name
-            )
-
-        return SpellVfxData(
-            audio_name=self.audio_name,
-            animation_name=self.animation_name,
-            animation_scale=self.animation_scale,
-            animate_on_target=self.animate_on_target,
-            spawn_template=spawn_template
-        )
