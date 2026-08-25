@@ -1,13 +1,14 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-from src.settings import Consts
-
 
 @dataclass(slots=True)
 class SpellVisualTemplate:
     """Stores the cosmetic data extracted from a Spell's spawned_obj template."""
-    color: tuple[int, int, int]
+
+    color_red: int
+    color_green: int
+    color_blue: int
     sprite_name: str
     audio_name: str
 
@@ -15,6 +16,7 @@ class SpellVisualTemplate:
 @dataclass(slots=True)
 class SpellVfxData:
     """Stores visual/audio data for the spell itself."""
+
     audio_name: str
     animation_name: str
     animation_scale: float
@@ -33,30 +35,43 @@ class SpellVfxData:
 @dataclass(slots=True)
 class ObjVfxData:
     """ECS-style component storing rendering data for a GameObj."""
-    color: tuple[int, int, int]
+
+    color_red: int
+    color_green: int
+    color_blue: int
     sprite_name: str
     audio_name: str
 
     @classmethod
-    def create_environment(cls) -> 'ObjVfxData':
+    def create_environment(cls) -> "ObjVfxData":
         return cls(
-            color=(255, 255, 255),
+            color_red=255,
+            color_green=255,
+            color_blue=255,
             sprite_name="",
-            audio_name=""
+            audio_name="",
         )
 
     @classmethod
-    def create_from_spell(cls, spell_data: Optional[SpellVfxData]) -> 'ObjVfxData':
+    def create_from_spell(
+        cls,
+        spell_data: Optional[SpellVfxData],
+    ) -> "ObjVfxData":
         if spell_data and spell_data.spawn_template:
             return cls(
-                color=spell_data.spawn_template.color,
+                color_red=spell_data.spawn_template.color_red,
+                color_green=spell_data.spawn_template.color_green,
+                color_blue=spell_data.spawn_template.color_blue,
                 sprite_name=spell_data.spawn_template.sprite_name,
-                audio_name=spell_data.spawn_template.audio_name
+                audio_name=spell_data.spawn_template.audio_name,
             )
+
         return cls(
-            color=(255, 255, 255),
+            color_red=255,
+            color_green=255,
+            color_blue=255,
             sprite_name="",
-            audio_name=""
+            audio_name="",
         )
 
 
@@ -64,6 +79,7 @@ class VfxAndSfxSystem:
     """
     Manages all cosmetic rendering logic, sprites, animations, and sound effects.
     """
+
     def __init__(self, spell_data_dct: Dict[int, SpellVfxData]) -> None:
         self.spell_data_dct: Dict[int, SpellVfxData] = spell_data_dct
         self.game_obj_vfx_dct: Dict[int, ObjVfxData] = {}

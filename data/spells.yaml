@@ -1,0 +1,316 @@
+# When you are ready to use string IDs, change these integer keys to string names
+# (e.g. "128": -> "fire_blast": ) and update the timeline arrays to use names.
+# For now, they remain integers so your tests pass.
+
+0:
+  name: empty_spell
+
+# ==========================================
+# Basic Movement
+# ==========================================
+91:
+  name: start_move_up
+  walk_forward: true
+92:
+  name: stop_move_up
+  stop_walk_forward: true
+181:
+  name: start_move_left
+  walk_left: true
+182:
+  name: stop_move_left
+  stop_walk_left: true
+271:
+  name: start_move_down
+  walk_backward: true
+272:
+  name: stop_move_down
+  stop_walk_backward: true
+1:
+  name: start_move_right
+  walk_right: true
+2:
+  name: stop_move_right
+  stop_walk_right: true
+361:
+  name: step_towards_target
+  walk_source_towards_target: true
+362:
+  name: start_move_towards_target
+  start_channel: true
+  walk_source_towards_target: true
+  timeline_generator:
+    type: channel
+    spell_id: 361
+    duration: 60000
+    ticks: 3600
+363:
+  name: stop_move_towards_target
+  stop_channel: true
+  stop_walk_source_towards_target: true
+
+# ==========================================
+# Basic Targeting
+# ==========================================
+22:
+  name: teamswap
+  teamswap: true
+15:
+  name: targetswap_to_next_tab_target
+  targetswap_to_other_team: true
+16:
+  name: targetswap_to_parent
+  targetswap_to_parent: true
+
+# ==========================================
+# Npc Healing Powerup
+# ==========================================
+214:
+  name: healing_burst_tick
+  despawn_self: true
+  healing: true
+  power: 150.0
+  range_limit: 0.1
+215:
+  name: healing_burst_apply
+  start_channel: true
+  timeline_generator:
+    type: channel
+    spell_id: 214
+    duration: 15000
+    ticks: 150
+171:
+  name: spawn_healing_powerup
+  trigger_gcd: true
+  spawn_obj: true
+  hp: 30.0
+  spawned_x_offset: 0.2
+  spawned_y_offset: -0.2
+  audio_name: Rejuvenation
+  spawn_color_red: 0
+  spawn_color_green: 255
+  spawn_color_blue: 0
+  timeline:
+    100: [16]
+    200: [215]
+
+# ==========================================
+# Npc Landmine
+# ==========================================
+114:
+  name: landmine_explosion_tick
+  despawn_self: true
+  damaging: true
+  power: 150.0
+  range_limit: 0.1
+115:
+  name: landmine_explosion_apply
+  start_channel: true
+  timeline_generator:
+    type: channel
+    spell_id: 114
+    duration: 15000
+    ticks: 150
+71:
+  name: spawn_landmine
+  spawn_obj: true
+  hp: 20.0
+  spawned_x_offset: -0.5
+  spawned_y_offset: 0.1
+  spawn_color_red: 255
+  spawn_color_green: 0
+  spawn_color_blue: 255
+  timeline:
+    1400: [15]
+    1500: [115]
+
+# ==========================================
+# Npc Target Dummy
+# ==========================================
+70:
+  name: spawn_target_dummy
+  spawn_obj: true
+  spawn_boss: true
+  hp: 80.0
+  spawned_x_offset: -0.2
+  spawned_y_offset: 0.1
+  spawn_color_red: 0
+  spawn_color_green: 0
+  spawn_color_blue: 255
+  timeline:
+    1500: [15]
+    4000: [128]
+    7000: [362]
+970:
+  name: spawn_bravo_dummy
+  spawn_obj: true
+  spawn_boss: true
+  hp: 80.0
+  spawned_x_offset: -0.2
+  spawned_y_offset: 0.1
+  spawn_color_red: 0
+  spawn_color_green: 0
+  spawn_color_blue: 255
+  timeline:
+    1500: [15]
+    2000: [941]
+    4000: [124]
+    7000: [362]
+
+# ==========================================
+# Spec Warlock
+# ==========================================
+128:
+  name: fire_blast
+  trigger_gcd: true
+  aoe_cross_team: true
+  timeline:
+    0: [111]
+111:
+  name: fire_blast_damage
+  damaging: true
+  power: 13.0
+  audio_name: ShadowBoltHit
+911:
+  name: shadow_blast
+  damaging: true
+  power: 53.0
+  audio_name: ShadowBoltBuild
+112:
+  name: fire_channel_tick
+  damaging: true
+  power: 5.0
+  range_limit: 0.2
+113:
+  name: fire_channel_apply
+  start_channel: true
+  timeline_generator:
+    type: channel
+    spell_id: 112
+    duration: 3000
+    ticks: 30
+131:
+  name: channel_shadowbolt
+  start_channel: true
+  timeline_generator:
+    type: channel
+    spell_id: 132
+    duration: 60000
+    ticks: 3600
+132:
+  name: shadowbolt_tick
+  timeline:
+    0: [133, 116]
+116:
+  name: shadowbolt_damage_tick
+  despawn_self: true
+  damaging: true
+  power: 34.0
+  range_limit: 0.05
+  audio_name: ShadowBoltHit
+133:
+  name: shadowbolt_movement_tick
+  walk_source_towards_target: true
+124:
+  name: shadowbolt_spawn
+  trigger_gcd: true
+  aoe_cross_team: true
+  timeline:
+    0: [41]
+41:
+  name: shadowbolt_spawn_projectile
+  spawn_obj: true
+  spawned_x_offset: 0.0
+  spawned_y_offset: 0.05
+  spawned_movespeed: 5.0
+  audio_name: ShadowBoltCast
+  spawn_color_red: 255
+  spawn_color_green: 255
+  spawn_color_blue: 255
+  timeline:
+    0: [131]
+941:
+  name: bravo_channel_shadowtick
+  start_channel: true
+  timeline_generator:
+    type: channel
+    spell_id: 911
+    duration: 1220
+    ticks: 4
+42:
+  name: spawn_player
+  spawn_obj: true
+  spawn_player: true
+  hp: 30.0
+  spawned_x_offset: 0.3
+  spawned_y_offset: 0.3
+  spawn_color_red: 255
+  spawn_color_green: 0
+  spawn_color_blue: 0
+  spawn_sprite_name: Poro
+  timeline:
+    0: [15]
+  hardware_bindings:
+    KEYBOARD_KEYDOWN_1: 128
+    KEYBOARD_KEYDOWN_2: 113
+    KEYBOARD_KEYDOWN_3: 171
+    KEYBOARD_KEYDOWN_4: 124
+    KEYBOARD_KEYDOWN_TAB: 15
+    KEYBOARD_KEYDOWN_ARROW_UP: 91
+    KEYBOARD_KEYUP_ARROW_UP: 92
+    KEYBOARD_KEYDOWN_ARROW_LEFT: 181
+    KEYBOARD_KEYUP_ARROW_LEFT: 182
+    KEYBOARD_KEYDOWN_ARROW_DOWN: 271
+    KEYBOARD_KEYUP_ARROW_DOWN: 272
+    KEYBOARD_KEYDOWN_ARROW_RIGHT: 1
+    KEYBOARD_KEYUP_ARROW_RIGHT: 2
+
+# ==========================================
+# Npc Boss
+# ==========================================
+69:
+  name: spawn_boss
+  spawn_obj: true
+  spawn_boss: true
+  hp: 30.0
+  spawned_x_offset: 0.7
+  spawned_y_offset: 0.7
+  spawn_color_red: 0
+  spawn_color_green: 255
+  spawn_color_blue: 0
+  timeline:
+    0: [22]
+    400: [70]
+    800: [71]
+    1000: [15]
+    3000: [128]
+    5000: [113]
+969:
+  name: spawn_bravo_boss
+  spawn_obj: true
+  spawn_boss: true
+  hp: 30.0
+  spawned_x_offset: 0.7
+  spawned_y_offset: 0.7
+  spawn_color_red: 0
+  spawn_color_green: 255
+  spawn_color_blue: 0
+  timeline:
+    0: [22]
+    400: [970]
+    800: [71]
+    1000: [15]
+    3000: [128]
+    5000: [113]
+
+# ==========================================
+# Zone Test Ground
+# ==========================================
+300:
+  name: setup_test_zone
+  timeline:
+    0: [69, 42]
+9001:
+  name: bravo_test_zone
+  timeline:
+    0: [969, 42]

@@ -2,6 +2,7 @@ from enum import Enum, IntFlag, auto
 from typing import Tuple, Optional
 from dataclasses import dataclass, field
 from src.settings import Consts
+from .temp_registry import AssetRegistry, InputRegistry
 
 # ==========================================
 # Config-Level Spell Flags and Modes
@@ -21,51 +22,41 @@ class HealthSpellFlags(IntFlag):
     NONE = 0
     DAMAGING = auto()
     HEALING = auto()
-    IS_CHANNEL = auto()
 
-class MovementSpellFlags(IntFlag):
-    """ Various bitflags that define spell movement behavior. """
+class MovementSpellMode(Enum):
+    """ Enumeration of distinct spell movement behaviors. """
     NONE = 0
-    MOVE_UP = auto()
-    MOVE_LEFT = auto()
-    MOVE_DOWN = auto()
-    MOVE_RIGHT = auto()
-    STOP_MOVE_UP = auto()
-    STOP_MOVE_LEFT = auto()
-    STOP_MOVE_DOWN = auto()
-    STOP_MOVE_RIGHT = auto()
-    MOVE_TOWARDS_TARGET = auto()
-    STOP_MOVE_TOWARDS_TARGET = auto()
-    TELEPORT_TO_TARGET = auto()
-    FORCE_MOVE = auto()
-    TRY_MOVE = auto()
+    # WASD MOVEMENT
+    WALK_FORWARD = auto()
+    WALK_LEFT = auto()
+    WALK_BACKWARD = auto()
+    WALK_RIGHT = auto()
+    STOP_WALK_FORWARD = auto()
+    STOP_WALK_LEFT = auto()
+    STOP_WALK_BACKWARD = auto()
+    STOP_WALK_RIGHT = auto()
+
+    # WALK
+    WALK_SOURCE_TOWARDS_TARGET = auto()
+    STOP_WALK_SOURCE_TOWARDS_TARGET = auto()
+
+    TELEPORT_SOURCE_TO_TARGET = auto()
     DESPAWN_SELF = auto()
-    APPLY_VELOCITY = auto()
-    REMOVE_VELOCITY = auto()
+
 
 class TargetingSpellFlags(IntFlag):
     """Non-combat, non-movement spell flags related to targeting."""
     NONE = 0
-    AOE = auto()
+    AOE_CROSS_TEAM = auto()
+    AOE_SAME_TEAM = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
     SPAWN_OBJ = auto()
     DESPAWN_SELF = auto()
     UPDATE_CURRENT_TARGET = auto()
-
-class TargetingSpellMode(Enum):
-    """ Defines targeting behavior for spell """
-    NONE = 0
-    SELF = auto()
-    USE_EVENT_TARGET = auto()
-    TARGET = auto()
-    TARGET_OF_TARGET = auto()
-    PARENT = auto()
-    TARGET_OF_PARENT = auto()
-    DEFAULT_SAME_TEAM = auto()
-    DEFAULT_CROSS_TEAM = auto()
-    TAB_TO_NEXT = auto()
-
+    TARGETSWAP_TO_OTHER_TEAM = auto()
+    TARGETSWAP_TO_PARENT = auto()
+    TEAMSWAP = auto()
 
 @dataclass(slots=True)
 class SpellData:
@@ -76,7 +67,7 @@ class SpellData:
     # Extracted Behaviors (Now System-Agnostic)
     casting_behavior: CastingSpellFlags = CastingSpellFlags.NONE
     health_behavior: HealthSpellFlags = HealthSpellFlags.NONE
-    movement_behavior: MovementSpellFlags = MovementSpellFlags.NONE
+    movement_behavior: MovementSpellMode = MovementSpellMode.NONE
     targeting_behavior: TargetingSpellFlags = TargetingSpellFlags.NONE
 
     # Casting Data
@@ -91,13 +82,10 @@ class SpellData:
 
     # Movement Data
     range_limit: float = 0.0
-    cast_time: int = 0
+    movement_force: float = 1.0
     spawned_x_offset: float = 0.0
     spawned_y_offset: float = 0.0
     spawned_movespeed: float = 1.0
-
-    # Targeting Data
-    targeting: TargetingSpellMode = TargetingSpellMode.NONE
 
     # VFX/SFX Data
     audio_name: str = ""
@@ -109,3 +97,15 @@ class SpellData:
     spawn_color: Optional[Tuple[int, int, int]] = None
     spawn_sprite_name: str = ""
     spawn_audio_name: str = ""
+
+    def __post_init__(self):
+        # Dynamically inject assets so the rest of the game doesn't break
+        if not self.audio_name:
+            self.audio_name = AssetRegistry.get_audio(self.spell_id)
+        if not self.spawn_sprite_name:
+            self.spawn_sprite_name = AssetRegistry.get_sprite(self.spell_id)
+
+        # Legacy Support: Inject the hardware bindings into spawn_player (Spell 42)
+        # so your StateHandler can still find them if it relies on this field.
+        if self.spell_id == 42 and not self.hardware_bindings:
+            self.hardware_bindings = InputRegistry.BINDINGS

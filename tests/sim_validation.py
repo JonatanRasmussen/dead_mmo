@@ -130,7 +130,7 @@ class SimValidation:
             if isinstance(val, Enum):
                 return val.name
             elif isinstance(val, dict):
-                return {k: sanitize(v) for k, v in val.items()}
+                return {str(k): sanitize(v) for k, v in val.items()}
             elif isinstance(val, (list, tuple)):
                 return [sanitize(v) for v in val]
             return val
@@ -236,7 +236,7 @@ class SimValidation:
     @staticmethod
     def _diff_dict(golden: dict, current: dict, prefix: str, diffs: list[str]) -> None:
         all_keys = set(golden.keys()) | set(current.keys())
-        for key in sorted(all_keys):
+        for key in sorted(all_keys, key=str):
             full_key = f"{prefix}.{key}"
             if key not in golden:
                 diffs.append(f"{full_key}: ADDED → {current[key]!r}")

@@ -3,9 +3,8 @@ from ._spell_data import (
     SpellData,
     CastingSpellFlags,
     HealthSpellFlags,
-    MovementSpellFlags,
+    MovementSpellMode,
     TargetingSpellFlags,
-    TargetingSpellMode
 )
 
 class LegacySpellConfig:
@@ -30,87 +29,79 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=91,
                 name="start_move_up",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.MOVE_UP
+                movement_behavior=MovementSpellMode.WALK_FORWARD
             ),
             SpellData(
                 spell_id=92,
                 name="stop_move_up",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.STOP_MOVE_UP
+                movement_behavior=MovementSpellMode.STOP_WALK_FORWARD
             ),
             SpellData(
                 spell_id=181,
                 name="start_move_left",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.MOVE_LEFT
+                movement_behavior=MovementSpellMode.WALK_LEFT
             ),
             SpellData(
                 spell_id=182,
                 name="stop_move_left",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.STOP_MOVE_LEFT
+                movement_behavior=MovementSpellMode.STOP_WALK_LEFT
             ),
             SpellData(
                 spell_id=271,
                 name="start_move_down",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.MOVE_DOWN
+                movement_behavior=MovementSpellMode.WALK_BACKWARD
             ),
             SpellData(
                 spell_id=272,
                 name="stop_move_down",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.STOP_MOVE_DOWN
+                movement_behavior=MovementSpellMode.STOP_WALK_BACKWARD
             ),
             SpellData(
                 spell_id=1,
                 name="start_move_right",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.MOVE_RIGHT
+                movement_behavior=MovementSpellMode.WALK_RIGHT
             ),
             SpellData(
                 spell_id=2,
                 name="stop_move_right",
-                targeting=TargetingSpellMode.SELF,
-                movement_behavior=MovementSpellFlags.STOP_MOVE_RIGHT
+                movement_behavior=MovementSpellMode.STOP_WALK_RIGHT
             ),
             SpellData(
                 spell_id=361,
                 name="step_towards_target",
-                targeting=TargetingSpellMode.TARGET,
-                movement_behavior=MovementSpellFlags.MOVE_TOWARDS_TARGET
+                movement_behavior=MovementSpellMode.WALK_SOURCE_TOWARDS_TARGET
             ),
             SpellData(
                 spell_id=362,
                 name="start_move_towards_target",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.START_CHANNEL,
-                movement_behavior=MovementSpellFlags.MOVE_TOWARDS_TARGET,
+                movement_behavior=MovementSpellMode.WALK_SOURCE_TOWARDS_TARGET,
                 timeline=LegacySpellConfig._channel(361, 60000, 60 * Consts.MOVEMENT_UPDATES_PER_SECOND)
             ),
             SpellData(
                 spell_id=363,
                 name="stop_move_towards_target",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.STOP_CHANNEL,
-                movement_behavior=MovementSpellFlags.STOP_MOVE_TOWARDS_TARGET
+                movement_behavior=MovementSpellMode.STOP_WALK_SOURCE_TOWARDS_TARGET
             ),
 
             # ==========================================
             # Basic Targeting
             # ==========================================
             SpellData(
+                spell_id=22,
+                name="teamswap",
+                targeting_behavior=TargetingSpellFlags.TEAMSWAP
+            ),
+            SpellData(
                 spell_id=15,
                 name="targetswap_to_next_tab_target",
-                targeting=TargetingSpellMode.TAB_TO_NEXT,
-                targeting_behavior=TargetingSpellFlags.UPDATE_CURRENT_TARGET
+                targeting_behavior=TargetingSpellFlags.TARGETSWAP_TO_OTHER_TEAM
             ),
             SpellData(
                 spell_id=16,
                 name="targetswap_to_parent",
-                targeting=TargetingSpellMode.PARENT,
-                targeting_behavior=TargetingSpellFlags.UPDATE_CURRENT_TARGET
+                targeting_behavior=TargetingSpellFlags.TARGETSWAP_TO_PARENT
             ),
 
             # ==========================================
@@ -119,8 +110,7 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=214,
                 name="healing_burst_tick",
-                targeting=TargetingSpellMode.TARGET,
-                movement_behavior=MovementSpellFlags.DESPAWN_SELF,
+                movement_behavior=MovementSpellMode.DESPAWN_SELF,
                 health_behavior=HealthSpellFlags.HEALING,
                 targeting_behavior=TargetingSpellFlags.DESPAWN_SELF,
                 power=150.0,
@@ -129,14 +119,12 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=215,
                 name="healing_burst_apply",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.START_CHANNEL,
                 timeline=LegacySpellConfig._channel(214, 15000, 150)
             ),
             SpellData(
                 spell_id=171,
                 name="spawn_healing_powerup",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.TRIGGER_GCD,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ,
                 timeline={100: [16], 200: [215]},
@@ -153,8 +141,7 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=114,
                 name="landmine_explosion_tick",
-                targeting=TargetingSpellMode.DEFAULT_CROSS_TEAM,
-                movement_behavior=MovementSpellFlags.DESPAWN_SELF,
+                movement_behavior=MovementSpellMode.DESPAWN_SELF,
                 health_behavior=HealthSpellFlags.DAMAGING,
                 targeting_behavior=TargetingSpellFlags.DESPAWN_SELF,
                 power=150.0,
@@ -163,16 +150,14 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=115,
                 name="landmine_explosion_apply",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.START_CHANNEL,
                 timeline=LegacySpellConfig._channel(114, 15000, 150)
             ),
             SpellData(
                 spell_id=71,
                 name="spawn_landmine",
-                targeting=TargetingSpellMode.SELF,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ,
-                timeline={1500: [115]},
+                timeline={1400: [15], 1500: [115]},
                 hp=20.0,
                 spawned_x_offset=-0.5,
                 spawned_y_offset=0.1,
@@ -185,7 +170,6 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=70,
                 name="spawn_target_dummy",
-                targeting=TargetingSpellMode.SELF,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ | TargetingSpellFlags.SPAWN_BOSS,
                 timeline={1500: [15], 4000: [128], 7000: [362]},
                 hp=80.0,
@@ -196,7 +180,6 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=970,
                 name="spawn_bravo_dummy",
-                targeting=TargetingSpellMode.SELF,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ | TargetingSpellFlags.SPAWN_BOSS,
                 timeline={1500: [15], 2000: [941], 4000: [124], 7000: [362]},
                 hp=80.0,
@@ -211,15 +194,13 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=128,
                 name="fire_blast",
-                targeting=TargetingSpellMode.TARGET,
                 casting_behavior=CastingSpellFlags.TRIGGER_GCD,
-                targeting_behavior=TargetingSpellFlags.AOE,
+                targeting_behavior=TargetingSpellFlags.AOE_CROSS_TEAM,
                 timeline={0: [111]}
             ),
             SpellData(
                 spell_id=111,
                 name="fire_blast_damage",
-                targeting=TargetingSpellMode.USE_EVENT_TARGET,
                 health_behavior=HealthSpellFlags.DAMAGING,
                 power=13.0,
                 audio_name=AudioFiles.SHADOW_BOLT_HIT
@@ -227,7 +208,6 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=911,
                 name="shadow_blast",
-                targeting=TargetingSpellMode.TARGET,
                 health_behavior=HealthSpellFlags.DAMAGING,
                 power=53.0,
                 audio_name=AudioFiles.SHADOW_BOLT_BUILD
@@ -235,7 +215,6 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=112,
                 name="fire_channel_tick",
-                targeting=TargetingSpellMode.DEFAULT_CROSS_TEAM,
                 health_behavior=HealthSpellFlags.DAMAGING,
                 power=5.0,
                 range_limit=0.2
@@ -243,28 +222,24 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=113,
                 name="fire_channel_apply",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.START_CHANNEL,
                 timeline=LegacySpellConfig._channel(112, 3000, 30)
             ),
             SpellData(
                 spell_id=131,
                 name="channel_shadowbolt",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.START_CHANNEL,
                 timeline=LegacySpellConfig._channel(132, 60000, 60 * Consts.MOVEMENT_UPDATES_PER_SECOND)
             ),
             SpellData(
                 spell_id=132,
                 name="shadowbolt_tick",
-                targeting=TargetingSpellMode.SELF,
                 timeline={0: [133, 116]}
             ),
             SpellData(
                 spell_id=116,
                 name="shadowbolt_damage_tick",
-                targeting=TargetingSpellMode.TARGET,
-                movement_behavior=MovementSpellFlags.DESPAWN_SELF,
+                movement_behavior=MovementSpellMode.DESPAWN_SELF,
                 health_behavior=HealthSpellFlags.DAMAGING,
                 targeting_behavior=TargetingSpellFlags.DESPAWN_SELF,
                 power=34.0,
@@ -274,21 +249,18 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=133,
                 name="shadowbolt_movement_tick",
-                targeting=TargetingSpellMode.TARGET,
-                movement_behavior=MovementSpellFlags.MOVE_TOWARDS_TARGET
+                movement_behavior=MovementSpellMode.WALK_SOURCE_TOWARDS_TARGET
             ),
             SpellData(
                 spell_id=124,
                 name="shadowbolt_spawn",
-                targeting=TargetingSpellMode.TARGET,
                 casting_behavior=CastingSpellFlags.TRIGGER_GCD,
-                targeting_behavior=TargetingSpellFlags.AOE,
+                targeting_behavior=TargetingSpellFlags.AOE_CROSS_TEAM,
                 timeline={0: [41]}
             ),
             SpellData(
                 spell_id=41,
                 name="shadowbolt_spawn_projectile",
-                targeting=TargetingSpellMode.USE_EVENT_TARGET,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ,
                 timeline={0: [131]},
                 spawned_x_offset=0.0,
@@ -300,15 +272,14 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=941,
                 name="bravo_channel_shadowtick",
-                targeting=TargetingSpellMode.SELF,
                 casting_behavior=CastingSpellFlags.START_CHANNEL,
                 timeline=LegacySpellConfig._channel(911, 1220, 4)
             ),
             SpellData(
                 spell_id=42,
                 name="spawn_player",
-                targeting=TargetingSpellMode.SELF,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ | TargetingSpellFlags.SPAWN_PLAYER,
+                timeline={0: [15]},
                 hardware_bindings={
                     HardwareInputConsts.KEYBOARD_KEYDOWN_1: 128,
                     HardwareInputConsts.KEYBOARD_KEYDOWN_2: 113,
@@ -337,9 +308,8 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=69,
                 name="spawn_boss",
-                targeting=TargetingSpellMode.SELF,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ | TargetingSpellFlags.SPAWN_BOSS,
-                timeline={400: [70], 800: [71], 1000: [15], 3000: [128], 5000: [113]},
+                timeline={0: [22], 400: [70], 800: [71], 1000: [15], 3000: [128], 5000: [113]},
                 hp=30.0,
                 spawned_x_offset=0.7,
                 spawned_y_offset=0.7,
@@ -348,9 +318,8 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=969,
                 name="spawn_bravo_boss",
-                targeting=TargetingSpellMode.SELF,
                 targeting_behavior=TargetingSpellFlags.SPAWN_OBJ | TargetingSpellFlags.SPAWN_BOSS,
-                timeline={400: [970], 800: [71], 1000: [15], 3000: [128], 5000: [113]},
+                timeline={0: [22], 400: [970], 800: [71], 1000: [15], 3000: [128], 5000: [113]},
                 hp=30.0,
                 spawned_x_offset=0.7,
                 spawned_y_offset=0.7,
@@ -363,13 +332,11 @@ class LegacySpellConfig:
             SpellData(
                 spell_id=300,
                 name="setup_test_zone",
-                targeting=TargetingSpellMode.SELF,
                 timeline={0: [69, 42]}
             ),
             SpellData(
                 spell_id=9001,
                 name="bravo_test_zone",
-                targeting=TargetingSpellMode.SELF,
                 timeline={0: [969, 42]}
             ),
         ]

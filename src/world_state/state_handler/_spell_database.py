@@ -5,7 +5,7 @@ from ._spell_data import SpellData, TargetingSpellFlags
 from ._casting_system import CastingSystem, SpellCastingData, CastingBehavior
 from ._health_system import HealthSystem, SpellHealthData, HealthBehavior
 from ._movement_system import MovementSystem, SpellMovementData, MovementBehavior
-from ._targeting_system import TargetingSystem, SpellTargetingData, TargetingBehavior, Targeting
+from ._targeting_system import TargetingSystem, SpellTargetingData, TargetingBehavior
 from ._vfx_and_sfx_system import VfxAndSfxSystem, SpellVfxData, SpellVisualTemplate
 
 
@@ -52,9 +52,9 @@ class SpellDatabase:
     def create_movement_system(self) -> MovementSystem:
         spell_data_dct = {
             spell_id: SpellMovementData(
-                power=spell.power,
+                movement_force=spell.movement_force,
                 range_limit=spell.range_limit,
-                flags=MovementBehavior(spell.movement_behavior.value),
+                behavior=MovementBehavior(spell.movement_behavior.value),
                 spawned_x_offset=spell.spawned_x_offset,
                 spawned_y_offset=spell.spawned_y_offset,
                 spawned_movespeed=spell.spawned_movespeed,
@@ -77,7 +77,6 @@ class SpellDatabase:
 
             spell_data_dct[spell_id] = SpellTargetingData(
                 spell_id=spell.spell_id,
-                targeting=Targeting(spell.targeting.value),
                 is_enemy=is_enemy,
                 is_boss_or_player=is_boss_or_player,
                 flags=TargetingBehavior(spell.targeting_behavior.value),
@@ -91,7 +90,9 @@ class SpellDatabase:
             spawn_template = None
             if spell.spawn_color is not None:
                 spawn_template = SpellVisualTemplate(
-                    color=spell.spawn_color,
+                    color_red=spell.spawn_color[0],
+                    color_green=spell.spawn_color[1],
+                    color_blue=spell.spawn_color[2],
                     sprite_name=spell.spawn_sprite_name,
                     audio_name=spell.spawn_audio_name,
                 )

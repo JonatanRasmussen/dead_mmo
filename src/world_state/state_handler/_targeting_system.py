@@ -5,49 +5,6 @@ from enum import IntFlag, auto, Enum
 from src.settings import Consts
 
 
-class Targeting(Enum):
-    """ Defines targeting behavior for spell """
-    NONE = 0
-    SELF = auto()
-    USE_EVENT_TARGET = auto()
-    TARGET = auto()
-    TARGET_OF_TARGET = auto()
-    PARENT = auto()
-    TARGET_OF_PARENT = auto()
-    DEFAULT_SAME_TEAM = auto()
-    DEFAULT_CROSS_TEAM = auto()
-    TAB_TO_NEXT = auto()
-
-class Status(Enum):
-    """ Various status effects that game objects can have. """
-    EMPTY = 0  # Should never be used outside initialization
-    ENVIRONMENT = auto()  # Special case used only by ENVIRONMENT objs
-    NEW_PLAYER_OBJ = auto()  # Special case used temporarily by newly spawned players
-    NEW_BOSS_OBJ = auto()  # Special case used temporarily by newly spawned bosses
-    ALIVE = auto()  # Default status used to indicate the absence of other status effects
-    INACTIVE = auto()  # Not yet engaged in combat, cannot be source or target of events
-    DESPAWNED = auto()  # Permamently removed from combat, cannot be source or target of events
-    BANISHED = auto()  # Temporarily removed from combat, cannot be source or target of events
-    CASTING = auto()  # to-do: document this
-    CHANNELING = auto()  # to-do: document this
-    ROOTED = auto()  # to-do: document this
-    STUNNED = auto()  # to-do: document this
-
-    @property
-    def is_valid_source(self) -> bool:
-        return not self in {
-            Status.DESPAWNED,
-            Status.BANISHED,
-        }
-
-    @property
-    def is_valid_target(self) -> bool:
-        return not self in {
-            Status.ENVIRONMENT,
-            Status.DESPAWNED,
-            Status.BANISHED,
-        }
-
 @dataclass(slots=True)
 class DefaultIDs:
     environment_id: int = Consts.EMPTY_ID
@@ -86,19 +43,22 @@ class DefaultIDs:
 class TargetingBehavior(IntFlag):
     """Non-combat, non-movement spell flags related to targeting."""
     NONE = 0
-    AOE = auto()
+    AOE_CROSS_TEAM = auto()
+    AOE_SAME_TEAM = auto()
     SPAWN_BOSS = auto()
     SPAWN_PLAYER = auto()
     SPAWN_OBJ = auto()
     DESPAWN_SELF = auto()
     UPDATE_CURRENT_TARGET = auto()
+    TARGETSWAP_TO_OTHER_TEAM = auto()
+    TARGETSWAP_TO_PARENT = auto()
+    TEAMSWAP = auto()
 
 
 @dataclass(slots=True)
 class SpellTargetingData:
     """Stores targeting-related data extracted from a Spell."""
     spell_id: int
-    targeting: Targeting
     is_enemy: bool = False
     is_boss_or_player: bool = False
     flags: TargetingBehavior = TargetingBehavior.NONE
@@ -111,7 +71,8 @@ class ObjTargetingData:
     current_target_id: int = Consts.EMPTY_ID
     is_enemy: bool = False
     is_boss_or_player: bool = False
-    status: Status = Status.EMPTY
+    is_combat_participant: bool = True
+    is_visible: bool = True
     obj_spawn_timestamp: int = 0
 
     @classmethod
@@ -121,7 +82,6 @@ class ObjTargetingData:
             current_target_id=obj_id,
             is_enemy=False,
             is_boss_or_player=False,
-            status=Status.ENVIRONMENT,
             obj_spawn_timestamp=0,
         )
 
@@ -130,13 +90,11 @@ class ObjTargetingData:
         cls, timestamp: int, parent_obj_id: int, target_id: int,
         parent_data: 'ObjTargetingData', spell_data: SpellTargetingData
     ) -> 'ObjTargetingData':
-        is_enemy = spell_data.is_enemy if parent_data.status == Status.ENVIRONMENT else parent_data.is_enemy
         return cls(
             parent_id=parent_obj_id,
             current_target_id=target_id,
-            is_enemy=is_enemy,
+            is_enemy=parent_data.is_enemy,
             is_boss_or_player=spell_data.is_boss_or_player,
-            status=Status.ALIVE,
             obj_spawn_timestamp=timestamp,
         )
 
@@ -199,14 +157,24 @@ class TargetingSystem:
             if flags & TargetingBehavior.UPDATE_CURRENT_TARGET:
                 source_data.current_target_id = target_id
             if flags & TargetingBehavior.DESPAWN_SELF:
-                source_data.status = Status.DESPAWNED
+                source_data.is_combat_participant = False
+                source_data.is_visible = False
+            if flags & TargetingBehavior.TEAMSWAP:
+                source_data.is_enemy = not source_data.is_enemy
+            if flags & TargetingBehavior.TARGETSWAP_TO_PARENT:
+                source_data.current_target_id = source_data.parent_id
+            if flags & TargetingBehavior.TARGETSWAP_TO_OTHER_TEAM:
+                if source_data.is_enemy:
+                    source_data.current_target_id = self.default_ids.player_id
+                elif not source_data.is_enemy:
+                    source_data.current_target_id = self.default_ids.boss1_id
+                else:
+                    raise AssertionError(f"Unknown team for obj {source_id}")
 
     def is_area_of_effect(self, spell_id: int) -> bool:
         spell_data = self.spell_data_dct[spell_id]
         flags = spell_data.flags
-        if flags & TargetingBehavior.AOE:
-            return True
-        return False
+        return bool(flags & (TargetingBehavior.AOE_CROSS_TEAM | TargetingBehavior.AOE_SAME_TEAM))
 
     def is_obj_spawn(self, spell_id) -> bool:
         spell_data = self.spell_data_dct[spell_id]
@@ -219,7 +187,7 @@ class TargetingSystem:
         if obj_id not in self.game_obj_data_dct:
             return False
         data = self.game_obj_data_dct[obj_id]
-        return data.status != Status.ENVIRONMENT and data.status != Status.DESPAWNED
+        return data.is_visible
 
     def get_all_active_obj_ids(self) -> Iterable[int]:
         return self.game_obj_data_dct.keys()
@@ -240,69 +208,8 @@ class TargetingSystem:
         for obj_id, data in self.game_obj_data_dct.items():
             obj_allied = not data.is_enemy
             team_is_hit = (obj_allied == source_allied) == (source_allied == target_allied)
-            if team_is_hit and data.status.is_valid_target and obj_id != primary_target_id:
+            if team_is_hit and data.is_combat_participant and obj_id != primary_target_id:
                 yield obj_id
-
-    def decide_event_targeting(self, source_id: int, spell_id: int, undecided_target_id: int) -> int:
-        spell_data = self.spell_data_dct[spell_id]
-        targeting = spell_data.targeting
-
-        assert targeting != Targeting.NONE or (spell_data.flags & TargetingBehavior.AOE), (
-            f"obj {source_id} is casting a spell with neither targeting=NONE or AOE-behavior"
-        )
-
-        source_data = self.game_obj_data_dct[source_id]
-        is_on_players_team = not source_data.is_enemy
-
-        if targeting in {Targeting.SELF, Targeting.DEFAULT_SAME_TEAM}:
-            target_id = source_id
-        elif (
-            targeting in {Targeting.TARGET, Targeting.TARGET_OF_TARGET}
-            and Consts.is_valid_id(source_data.current_target_id)
-        ):
-            target_id = source_data.current_target_id
-        elif (
-            targeting in {Targeting.PARENT, Targeting.TARGET_OF_PARENT}
-            and Consts.is_valid_id(source_data.parent_id)
-        ):
-            target_id = source_data.parent_id
-        elif targeting == Targeting.DEFAULT_CROSS_TEAM:
-            if is_on_players_team:
-                target_id = self.default_ids.boss1_id
-            else:
-                target_id = self.default_ids.player_id
-        elif targeting == Targeting.TAB_TO_NEXT:
-            if not is_on_players_team:
-                target_id = self.default_ids.player_id
-            elif (
-                source_data.current_target_id == self.default_ids.boss1_id
-                and self.default_ids.boss2_exists
-            ):
-                target_id = self.default_ids.boss2_id
-            elif Consts.is_valid_id(self.default_ids.boss1_id):
-                target_id = self.default_ids.boss1_id
-            else:
-                target_id = self.default_ids.player_id
-        else:
-            target_id = self.default_ids.missing_target_id
-
-        if (
-            targeting in {Targeting.TARGET_OF_TARGET, Targeting.TARGET_OF_PARENT}
-            and Consts.is_valid_id(target_id)
-        ):
-            target_data = self.game_obj_data_dct.get(target_id)
-            if (
-                target_data is not None
-                and Consts.is_valid_id(target_data.current_target_id)
-            ):
-                target_id = target_data.current_target_id
-            else:
-                target_id = self.default_ids.missing_target_id
-
-        if targeting == Targeting.USE_EVENT_TARGET:
-            target_id = undecided_target_id
-
-        return target_id
 
     def _update_default_ids(self, obj_id: int, spell_id: int) -> None:
         spell_data = self.spell_data_dct[spell_id]
@@ -317,25 +224,27 @@ class TargetingSystem:
             assert not self.default_ids.player_exists, "Player already exists."
             self.default_ids.player_id = obj_id
 
-    def is_valid_source(self, obj_id: int) -> bool:
-        data = self.game_obj_data_dct.get(obj_id)
-        return data is not None and data.status.is_valid_source
-
     def is_valid_target(self, obj_id: int) -> bool:
-        data = self.game_obj_data_dct.get(obj_id)
-        return data is not None and data.status.is_valid_target
+        data: ObjTargetingData | None = self.game_obj_data_dct.get(obj_id)
+        return data is not None and data.is_combat_participant
 
-    def select_targets_for_aoe(self, source_id: int, target_id: int) -> Iterable[int]:
+    def select_targets_for_aoe(self, source_id: int, spell_id: int) -> Iterable[int]:
         source_data = self.game_obj_data_dct.get(source_id)
-        target_data = self.game_obj_data_dct.get(target_id)
-        if source_data is None or target_data is None:
+        spell_data = self.spell_data_dct.get(spell_id)
+        if source_data is None or spell_data is None:
             return
         source_is_enemy = source_data.is_enemy
-        target_is_enemy = target_data.is_enemy
+        flags = spell_data.flags
+        hits_cross_team = bool(flags & TargetingBehavior.AOE_CROSS_TEAM)
+        hits_same_team = bool(flags & TargetingBehavior.AOE_SAME_TEAM)
+        if not hits_cross_team and not hits_same_team:
+            return
         for obj_id, obj_data in self.game_obj_data_dct.items():
-            team_is_hit_by_aoe = (
-                (obj_data.is_enemy == source_is_enemy) ==
-                (source_is_enemy == target_is_enemy)
-            )
-            if team_is_hit_by_aoe and obj_data.status.is_valid_target:
+            if not obj_data.is_combat_participant:
+                continue
+            is_opposite_team = (obj_data.is_enemy != source_is_enemy)
+            # Yield the target if it matches the spell's AOE targeting flags
+            if is_opposite_team and hits_cross_team:
+                yield obj_id
+            elif not is_opposite_team and hits_same_team:
                 yield obj_id

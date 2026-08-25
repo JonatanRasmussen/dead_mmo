@@ -2,6 +2,7 @@ from typing import Iterable
 from dataclasses import dataclass
 
 from ._spell_database import SpellDatabase
+from ._spell_loader import SpellLoader
 from ._casting_system import CastingSystem
 from ._health_system import HealthSystem
 from ._movement_system import MovementSystem
@@ -23,11 +24,12 @@ class StateHandler:
 
     def __init__(self) -> None:
         self.spell_database: SpellDatabase = SpellDatabase()
-        self._health_system: HealthSystem = self.spell_database.create_health_system()
-        self._casting_system: CastingSystem = self.spell_database.create_casting_system()
-        self._movement_system: MovementSystem = self.spell_database.create_movement_system()
-        self._targeting_system: TargetingSystem = self.spell_database.create_targeting_system()
-        self._vfx_and_sfx_system: VfxAndSfxSystem = self.spell_database.create_vfx_and_sfx_system()
+        self.spell_loader: SpellLoader = SpellLoader()
+        self._health_system: HealthSystem = self.spell_loader.create_health_system()
+        self._casting_system: CastingSystem = self.spell_loader.create_casting_system()
+        self._movement_system: MovementSystem = self.spell_loader.create_movement_system()
+        self._targeting_system: TargetingSystem = self.spell_loader.create_targeting_system()
+        self._vfx_and_sfx_system: VfxAndSfxSystem = self.spell_loader.create_vfx_and_sfx_system()
 
     @property
     def environment_id(self) -> int:
@@ -55,9 +57,6 @@ class StateHandler:
     def get_spell_visuals(self, spell_id: int) -> SpellVfxData:
         return self._vfx_and_sfx_system.get_spell_visuals(spell_id)
 
-    def decide_event_targeting(self, source_id: int, spell_id: int, undecided_target_id: int) -> int:
-        return self._targeting_system.decide_event_targeting(source_id, spell_id, undecided_target_id)
-
     def get_current_target_for_obj(self, obj_id: int) -> int:
         return self._targeting_system.get_current_target_for_obj(obj_id)
 
@@ -77,7 +76,7 @@ class StateHandler:
         return self._casting_system.get_spell_ids_for_inputs(source_id, player_inputs)
 
     def is_valid_source(self, source_id: int) -> bool:
-        return self._targeting_system.is_valid_source(source_id)
+        return self._targeting_system.is_valid_target(source_id)
 
     def is_gcd_ready(self, source_id: int, spell_id: int, timestamp: int) -> bool:
         return self._casting_system.is_gcd_ready(source_id, spell_id, timestamp)

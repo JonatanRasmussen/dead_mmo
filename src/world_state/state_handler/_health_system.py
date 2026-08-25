@@ -10,7 +10,6 @@ class HealthBehavior(IntFlag):
     # HEALTH RELATED STATS
     DAMAGING = auto()
     HEALING = auto()
-    IS_CHANNEL = auto()
 
 
 @dataclass(slots=True)
