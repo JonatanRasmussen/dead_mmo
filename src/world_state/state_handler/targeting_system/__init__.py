@@ -1,7 +1,5 @@
-from .targeting_system import TargetingSystem, SpellTargetingData, TargetingBehavior
+from .targeting_system import TargetingSystem
 
 __all__ = [
     "TargetingSystem",
-    "SpellTargetingData",
-    "TargetingBehavior",
 ]

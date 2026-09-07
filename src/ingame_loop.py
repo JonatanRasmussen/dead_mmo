@@ -1,7 +1,7 @@
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
 from src.world_state.world_state import DisplayObj, WorldState
-from src.world_state.state_handler.visuals_system import SpellVisualsData
+from src.world_state.state_handler._spell_loader import SpellDef
 
 
 class IngameLoop:
@@ -52,8 +52,8 @@ class IngameLoop:
             for display_obj in display_objs_dct.values():
                 if display_obj.is_visible:
                     IngameLoop._render_game_obj(rendering_framework, display_obj)
-            for spell_vfx in world_state.get_spell_vfx_for_successful_events(ingame_time):
-                IngameLoop._display_spell(rendering_framework, spell_vfx)
+            for spell_def in world_state.get_spell_vfx_for_successful_events(ingame_time):
+                IngameLoop._display_spell(rendering_framework, spell_def)
             IngameLoop._render_frame_actions(rendering_framework, ui_manager)
             rendering_framework.end_frame()
 
@@ -61,16 +61,16 @@ class IngameLoop:
         rendering_framework.terminate_rendering_framework()
 
     @staticmethod
-    def _display_spell(rendering_framework: PygameRenderer, spell_vfx: SpellVisualsData) -> None:
-        if spell_vfx.should_play_audio:
-            rendering_framework.play_sound(spell_vfx.audio_name)
-        if spell_vfx.should_play_animation:
+    def _display_spell(rendering_framework: PygameRenderer, spell_def: SpellDef) -> None:
+        if spell_def.audio_name != "":
+            rendering_framework.play_sound(spell_def.audio_name)
+        if spell_def.animation_name != "":
             # Note: in the future, extract position from state.movement_system based on spell cast event data
             pos = (0.0, 0.0)
             rendering_framework.play_animation(
                 pos_xy=pos,
-                scale=spell_vfx.animation_scale,
-                asset_name=spell_vfx.animation_name
+                scale=spell_def.animation_scale,
+                asset_name=spell_def.animation_name
             )
 
     @staticmethod

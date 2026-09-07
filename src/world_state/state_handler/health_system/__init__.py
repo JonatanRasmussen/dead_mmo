@@ -1,7 +1,5 @@
-from .health_system import HealthSystem, SpellHealthData, HealthBehavior
+from .health_system import HealthSystem
 
 __all__ = [
     "HealthSystem",
-    "SpellHealthData",
-    "HealthBehavior",
 ]

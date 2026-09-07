@@ -1,7 +1,6 @@
-from .state_handler import StateHandler, DisplayObj, InputRegistry
+from .state_handler import StateHandler, DisplayObj
 
 __all__ = [
     "DisplayObj",
     "StateHandler",
-    "InputRegistry",
 ]

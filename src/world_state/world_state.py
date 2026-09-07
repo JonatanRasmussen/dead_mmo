@@ -2,9 +2,8 @@ from dataclasses import dataclass
 
 from src.settings import Consts
 from .event_handler import EventHandler, IdGen
-from .state_handler import StateHandler, DisplayObj, InputRegistry
-from .state_handler.visuals_system import SpellVisualsData
-
+from .state_handler import StateHandler, DisplayObj
+from .state_handler._spell_loader import SpellDef
 
 @dataclass(slots=True)
 class FrameOutput:
@@ -20,11 +19,7 @@ class FrameOutput:
     animation_name: str
     audio_name: str
 
-
-
 class WorldState:
-    """ The entirely ECS-driven game state of the save file that is currently in use """
-
     def __init__(self) -> None:
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._event_handler: EventHandler = EventHandler()
@@ -35,32 +30,28 @@ class WorldState:
         display_obj_dct: dict[int, DisplayObj] = {}
         obj_ids = self._state_handler.active_obj_ids
         for obj_id in obj_ids:
-            display_obj = self._state_handler.create_display_obj(current_time, obj_id)
-            display_obj_dct[obj_id] = display_obj
+            display_obj_dct[obj_id] = self._state_handler.create_display_obj(current_time, obj_id)
         return display_obj_dct
 
     def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
 
-    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[SpellVisualsData]:
-        spell_visuals_data: list[SpellVisualsData] = []
+    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[SpellDef]:
+        spell_visuals_data: list[SpellDef] = []
         combat_interactions = self._event_handler.get_combat_interactions_for_frame(timestamp)
         for _, spell_id, _ in combat_interactions:
-            spell_visuals = self._state_handler.get_spell_visuals(spell_id)
-            #if spell_vfx.animate_on_source or spell_vfx.animate_on_target:
-            #    self, source_id: int, spell_id: int, target_id: int
-            spell_visuals_data.append(spell_visuals)
+            spell_def = self._state_handler.get_spell_def(spell_id)
+            if spell_def:
+                spell_visuals_data.append(spell_def)
         return spell_visuals_data
 
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         environment_id = self._state_handler.environment_id
         for spell_id in setup_spell_ids:
             self._event_handler.dispatch_upcoming_event(ingame_time, environment_id, spell_id, environment_id)
-        empty_list_of_player_inputs: list[str] = []
-        self.process_frame(empty_list_of_player_inputs, ingame_time)
+        self.process_frame([], ingame_time)
 
     def process_frame(self, player_inputs: list[str], frame_end: int) -> None:
-        """Execute state updates for current frame"""
         self._create_events_from_controls(player_inputs, frame_end)
         while self._event_handler.has_unprocessed_events(frame_end):
             self._event_handler.fetch_next_event()
@@ -69,40 +60,33 @@ class WorldState:
             spell_id = self._event_handler.current_events_spell_id
             target_id = self._event_handler.current_events_target_id
             assert timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {timestamp}."
-            event_is_valid = self._validate_event(timestamp, source_id, spell_id, target_id)
-            if event_is_valid:
+
+            if self._validate_event(timestamp, source_id, spell_id, target_id):
                 new_obj_id = self._handle_spawn(timestamp, source_id, spell_id, target_id)
                 self._create_cascading_events(timestamp, new_obj_id, source_id, spell_id)
                 self._apply_event(timestamp, source_id, spell_id, target_id)
+
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
 
     def _create_cascading_events(self, timestamp: int, new_obj_id: int, source_id: int, spell_id: int) -> None:
         timeline = self._state_handler.get_ability_timeline(spell_id)
-        if not timeline:
-            return
-        # Determine who casts the timeline events
-        if new_obj_id != Consts.EMPTY_ID:
-            t_source = new_obj_id
-        else:
-            t_source = source_id
-        # Dispatch
+        if not timeline: return
+        t_source = new_obj_id if new_obj_id != Consts.EMPTY_ID else source_id
+
         for trigger_timestamp, timeline_spell_ids in timeline.items():
             for t_spell in timeline_spell_ids:
-                # Determine targets
                 if self._state_handler.is_area_of_effect(spell_id):
                     timeline_targets = list(self._state_handler.select_targets_for_aoe(t_source, spell_id))
                 else:
                     timeline_targets = [self._state_handler.get_current_target_for_obj(t_source)]
                 for t_target in timeline_targets:
-                    self._event_handler.dispatch_upcoming_event(
-                        timestamp + trigger_timestamp, t_source, t_spell, t_target
-                    )
+                    self._event_handler.dispatch_upcoming_event(timestamp + trigger_timestamp, t_source, t_spell, t_target)
 
     def _create_events_from_controls(self, player_inputs: list[str], timestamp: int) -> None:
         source_id = self._state_handler.player_id
         if not player_inputs or source_id == Consts.EMPTY_ID:
             return
-        spell_ids = InputRegistry.get_spells_for_inputs(player_inputs)
+        spell_ids = self._state_handler.get_spells_for_inputs(player_inputs=player_inputs)
         target_id = self._state_handler.get_current_target_for_obj(source_id)
         for spell_id in spell_ids:
             self._event_handler.dispatch_upcoming_event(timestamp, source_id, spell_id, target_id)

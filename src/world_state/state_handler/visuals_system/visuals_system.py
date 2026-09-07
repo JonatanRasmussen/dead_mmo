@@ -1,40 +1,9 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
-from enum import IntFlag, auto
-
-
-class VisualsBehavior(IntFlag):
-    NONE = 0
-    CHANGE_COLOR_RGB_OF_SOURCE = auto()
-    CHANGE_SPRITE_OF_SOURCE = auto()
-
-@dataclass(slots=True)
-class SpellVisualsData:
-    """Stores visual/audio data for the spell itself."""
-    flags: VisualsBehavior
-    audio_name: str
-    animation_name: str
-    animation_scale: float
-    animate_on_source: bool
-    animate_on_target: bool
-    rgb_color_red: int
-    rgb_color_green: int
-    rgb_color_blue: int
-    obj_sprite_name: str
-
-    @property
-    def should_play_audio(self) -> bool:
-        return bool(self.audio_name)
-
-    @property
-    def should_play_animation(self) -> bool:
-        return bool(self.animation_name)
-
+from typing import Dict
+from src.world_state.state_handler._spell_loader import Effect
 
 @dataclass(slots=True)
 class ObjVisualsData:
-    """ECS-style component storing rendering data for a GameObj."""
-
     color_red: int
     color_green: int
     color_blue: int
@@ -42,66 +11,38 @@ class ObjVisualsData:
 
     @classmethod
     def create_environment(cls) -> "ObjVisualsData":
-        return cls(
-            color_red=255,
-            color_green=255,
-            color_blue=255,
-            sprite_name="",
-        )
+        return cls(255, 255, 255, "")
 
     @classmethod
-    def create_from_spell(cls, spell_data: SpellVisualsData) -> "ObjVisualsData":
-        return cls(
-            color_red=spell_data.rgb_color_red,
-            color_green=spell_data.rgb_color_green,
-            color_blue=spell_data.rgb_color_blue,
-            sprite_name=spell_data.obj_sprite_name,
-        )
-
+    def create_spawned(cls, r: int, g: int, b: int, sprite: str) -> "ObjVisualsData":
+        return cls(r, g, b, sprite)
 
 class VisualsSystem:
-    """
-    Manages all cosmetic rendering logic, sprites, animations, and sound effects.
-    """
-
-    def __init__(self, spell_data_dct: Dict[int, SpellVisualsData]) -> None:
-        self.spell_data_dct: Dict[int, SpellVisualsData] = spell_data_dct
+    def __init__(self) -> None:
         self.game_obj_data_dct: Dict[int, ObjVisualsData] = {}
 
     def create_environment_obj(self, obj_id: int) -> None:
-        """Sets up default, invisible rendering for the environment object."""
         self.game_obj_data_dct[obj_id] = ObjVisualsData.create_environment()
 
-    def spawn_game_obj(self, obj_id: int, spell_id: int) -> None:
-        """Assigns the cosmetic template of the spell to a newly spawned object."""
-        spell_data = self.spell_data_dct[spell_id]
-        self.game_obj_data_dct[obj_id] = ObjVisualsData.create_from_spell(spell_data)
+    def spawn_game_obj(self, obj_id: int, r: int, g: int, b: int, sprite: str) -> None:
+        self.game_obj_data_dct[obj_id] = ObjVisualsData.create_spawned(r, g, b, sprite)
 
     def despawn_game_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct.pop(obj_id, None)
 
-    def apply_visuals_event(self, source_id: int, spell_id: int) -> None:
-        if spell_id not in self.spell_data_dct:
-            return
+    # ---- State Update Handlers ----
 
-        spell_data = self.spell_data_dct[spell_id]
-        flags = spell_data.flags
-        source_data = self.game_obj_data_dct.get(source_id)
+    def change_color_rgb(self, source_id: int, r: int, g: int, b: int) -> None:
+        if data := self.game_obj_data_dct.get(source_id):
+            data.color_red, data.color_green, data.color_blue = r, g, b
 
-        # Apply Target Effects
-        if source_data:
-            if flags & VisualsBehavior.CHANGE_COLOR_RGB_OF_SOURCE:
-                source_data.color_red = spell_data.rgb_color_red
-                source_data.color_green = spell_data.rgb_color_green
-                source_data.color_blue = spell_data.rgb_color_blue
-            if flags & VisualsBehavior.CHANGE_SPRITE_OF_SOURCE:
-                source_data.sprite_name = spell_data.obj_sprite_name
-
-
-    def get_spell_visuals(self, spell_id: int) -> SpellVisualsData:
-        """Returns visual/audio data to play when a spell is cast."""
-        return self.spell_data_dct[spell_id]
+    def change_sprite(self, source_id: int, sprite_name: str) -> None:
+        if data := self.game_obj_data_dct.get(source_id):
+            data.sprite_name = sprite_name
 
     def get_obj_visuals(self, obj_id: int) -> ObjVisualsData:
-        """Returns the sprite and color payload used to render an object."""
         return self.game_obj_data_dct[obj_id]
+
+    def apply_effect(self, effect: Effect, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        # Implemented for completeness so StateHandler can blindly invoke this method in its loop
+        pass

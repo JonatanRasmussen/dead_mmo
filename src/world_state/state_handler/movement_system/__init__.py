@@ -1,7 +1,5 @@
-from .movement_system import MovementSystem, SpellMovementData, MovementBehavior
+from .movement_system import MovementSystem
 
 __all__ = [
     "MovementSystem",
-    "SpellMovementData",
-    "MovementBehavior",
 ]

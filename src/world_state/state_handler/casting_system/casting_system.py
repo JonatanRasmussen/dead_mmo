@@ -1,30 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Iterable
-from enum import IntFlag, auto
-
 from src.settings import Consts
-
-
-class CastingBehavior(IntFlag):
-    NONE = 0
-    DENY_IF_CASTING = auto()
-    START_CHANNEL = auto()
-    STOP_CHANNEL = auto()
-
-
-@dataclass(slots=True)
-class SpellCastingData:
-    flags: CastingBehavior = CastingBehavior.NONE
-    timeline: dict[int, list[int]] = field(default_factory=dict)
-    base_cooldown: int = 0
-    hardware_bindings: dict[str, int] = field(default_factory=dict)
-    gcd_mod: float = 0.0
-    channel_duration: int = field(init=False, default=0)
-
-    def __post_init__(self):
-        # Infer how long this channel lasts by the final timestamp in its timeline
-        self.channel_duration = max(self.timeline.keys()) if self.timeline else 0
-
+from src.world_state.state_handler._spell_loader import Effect
 
 @dataclass(slots=True)
 class ObjCastingData:
@@ -40,139 +17,97 @@ class ObjCastingData:
         return cls()
 
     @classmethod
-    def create_from_spell(cls, timestamp: int, spell_data: SpellCastingData) -> 'ObjCastingData':
+    def create_spawned(cls, timestamp: int, hardware_bindings: dict[str, int]) -> 'ObjCastingData':
         return cls(
             ability_cd_start={},
             gcd_start=-10000,
-            gcd_mod=0.0,  # Initialize to 0.0 so the first cast is free if no prior GCD
-            hardware_bindings=spell_data.hardware_bindings.copy() if spell_data.hardware_bindings else {},
+            gcd_mod=0.0,
+            hardware_bindings=hardware_bindings.copy() if hardware_bindings else {},
             current_spell_cast=Consts.EMPTY_ID,
             cast_start_time=timestamp,
         )
 
-
 class CastingSystem:
-    def __init__(self, spell_data_dct: Dict[int, SpellCastingData]) -> None:
-        self.spell_data_dct: Dict[int, SpellCastingData] = spell_data_dct
+    def __init__(self) -> None:
         self.game_obj_data_dct: Dict[int, ObjCastingData] = {}
 
     def create_environment_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct[obj_id] = ObjCastingData.create_environment()
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, spell_id: int) -> None:
-        if spell_id not in self.spell_data_dct or new_obj_id in self.game_obj_data_dct:
-            return
-        spell_data = self.spell_data_dct[spell_id]
-        self.game_obj_data_dct[new_obj_id] = ObjCastingData.create_from_spell(timestamp, spell_data)
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, hardware_bindings: dict[str, int]) -> None:
+        if new_obj_id in self.game_obj_data_dct: return
+        self.game_obj_data_dct[new_obj_id] = ObjCastingData.create_spawned(timestamp, hardware_bindings)
 
     def despawn_game_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct.pop(obj_id, None)
 
-    def apply_casting_event(self, timestamp: int, source_id: int, spell_id: int) -> None:
-        if spell_id not in self.spell_data_dct:
-            return
+    # ---- State Update Handlers ----
 
-        spell_data = self.spell_data_dct[spell_id]
-        flags = spell_data.flags
-        source_data = self.game_obj_data_dct.get(source_id)
+    def trigger_gcd(self, source_id: int, timestamp: int, gcd_mod: float) -> None:
+        if source_data := self.game_obj_data_dct.get(source_id):
+            source_data.gcd_start = timestamp
+            source_data.gcd_mod = gcd_mod
 
-        if source_data:
-            # If the spell has a gcd_mod != 0, it triggers a GCD for subsequent spells
-            if spell_data.gcd_mod != 0.0:
-                source_data.gcd_start = timestamp
-                source_data.gcd_mod = spell_data.gcd_mod
+    def trigger_cooldown(self, source_id: int, spell_id: int, timestamp: int) -> None:
+        if source_data := self.game_obj_data_dct.get(source_id):
+            source_data.ability_cd_start[spell_id] = timestamp
 
-            # If the spell has a base_cooldown != 0, it triggers a cooldown
-            if spell_data.base_cooldown != 0:
-                source_data.ability_cd_start[spell_id] = timestamp
+    def start_channel(self, source_id: int, spell_id: int, timestamp: int) -> None:
+        if source_data := self.game_obj_data_dct.get(source_id):
+            source_data.cast_start_time = timestamp
+            source_data.current_spell_cast = spell_id
 
-            if flags & CastingBehavior.START_CHANNEL:
-                source_data.cast_start_time = timestamp
-                source_data.current_spell_cast = spell_id
-            if flags & CastingBehavior.STOP_CHANNEL:
-                source_data.cast_start_time = timestamp
-                source_data.current_spell_cast = Consts.EMPTY_ID
+    def stop_channel(self, source_id: int, timestamp: int) -> None:
+        if source_data := self.game_obj_data_dct.get(source_id):
+            source_data.cast_start_time = timestamp
+            source_data.current_spell_cast = Consts.EMPTY_ID
 
     # ---- Cooldown & Input Methods ----
 
-    def get_gcd_progress(self, obj_id: int, spell_id: int, current_timestamp: int) -> float:
-        spell_data = self.spell_data_dct.get(spell_id)
-
-        # If the spell being cast has a gcd_mod of 0, it bypasses GCD entirely
-        if spell_data is None or spell_data.gcd_mod == 0.0:
-            return 1.0
-
+    def get_gcd_progress(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> float:
+        if gcd_mod == 0.0: return 1.0
         obj_data = self.game_obj_data_dct.get(obj_id)
-        if obj_data is None:
-            return 1.0
+        if not obj_data or obj_data.gcd_mod == 0.0: return 1.0
 
-        # If the object hasn't cast a GCD-triggering spell yet, GCD is ready
-        if obj_data.gcd_mod == 0.0:
-            return 1.0
-
-        base_gcd = Consts.BASE_GCD
-        # The GCD duration is determined by the PREVIOUS spell's gcd_mod
-        gcd_duration = base_gcd * obj_data.gcd_mod
-        if gcd_duration <= 0:
-            return 1.0
-
+        gcd_duration = Consts.BASE_GCD * obj_data.gcd_mod
+        if gcd_duration <= 0: return 1.0
         progress = (current_timestamp - obj_data.gcd_start) / gcd_duration
         return min(1.0, max(0.0, progress))
 
-    def is_gcd_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
-        return self.get_gcd_progress(obj_id, spell_id, current_timestamp) >= 1.0
+    def is_gcd_ready(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> bool:
+        return self.get_gcd_progress(obj_id, gcd_mod, current_timestamp) >= 1.0
 
-    def is_cooldown_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
-        return self.get_cooldown_progress(obj_id, spell_id, current_timestamp) >= 1.0
-
-    def get_cooldown_progress(self, obj_id: int, spell_id: int, current_timestamp: int) -> float:
-        spell_data = self.spell_data_dct.get(spell_id)
-        if spell_data is None or spell_data.base_cooldown == 0:
-            return 1.0
-
+    def get_cooldown_progress(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> float:
+        if base_cooldown == 0: return 1.0
         obj_data = self.game_obj_data_dct.get(obj_id)
-        if obj_data is None:
-            return 1.0
-
-        cd_duration = spell_data.base_cooldown
-        if cd_duration <= 0:
-            return 1.0
+        if not obj_data: return 1.0
 
         cd_start = obj_data.ability_cd_start.get(spell_id, -10000)
-        progress = (current_timestamp - cd_start) / cd_duration
+        progress = (current_timestamp - cd_start) / base_cooldown
         return min(1.0, max(0.0, progress))
 
-    def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str]) -> Iterable[int]:
-        if not hardware_inputs:
-            return
+    def is_cooldown_ready(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> bool:
+        return self.get_cooldown_progress(obj_id, spell_id, base_cooldown, current_timestamp) >= 1.0
 
+    def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str]) -> Iterable[int]:
+        if not hardware_inputs: return
         obj_data = self.game_obj_data_dct.get(obj_id)
-        if not obj_data or not obj_data.hardware_bindings:
-            return
+        if not obj_data or not obj_data.hardware_bindings: return
 
         for hw_input in hardware_inputs:
             spell_id = obj_data.hardware_bindings.get(hw_input)
             if spell_id is not None and Consts.is_valid_id(spell_id):
                 yield spell_id
 
-    # ---- Timeline properties ----
-
-    def has_channel_start(self, spell_id: int) -> bool:
-        return bool(self.spell_data_dct[spell_id].flags & CastingBehavior.START_CHANNEL)
-
-    def get_ability_timeline(self, spell_id: int) -> dict[int, list[int]]:
-        return self.spell_data_dct[spell_id].timeline
-
-    def is_aura_active(self, current_timestamp: int, obj_id: int, spell_id: int) -> bool:
+    def is_aura_active(self, current_timestamp: int, obj_id: int, spell_id: int, channel_duration: int) -> bool:
         obj_data = self.game_obj_data_dct.get(obj_id)
-        if obj_data is None:
-            return False
-        spell_data = self.spell_data_dct.get(spell_id)
+        if not obj_data: return False
+        if current_timestamp > (obj_data.cast_start_time + channel_duration): return False
+        return obj_data.current_spell_cast == spell_id
 
-        # Check against inferred duration
-        if spell_data and current_timestamp > (obj_data.cast_start_time + spell_data.channel_duration):
-            return False
-
-        if obj_data.current_spell_cast != spell_id:
-            return False
-        return True
+    def apply_effect(self, effect: Effect, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        t = effect.effect_type
+        if t == "start_channel":
+            self.start_channel(source_id, spell_id, timestamp)
+        elif t == "stop_channel":
+            self.stop_channel(source_id, timestamp)

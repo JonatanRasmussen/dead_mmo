@@ -1,8 +1,6 @@
-from .visuals_system import VisualsSystem, SpellVisualsData, VisualsBehavior, ObjVisualsData
+from .visuals_system import VisualsSystem, ObjVisualsData
 
 __all__ = [
     "VisualsSystem",
-    "SpellVisualsData",
-    "VisualsBehavior",
     "ObjVisualsData",
 ]
