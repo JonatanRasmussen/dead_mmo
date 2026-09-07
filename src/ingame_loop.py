@@ -1,6 +1,7 @@
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
-from src.world_state.world_state import DisplayObj, SpellVfxData, WorldState
+from src.world_state.world_state import DisplayObj, WorldState
+from src.world_state.state_handler.visuals_system import SpellVisualsData
 
 
 class IngameLoop:
@@ -60,7 +61,7 @@ class IngameLoop:
         rendering_framework.terminate_rendering_framework()
 
     @staticmethod
-    def _display_spell(rendering_framework: PygameRenderer, spell_vfx: SpellVfxData) -> None:
+    def _display_spell(rendering_framework: PygameRenderer, spell_vfx: SpellVisualsData) -> None:
         if spell_vfx.should_play_audio:
             rendering_framework.play_sound(spell_vfx.audio_name)
         if spell_vfx.should_play_animation:

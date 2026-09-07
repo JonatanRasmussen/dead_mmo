@@ -1,8 +1,7 @@
-from .state_handler import StateHandler, DisplayObj
-from ._vfx_and_sfx_system import SpellVfxData
+from .state_handler import StateHandler, DisplayObj, InputRegistry
 
 __all__ = [
     "DisplayObj",
-    "SpellVfxData",
     "StateHandler",
+    "InputRegistry",
 ]

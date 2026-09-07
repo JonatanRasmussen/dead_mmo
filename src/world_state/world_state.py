@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from src.settings import Consts
 from .event_handler import EventHandler, IdGen
-from .state_handler import StateHandler, SpellVfxData, DisplayObj
-from .state_handler.temp_registry import InputRegistry
+from .state_handler import StateHandler, DisplayObj, InputRegistry
+from .state_handler.visuals_system import SpellVisualsData
 
 
 @dataclass(slots=True)
@@ -42,15 +42,15 @@ class WorldState:
     def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
 
-    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[SpellVfxData]:
-        spell_vfx_data: list[SpellVfxData] = []
+    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[SpellVisualsData]:
+        spell_visuals_data: list[SpellVisualsData] = []
         combat_interactions = self._event_handler.get_combat_interactions_for_frame(timestamp)
         for _, spell_id, _ in combat_interactions:
-            spell_vfx = self._state_handler.get_spell_visuals(spell_id)
+            spell_visuals = self._state_handler.get_spell_visuals(spell_id)
             #if spell_vfx.animate_on_source or spell_vfx.animate_on_target:
             #    self, source_id: int, spell_id: int, target_id: int
-            spell_vfx_data.append(spell_vfx)
-        return spell_vfx_data
+            spell_visuals_data.append(spell_visuals)
+        return spell_visuals_data
 
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         environment_id = self._state_handler.environment_id

@@ -8,8 +8,8 @@ class HealthBehavior(IntFlag):
     """ Various bitflags that define spell health behavior. """
     NONE = 0
     # HEALTH RELATED STATS
-    DAMAGING = auto()
-    HEALING = auto()
+    DAMAGE_TARGET = auto()
+    HEAL_TARGET = auto()
 
 
 @dataclass(slots=True)
@@ -78,10 +78,10 @@ class HealthSystem:
 
         # Apply Target Effects
         if source_data and target_data:
-            if flags & HealthBehavior.DAMAGING:
+            if flags & HealthBehavior.DAMAGE_TARGET:
                 damage_amount = spell_data.power * source_data.spell_modifier
                 target_data.hp -= damage_amount
-            if flags & HealthBehavior.HEALING:
+            if flags & HealthBehavior.HEAL_TARGET:
                 healing_amount = spell_data.power * source_data.spell_modifier
                 target_data.hp += healing_amount
 

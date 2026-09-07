@@ -1,7 +1,6 @@
-from .world_state import WorldState, DisplayObj, SpellVfxData
+from .world_state import WorldState, DisplayObj
 
 __all__ = [
     "DisplayObj",
-    "SpellVfxData",
     "WorldState",
 ]

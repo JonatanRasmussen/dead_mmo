@@ -4,13 +4,12 @@ from typing import Optional
 
 # Assuming these imports match your project structure:
 from src.settings import HardwareInputConsts
-from .temp_registry import AssetRegistry
 
-from ._casting_system import CastingSystem, SpellCastingData, CastingBehavior
-from ._health_system import HealthSystem, SpellHealthData, HealthBehavior
-from ._movement_system import MovementSystem, SpellMovementData, MovementBehavior
-from ._targeting_system import TargetingSystem, SpellTargetingData, TargetingBehavior
-from ._vfx_and_sfx_system import VfxAndSfxSystem, SpellVfxData, SpellVisualTemplate
+from .casting_system import CastingSystem, SpellCastingData, CastingBehavior
+from .health_system import HealthSystem, SpellHealthData, HealthBehavior
+from .movement_system import MovementSystem, SpellMovementData, MovementBehavior
+from .targeting_system import TargetingSystem, SpellTargetingData, TargetingBehavior
+from .visuals_system import VisualsSystem, SpellVisualsData, VisualsBehavior
 
 
 class SpellLoader:
@@ -101,8 +100,8 @@ class SpellLoader:
         data_dct = {}
         for spell_id, s in self._raw_spells.items():
             flags = HealthBehavior.NONE
-            if s.get("damaging"): flags |= HealthBehavior.DAMAGING
-            if s.get("healing"): flags |= HealthBehavior.HEALING
+            if s.get("damaging"): flags |= HealthBehavior.DAMAGE_TARGET
+            if s.get("healing"): flags |= HealthBehavior.HEAL_TARGET
 
             data_dct[spell_id] = SpellHealthData(
                 power=s.get("power", 1.0),
@@ -163,24 +162,19 @@ class SpellLoader:
             )
         return TargetingSystem(data_dct)
 
-    def create_vfx_and_sfx_system(self) -> VfxAndSfxSystem:
+    def create_visuals_system(self) -> VisualsSystem:
         data_dct = {}
         for spell_id, s in self._raw_spells.items():
-            spawn_template = None
-            spawn_template = SpellVisualTemplate(
-                color_red=s.get("spawn_color_red", 128),
-                color_green=s.get("spawn_color_green", 128),
-                color_blue=s.get("spawn_color_blue", 128),
-                sprite_name=s.get("spawn_sprite_name") or AssetRegistry.get_sprite(spell_id),
-                audio_name=s.get("spawn_audio_name", "")
-            )
-
-            data_dct[spell_id] = SpellVfxData(
-                audio_name=s.get("audio_name") or AssetRegistry.get_audio(spell_id),
+            data_dct[spell_id] = SpellVisualsData(
+                flags = VisualsBehavior.NONE,
+                audio_name=s.get("audio_name", ""),
                 animation_name=s.get("animation_name", ""),
                 animation_scale=s.get("animation_scale", 1.0),
                 animate_on_source=s.get("animate_on_source", False),
                 animate_on_target=s.get("animate_on_target", False),
-                spawn_template=spawn_template
+                rgb_color_red=s.get("spawn_color_red", 128),
+                rgb_color_green=s.get("spawn_color_green", 128),
+                rgb_color_blue=s.get("spawn_color_blue", 128),
+                obj_sprite_name=s.get("spawn_sprite_name", ""),
             )
-        return VfxAndSfxSystem(data_dct)
+        return VisualsSystem(data_dct)
