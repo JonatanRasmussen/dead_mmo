@@ -1,5 +1,3 @@
-from typing import Iterable
-
 from src.settings import Consts
 from ._combat_event import CombatEvent
 from ._event_log import EventLog
@@ -61,6 +59,9 @@ class EventHandler:
     def assign_outcome_gcd_not_ready(self, finalized_target_id: int) -> None:
         self.finalize_event(finalized_target_id, Outcome.GCD_NOT_READY)
 
+    def assign_outcome_cooldown_not_ready(self, finalized_target_id: int) -> None:
+        self.finalize_event(finalized_target_id, Outcome.COOLDOWN_NOT_READY)
+
     def assign_outcome_invalid_target(self, finalized_target_id: int) -> None:
         self.finalize_event(finalized_target_id, Outcome.TARGET_IS_INVALID)
 
@@ -71,8 +72,14 @@ class EventHandler:
         self._event_log_for_each_frame[current_frame_timestamp] = self._event_log_for_current_frame
         self._event_log_for_current_frame = EventLog()
 
-    def get_successful_spell_ids(self, current_frame_timestamp: int) -> Iterable[int]:
-        return self._event_log_for_each_frame[current_frame_timestamp].get_successful_spell_ids
+    def get_combat_interactions_for_frame(self, current_frame_timestamp: int) -> list[tuple[int, int, int]]:
+        combat_interactions: list[tuple[int, int, int]] = []
+        for evt in self._event_log_for_each_frame[current_frame_timestamp].view_all_events:
+            if evt.outcome_is_valid:
+                interaction = (evt.source_id, evt.spell_id, evt.target_id)
+                combat_interactions.append(interaction)
+        return combat_interactions
+
 
     def dispatch_upcoming_event(self, timestamp: int, source_id: int, spell_id: int, target_id) -> None:
         event_id=self._event_id_gen.generate_new_id()

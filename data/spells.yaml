@@ -81,7 +81,7 @@
     ticks: 150
 171:
   name: spawn_healing_powerup
-  trigger_gcd: true
+  gcd_mod: 1.0
   spawn_obj: true
   hp: 30.0
   spawned_x_offset: 0.2
@@ -161,16 +161,16 @@
 # Spec Warlock
 # ==========================================
 128:
-  name: fire_blast
-  trigger_gcd: true
+  name: molten_blast
+  gcd_mod: 0.5
   aoe_cross_team: true
   timeline:
     0: [111]
 111:
-  name: fire_blast_damage
+  name: molten_blast_damage
   damaging: true
   power: 13.0
-  audio_name: ShadowBoltHit
+  audio_name: MoltenBlastHit
 911:
   name: shadow_blast
   damaging: true
@@ -213,7 +213,8 @@
   walk_source_towards_target: true
 124:
   name: shadowbolt_spawn
-  trigger_gcd: true
+  base_cooldown: 2000
+  gcd_mod: 1.0
   aoe_cross_team: true
   timeline:
     0: [41]

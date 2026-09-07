@@ -1,9 +1,25 @@
-from typing import Iterable
+from dataclasses import dataclass
 
 from src.settings import Consts
 from .event_handler import EventHandler, IdGen
 from .state_handler import StateHandler, SpellVfxData, DisplayObj
 from .state_handler.temp_registry import InputRegistry
+
+
+@dataclass(slots=True)
+class FrameOutput:
+    effect_id: int
+    scale: float
+    pos_x: float
+    pos_y: float
+    is_visible: bool
+    color_red: int
+    color_green: int
+    color_blue: int
+    sprite_name: str
+    animation_name: str
+    audio_name: str
+
 
 
 class WorldState:
@@ -15,18 +31,26 @@ class WorldState:
         self._state_handler: StateHandler = StateHandler()
         self._create_environment_obj()
 
-    def view_display_objs(self, current_time: int) -> Iterable[DisplayObj]:
-        for obj_id in self._state_handler.get_all_obj_ids():
-            obj_vfx = self._state_handler.get_obj_visuals(obj_id)
-            if not self._state_handler.is_visible(obj_id) or not obj_vfx:
-                continue
-            x, y = self._state_handler.get_position(obj_id, current_time)
-            color = (obj_vfx.color_red, obj_vfx.color_green, obj_vfx.color_blue)
-            yield DisplayObj(obj_id, (x, y), self._state_handler.get_size(obj_id), color, obj_vfx.sprite_name)
+    def get_display_obj_dct(self, current_time: int) -> dict[int, DisplayObj]:
+        display_obj_dct: dict[int, DisplayObj] = {}
+        obj_ids = self._state_handler.active_obj_ids
+        for obj_id in obj_ids:
+            display_obj = self._state_handler.create_display_obj(current_time, obj_id)
+            display_obj_dct[obj_id] = display_obj
+        return display_obj_dct
 
-    def get_spell_vfx_for_successful_events(self, timestamp: int) -> Iterable[SpellVfxData]:
-        for spell_id in self._event_handler.get_successful_spell_ids(timestamp):
-            yield self._state_handler.get_spell_visuals(spell_id)
+    def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
+        return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
+
+    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[SpellVfxData]:
+        spell_vfx_data: list[SpellVfxData] = []
+        combat_interactions = self._event_handler.get_combat_interactions_for_frame(timestamp)
+        for _, spell_id, _ in combat_interactions:
+            spell_vfx = self._state_handler.get_spell_visuals(spell_id)
+            #if spell_vfx.animate_on_source or spell_vfx.animate_on_target:
+            #    self, source_id: int, spell_id: int, target_id: int
+            spell_vfx_data.append(spell_vfx)
+        return spell_vfx_data
 
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         environment_id = self._state_handler.environment_id
@@ -89,6 +113,9 @@ class WorldState:
             return False
         elif not self._state_handler.is_gcd_ready(source_id, spell_id, timestamp):
             self._event_handler.assign_outcome_gcd_not_ready(finalized_target_id)
+            return False
+        elif not self._state_handler.is_cooldown_ready(source_id, spell_id, timestamp):
+            self._event_handler.assign_outcome_cooldown_not_ready(finalized_target_id)
             return False
         elif not self._state_handler.is_valid_target(finalized_target_id) and not source_id == finalized_target_id:
             self._event_handler.assign_outcome_invalid_target(finalized_target_id)

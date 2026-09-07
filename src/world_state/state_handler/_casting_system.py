@@ -7,8 +7,6 @@ from src.settings import Consts
 
 class CastingBehavior(IntFlag):
     NONE = 0
-    TRIGGER_GCD = auto()
-    TRIGGER_COOLDOWN = auto()
     DENY_IF_CASTING = auto()
     START_CHANNEL = auto()
     STOP_CHANNEL = auto()
@@ -18,9 +16,9 @@ class CastingBehavior(IntFlag):
 class SpellCastingData:
     flags: CastingBehavior = CastingBehavior.NONE
     timeline: dict[int, list[int]] = field(default_factory=dict)
-    base_cooldown: float = 0.0
+    base_cooldown: int = 0
     hardware_bindings: dict[str, int] = field(default_factory=dict)
-    gcd_mod: float = 1.0
+    gcd_mod: float = 0.0
     channel_duration: int = field(init=False, default=0)
 
     def __post_init__(self):
@@ -32,7 +30,7 @@ class SpellCastingData:
 class ObjCastingData:
     ability_cd_start: dict[int, int] = field(default_factory=dict)
     gcd_start: int = -10000
-    gcd_mod: float = 1.0
+    gcd_mod: float = 0.0
     hardware_bindings: dict[str, int] = field(default_factory=dict)
     current_spell_cast: int = Consts.EMPTY_ID
     cast_start_time: int = 0
@@ -46,7 +44,7 @@ class ObjCastingData:
         return cls(
             ability_cd_start={},
             gcd_start=-10000,
-            gcd_mod=spell_data.gcd_mod,
+            gcd_mod=0.0,  # Initialize to 0.0 so the first cast is free if no prior GCD
             hardware_bindings=spell_data.hardware_bindings.copy() if spell_data.hardware_bindings else {},
             current_spell_cast=Consts.EMPTY_ID,
             cast_start_time=timestamp,
@@ -79,10 +77,15 @@ class CastingSystem:
         source_data = self.game_obj_data_dct.get(source_id)
 
         if source_data:
-            if flags & CastingBehavior.TRIGGER_GCD:
+            # If the spell has a gcd_mod != 0, it triggers a GCD for subsequent spells
+            if spell_data.gcd_mod != 0.0:
                 source_data.gcd_start = timestamp
-            if flags & CastingBehavior.TRIGGER_COOLDOWN:
+                source_data.gcd_mod = spell_data.gcd_mod
+
+            # If the spell has a base_cooldown != 0, it triggers a cooldown
+            if spell_data.base_cooldown != 0:
                 source_data.ability_cd_start[spell_id] = timestamp
+
             if flags & CastingBehavior.START_CHANNEL:
                 source_data.cast_start_time = timestamp
                 source_data.current_spell_cast = spell_id
@@ -94,14 +97,21 @@ class CastingSystem:
 
     def get_gcd_progress(self, obj_id: int, spell_id: int, current_timestamp: int) -> float:
         spell_data = self.spell_data_dct.get(spell_id)
-        if spell_data is None or not (spell_data.flags & CastingBehavior.TRIGGER_GCD):
+
+        # If the spell being cast has a gcd_mod of 0, it bypasses GCD entirely
+        if spell_data is None or spell_data.gcd_mod == 0.0:
             return 1.0
 
         obj_data = self.game_obj_data_dct.get(obj_id)
         if obj_data is None:
             return 1.0
 
-        base_gcd = float(getattr(Consts, "BASE_GCD", 0.0))
+        # If the object hasn't cast a GCD-triggering spell yet, GCD is ready
+        if obj_data.gcd_mod == 0.0:
+            return 1.0
+
+        base_gcd = Consts.BASE_GCD
+        # The GCD duration is determined by the PREVIOUS spell's gcd_mod
         gcd_duration = base_gcd * obj_data.gcd_mod
         if gcd_duration <= 0:
             return 1.0
@@ -112,9 +122,12 @@ class CastingSystem:
     def is_gcd_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
         return self.get_gcd_progress(obj_id, spell_id, current_timestamp) >= 1.0
 
+    def is_cooldown_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
+        return self.get_cooldown_progress(obj_id, spell_id, current_timestamp) >= 1.0
+
     def get_cooldown_progress(self, obj_id: int, spell_id: int, current_timestamp: int) -> float:
         spell_data = self.spell_data_dct.get(spell_id)
-        if spell_data is None or not (spell_data.flags & CastingBehavior.TRIGGER_COOLDOWN):
+        if spell_data is None or spell_data.base_cooldown == 0:
             return 1.0
 
         obj_data = self.game_obj_data_dct.get(obj_id)
@@ -128,9 +141,6 @@ class CastingSystem:
         cd_start = obj_data.ability_cd_start.get(spell_id, -10000)
         progress = (current_timestamp - cd_start) / cd_duration
         return min(1.0, max(0.0, progress))
-
-    def is_cooldown_ready(self, obj_id: int, spell_id: int, current_timestamp: int) -> bool:
-        return self.get_cooldown_progress(obj_id, spell_id, current_timestamp) >= 1.0
 
     def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str]) -> Iterable[int]:
         if not hardware_inputs:

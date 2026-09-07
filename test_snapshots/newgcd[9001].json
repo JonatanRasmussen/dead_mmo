@@ -24542,7 +24542,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 0,
         "cast_start_time": 0
@@ -24577,7 +24577,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": 3000,
-        "gcd_mod": 0.5,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 113,
         "cast_start_time": 5000
@@ -24614,7 +24614,7 @@
           "124": 500
         },
         "gcd_start": 3800,
-        "gcd_mod": 0.5,
+        "gcd_mod": 1.0,
         "hardware_bindings": {
           "BUILTIN_KEYBOARD_KEYDOWN_1": 128,
           "BUILTIN_KEYBOARD_KEYDOWN_2": 113,
@@ -24700,7 +24700,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 131,
         "cast_start_time": 500
@@ -24735,7 +24735,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 131,
         "cast_start_time": 500
@@ -24770,7 +24770,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 115,
         "cast_start_time": 2300
@@ -24805,7 +24805,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 215,
         "cast_start_time": 2000
@@ -24840,7 +24840,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 131,
         "cast_start_time": 4400
@@ -24875,7 +24875,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": -10000,
-        "gcd_mod": 0.0,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 131,
         "cast_start_time": 4400

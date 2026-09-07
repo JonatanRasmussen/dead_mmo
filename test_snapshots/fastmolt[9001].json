@@ -24577,7 +24577,7 @@
       "casting": {
         "ability_cd_start": {},
         "gcd_start": 3000,
-        "gcd_mod": 0.5,
+        "gcd_mod": 1.0,
         "hardware_bindings": {},
         "current_spell_cast": 113,
         "cast_start_time": 5000
@@ -24614,7 +24614,7 @@
           "124": 500
         },
         "gcd_start": 3800,
-        "gcd_mod": 0.5,
+        "gcd_mod": 1.0,
         "hardware_bindings": {
           "BUILTIN_KEYBOARD_KEYDOWN_1": 128,
           "BUILTIN_KEYBOARD_KEYDOWN_2": 113,

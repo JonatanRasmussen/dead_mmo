@@ -422,3 +422,13 @@
 [2026-08-26 00:18:41] {BudoB}: Me sleepy.
 [2026-08-26 00:18:43] {BudoB}: Coded for like 4 days, the following is total time.
 [2026-08-26 00:19:03] {BudoB}: Code time: 14 hours.
+
+[2026-09-07 02:16:53] {BudoB}: Now at Snawer-hus. Very nice. And cozy.
+[2026-09-07 02:17:03] {BudoB}: It is super late so I will be brief.
+[2026-09-07 02:17:08] {BudoB}: FrameOutput: Maybe my smartest idea yet.
+[2026-09-07 02:17:25] {BudoB}: I see a clear path forward.
+[2026-09-07 02:17:37] {BudoB}: Much simpler to define the data available for frontend.
+[2026-09-07 02:17:58] {BudoB}: And then let frontend decide how to display it.
+[2026-09-07 02:18:07] {BudoB}: The alternative is that backend exposes a bunch of state.
+[2026-09-07 02:18:40] {BudoB}: Me smart. Me also arrogant. GameDev reality bonks Budo.
+[2026-09-07 02:18:52] {BudoB}: Code time: 4 hours.

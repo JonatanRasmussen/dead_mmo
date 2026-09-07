@@ -47,10 +47,12 @@ class IngameLoop:
             world_state.process_frame(player_inputs_this_frame, ingame_time)
             # Render the frame we just simulated
             rendering_framework.begin_frame()
+            display_objs_dct = world_state.get_display_obj_dct(ingame_time)
+            for display_obj in display_objs_dct.values():
+                if display_obj.is_visible:
+                    IngameLoop._render_game_obj(rendering_framework, display_obj)
             for spell_vfx in world_state.get_spell_vfx_for_successful_events(ingame_time):
                 IngameLoop._display_spell(rendering_framework, spell_vfx)
-            for display_obj in world_state.view_display_objs(ingame_time):
-                IngameLoop._render_game_obj(rendering_framework, display_obj)
             IngameLoop._render_frame_actions(rendering_framework, ui_manager)
             rendering_framework.end_frame()
 

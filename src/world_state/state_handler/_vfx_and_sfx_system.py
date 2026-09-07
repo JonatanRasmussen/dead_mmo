@@ -20,6 +20,7 @@ class SpellVfxData:
     audio_name: str
     animation_name: str
     animation_scale: float
+    animate_on_source: bool
     animate_on_target: bool
     spawn_template: Optional[SpellVisualTemplate] = None
 

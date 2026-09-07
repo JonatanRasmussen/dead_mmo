@@ -72,7 +72,7 @@ class SpellData:
 
     # Casting Data
     timeline: dict[int, list[int]] = field(default_factory=dict)
-    base_cooldown: float = 0.0
+    base_cooldown: int = 0
     hardware_bindings: dict[str, int] = field(default_factory=dict)
     gcd_mod: float = 1.0
 

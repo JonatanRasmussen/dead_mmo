@@ -25,10 +25,6 @@ class EventLog:
     def view_all_events(self) -> ValuesView[CombatEvent]:
         return self._event_log.values()
 
-    @property
-    def get_successful_spell_ids(self) -> Iterable[int]:
-        return (event.spell_id for event in self._event_log.values() if event.outcome_is_valid)
-
     def log_event(self, finalized_event: CombatEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
             if finalized_event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:

@@ -71,8 +71,6 @@ class SpellLoader:
         data_dct = {}
         for spell_id, s in self._raw_spells.items():
             flags = CastingBehavior.NONE
-            if s.get("trigger_gcd"): flags |= CastingBehavior.TRIGGER_GCD
-            if s.get("trigger_cooldown"): flags |= CastingBehavior.TRIGGER_COOLDOWN
             if s.get("deny_if_casting"): flags |= CastingBehavior.DENY_IF_CASTING
             if s.get("start_channel"): flags |= CastingBehavior.START_CHANNEL
             if s.get("stop_channel"): flags |= CastingBehavior.STOP_CHANNEL
@@ -93,8 +91,8 @@ class SpellLoader:
             data_dct[spell_id] = SpellCastingData(
                 flags=flags,
                 timeline=timeline,
-                base_cooldown=s.get("base_cooldown", 0.0),
-                gcd_mod=s.get("gcd_mod", 1.0),
+                base_cooldown=s.get("base_cooldown", 0),
+                gcd_mod=s.get("gcd_mod", 0.0),
                 hardware_bindings=bindings
             )
         return CastingSystem(data_dct)
@@ -181,7 +179,8 @@ class SpellLoader:
                 audio_name=s.get("audio_name") or AssetRegistry.get_audio(spell_id),
                 animation_name=s.get("animation_name", ""),
                 animation_scale=s.get("animation_scale", 1.0),
-                animate_on_target=s.get("animate_on_target", True),
+                animate_on_source=s.get("animate_on_source", False),
+                animate_on_target=s.get("animate_on_target", False),
                 spawn_template=spawn_template
             )
         return VfxAndSfxSystem(data_dct)

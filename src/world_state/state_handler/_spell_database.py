@@ -1,3 +1,4 @@
+'''
 from typing import Iterable
 from ._spell_data_configs import LegacySpellConfig
 from ._spell_data import SpellData, TargetingSpellFlags
@@ -117,3 +118,4 @@ class SpellDatabase:
             spells_loaded_into_memory[spell.spell_id] = spell
 
         return spells_loaded_into_memory
+'''
