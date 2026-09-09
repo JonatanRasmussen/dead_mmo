@@ -62,15 +62,18 @@ class IngameLoop:
 
     @staticmethod
     def _display_spell(rendering_framework: PygameRenderer, spell_def: SpellDef) -> None:
-        if spell_def.audio_name != "":
-            rendering_framework.play_sound(spell_def.audio_name)
-        if spell_def.animation_name != "":
+        audio_name = spell_def.cosmetics.get("audio_name", "")
+        if audio_name != "":
+            rendering_framework.play_sound(audio_name)
+
+        animation_name = spell_def.cosmetics.get("animation_name", "")
+        if animation_name != "":
             # Note: in the future, extract position from state.movement_system based on spell cast event data
             pos = (0.0, 0.0)
             rendering_framework.play_animation(
                 pos_xy=pos,
                 scale=spell_def.animation_scale,
-                asset_name=spell_def.animation_name
+                asset_name=animation_name
             )
 
     @staticmethod

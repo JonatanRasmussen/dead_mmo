@@ -40,5 +40,5 @@ class CombatEvent:
         })
 
     @property
-    def outcome_is_valid(self) -> bool:
-        return self.outcome.outcome_is_valid
+    def outcome_is_successful(self) -> bool:
+        return self == Outcome.SUCCESS

@@ -1,3 +1,6 @@
+# ==========================================
+# Start of configs (spells.yaml)
+# ==========================================
 0:
   name: empty_spell
 
@@ -7,54 +10,57 @@
 91:
   name: start_move_up
   effects:
-    - type: walk_forward
+    walk_forward: true
+
 92:
   name: stop_move_up
   effects:
-    - type: stop_walk_forward
+    stop_walk_forward: true
+
 181:
   name: start_move_left
   effects:
-    - type: walk_left
+    walk_left: true
+
 182:
   name: stop_move_left
   effects:
-    - type: stop_walk_left
+    stop_walk_left: true
+
 271:
   name: start_move_down
   effects:
-    - type: walk_backward
+    walk_backward: true
+
 272:
   name: stop_move_down
   effects:
-    - type: stop_walk_backward
+    stop_walk_backward: true
+
 1:
   name: start_move_right
   effects:
-    - type: walk_right
+    walk_right: true
+
 2:
   name: stop_move_right
   effects:
-    - type: stop_walk_right
+    stop_walk_right: true
+
 361:
   name: step_towards_target
+  timeline:
+    20: [361]
   effects:
-    - type: walk_towards_target
+    consume_channeling_ticks: 1
+    walk_towards_target: true
+
 362:
   name: start_move_towards_target
-  timeline_generator:
-    type: channel
-    spell_id: 361
-    duration: 60000
-    ticks: 3600
+  timeline:
+    20: [361]
   effects:
-    - type: start_channel
-    - type: walk_towards_target
-363:
-  name: stop_move_towards_target
-  effects:
-    - type: stop_channel
-    - type: stop_walk_towards_target
+    add_channeling_ticks: 3600
 
 # ==========================================
 # Basic Targeting
@@ -62,277 +68,256 @@
 22:
   name: teamswap
   effects:
-    - type: teamswap
+    teamswap: true
+
 15:
   name: targetswap_to_next_tab_target
   effects:
-    - type: targetswap_to_other_team
+    targetswap_to_other_team: true
+
 16:
   name: targetswap_to_parent
   effects:
-    - type: targetswap_to_parent
+    targetswap_to_parent: true
 
 # ==========================================
 # Npc Healing Powerup
 # ==========================================
-214:
-  name: healing_burst_tick
-  range_limit: 0.1
-  effects:
-    - type: despawn_self
-    - type: heal
-      amount: 150.0
-215:
-  name: healing_burst_apply
-  timeline_generator:
-    type: channel
-    spell_id: 214
-    duration: 15000
-    ticks: 150
-  effects:
-    - type: start_channel
 171:
   name: spawn_healing_powerup
   gcd_mod: 1.0
-  audio_name: Rejuvenation
+  cosmetics:
+    audio_name: Rejuvenation
+  spawn_child: [172]
+
+172:
+  name: init_healing_powerup
   timeline:
     100: [16]
-    200: [215]
+    200: [173]
   effects:
-    - type: spawn_obj
-      hp: 30.0
-      x_offset: 0.2
-      y_offset: -0.2
-      color_red: 0
-      color_green: 255
-      color_blue: 0
+    add_channeling_ticks: 150
+    hp: 30.0
+    x_offset: 0.2
+    y_offset: -0.2
+    color_red: 0
+    color_green: 255
+    color_blue: 0
+
+173:
+  name: tick_healing_powerup
+  timeline:
+    100: [173, 174]
+  effects:
+    consume_channeling_ticks: 1
+
+174:
+  name: trigger_healing_powerup
+  range_limit: 0.1
+  effects:
+    despawn_self: true
+    heal: 150.0
+
 
 # ==========================================
 # Npc Landmine
 # ==========================================
-114:
-  name: landmine_explosion_tick
-  range_limit: 0.1
-  effects:
-    - type: despawn_self
-    - type: damage
-      amount: 150.0
-115:
-  name: landmine_explosion_apply
-  timeline_generator:
-    type: channel
-    spell_id: 114
-    duration: 15000
-    ticks: 150
-  effects:
-    - type: start_channel
 71:
   name: spawn_landmine
+  spawn_child: [72]
+
+72:
+  name: init_landmine
   timeline:
     1400: [15]
-    1500: [115]
+    1500: [73]
   effects:
-    - type: spawn_obj
-      hp: 20.0
-      x_offset: -0.5
-      y_offset: 0.1
-      color_red: 255
-      color_green: 0
-      color_blue: 255
+    add_channeling_ticks: 150
+    hp: 20.0
+    x_offset: -0.5
+    y_offset: 0.1
+    color_red: 255
+    color_green: 0
+    color_blue: 255
+
+73:
+  name: tick_landmine
+  timeline:
+    100: [73, 74]
+  effects:
+    consume_channeling_ticks: 1
+
+74:
+  name: trigger_landmine
+  range_limit: 0.1
+  effects:
+    despawn_self: true
+    damage: 150.0
+
 
 # ==========================================
 # Npc Target Dummy
 # ==========================================
-70:
+80:
   name: spawn_target_dummy
+  spawn_child: [83]
+
+83:
+  name: init_target_dummy
   timeline:
     1500: [15]
     4000: [128]
     7000: [362]
   effects:
-    - type: spawn_obj
-      is_boss: true
-      hp: 80.0
-      x_offset: -0.2
-      y_offset: 0.1
-      color_red: 0
-      color_green: 0
-      color_blue: 255
+    is_boss: true
+    hp: 80.0
+    x_offset: -0.2
+    y_offset: 0.1
+    color_red: 0
+    color_green: 0
+    color_blue: 255
+
 970:
   name: spawn_bravo_dummy
+  spawn_child: [971]
+
+971:
+  name: init_bravo_dummy
   timeline:
     1500: [15]
-    2000: [941]
-    4000: [124]
+    2000: [911]
     7000: [362]
   effects:
-    - type: spawn_obj
-      is_boss: true
-      hp: 80.0
-      x_offset: -0.2
-      y_offset: 0.1
-      color_red: 0
-      color_green: 0
-      color_blue: 255
+    is_boss: true
+    hp: 80.0
+    x_offset: -0.2
+    y_offset: 0.1
+    color_red: 0
+    color_green: 0
+    color_blue: 255
 
 # ==========================================
 # Spec Warlock
 # ==========================================
 128:
-  name: molten_blast
+  name: molten_blast_aoe
   gcd_mod: 0.5
   aoe_cross_team: true
   timeline:
-    0: [111]
-111:
-  name: molten_blast_damage
-  audio_name: MoltenBlastHit
+    0: [129]
+
+129:
+  name: molten_blast_trigger
+  cosmetics:
+    audio_name: MoltenBlastHit
   effects:
-    - type: damage
-      amount: 13.0
-911:
-  name: shadow_blast
-  audio_name: ShadowBoltBuild
-  effects:
-    - type: damage
-      amount: 53.0
-112:
-  name: fire_channel_tick
-  range_limit: 0.2
-  effects:
-    - type: damage
-      amount: 5.0
-113:
-  name: fire_channel_apply
-  timeline_generator:
-    type: channel
-    spell_id: 112
-    duration: 3000
-    ticks: 30
-  effects:
-    - type: start_channel
-131:
-  name: channel_shadowbolt
-  timeline_generator:
-    type: channel
-    spell_id: 132
-    duration: 60000
-    ticks: 3600
-  effects:
-    - type: start_channel
-132:
-  name: shadowbolt_tick
+    damage: 13.0
+
+912:
+  name: shadow_blast_tick
   timeline:
-    0: [133, 116]
-116:
-  name: shadowbolt_damage_tick
-  range_limit: 0.05
-  audio_name: ShadowBoltHit
+    300: [912]
   effects:
-    - type: despawn_self
-    - type: damage
-      amount: 34.0
-133:
-  name: shadowbolt_movement_tick
+    consume_channeling_ticks: 1
+    damage: 53.0
+
+911:
+  name: shadow_blast_apply
+  timeline:
+    300: [912]
+  cosmetics:
+    audio_name: ShadowBoltBuild
   effects:
-    - type: walk_towards_target
-124:
-  name: shadowbolt_spawn
+    add_channeling_ticks: 4
+
+1440:
+  name: aoe_shadowbolt
   base_cooldown: 2000
   gcd_mod: 1.0
   aoe_cross_team: true
   timeline:
-    0: [41]
-41:
-  name: shadowbolt_spawn_projectile
-  audio_name: ShadowBoltCast
+    0: [1441]
+
+1441:
+  name: spawn_shadowbolt
+  spawn_child: [1442]
+
+1442:
+  name: init_shadowbolt
+  cosmetics:
+    audio_name: ShadowBoltCast
   timeline:
-    0: [131]
+    20: [1443]
   effects:
-    - type: spawn_obj
-      x_offset: 0.0
-      y_offset: 0.05
-      movespeed: 5.0
-      color_red: 255
-      color_green: 255
-      color_blue: 255
-941:
-  name: bravo_channel_shadowtick
-  timeline_generator:
-    type: channel
-    spell_id: 911
-    duration: 1220
-    ticks: 4
+    add_channeling_ticks: 3600
+    x_offset: 0.0
+    y_offset: 0.05
+    movespeed: 5.0
+    color_red: 255
+    color_green: 255
+    color_blue: 255
+
+1443:
+  name: shadowbolt_tick
+  timeline:
+    20: [1443, 1444]
   effects:
-    - type: start_channel
-42:
+    consume_channeling_ticks: 1
+    walk_towards_target: true
+
+1444:
+  name: shadowbolt_trigger
+  range_limit: 0.05
+  cosmetics:
+    audio_name: ShadowBoltHit
+  effects:
+    despawn_self: true
+    damage: 34.0
+
+8999:
   name: spawn_player
-  hardware_bindings:
-    KEYBOARD_KEYDOWN_1: 128
-    KEYBOARD_KEYDOWN_2: 113
-    KEYBOARD_KEYDOWN_3: 171
-    KEYBOARD_KEYDOWN_4: 124
-    KEYBOARD_KEYDOWN_TAB: 15
-    KEYBOARD_KEYDOWN_ARROW_UP: 91
-    KEYBOARD_KEYUP_ARROW_UP: 92
-    KEYBOARD_KEYDOWN_ARROW_LEFT: 181
-    KEYBOARD_KEYUP_ARROW_LEFT: 182
-    KEYBOARD_KEYDOWN_ARROW_DOWN: 271
-    KEYBOARD_KEYUP_ARROW_DOWN: 272
-    KEYBOARD_KEYDOWN_ARROW_RIGHT: 1
-    KEYBOARD_KEYUP_ARROW_RIGHT: 2
+  spawn_child: [7999]
+
+7999:
+  name: init_player
   timeline:
     0: [15]
   effects:
-    - type: spawn_obj
-      is_player: true
-      hp: 30.0
-      x_offset: 0.3
-      y_offset: 0.3
-      color_red: 255
-      color_green: 0
-      color_blue: 0
-      sprite_name: Poro
+    is_player: true
+    hp: 30.0
+    x_offset: 0.3
+    y_offset: 0.3
+    color_red: 255
+    color_green: 0
+    color_blue: 0
+  cosmetics:
+    sprite_name: Poro
 
 # ==========================================
 # Npc Boss
 # ==========================================
-69:
-  name: spawn_boss
-  timeline:
-    0: [22]
-    400: [70]
-    800: [71]
-    1000: [15]
-    3000: [128]
-    5000: [113]
-  effects:
-    - type: spawn_obj
-      is_boss: true
-      hp: 30.0
-      x_offset: 0.7
-      y_offset: 0.7
-      color_red: 0
-      color_green: 255
-      color_blue: 0
+
 969:
   name: spawn_bravo_boss
+  spawn_child: [968]
+
+968:
+  name: init_bravo_boss
   timeline:
     0: [22]
     400: [970]
+    700: [15]
     800: [71]
-    1000: [15]
     3000: [128]
-    5000: [113]
+    5000: [1440]
   effects:
-    - type: spawn_obj
-      is_boss: true
-      hp: 30.0
-      x_offset: 0.7
-      y_offset: 0.7
-      color_red: 0
-      color_green: 255
-      color_blue: 0
+    is_boss: true
+    hp: 30.0
+    x_offset: 0.7
+    y_offset: 0.7
+    color_red: 0
+    color_green: 255
+    color_blue: 0
 
 # ==========================================
 # Zone Test Ground
@@ -340,8 +325,9 @@
 300:
   name: setup_test_zone
   timeline:
-    0: [69, 42]
+    0: [69, 8999]
+
 9001:
   name: bravo_test_zone
   timeline:
-    0: [969, 42]
+    0: [969, 8999]

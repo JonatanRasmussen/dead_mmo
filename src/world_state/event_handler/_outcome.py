@@ -7,10 +7,7 @@ class Outcome(Enum):
     GCD_NOT_READY = auto()
     COOLDOWN_NOT_READY = auto()
     NO_TARGET_WAS_SELECTED = auto()
+    OUT_OF_CHANNELING_TICKS = auto()
     SOURCE_IS_DISABLED = auto()
     TARGET_IS_INVALID = auto()
     AURA_NO_LONGER_EXISTS = auto()
-
-    @property
-    def outcome_is_valid(self) -> bool:
-        return self == Outcome.SUCCESS

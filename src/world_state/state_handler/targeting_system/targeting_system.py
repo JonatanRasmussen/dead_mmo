@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable
 from src.settings import Consts
-from src.world_state.state_handler._spell_loader import Effect
 
 @dataclass(slots=True)
 class DefaultIDs:
@@ -34,12 +33,12 @@ class ObjTargetingData:
         return cls(current_target_id=obj_id)
 
     @classmethod
-    def create_spawned(cls, timestamp: int, parent_id: int, target_id: int, is_enemy: bool, is_boss_or_player: bool) -> 'ObjTargetingData':
+    def create_spawned(cls, timestamp: int, parent_id: int, target_id: int, is_enemy: bool) -> 'ObjTargetingData':
         return cls(
             parent_id=parent_id,
             current_target_id=target_id,
             is_enemy=is_enemy,
-            is_boss_or_player=is_boss_or_player,
+            is_boss_or_player=False,
             obj_spawn_timestamp=timestamp,
         )
 
@@ -57,18 +56,10 @@ class TargetingSystem:
     @property
     def player_id(self) -> int: return self.default_ids.player_id
 
-    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, target_id: int, is_enemy: bool, is_boss_or_player: bool, flag_spawn_boss: bool, flag_spawn_player: bool) -> None:
-        # Inherit enemy status if not explicitly overridden by boss/player spawn
+    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, target_id: int) -> None:
         parent_data = self.game_obj_data_dct.get(parent_id)
-        final_is_enemy = parent_data.is_enemy if parent_data else is_enemy
-
-        self.game_obj_data_dct[new_obj_id] = ObjTargetingData.create_spawned(timestamp, parent_id, target_id, final_is_enemy, is_boss_or_player)
-
-        if flag_spawn_boss:
-            if not self.default_ids.boss1_exists: self.default_ids.boss1_id = new_obj_id
-            else: self.default_ids.boss2_id = new_obj_id
-        if flag_spawn_player:
-            self.default_ids.player_id = new_obj_id
+        final_is_enemy = parent_data.is_enemy if parent_data else False
+        self.game_obj_data_dct[new_obj_id] = ObjTargetingData.create_spawned(timestamp, parent_id, target_id, final_is_enemy)
 
     # ---- State Update Handlers ----
 
@@ -116,10 +107,25 @@ class TargetingSystem:
             if (is_opposite_team and hits_cross_team) or (not is_opposite_team and hits_same_team):
                 yield obj_id
 
-    def apply_effect(self, effect: Effect, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        t = effect.effect_type
-        if t == "update_current_target": self.update_current_target(source_id, target_id)
-        elif t == "targetswap_to_other_team": self.targetswap_to_other_team(source_id)
-        elif t == "targetswap_to_parent": self.targetswap_to_parent(source_id)
-        elif t == "teamswap": self.teamswap(source_id)
-        elif t == "despawn_self": self.despawn_self(source_id)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        if effect_type == "update_current_target": self.update_current_target(source_id, target_id)
+        elif effect_type == "targetswap_to_other_team": self.targetswap_to_other_team(source_id)
+        elif effect_type == "targetswap_to_parent": self.targetswap_to_parent(source_id)
+        elif effect_type == "teamswap": self.teamswap(source_id)
+        elif effect_type == "despawn_self": self.despawn_self(source_id)
+        elif effect_type == "is_enemy":
+            if data := self.game_obj_data_dct.get(source_id):
+                data.is_enemy = bool(effect_value)
+        elif effect_type == "is_boss":
+            if data := self.game_obj_data_dct.get(source_id):
+                is_boss = bool(effect_value)
+                data.is_boss_or_player = is_boss
+                if is_boss:
+                    if not self.default_ids.boss1_exists: self.default_ids.boss1_id = source_id
+                    else: self.default_ids.boss2_id = source_id
+        elif effect_type == "is_player":
+            if data := self.game_obj_data_dct.get(source_id):
+                is_player = bool(effect_value)
+                data.is_boss_or_player = is_player
+                if is_player:
+                    self.default_ids.player_id = source_id

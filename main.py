@@ -7,9 +7,9 @@ import cProfile
 def main() -> None:
     # Run tests
     SimValidation.simulate_game_in_console(
-            LevelSetupConsts.BRAVO_SETUP_SPELL_IDS,
-            LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
-        )
+        LevelSetupConsts.BRAVO_SETUP_SPELL_IDS,
+        LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
+    )
     # Actually play the play
     IngameLoop.play_game_in_pygame(
         LevelSetupConsts.BRAVO_SETUP_SPELL_IDS,
@@ -19,3 +19,4 @@ def main() -> None:
 if __name__ == "__main__":
     #cProfile.run("main()", sort="tottime")
     main()
+# %%

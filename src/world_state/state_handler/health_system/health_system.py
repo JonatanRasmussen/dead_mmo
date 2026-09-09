@@ -1,7 +1,6 @@
 import math
 from dataclasses import dataclass
 from typing import Dict
-from src.world_state.state_handler._spell_loader import Effect
 
 @dataclass(slots=True)
 class ObjHealthData:
@@ -15,8 +14,8 @@ class ObjHealthData:
         return cls(hp=0.0, max_hp=0.0, spell_modifier=1.0, is_environment=True)
 
     @classmethod
-    def create_spawned(cls, hp: float) -> 'ObjHealthData':
-        return cls(hp=hp, max_hp=hp, spell_modifier=1.0, is_environment=False)
+    def create_spawned(cls) -> 'ObjHealthData':
+        return cls(hp=0.0, max_hp=0.0, spell_modifier=1.0, is_environment=False)
 
 class HealthSystem:
     def __init__(self) -> None:
@@ -25,9 +24,9 @@ class HealthSystem:
     def create_environment_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct[obj_id] = ObjHealthData.create_environment()
 
-    def spawn_game_obj(self, new_obj_id: int, hp: float) -> None:
+    def spawn_game_obj(self, new_obj_id: int) -> None:
         if new_obj_id in self.game_obj_data_dct: return
-        self.game_obj_data_dct[new_obj_id] = ObjHealthData.create_spawned(hp)
+        self.game_obj_data_dct[new_obj_id] = ObjHealthData.create_spawned()
 
     def despawn_game_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct.pop(obj_id, None)
@@ -59,9 +58,12 @@ class HealthSystem:
         if data.is_environment: return 0.0
         return 0.01 + math.sqrt(0.0001 * abs(data.hp))
 
-    def apply_effect(self, effect: Effect, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        t = effect.effect_type
-        if t == "damage":
-            self.damage_target(source_id, target_id, effect.amount)
-        elif t == "heal":
-            self.heal_target(source_id, target_id, effect.amount)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        if effect_type == "damage":
+            self.damage_target(source_id, target_id, effect_value)
+        elif effect_type == "heal":
+            self.heal_target(source_id, target_id, effect_value)
+        elif effect_type == "hp":
+            if data := self.game_obj_data_dct.get(source_id):
+                data.hp = effect_value
+                data.max_hp = effect_value

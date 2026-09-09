@@ -27,7 +27,7 @@ class EventLog:
 
     def log_event(self, finalized_event: CombatEvent) -> None:
         if self.DEBUG_PRINT_LOG_UDPATES:
-            if finalized_event.outcome_is_valid or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
+            if finalized_event.outcome_is_successful or self.DEBUG_PRINT_UNSUCCESFUL_EVENTS:
                 event_summary = f"[{finalized_event.timestamp:.3f}: id={finalized_event.event_id:04d}] {finalized_event.outcome} (obj_{finalized_event.source_id:04d} uses spell_{finalized_event.spell_id:04d} on obj_{finalized_event.target_id:04d}.)"
                 Logger.debug(event_summary, self.FILENAME_COMBAT_EVENT_LOG)
         assert finalized_event.event_id not in self._event_log, f"Event with ID {finalized_event.event_id} already exists in event_log."

@@ -1,13 +1,13 @@
 from dataclasses import dataclass, field
 from typing import Dict, Iterable
 from src.settings import Consts
-from src.world_state.state_handler._spell_loader import Effect
 
 @dataclass(slots=True)
 class ObjCastingData:
     ability_cd_start: dict[int, int] = field(default_factory=dict)
     gcd_start: int = -10000
     gcd_mod: float = 0.0
+    channeling_ticks: int = 0
     hardware_bindings: dict[str, int] = field(default_factory=dict)
     current_spell_cast: int = Consts.EMPTY_ID
     cast_start_time: int = 0
@@ -17,12 +17,12 @@ class ObjCastingData:
         return cls()
 
     @classmethod
-    def create_spawned(cls, timestamp: int, hardware_bindings: dict[str, int]) -> 'ObjCastingData':
+    def create_spawned(cls, timestamp: int) -> 'ObjCastingData':
         return cls(
             ability_cd_start={},
             gcd_start=-10000,
             gcd_mod=0.0,
-            hardware_bindings=hardware_bindings.copy() if hardware_bindings else {},
+            hardware_bindings={},
             current_spell_cast=Consts.EMPTY_ID,
             cast_start_time=timestamp,
         )
@@ -34,14 +34,18 @@ class CastingSystem:
     def create_environment_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct[obj_id] = ObjCastingData.create_environment()
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, hardware_bindings: dict[str, int]) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int) -> None:
         if new_obj_id in self.game_obj_data_dct: return
-        self.game_obj_data_dct[new_obj_id] = ObjCastingData.create_spawned(timestamp, hardware_bindings)
+        self.game_obj_data_dct[new_obj_id] = ObjCastingData.create_spawned(timestamp)
 
     def despawn_game_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct.pop(obj_id, None)
 
     # ---- State Update Handlers ----
+
+    def set_hardware_bindings(self, source_id: int, bindings: dict[str, int]) -> None:
+        if data := self.game_obj_data_dct.get(source_id):
+            data.hardware_bindings = bindings.copy()
 
     def trigger_gcd(self, source_id: int, timestamp: int, gcd_mod: float) -> None:
         if source_data := self.game_obj_data_dct.get(source_id):
@@ -52,15 +56,10 @@ class CastingSystem:
         if source_data := self.game_obj_data_dct.get(source_id):
             source_data.ability_cd_start[spell_id] = timestamp
 
-    def start_channel(self, source_id: int, spell_id: int, timestamp: int) -> None:
+    def modify_channeling_ticks(self, source_id: int, ticks: int) -> None:
         if source_data := self.game_obj_data_dct.get(source_id):
-            source_data.cast_start_time = timestamp
-            source_data.current_spell_cast = spell_id
-
-    def stop_channel(self, source_id: int, timestamp: int) -> None:
-        if source_data := self.game_obj_data_dct.get(source_id):
-            source_data.cast_start_time = timestamp
-            source_data.current_spell_cast = Consts.EMPTY_ID
+            source_data.channeling_ticks += ticks
+            source_data.channeling_ticks = max(0, source_data.channeling_ticks)
 
     # ---- Cooldown & Input Methods ----
 
@@ -89,6 +88,11 @@ class CastingSystem:
     def is_cooldown_ready(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> bool:
         return self.get_cooldown_progress(obj_id, spell_id, base_cooldown, current_timestamp) >= 1.0
 
+    def is_channeling_continueing(self, obj_id: int, ticks_to_consume: float) -> bool:
+        obj_data = self.game_obj_data_dct.get(obj_id)
+        if not obj_data: return False
+        return obj_data.channeling_ticks >= round(ticks_to_consume)
+
     def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str]) -> Iterable[int]:
         if not hardware_inputs: return
         obj_data = self.game_obj_data_dct.get(obj_id)
@@ -99,15 +103,8 @@ class CastingSystem:
             if spell_id is not None and Consts.is_valid_id(spell_id):
                 yield spell_id
 
-    def is_aura_active(self, current_timestamp: int, obj_id: int, spell_id: int, channel_duration: int) -> bool:
-        obj_data = self.game_obj_data_dct.get(obj_id)
-        if not obj_data: return False
-        if current_timestamp > (obj_data.cast_start_time + channel_duration): return False
-        return obj_data.current_spell_cast == spell_id
-
-    def apply_effect(self, effect: Effect, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        t = effect.effect_type
-        if t == "start_channel":
-            self.start_channel(source_id, spell_id, timestamp)
-        elif t == "stop_channel":
-            self.stop_channel(source_id, timestamp)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        if effect_type == "add_channeling_ticks":
+            self.modify_channeling_ticks(source_id, round(effect_value))
+        elif effect_type == "consume_channeling_ticks":
+            self.modify_channeling_ticks(source_id, -round(effect_value))

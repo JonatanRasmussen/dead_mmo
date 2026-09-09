@@ -1,0 +1,52 @@
+{
+  "events_by_frame": {
+    "0": [
+      {
+        "eid": 1,
+        "ts": 0,
+        "sid": 1,
+        "sp": 9001,
+        "tid": 1,
+        "sm": 1.0
+      }
+    ]
+  },
+  "game_objs": {
+    "1": {
+      "casting": {
+        "ability_cd_start": {},
+        "gcd_start": -10000,
+        "gcd_mod": 0.0,
+        "channeling_ticks": 0,
+        "hardware_bindings": {},
+        "current_spell_cast": 0,
+        "cast_start_time": 0
+      },
+      "health": {
+        "hp": 0.0,
+        "max_hp": 0.0,
+        "spell_modifier": 1.0,
+        "is_environment": true
+      },
+      "movement": {
+        "x_pos": 0.0,
+        "y_pos": 0.0,
+        "x_vel": 0.0,
+        "y_vel": 0.0,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
+        "timestamp": 0,
+        "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 0,
+        "current_target_id": 1,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "is_combat_participant": true,
+        "is_visible": true,
+        "obj_spawn_timestamp": 0
+      }
+    }
+  }
+}

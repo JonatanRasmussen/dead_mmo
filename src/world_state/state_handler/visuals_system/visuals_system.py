@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from typing import Dict
-from src.world_state.state_handler._spell_loader import Effect
 
 @dataclass(slots=True)
 class ObjVisualsData:
@@ -14,8 +13,8 @@ class ObjVisualsData:
         return cls(255, 255, 255, "")
 
     @classmethod
-    def create_spawned(cls, r: int, g: int, b: int, sprite: str) -> "ObjVisualsData":
-        return cls(r, g, b, sprite)
+    def create_spawned(cls) -> "ObjVisualsData":
+        return cls(255, 255, 255, "")
 
 class VisualsSystem:
     def __init__(self) -> None:
@@ -24,25 +23,26 @@ class VisualsSystem:
     def create_environment_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct[obj_id] = ObjVisualsData.create_environment()
 
-    def spawn_game_obj(self, obj_id: int, r: int, g: int, b: int, sprite: str) -> None:
-        self.game_obj_data_dct[obj_id] = ObjVisualsData.create_spawned(r, g, b, sprite)
+    def spawn_game_obj(self, obj_id: int) -> None:
+        self.game_obj_data_dct[obj_id] = ObjVisualsData.create_spawned()
 
     def despawn_game_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct.pop(obj_id, None)
 
     # ---- State Update Handlers ----
 
-    def change_color_rgb(self, source_id: int, r: int, g: int, b: int) -> None:
-        if data := self.game_obj_data_dct.get(source_id):
-            data.color_red, data.color_green, data.color_blue = r, g, b
-
-    def change_sprite(self, source_id: int, sprite_name: str) -> None:
-        if data := self.game_obj_data_dct.get(source_id):
-            data.sprite_name = sprite_name
-
     def get_obj_visuals(self, obj_id: int) -> ObjVisualsData:
         return self.game_obj_data_dct[obj_id]
 
-    def apply_effect(self, effect: Effect, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        # Implemented for completeness so StateHandler can blindly invoke this method in its loop
-        pass
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        if effect_type == "color_red":
+            if data := self.game_obj_data_dct.get(source_id): data.color_red = int(effect_value)
+        elif effect_type == "color_green":
+            if data := self.game_obj_data_dct.get(source_id): data.color_green = int(effect_value)
+        elif effect_type == "color_blue":
+            if data := self.game_obj_data_dct.get(source_id): data.color_blue = int(effect_value)
+
+    def apply_cosmetic(self, cosmetic_type: str, cosmetic_value: str, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+        if cosmetic_type == "sprite_name":
+            if data := self.game_obj_data_dct.get(source_id):
+                data.sprite_name = cosmetic_value
