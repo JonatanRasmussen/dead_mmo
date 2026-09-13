@@ -25,7 +25,6 @@ class WorldState:
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._event_handler: EventHandler = EventHandler()
         self._state_handler: StateHandler = StateHandler()
-        self._create_environment_obj()
 
     def get_display_obj_dct(self, current_time: int) -> dict[int, DisplayObj]:
         display_obj_dct: dict[int, DisplayObj] = {}
@@ -47,7 +46,8 @@ class WorldState:
         return spell_visuals_data
 
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
-        environment_id = self._state_handler.environment_id
+        environment_id = self._game_obj_id_gen.generate_new_id()
+        self._state_handler.create_environment_obj(environment_id)
         for spell_id in setup_spell_ids:
             self._event_handler.dispatch_upcoming_event(ingame_time, environment_id, spell_id, environment_id)
         player_inputs: list[str] = []
@@ -107,11 +107,7 @@ class WorldState:
         if spell and spell.spawn_child:
             for child_init_spell in spell.spawn_child:
                 new_obj_id = self._game_obj_id_gen.generate_new_id()
-                self._state_handler.spawn_game_obj(timestamp, source_id, new_obj_id, target_id)
+                self._state_handler.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
                 self._event_handler.dispatch_upcoming_event(timestamp, new_obj_id, child_init_spell, target_id)
                 new_obj_ids.append(new_obj_id)
         return new_obj_ids
-
-    def _create_environment_obj(self) -> None:
-        obj_id = self._game_obj_id_gen.generate_new_id()
-        self._state_handler.create_environment_obj(obj_id)

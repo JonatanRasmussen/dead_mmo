@@ -1,127 +1,87 @@
 from dataclasses import dataclass, field
 from typing import Dict, Iterable
 from src.settings import Consts
-from src.world_state.state_handler._spell_loader import SpellDef
 
 @dataclass(slots=True)
 class ObjCastingData:
+    spawn_timestamp: int = 0
+    obj_id: int = Consts.EMPTY_ID
+    parent_id: int = Consts.EMPTY_ID
+    spawned_from_spell_id: int = Consts.EMPTY_ID
     ability_cd_start: dict[int, int] = field(default_factory=dict)
     gcd_start: int = -10000
-    gcd_mod: float = 0.0
-    channeling_ticks: int = 0
-    hardware_bindings: dict[str, int] = field(default_factory=dict)
-    current_spell_cast: int = Consts.EMPTY_ID
-    cast_start_time: int = 0
-
-    @classmethod
-    def create_environment(cls) -> 'ObjCastingData':
-        return cls()
-
-    @classmethod
-    def create_spawned(cls, timestamp: int) -> 'ObjCastingData':
-        return cls(
-            ability_cd_start={},
-            gcd_start=-10000,
-            gcd_mod=0.0,
-            hardware_bindings={},
-            current_spell_cast=Consts.EMPTY_ID,
-            cast_start_time=timestamp,
-        )
+    gcd_duration: int = 0
+    cooldown_start: int = -10000
+    cooldown_duration: int = 0
+    castbar_spell_id: int = Consts.EMPTY_ID
+    castbar_start: int = -10000
+    castbar_duration: int = 0
+    castbar_ticks: int = 0
 
 class CastingSystem:
+
+    VALIDATE_TICKS_READY = "has_channeling_ticks"
+    VALIDATE_GCD_READY = "is_gcd_ready"
+    VALIDATE_COOLDOWN_READY = "is_cooldown_ready"
+
+    APPLY_TICKS_ADDITION = "add_channeling_ticks"
+    APPLY_TICKS_SUBTRACTION = "consume_channeling_ticks"
+    APPLY_GCD = "gcd_duration"
+    APPLY_COOLDOWN = "base_cooldown"
+
     def __init__(self) -> None:
-        self.game_obj_data_dct: Dict[int, ObjCastingData] = {}
+        self._data_dct: Dict[int, ObjCastingData] = {}
 
-    def create_environment_obj(self, obj_id: int) -> None:
-        self.game_obj_data_dct[obj_id] = ObjCastingData.create_environment()
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, spell_id: int) -> None:
+        game_obj = ObjCastingData()
+        game_obj.spawn_timestamp = timestamp
+        game_obj.spawned_from_spell_id = spell_id
+        self.add_data(new_obj_id, game_obj)
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int) -> None:
-        if new_obj_id in self.game_obj_data_dct: return
-        self.game_obj_data_dct[new_obj_id] = ObjCastingData.create_spawned(timestamp)
+    def spawn_environment_obj(self, obj_id: int) -> None:
+        environment_obj = ObjCastingData()
+        self.add_data(obj_id, environment_obj)
 
-    def despawn_game_obj(self, obj_id: int) -> None:
-        self.game_obj_data_dct.pop(obj_id, None)
+    def add_data(self, new_obj_id: int, new_obj: ObjCastingData) -> None:
+        assert new_obj_id not in self._data_dct, "Error: Obj already exists."
+        self._data_dct[new_obj_id] = new_obj
 
-    # ---- State Update Handlers ----
+    def get_data(self, obj_id: int) -> ObjCastingData:
+        assert obj_id in self._data_dct, "Error: Obj does not exist."
+        return self._data_dct[obj_id]
 
-    def set_hardware_bindings(self, source_id: int, bindings: dict[str, int]) -> None:
-        if data := self.game_obj_data_dct.get(source_id):
-            data.hardware_bindings = bindings.copy()
+    def remove_data(self, obj_id: int) -> None:
+        self.get_data(obj_id)  # Assert that data exists
+        self._data_dct.pop(obj_id, None)
 
-    def trigger_gcd(self, source_id: int, timestamp: int, gcd_mod: float) -> None:
-        if source_data := self.game_obj_data_dct.get(source_id):
-            source_data.gcd_start = timestamp
-            source_data.gcd_mod = gcd_mod
-
-    def trigger_cooldown(self, source_id: int, spell_id: int, timestamp: int) -> None:
-        if source_data := self.game_obj_data_dct.get(source_id):
-            source_data.ability_cd_start[spell_id] = timestamp
-
-    def modify_channeling_ticks(self, source_id: int, ticks: int) -> None:
-        if source_data := self.game_obj_data_dct.get(source_id):
-            source_data.channeling_ticks += ticks
-            source_data.channeling_ticks = max(0, source_data.channeling_ticks)
-
-    # ---- Cooldown & Input Methods ----
-
-    def _get_gcd_progress(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> float:
-        if gcd_mod == 0.0: return 1.0
-        obj_data = self.game_obj_data_dct.get(obj_id)
-        if not obj_data or obj_data.gcd_mod == 0.0: return 1.0
-
-        gcd_duration = Consts.BASE_GCD * obj_data.gcd_mod
-        if gcd_duration <= 0: return 1.0
-        progress = (current_timestamp - obj_data.gcd_start) / gcd_duration
-        return min(1.0, max(0.0, progress))
-
-    def _is_gcd_ready(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> bool:
-        return self._get_gcd_progress(obj_id, gcd_mod, current_timestamp) >= 1.0
-
-    def _get_cooldown_progress(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> float:
-        if base_cooldown == 0: return 1.0
-        obj_data = self.game_obj_data_dct.get(obj_id)
-        if not obj_data: return 1.0
-
-        cd_start = obj_data.ability_cd_start.get(spell_id, -10000)
-        progress = (current_timestamp - cd_start) / base_cooldown
-        return min(1.0, max(0.0, progress))
-
-    def _is_cooldown_ready(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> bool:
-        return self._get_cooldown_progress(obj_id, spell_id, base_cooldown, current_timestamp) >= 1.0
-
-    def _is_channeling_continueing(self, obj_id: int, ticks_to_consume: float) -> bool:
-        obj_data = self.game_obj_data_dct.get(obj_id)
-        if not obj_data: return False
-        return obj_data.channeling_ticks >= round(ticks_to_consume)
-
-    def get_spell_ids_for_inputs(self, obj_id: int, hardware_inputs: list[str]) -> Iterable[int]:
-        if not hardware_inputs: return
-        obj_data = self.game_obj_data_dct.get(obj_id)
-        if not obj_data or not obj_data.hardware_bindings: return
-
-        for hw_input in hardware_inputs:
-            spell_id = obj_data.hardware_bindings.get(hw_input)
-            if spell_id is not None and Consts.is_valid_id(spell_id):
-                yield spell_id
-
-    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int, spell: SpellDef) -> str:
-        if "has_channeling_ticks" in spell.validations:
-            if not self._is_channeling_continueing(source_id, spell.effects.get("consume_channeling_ticks", 0.0)):
+    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
+        if validation_type == CastingSystem.VALIDATE_TICKS_READY:
+            ticks_remaining = self.get_data(source_id).castbar_ticks
+            required_ticks = round(validation_value)
+            if ticks_remaining < required_ticks:
                 return "out_of_channeling_ticks"
-        if "is_gcd_ready" in spell.validations:
-            if not self._is_gcd_ready(source_id, spell.effects.get("gcd_mod", 0.0), timestamp):
+        if validation_type == CastingSystem.VALIDATE_GCD_READY:
+            obj_data = self.get_data(source_id)
+            gcd_ready_timestamp = obj_data.gcd_start + obj_data.gcd_duration
+            if gcd_ready_timestamp > timestamp:
                 return "gcd_not_ready"
-        if "is_cooldown_ready" in spell.validations:
-            if not self._is_cooldown_ready(source_id, spell_id, int(spell.effects.get("base_cooldown", 0)), timestamp):
+        if validation_type == CastingSystem.VALIDATE_COOLDOWN_READY:
+            obj_data = self.get_data(source_id)
+            cooldown_ready_timestamp = obj_data.cooldown_start + obj_data.cooldown_duration
+            if cooldown_ready_timestamp > timestamp:
                 return "cooldown_not_ready"
         return ""
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        if effect_type == "add_channeling_ticks":
-            self.modify_channeling_ticks(source_id, round(effect_value))
-        elif effect_type == "consume_channeling_ticks":
-            self.modify_channeling_ticks(source_id, -round(effect_value))
-        elif effect_type == "gcd_mod":
-            self.trigger_gcd(source_id, timestamp, effect_value)
-        elif effect_type == "base_cooldown":
-            self.trigger_cooldown(source_id, spell_id, timestamp)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int) -> None:
+        if effect_type == CastingSystem.APPLY_TICKS_ADDITION:
+            self.get_data(source_id).castbar_ticks += round(effect_value)
+        elif effect_type == CastingSystem.APPLY_TICKS_SUBTRACTION:
+            self.get_data(source_id).castbar_ticks -= max(0, round(effect_value))
+        elif effect_type == CastingSystem.APPLY_GCD:
+            obj_data = self.get_data(source_id)
+            obj_data.gcd_start = timestamp
+            obj_data.gcd_duration = round(effect_value)
+        elif effect_type == CastingSystem.APPLY_COOLDOWN:
+            obj_data = self.get_data(source_id)
+            obj_data.cooldown_start = timestamp
+            obj_data.cooldown_duration = round(effect_value)

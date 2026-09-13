@@ -20,6 +20,7 @@ class DisplayObj:
 
 @dataclass(slots=True)
 class DisplaySpell:
+    spell_id: int
     audio_name: str
     animation_name: str
     animation_scale: float
@@ -28,15 +29,12 @@ class StateHandler:
     def __init__(self) -> None:
         self.spell_loader = SpellLoader()
         self.spell_database = self.spell_loader.spell_database
+        self._active_game_objs: set = set()
         self._casting_system = CastingSystem()
         self._health_system = HealthSystem()
         self._movement_system = MovementSystem()
         self._targeting_system = TargetingSystem()
         self._visuals_system = VisualsSystem()
-
-    @property
-    def environment_id(self) -> int:
-        return self._targeting_system.environment_id
 
     @property
     def player_id(self) -> int:
@@ -59,6 +57,7 @@ class StateHandler:
         spell = self.spell_database.get(spell_id)
         if not spell: return None
         return DisplaySpell(
+            spell_id=spell_id,
             audio_name=spell.cosmetics.get("audio_name", ""),
             animation_name=spell.cosmetics.get("animation_name", ""),
             animation_scale=spell.animation_scale
@@ -98,18 +97,17 @@ class StateHandler:
         spell = self.spell_database.get(spell_id)
         return spell is not None and "start_channel" in spell.effects
 
-    def get_spell_ids_for_inputs(self, source_id: int, player_inputs: list[str]) -> Iterable[int]:
-        return self._casting_system.get_spell_ids_for_inputs(source_id, player_inputs)
-
     # --- Core Validation Logic ---
     def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
         spell = self.spell_database.get(spell_id)
         if not spell: return "invalid_spell_id"
 
         # Delegate the validation processing to the individual systems
-        if err := self._targeting_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
-        if err := self._movement_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
-        if err := self._casting_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
+        for validation_type, validation_value in spell.effects.items():
+            if err := self._casting_system.validate_event(validation_type, validation_value, timestamp, source_id, spell_id, target_id): return err
+            if err := self._health_system.validate_event(): return err
+            if err := self._movement_system.validate_event(timestamp, source_id, target_id, spell): return err
+            if err := self._targeting_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
 
         return ""  # Empty error msg (validation passed)
 
@@ -120,24 +118,26 @@ class StateHandler:
 
         # Delegate the effect processing to the individual systems
         for effect_type, effect_value in spell.effects.items():
-            self._health_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
-            self._movement_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
+            self._casting_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id)
+            self._health_system.apply_effect(effect_type, effect_value, source_id, target_id)
+            self._movement_system.apply_effect(effect_type, effect_value, timestamp, source_id, target_id)
             self._targeting_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
-            self._casting_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
             self._visuals_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
 
         for cosmetic_type, cosmetic_value in spell.cosmetics.items():
             self._visuals_system.apply_cosmetic(cosmetic_type, cosmetic_value, timestamp, source_id, spell_id, target_id)
 
-    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, target_id: int) -> None:
-        self._movement_system.spawn_game_obj(timestamp, parent_id, new_obj_id)
-        self._casting_system.spawn_game_obj(timestamp, new_obj_id)
+    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, target_id: int) -> None:
+        assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."
+        self._active_game_objs.add(new_obj_id)
+        self._casting_system.spawn_game_obj(timestamp, new_obj_id, spell_id)
         self._health_system.spawn_game_obj(new_obj_id)
+        self._movement_system.spawn_game_obj(timestamp, parent_id, new_obj_id)
         self._targeting_system.spawn_game_obj(timestamp, parent_id, new_obj_id, target_id)
         self._visuals_system.spawn_game_obj(new_obj_id)
 
     def create_environment_obj(self, obj_id: int) -> None:
-        self._casting_system.create_environment_obj(obj_id)
+        self._casting_system.spawn_environment_obj(obj_id)
         self._health_system.create_environment_obj(obj_id)
         self._movement_system.create_environment_obj(obj_id)
         self._targeting_system.create_environment_obj(obj_id)

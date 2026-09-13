@@ -45,10 +45,10 @@ class MovementSystem:
     def create_environment_obj(self, obj_id: int) -> None:
         self.game_obj_data_dct[obj_id] = ObjMovementData.create_environment()
 
-    def spawn_game_obj(self, timestamp: int, parent_obj_id: int, spawned_obj_id: int) -> None:
-        if spawned_obj_id in self.game_obj_data_dct: return
-        parent_x, parent_y = self.get_position(parent_obj_id, timestamp)
-        self.game_obj_data_dct[spawned_obj_id] = ObjMovementData.create_spawned(timestamp, parent_x, parent_y)
+    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int) -> None:
+        if new_obj_id in self.game_obj_data_dct: return
+        parent_x, parent_y = self.get_position(parent_id, timestamp)
+        self.game_obj_data_dct[new_obj_id] = ObjMovementData.create_spawned(timestamp, parent_x, parent_y)
 
     def get_position(self, obj_id: int, current_time: int) -> Tuple[float, float]:
         if obj_id not in self.game_obj_data_dct:
@@ -159,13 +159,13 @@ class MovementSystem:
         target_x, target_y = self.get_position(target_id, current_time)
         return (source_x - target_x)**2 + (source_y - target_y)**2 <= range_limit**2
 
-    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int, spell: SpellDef) -> str:
+    def validate_event(self, timestamp: int, source_id: int, target_id: int, spell: SpellDef) -> str:
         if "is_within_range" in spell.validations:
             if not self._is_within_range(timestamp, source_id, target_id, spell.validations["is_within_range"]):
                 return "out_of_range"
         return ""
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
         if effect_type == "walk_forward": self.walk_forward(source_id, timestamp)
         elif effect_type == "stop_walk_forward": self.stop_walk_forward(source_id, timestamp)
         elif effect_type == "walk_backward": self.walk_backward(source_id, timestamp)

@@ -35,7 +35,7 @@ VALID_EFFECT_TYPES = {
     "color_green",
     "color_blue",
     "base_cooldown",
-    "gcd_mod",
+    "gcd_duration",
     "range_limit",
 }
 
@@ -183,8 +183,8 @@ class SpellLoader:
             if "base_cooldown" in parsed_effects:
                 assert "is_cooldown_ready" in parsed_validations, f"Spell {spell_id} has 'base_cooldown' effect but is missing 'is_cooldown_ready' validation."
 
-            if "gcd_mod" in parsed_effects:
-                assert "is_gcd_ready" in parsed_validations, f"Spell {spell_id} has 'gcd_mod' effect but is missing 'is_gcd_ready' validation."
+            if "gcd_duration" in parsed_effects:
+                assert "is_gcd_ready" in parsed_validations, f"Spell {spell_id} has 'gcd_duration' effect but is missing 'is_gcd_ready' validation."
 
             if "consume_channeling_ticks" in parsed_effects:
                 assert "has_channeling_ticks" in parsed_validations, f"Spell {spell_id} has 'consume_channeling_ticks' effect but is missing 'has_channeling_ticks' validation."

@@ -92,7 +92,7 @@
   validations:
     is_gcd_ready: true
   effects:
-    gcd_mod: 1.0
+    gcd_duration: 1000
   cosmetics:
     audio_name: Rejuvenation
   triggers:
@@ -229,7 +229,7 @@
   validations:
     is_gcd_ready: true
   effects:
-    gcd_mod: 0.5
+    gcd_duration: 500
   triggers:
     aoe_cross_team: true
     timeline:
@@ -270,7 +270,7 @@
     is_gcd_ready: true
   effects:
     base_cooldown: 2000
-    gcd_mod: 1.0
+    gcd_duration: 1000
   triggers:
     aoe_cross_team: true
     timeline:

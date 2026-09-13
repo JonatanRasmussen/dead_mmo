@@ -108,8 +108,8 @@ class SimValidation:
 
         # Gather all unique object IDs across all ECS systems
         all_obj_ids: set[int] = set()
-        all_obj_ids.update(state._state_handler._casting_system.game_obj_data_dct.keys())
-        all_obj_ids.update(state._state_handler._health_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._state_handler._casting_system._data_dct.keys())
+        all_obj_ids.update(state._state_handler._health_system._data_dct.keys())
         all_obj_ids.update(state._state_handler._movement_system.game_obj_data_dct.keys())
         all_obj_ids.update(state._state_handler._targeting_system.game_obj_data_dct.keys())
 
@@ -138,12 +138,12 @@ class SimValidation:
         data = {}
 
         # 0. Casting Component
-        casting = state._state_handler._casting_system.game_obj_data_dct.get(obj_id)
+        casting = state._state_handler._casting_system._data_dct.get(obj_id)
         if casting:
             data['casting'] = sanitize(dataclasses.asdict(casting))
 
         # 1. Health Component
-        health = state._state_handler._health_system.game_obj_data_dct.get(obj_id)
+        health = state._state_handler._health_system._data_dct.get(obj_id)
         if health:
             data['health'] = sanitize(dataclasses.asdict(health))
 
