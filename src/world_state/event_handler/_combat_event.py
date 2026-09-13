@@ -2,7 +2,6 @@ import json
 from dataclasses import dataclass
 
 from src.settings import Consts
-from ._outcome import Outcome
 
 @dataclass(slots=True)
 class CombatEvent:
@@ -13,7 +12,7 @@ class CombatEvent:
     spell_id: int = Consts.EMPTY_ID
     target_id: int = Consts.EMPTY_ID
 
-    outcome: Outcome = Outcome.EMPTY
+    validation_error_msg: str = ""
 
     spell_modifier: float = 1.0
 
@@ -26,6 +25,7 @@ class CombatEvent:
             source_id=d["sid"],
             spell_id=d["sp"],
             target_id=d["tid"],
+            validation_error_msg=d.get("err"),
             spell_modifier=d["sm"],
         )
 
@@ -36,9 +36,10 @@ class CombatEvent:
             "sid": self.source_id,
             "sp": self.spell_id,
             "tid": self.target_id,
+            "err": self.validation_error_msg,
             "sm": self.spell_modifier,
         })
 
     @property
     def outcome_is_successful(self) -> bool:
-        return self == Outcome.SUCCESS
+        return self.validation_error_msg == ""

@@ -2,6 +2,7 @@ import math
 from dataclasses import dataclass
 from typing import Dict, Tuple
 from src.settings import Consts
+from src.world_state.state_handler._spell_loader import SpellDef
 
 @dataclass(slots=True)
 class ObjMovementData:
@@ -151,12 +152,18 @@ class MovementSystem:
 
     # ---- Utilities ----
 
-    def is_within_range(self, current_time: int, source_id: int, target_id: int, range_limit: float) -> bool:
+    def _is_within_range(self, current_time: int, source_id: int, target_id: int, range_limit: float) -> bool:
         if range_limit <= 0.0: return True
         if source_id not in self.game_obj_data_dct or target_id not in self.game_obj_data_dct: return False
         source_x, source_y = self.get_position(source_id, current_time)
         target_x, target_y = self.get_position(target_id, current_time)
         return (source_x - target_x)**2 + (source_y - target_y)**2 <= range_limit**2
+
+    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int, spell: SpellDef) -> str:
+        if "is_within_range" in spell.validations:
+            if not self._is_within_range(timestamp, source_id, target_id, spell.validations["is_within_range"]):
+                return "out_of_range"
+        return ""
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         if effect_type == "walk_forward": self.walk_forward(source_id, timestamp)

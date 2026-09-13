@@ -1,12 +1,10 @@
 from typing import Any
 
-
 from dataclasses import dataclass
 
 from src.settings import Consts
 from .event_handler import EventHandler, IdGen
-from .state_handler import StateHandler, DisplayObj
-from .state_handler._spell_loader import SpellDef
+from .state_handler import StateHandler, DisplayObj, DisplaySpell
 
 @dataclass(slots=True)
 class FrameOutput:
@@ -39,13 +37,13 @@ class WorldState:
     def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
 
-    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[SpellDef]:
-        spell_visuals_data: list[SpellDef] = []
+    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[DisplaySpell]:
+        spell_visuals_data: list[DisplaySpell] = []
         combat_interactions = self._event_handler.get_combat_interactions_for_frame(timestamp)
         for _, spell_id, _ in combat_interactions:
-            spell_def = self._state_handler.get_spell_def(spell_id)
-            if spell_def:
-                spell_visuals_data.append(spell_def)
+            display_spell = self._state_handler.create_display_spell(spell_id)
+            if display_spell:
+                spell_visuals_data.append(display_spell)
         return spell_visuals_data
 
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
@@ -66,7 +64,11 @@ class WorldState:
             spell_id = self._event_handler.current_events_spell_id
             target_id = self._event_handler.current_events_target_id
             assert timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {timestamp}."
-            if self._validate_event(timestamp, source_id, spell_id, target_id):
+
+            error_msg = self._state_handler.validate_event(timestamp, source_id, spell_id, target_id)
+            outcome_is_valid = self._event_handler.finalize_event(error_msg)
+
+            if outcome_is_valid:
                 self._handle_spawn(timestamp, source_id, spell_id, target_id)
                 self._create_cascading_events(timestamp, source_id, spell_id)
                 self._apply_event(timestamp, source_id, spell_id, target_id)
@@ -95,29 +97,6 @@ class WorldState:
         target_id = self._state_handler.get_current_target_for_obj(source_id)
         for spell_id in spell_ids:
             self._event_handler.dispatch_upcoming_event(timestamp, source_id, spell_id, target_id)
-
-    def _validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> bool:
-        if not self._state_handler.is_obj_valid(source_id):
-            self._event_handler.assign_outcome_source_is_disabled(target_id)
-            return False
-        elif not self._state_handler.is_obj_valid(target_id) and not source_id == target_id:
-            self._event_handler.assign_outcome_invalid_target(target_id)
-            return False
-        elif not self._state_handler.is_within_range(timestamp, source_id, spell_id, target_id):
-            self._event_handler.assign_outcome_out_of_range(target_id)
-            return False
-        elif not self._state_handler.is_channeling_continueing(source_id, spell_id):
-            self._event_handler.assign_outcome_no_more_channeling_ticks(source_id)
-            return False
-        elif not self._state_handler.is_gcd_ready(timestamp, source_id, spell_id):
-            self._event_handler.assign_outcome_gcd_not_ready(target_id)
-            return False
-        elif not self._state_handler.is_cooldown_ready(timestamp, source_id, spell_id):
-            self._event_handler.assign_outcome_cooldown_not_ready(target_id)
-            return False
-        else:
-            self._event_handler.assign_outcome_success(target_id)
-            return True
 
     def _apply_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         self._state_handler.apply_event(timestamp, source_id, spell_id, target_id)

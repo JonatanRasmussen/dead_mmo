@@ -49,18 +49,22 @@
 
 361:
   name: step_towards_target
-  timeline:
-    20: [361]
+  validations:
+    has_channeling_ticks: 1
   effects:
     consume_channeling_ticks: 1
     walk_towards_target: true
+  triggers:
+    timeline:
+      20: [361]
 
 362:
   name: start_move_towards_target
-  timeline:
-    20: [361]
   effects:
     add_channeling_ticks: 3600
+  triggers:
+    timeline:
+      20: [361]
 
 # ==========================================
 # Basic Targeting
@@ -85,16 +89,17 @@
 # ==========================================
 171:
   name: spawn_healing_powerup
-  gcd_mod: 1.0
+  validations:
+    is_gcd_ready: true
+  effects:
+    gcd_mod: 1.0
   cosmetics:
     audio_name: Rejuvenation
-  spawn_child: [172]
+  triggers:
+    spawn_child: [172]
 
 172:
   name: init_healing_powerup
-  timeline:
-    100: [16]
-    200: [173]
   effects:
     add_channeling_ticks: 150
     hp: 30.0
@@ -103,18 +108,27 @@
     color_red: 0
     color_green: 255
     color_blue: 0
+  triggers:
+    timeline:
+      100: [16]
+      200: [173]
 
 173:
   name: tick_healing_powerup
-  timeline:
-    100: [173, 174]
+  validations:
+    has_channeling_ticks: 1
   effects:
     consume_channeling_ticks: 1
+  triggers:
+    timeline:
+      100: [173, 174]
 
 174:
   name: trigger_healing_powerup
-  range_limit: 0.1
+  validations:
+    is_within_range: 0.1
   effects:
+    range_limit: 0.1
     despawn_self: true
     heal: 150.0
 
@@ -124,13 +138,11 @@
 # ==========================================
 71:
   name: spawn_landmine
-  spawn_child: [72]
+  triggers:
+    spawn_child: [72]
 
 72:
   name: init_landmine
-  timeline:
-    1400: [15]
-    1500: [73]
   effects:
     add_channeling_ticks: 150
     hp: 20.0
@@ -139,18 +151,27 @@
     color_red: 255
     color_green: 0
     color_blue: 255
+  triggers:
+    timeline:
+      1400: [15]
+      1500: [73]
 
 73:
   name: tick_landmine
-  timeline:
-    100: [73, 74]
+  validations:
+    has_channeling_ticks: 1
   effects:
     consume_channeling_ticks: 1
+  triggers:
+    timeline:
+      100: [73, 74]
 
 74:
   name: trigger_landmine
-  range_limit: 0.1
+  validations:
+    is_within_range: 0.1
   effects:
+    range_limit: 0.1
     despawn_self: true
     damage: 150.0
 
@@ -160,14 +181,11 @@
 # ==========================================
 80:
   name: spawn_target_dummy
-  spawn_child: [83]
+  triggers:
+    spawn_child: [83]
 
 83:
   name: init_target_dummy
-  timeline:
-    1500: [15]
-    4000: [128]
-    7000: [362]
   effects:
     is_boss: true
     hp: 80.0
@@ -176,17 +194,19 @@
     color_red: 0
     color_green: 0
     color_blue: 255
+  triggers:
+    timeline:
+      1500: [15]
+      4000: [128]
+      7000: [362]
 
 970:
   name: spawn_bravo_dummy
-  spawn_child: [971]
+  triggers:
+    spawn_child: [971]
 
 971:
   name: init_bravo_dummy
-  timeline:
-    1500: [15]
-    2000: [911]
-    7000: [362]
   effects:
     is_boss: true
     hp: 80.0
@@ -195,16 +215,25 @@
     color_red: 0
     color_green: 0
     color_blue: 255
+  triggers:
+    timeline:
+      1500: [15]
+      2000: [911]
+      7000: [362]
 
 # ==========================================
 # Spec Warlock
 # ==========================================
 128:
   name: molten_blast_aoe
-  gcd_mod: 0.5
-  aoe_cross_team: true
-  timeline:
-    0: [129]
+  validations:
+    is_gcd_ready: true
+  effects:
+    gcd_mod: 0.5
+  triggers:
+    aoe_cross_team: true
+    timeline:
+      0: [129]
 
 129:
   name: molten_blast_trigger
@@ -215,39 +244,47 @@
 
 912:
   name: shadow_blast_tick
-  timeline:
-    300: [912]
+  validations:
+    has_channeling_ticks: 1
   effects:
     consume_channeling_ticks: 1
     damage: 53.0
+  triggers:
+    timeline:
+      300: [912]
 
 911:
   name: shadow_blast_apply
-  timeline:
-    300: [912]
   cosmetics:
     audio_name: ShadowBoltBuild
   effects:
     add_channeling_ticks: 4
+  triggers:
+    timeline:
+      300: [912]
 
 1440:
   name: aoe_shadowbolt
-  base_cooldown: 2000
-  gcd_mod: 1.0
-  aoe_cross_team: true
-  timeline:
-    0: [1441]
+  validations:
+    is_cooldown_ready: true
+    is_gcd_ready: true
+  effects:
+    base_cooldown: 2000
+    gcd_mod: 1.0
+  triggers:
+    aoe_cross_team: true
+    timeline:
+      0: [1441]
 
 1441:
   name: spawn_shadowbolt
-  spawn_child: [1442]
+  triggers:
+    spawn_child: [1442]
 
 1442:
   name: init_shadowbolt
   cosmetics:
     audio_name: ShadowBoltCast
-  timeline:
-    20: [1443]
   effects:
     add_channeling_ticks: 3600
     x_offset: 0.0
@@ -256,32 +293,39 @@
     color_red: 255
     color_green: 255
     color_blue: 255
+  triggers:
+    timeline:
+      20: [1443]
 
 1443:
   name: shadowbolt_tick
-  timeline:
-    20: [1443, 1444]
+  validations:
+    has_channeling_ticks: 1
   effects:
     consume_channeling_ticks: 1
     walk_towards_target: true
+  triggers:
+    timeline:
+      20: [1443, 1444]
 
 1444:
   name: shadowbolt_trigger
-  range_limit: 0.05
   cosmetics:
     audio_name: ShadowBoltHit
+  validations:
+    is_within_range: 0.05
   effects:
+    range_limit: 0.05
     despawn_self: true
     damage: 34.0
 
 8999:
   name: spawn_player
-  spawn_child: [7999]
+  triggers:
+    spawn_child: [7999]
 
 7999:
   name: init_player
-  timeline:
-    0: [15]
   effects:
     is_player: true
     hp: 30.0
@@ -292,6 +336,9 @@
     color_blue: 0
   cosmetics:
     sprite_name: Poro
+  triggers:
+    timeline:
+      0: [15]
 
 # ==========================================
 # Npc Boss
@@ -299,17 +346,11 @@
 
 969:
   name: spawn_bravo_boss
-  spawn_child: [968]
+  triggers:
+    spawn_child: [968]
 
 968:
   name: init_bravo_boss
-  timeline:
-    0: [22]
-    400: [970]
-    700: [15]
-    800: [71]
-    3000: [128]
-    5000: [1440]
   effects:
     is_boss: true
     hp: 30.0
@@ -318,16 +359,26 @@
     color_red: 0
     color_green: 255
     color_blue: 0
+  triggers:
+    timeline:
+      0: [22]
+      400: [970]
+      700: [15]
+      800: [71]
+      3000: [128]
+      5000: [1440]
 
 # ==========================================
 # Zone Test Ground
 # ==========================================
 300:
   name: setup_test_zone
-  timeline:
-    0: [69, 8999]
+  triggers:
+    timeline:
+      0: [69, 8999]
 
 9001:
   name: bravo_test_zone
-  timeline:
-    0: [969, 8999]
+  triggers:
+    timeline:
+      0: [969, 8999]

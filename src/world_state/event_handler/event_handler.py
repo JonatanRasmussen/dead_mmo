@@ -2,7 +2,6 @@ from src.settings import Consts
 from ._combat_event import CombatEvent
 from ._event_log import EventLog
 from ._frame_heap import FrameHeap
-from ._outcome import Outcome
 from .id_gen import IdGen
 
 
@@ -41,41 +40,20 @@ class EventHandler:
         assert not self._current_event, "New event was fetched before previous event was finalized."
         self._current_event = self._event_heap.pop_next_event()
 
-    def finalize_event(self, finalized_target_id: int, outcome: Outcome) -> None:
+    def finalize_event(self, error_msg: str) -> bool:
         assert self._current_event, "The current event has been finalized."
         finalized_event = CombatEvent(
             event_id=self._current_event.event_id,
             timestamp=self._current_event.timestamp,
             source_id=self._current_event.source_id,
             spell_id=self._current_event.spell_id,
-            target_id=finalized_target_id,
-            outcome=outcome,
+            target_id=self._current_event.target_id,
+            validation_error_msg=error_msg,
             spell_modifier=self._current_event.spell_modifier,
         )
         self._event_log_for_current_frame.log_event(finalized_event)
         self._current_event = None
-
-    def assign_outcome_success(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.SUCCESS)
-
-    def assign_outcome_source_is_disabled(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.SOURCE_IS_DISABLED)
-
-    def assign_outcome_invalid_target(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.TARGET_IS_INVALID)
-
-    def assign_outcome_out_of_range(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.OUT_OF_RANGE)
-
-    def assign_outcome_no_more_channeling_ticks(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.OUT_OF_CHANNELING_TICKS)
-
-    def assign_outcome_gcd_not_ready(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.GCD_NOT_READY)
-
-    def assign_outcome_cooldown_not_ready(self, finalized_target_id: int) -> None:
-        self.finalize_event(finalized_target_id, Outcome.COOLDOWN_NOT_READY)
-
+        return finalized_event.outcome_is_successful
 
     def finalize_event_log_for_current_frame(self, current_frame_timestamp: int) -> None:
         self._event_log_for_each_frame[current_frame_timestamp] = self._event_log_for_current_frame

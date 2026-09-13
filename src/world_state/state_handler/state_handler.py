@@ -18,6 +18,12 @@ class DisplayObj:
     color_rgb: tuple[int, int, int]
     sprite_name: str
 
+@dataclass(slots=True)
+class DisplaySpell:
+    audio_name: str
+    animation_name: str
+    animation_scale: float
+
 class StateHandler:
     def __init__(self) -> None:
         self.spell_loader = SpellLoader()
@@ -47,6 +53,15 @@ class StateHandler:
             obj_id, pos_xy, self.is_visible(obj_id), self.get_size(obj_id),
             (obj_visuals.color_red, obj_visuals.color_green, obj_visuals.color_blue),
             obj_visuals.sprite_name
+        )
+
+    def create_display_spell(self, spell_id: int) -> DisplaySpell | None:
+        spell = self.spell_database.get(spell_id)
+        if not spell: return None
+        return DisplaySpell(
+            audio_name=spell.cosmetics.get("audio_name", ""),
+            animation_name=spell.cosmetics.get("animation_name", ""),
+            animation_scale=spell.animation_scale
         )
 
     def get_spell_def(self, spell_id: int) -> SpellDef:
@@ -86,33 +101,22 @@ class StateHandler:
     def get_spell_ids_for_inputs(self, source_id: int, player_inputs: list[str]) -> Iterable[int]:
         return self._casting_system.get_spell_ids_for_inputs(source_id, player_inputs)
 
-    def is_obj_valid(self, obj_id: int) -> bool:
-        return self._targeting_system.is_valid_target(obj_id)
-
-    def is_channeling_continueing(self, source_id: int, spell_id: int) -> bool:
+    # --- Core Validation Logic ---
+    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
         spell = self.spell_database.get(spell_id)
-        return self._casting_system.is_channeling_continueing(source_id, spell.effects.get("consume_channeling_ticks", 0.0) if spell else 0.0)
+        if not spell: return "invalid_spell_id"
 
-    def is_gcd_ready(self, timestamp: int, source_id: int, spell_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return self._casting_system.is_gcd_ready(source_id, spell.gcd_mod if spell else 0.0, timestamp)
+        # Delegate the validation processing to the individual systems
+        if err := self._targeting_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
+        if err := self._movement_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
+        if err := self._casting_system.validate_event(timestamp, source_id, spell_id, target_id, spell): return err
 
-    def is_cooldown_ready(self, timestamp: int, source_id: int, spell_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return self._casting_system.is_cooldown_ready(source_id, spell_id, spell.base_cooldown if spell else 0, timestamp)
-
-    def is_within_range(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return self._movement_system.is_within_range(timestamp, source_id, target_id, spell.range_limit if spell else 0.0)
+        return ""  # Empty error msg (validation passed)
 
     # --- Core Event Logic ---
     def apply_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         spell = self.spell_database.get(spell_id)
         if not spell: return
-
-        # Base Casting Properties
-        if spell.gcd_mod != 0.0: self._casting_system.trigger_gcd(source_id, timestamp, spell.gcd_mod)
-        if spell.base_cooldown != 0: self._casting_system.trigger_cooldown(source_id, spell_id, timestamp)
 
         # Delegate the effect processing to the individual systems
         for effect_type, effect_value in spell.effects.items():

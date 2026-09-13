@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Iterable
 from src.settings import Consts
+from src.world_state.state_handler._spell_loader import SpellDef
 
 @dataclass(slots=True)
 class DefaultIDs:
@@ -92,7 +93,7 @@ class TargetingSystem:
     def get_current_target_for_obj(self, obj_id: int) -> int:
         return self.game_obj_data_dct.get(obj_id, ObjTargetingData()).current_target_id
 
-    def is_valid_target(self, obj_id: int) -> bool:
+    def _is_valid_target(self, obj_id: int) -> bool:
         data = self.game_obj_data_dct.get(obj_id)
         return data is not None and data.is_combat_participant
 
@@ -106,6 +107,13 @@ class TargetingSystem:
             is_opposite_team = (obj_data.is_enemy != source_data.is_enemy)
             if (is_opposite_team and hits_cross_team) or (not is_opposite_team and hits_same_team):
                 yield obj_id
+
+    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int, spell: SpellDef) -> str:
+        if not self._is_valid_target(source_id):
+            return "source_is_disabled"
+        if not self._is_valid_target(target_id) and source_id != target_id:
+            return "target_is_invalid"
+        return ""
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         if effect_type == "update_current_target": self.update_current_target(source_id, target_id)

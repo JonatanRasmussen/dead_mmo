@@ -1,7 +1,6 @@
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
-from src.world_state.world_state import DisplayObj, WorldState
-from src.world_state.state_handler._spell_loader import SpellDef
+from src.world_state.world_state import DisplayObj, DisplaySpell, WorldState
 
 
 class IngameLoop:
@@ -52,8 +51,8 @@ class IngameLoop:
             for display_obj in display_objs_dct.values():
                 if display_obj.is_visible:
                     IngameLoop._render_game_obj(rendering_framework, display_obj)
-            for spell_def in world_state.get_spell_vfx_for_successful_events(ingame_time):
-                IngameLoop._display_spell(rendering_framework, spell_def)
+            for display_spell in world_state.get_spell_vfx_for_successful_events(ingame_time):
+                IngameLoop._display_spell(rendering_framework, display_spell)
             IngameLoop._render_frame_actions(rendering_framework, ui_manager)
             rendering_framework.end_frame()
 
@@ -61,19 +60,17 @@ class IngameLoop:
         rendering_framework.terminate_rendering_framework()
 
     @staticmethod
-    def _display_spell(rendering_framework: PygameRenderer, spell_def: SpellDef) -> None:
-        audio_name = spell_def.cosmetics.get("audio_name", "")
-        if audio_name != "":
-            rendering_framework.play_sound(audio_name)
+    def _display_spell(rendering_framework: PygameRenderer, display_spell: DisplaySpell) -> None:
+        if display_spell.audio_name:
+            rendering_framework.play_sound(display_spell.audio_name)
 
-        animation_name = spell_def.cosmetics.get("animation_name", "")
-        if animation_name != "":
+        if display_spell.animation_name:
             # Note: in the future, extract position from state.movement_system based on spell cast event data
             pos = (0.0, 0.0)
             rendering_framework.play_animation(
                 pos_xy=pos,
-                scale=spell_def.animation_scale,
-                asset_name=animation_name
+                scale=display_spell.animation_scale,
+                asset_name=display_spell.animation_name
             )
 
     @staticmethod

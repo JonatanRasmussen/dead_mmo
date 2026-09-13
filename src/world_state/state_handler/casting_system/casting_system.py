@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Iterable
 from src.settings import Consts
+from src.world_state.state_handler._spell_loader import SpellDef
 
 @dataclass(slots=True)
 class ObjCastingData:
@@ -63,7 +64,7 @@ class CastingSystem:
 
     # ---- Cooldown & Input Methods ----
 
-    def get_gcd_progress(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> float:
+    def _get_gcd_progress(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> float:
         if gcd_mod == 0.0: return 1.0
         obj_data = self.game_obj_data_dct.get(obj_id)
         if not obj_data or obj_data.gcd_mod == 0.0: return 1.0
@@ -73,10 +74,10 @@ class CastingSystem:
         progress = (current_timestamp - obj_data.gcd_start) / gcd_duration
         return min(1.0, max(0.0, progress))
 
-    def is_gcd_ready(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> bool:
-        return self.get_gcd_progress(obj_id, gcd_mod, current_timestamp) >= 1.0
+    def _is_gcd_ready(self, obj_id: int, gcd_mod: float, current_timestamp: int) -> bool:
+        return self._get_gcd_progress(obj_id, gcd_mod, current_timestamp) >= 1.0
 
-    def get_cooldown_progress(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> float:
+    def _get_cooldown_progress(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> float:
         if base_cooldown == 0: return 1.0
         obj_data = self.game_obj_data_dct.get(obj_id)
         if not obj_data: return 1.0
@@ -85,10 +86,10 @@ class CastingSystem:
         progress = (current_timestamp - cd_start) / base_cooldown
         return min(1.0, max(0.0, progress))
 
-    def is_cooldown_ready(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> bool:
-        return self.get_cooldown_progress(obj_id, spell_id, base_cooldown, current_timestamp) >= 1.0
+    def _is_cooldown_ready(self, obj_id: int, spell_id: int, base_cooldown: int, current_timestamp: int) -> bool:
+        return self._get_cooldown_progress(obj_id, spell_id, base_cooldown, current_timestamp) >= 1.0
 
-    def is_channeling_continueing(self, obj_id: int, ticks_to_consume: float) -> bool:
+    def _is_channeling_continueing(self, obj_id: int, ticks_to_consume: float) -> bool:
         obj_data = self.game_obj_data_dct.get(obj_id)
         if not obj_data: return False
         return obj_data.channeling_ticks >= round(ticks_to_consume)
@@ -103,8 +104,24 @@ class CastingSystem:
             if spell_id is not None and Consts.is_valid_id(spell_id):
                 yield spell_id
 
+    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int, spell: SpellDef) -> str:
+        if "has_channeling_ticks" in spell.validations:
+            if not self._is_channeling_continueing(source_id, spell.effects.get("consume_channeling_ticks", 0.0)):
+                return "out_of_channeling_ticks"
+        if "is_gcd_ready" in spell.validations:
+            if not self._is_gcd_ready(source_id, spell.effects.get("gcd_mod", 0.0), timestamp):
+                return "gcd_not_ready"
+        if "is_cooldown_ready" in spell.validations:
+            if not self._is_cooldown_ready(source_id, spell_id, int(spell.effects.get("base_cooldown", 0)), timestamp):
+                return "cooldown_not_ready"
+        return ""
+
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         if effect_type == "add_channeling_ticks":
             self.modify_channeling_ticks(source_id, round(effect_value))
         elif effect_type == "consume_channeling_ticks":
             self.modify_channeling_ticks(source_id, -round(effect_value))
+        elif effect_type == "gcd_mod":
+            self.trigger_gcd(source_id, timestamp, effect_value)
+        elif effect_type == "base_cooldown":
+            self.trigger_cooldown(source_id, spell_id, timestamp)
