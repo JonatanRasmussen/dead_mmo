@@ -53,7 +53,7 @@ class HealthSystem:
         self.add_data(new_obj_id, game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjHealthData(obj_id=obj_id)
+        environment_obj = ObjHealthData(obj_id=obj_id, is_visible=False)
         self.add_data(obj_id, environment_obj)
 
     def add_data(self, new_obj_id: int, new_obj: ObjHealthData) -> None:

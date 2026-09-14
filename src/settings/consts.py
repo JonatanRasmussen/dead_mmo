@@ -12,8 +12,6 @@ class Consts:
     MOVEMENT_DISTANCE_PER_SECOND: float = 0.1
     MOVEMENT_UPDATES_PER_SECOND: int = 50
 
-
-
     @staticmethod
     def is_empty_id(id_num: int) -> bool:
         return id_num == Consts.EMPTY_ID

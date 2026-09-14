@@ -77,7 +77,7 @@
 15:
   name: targetswap_to_next_tab_target
   effects:
-    targetswap_to_other_team: true
+    targetswap_to_target: true
 
 16:
   name: targetswap_to_parent
@@ -130,7 +130,7 @@
   effects:
     consume_channeling_ticks: 65535
     turn_invisible: true
-    become_untargetable: true
+    is_untargetable: true
     heal: 150.0
 
 
@@ -174,7 +174,7 @@
   effects:
     consume_channeling_ticks: 65535
     turn_invisible: true
-    become_untargetable: true
+    is_untargetable: true
     damage: 150.0
 
 
@@ -189,7 +189,7 @@
 83:
   name: init_target_dummy
   effects:
-    is_boss: true
+    threat_score: 901
     hp: 80.0
     x_offset: -0.2
     y_offset: 0.1
@@ -210,7 +210,7 @@
 971:
   name: init_bravo_dummy
   effects:
-    is_boss: true
+    threat_score: 9001
     hp: 80.0
     x_offset: -0.2
     y_offset: 0.1
@@ -233,7 +233,7 @@
   effects:
     gcd_duration: 500
   triggers:
-    aoe_cross_team: true
+    aoe_other_team: true
     timeline:
       0: [129]
 
@@ -274,7 +274,7 @@
     base_cooldown: 2000
     gcd_duration: 1000
   triggers:
-    aoe_cross_team: true
+    aoe_other_team: true
     timeline:
       0: [1441]
 
@@ -319,7 +319,7 @@
   effects:
     consume_channeling_ticks: 65535
     turn_invisible: true
-    become_untargetable: true
+    is_untargetable: true
     damage: 34.0
 
 8999:
@@ -330,7 +330,7 @@
 7999:
   name: init_player
   effects:
-    is_player: true
+    player_number: 1
     hp: 30.0
     x_offset: 0.3
     y_offset: 0.3
@@ -354,7 +354,7 @@
 968:
   name: init_bravo_boss
   effects:
-    is_boss: true
+    threat_score: 9001
     hp: 30.0
     x_offset: 0.7
     y_offset: 0.7
@@ -379,7 +379,7 @@
     timeline:
       0: [69, 8999]
 
-9001:
+6767:
   name: bravo_test_zone
   triggers:
     timeline:

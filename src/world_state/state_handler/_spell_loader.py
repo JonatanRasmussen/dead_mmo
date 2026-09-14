@@ -10,7 +10,7 @@ from ._movement_system import MovementEffect, MovementValidation
 class TriggerType(str, Enum):
     SPAWN_CHILD = "spawn_child"
     TIMELINE = "timeline"
-    AOE_CROSS_TEAM = "aoe_cross_team"
+    AOE_OTHER_TEAM = "aoe_other_team"
     AOE_SAME_TEAM = "aoe_same_team"
 
 class CosmeticType(str, Enum):
@@ -76,11 +76,11 @@ class SpellLoader:
             cosmetics = self._parse_string_dict(s.get("cosmetics", {}), VALID_COSMETIC_TYPES, "cosmetic", spell_id)
 
             # Sanity Checks
-            if CastingEffect.APPLY_COOLDOWN in effects: assert CastingValidation.VALIDATE_COOLDOWN_READY in validations, f"Spell {spell_id} missing cooldown validation."
-            if CastingEffect.APPLY_GCD in effects: assert CastingValidation.VALIDATE_GCD_READY in validations, f"Spell {spell_id} missing gcd validation."
+            if CastingEffect.APPLY_COOLDOWN in effects: assert CastingValidation.IS_COOLDOWN_READY in validations, f"Spell {spell_id} missing cooldown validation."
+            if CastingEffect.APPLY_GCD in effects: assert CastingValidation.IS_GCD_READY in validations, f"Spell {spell_id} missing gcd validation."
             if CastingEffect.APPLY_TICKS_SUBTRACTION in effects and effects[CastingEffect.APPLY_TICKS_SUBTRACTION] != 65535:
-                assert CastingValidation.VALIDATE_TICKS_READY in validations, f"Spell {spell_id} missing tick validation."
-                assert validations[CastingValidation.VALIDATE_TICKS_READY] == effects[CastingEffect.APPLY_TICKS_SUBTRACTION], f"Spell {spell_id} tick validation/effect mismatch."
+                assert CastingValidation.ARE_TICKS_READY in validations, f"Spell {spell_id} missing tick validation."
+                assert validations[CastingValidation.ARE_TICKS_READY] == effects[CastingEffect.APPLY_TICKS_SUBTRACTION], f"Spell {spell_id} tick validation/effect mismatch."
             if MovementEffect.PUSH_TARGET in effects or MovementEffect.TELEPORT_TO_TARGET in effects:
                 pass # Range limit checks usually apply here, but keeping your specific assertion below:
             if "range_limit" in effects: # Kept for backward compatibility if you still use it, though you removed it from Enums
@@ -96,7 +96,7 @@ class SpellLoader:
                 cosmetics=cosmetics,
                 spawn_child=spawn_child,
                 timeline=timeline,
-                flag_aoe_cross_team=bool(triggers.get(TriggerType.AOE_CROSS_TEAM, False)),
+                flag_aoe_cross_team=bool(triggers.get(TriggerType.AOE_OTHER_TEAM, False)),
                 flag_aoe_same_team=bool(triggers.get(TriggerType.AOE_SAME_TEAM, False)),
             )
         return db

@@ -84,15 +84,14 @@ class MovementSystem:
 
     # ---- Utilities ----
 
-    @classmethod
-    def get_velocity(cls, data: ObjMovementData) -> Tuple[float, float]:
+    def get_velocity(self, data: ObjMovementData) -> Tuple[float, float]:
         dir_mag_sq = data.x_dir**2 + data.y_dir**2
         if dir_mag_sq > 1.0:
             mag = math.sqrt(dir_mag_sq)
             nx, ny = data.x_dir / mag, data.y_dir / mag
         else:
             nx, ny = data.x_dir, data.y_dir
-        base_speed = data.movespeed * cls.GLOBAL_MOVESPEED_TO_USE / 1000.0
+        base_speed = data.movespeed * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
         return (nx * base_speed) + data.x_vel, (ny * base_speed) + data.y_vel
 
     def get_position(self, obj_id: int, current_time: int) -> Tuple[float, float]:

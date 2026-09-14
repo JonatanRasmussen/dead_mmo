@@ -93,7 +93,7 @@ class WorldState:
         if not player_inputs or source_id == Consts.EMPTY_ID:
             return
 
-        spell_ids = self._state_handler.get_spells_for_player_inputs(player_inputs=player_inputs)
+        spell_ids = self._state_handler.get_spells_for_player_inputs(player_inputs)
         target_id = self._state_handler.get_current_target_for_obj(source_id)
         for spell_id in spell_ids:
             self._event_handler.dispatch_upcoming_event(timestamp, source_id, spell_id, target_id)
