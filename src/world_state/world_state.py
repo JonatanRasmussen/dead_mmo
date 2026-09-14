@@ -65,8 +65,8 @@ class WorldState:
             target_id = self._event_handler.current_events_target_id
             assert timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {timestamp}."
 
-            error_msg = self._state_handler.validate_event(timestamp, source_id, spell_id, target_id)
-            outcome_is_valid = self._event_handler.finalize_event(error_msg)
+            validation_code = self._state_handler.validate_event(timestamp, source_id, spell_id, target_id)
+            outcome_is_valid = self._event_handler.finalize_event(validation_code)
 
             if outcome_is_valid:
                 self._handle_spawn(timestamp, source_id, spell_id, target_id)

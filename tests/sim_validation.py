@@ -110,8 +110,7 @@ class SimValidation:
         all_obj_ids: set[int] = set()
         all_obj_ids.update(state._state_handler._casting_system._data_dct.keys())
         all_obj_ids.update(state._state_handler._health_system._data_dct.keys())
-        all_obj_ids.update(state._state_handler._movement_system.game_obj_data_dct.keys())
-        all_obj_ids.update(state._state_handler._targeting_system.game_obj_data_dct.keys())
+        all_obj_ids.update(state._state_handler._movement_system._data_dct.keys())
 
         game_objs: dict[str, dict] = {
             str(obj_id): SimValidation._serialize_ecs_entity(state, obj_id)
@@ -148,14 +147,9 @@ class SimValidation:
             data['health'] = sanitize(dataclasses.asdict(health))
 
         # 2. Movement Component
-        movement = state._state_handler._movement_system.game_obj_data_dct.get(obj_id)
+        movement = state._state_handler._movement_system._data_dct.get(obj_id)
         if movement:
             data['movement'] = sanitize(dataclasses.asdict(movement))
-
-        # 3. Targeting Component
-        targeting = state._state_handler._targeting_system.game_obj_data_dct.get(obj_id)
-        if targeting:
-            data['targeting'] = sanitize(dataclasses.asdict(targeting))
 
         return data
 

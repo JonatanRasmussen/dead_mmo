@@ -574,7 +574,7 @@
         "ts": 700,
         "sid": 3,
         "sp": 1440,
-        "tid": 4,
+        "tid": 2,
         "err": "cooldown_not_ready",
         "sm": 1.0
       }
@@ -1914,7 +1914,7 @@
         "sid": 6,
         "sp": 1443,
         "tid": 4,
-        "err": "out_of_channeling_ticks",
+        "err": "source_is_disabled",
         "sm": 1.0
       },
       {
@@ -1923,7 +1923,7 @@
         "sid": 6,
         "sp": 1444,
         "tid": 4,
-        "err": "",
+        "err": "source_is_disabled",
         "sm": 1.0
       }
     ],
@@ -1994,7 +1994,7 @@
         "sid": 5,
         "sp": 1443,
         "tid": 2,
-        "err": "out_of_channeling_ticks",
+        "err": "source_is_disabled",
         "sm": 1.0
       },
       {
@@ -2003,7 +2003,7 @@
         "sid": 5,
         "sp": 1444,
         "tid": 2,
-        "err": "",
+        "err": "source_is_disabled",
         "sm": 1.0
       }
     ],
@@ -2013,7 +2013,7 @@
         "ts": 1800,
         "sid": 3,
         "sp": 271,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -2022,7 +2022,7 @@
         "ts": 1800,
         "sid": 3,
         "sp": 1,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -2031,7 +2031,7 @@
         "ts": 1800,
         "sid": 3,
         "sp": 171,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -2040,7 +2040,7 @@
         "ts": 1800,
         "sid": 8,
         "sp": 172,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       }
@@ -2060,7 +2060,7 @@
         "ts": 1900,
         "sid": 8,
         "sp": 16,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       }
@@ -2071,7 +2071,7 @@
         "ts": 2000,
         "sid": 8,
         "sp": 173,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       }
@@ -2792,7 +2792,7 @@
         "sid": 8,
         "sp": 173,
         "tid": 3,
-        "err": "out_of_channeling_ticks",
+        "err": "source_is_disabled",
         "sm": 1.0
       },
       {
@@ -2801,7 +2801,7 @@
         "sid": 8,
         "sp": 174,
         "tid": 3,
-        "err": "",
+        "err": "source_is_disabled",
         "sm": 1.0
       },
       {
@@ -2809,7 +2809,7 @@
         "ts": 3800,
         "sid": 3,
         "sp": 272,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -2818,7 +2818,7 @@
         "ts": 3800,
         "sid": 3,
         "sp": 128,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -3754,7 +3754,7 @@
         "ts": 5300,
         "sid": 3,
         "sp": 2,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -3763,7 +3763,7 @@
         "ts": 5300,
         "sid": 3,
         "sp": 911,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       }
@@ -4342,7 +4342,7 @@
         "ts": 5600,
         "sid": 3,
         "sp": 912,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -4975,7 +4975,7 @@
         "ts": 5900,
         "sid": 3,
         "sp": 912,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -5513,7 +5513,7 @@
         "sid": 10,
         "sp": 1443,
         "tid": 3,
-        "err": "out_of_channeling_ticks",
+        "err": "source_is_disabled",
         "sm": 1.0
       },
       {
@@ -5522,7 +5522,7 @@
         "sid": 10,
         "sp": 1444,
         "tid": 3,
-        "err": "",
+        "err": "source_is_disabled",
         "sm": 1.0
       }
     ],
@@ -5572,7 +5572,7 @@
         "ts": 6200,
         "sid": 3,
         "sp": 912,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -5935,7 +5935,7 @@
         "ts": 6500,
         "sid": 3,
         "sp": 912,
-        "tid": 4,
+        "tid": 2,
         "err": "",
         "sm": 1.0
       },
@@ -6298,7 +6298,7 @@
         "ts": 6800,
         "sid": 3,
         "sp": 912,
-        "tid": 4,
+        "tid": 2,
         "err": "out_of_channeling_ticks",
         "sm": 1.0
       },
@@ -6562,7 +6562,7 @@
         "sid": 9,
         "sp": 1443,
         "tid": 1,
-        "err": "out_of_channeling_ticks",
+        "err": "source_is_disabled",
         "sm": 1.0
       },
       {
@@ -6571,7 +6571,7 @@
         "sid": 9,
         "sp": 1444,
         "tid": 1,
-        "err": "",
+        "err": "source_is_disabled",
         "sm": 1.0
       }
     ],
@@ -8578,30 +8578,17 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": 0,
-        "current_target_id": 1,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "is_combat_participant": true
+        "castbar_ticks": 0
       },
       "health": {
         "spawn_timestamp": 0,
         "obj_id": 1,
         "parent_id": 0,
         "spawned_from_spell_id": 0,
-        "hp": -81.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 255,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": true
+        "hp": -47.0,
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 0,
-        "obj_id": 1,
-        "parent_id": 0,
-        "spawned_from_spell_id": 0,
         "x_pos": 0.0,
         "y_pos": 0.0,
         "x_vel": 0.0,
@@ -8610,6 +8597,15 @@
         "y_dir": 0.0,
         "timestamp": 0,
         "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 0,
+        "current_target_id": 1,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "is_combat_participant": true,
+        "is_visible": true,
+        "obj_spawn_timestamp": 0
       }
     },
     "2": {
@@ -8626,30 +8622,17 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": 0,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": true,
-        "is_combat_participant": true
+        "castbar_ticks": 0
       },
       "health": {
         "spawn_timestamp": 0,
         "obj_id": 2,
         "parent_id": 1,
         "spawned_from_spell_id": 969,
-        "hp": -51.0,
-        "spell_modifier": 1.0,
-        "color_red": 0,
-        "color_green": 255,
-        "color_blue": 0,
-        "icon_id": 0,
-        "is_visible": true
+        "hp": -229.0,
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 0,
-        "obj_id": 2,
-        "parent_id": 1,
-        "spawned_from_spell_id": 969,
         "x_pos": 0.7,
         "y_pos": 0.7,
         "x_vel": 0.0,
@@ -8658,6 +8641,15 @@
         "y_dir": 0.0,
         "timestamp": 0,
         "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 1,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": true,
+        "is_combat_participant": true,
+        "is_visible": true,
+        "obj_spawn_timestamp": 0
       }
     },
     "3": {
@@ -8674,30 +8666,17 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": 0,
-        "current_target_id": 4,
-        "is_enemy": false,
-        "is_boss_or_player": true,
-        "is_combat_participant": true
+        "castbar_ticks": 0
       },
       "health": {
         "spawn_timestamp": 0,
         "obj_id": 3,
         "parent_id": 1,
         "spawned_from_spell_id": 8999,
-        "hp": 37.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 0,
-        "color_blue": 0,
-        "icon_id": 24020,
-        "is_visible": true
+        "hp": -79.0,
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 0,
-        "obj_id": 3,
-        "parent_id": 1,
-        "spawned_from_spell_id": 8999,
         "x_pos": 0.5984924240491749,
         "y_pos": 0.16564971157455594,
         "x_vel": 0.0,
@@ -8706,6 +8685,15 @@
         "y_dir": 0.0,
         "timestamp": 5300,
         "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 1,
+        "current_target_id": 2,
+        "is_enemy": false,
+        "is_boss_or_player": true,
+        "is_combat_participant": true,
+        "is_visible": true,
+        "obj_spawn_timestamp": 0
       }
     },
     "4": {
@@ -8722,30 +8710,17 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": 3470,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": true,
-        "is_combat_participant": true
+        "castbar_ticks": 3470
       },
       "health": {
         "spawn_timestamp": 400,
         "obj_id": 4,
         "parent_id": 2,
         "spawned_from_spell_id": 970,
-        "hp": -213.0,
-        "spell_modifier": 1.0,
-        "color_red": 0,
-        "color_green": 0,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": true
+        "hp": 33.0,
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 400,
-        "obj_id": 4,
-        "parent_id": 2,
-        "spawned_from_spell_id": 970,
         "x_pos": 0.5395840907634091,
         "y_pos": 0.5450547122254795,
         "x_vel": 0.0,
@@ -8754,6 +8729,15 @@
         "y_dir": -0.9881600301338095,
         "timestamp": 10000,
         "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 2,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": true,
+        "is_combat_participant": true,
+        "is_visible": true,
+        "obj_spawn_timestamp": 400
       }
     },
     "5": {
@@ -8770,11 +8754,7 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": -127518,
-        "current_target_id": 2,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "is_combat_participant": false
+        "castbar_ticks": 3552
       },
       "health": {
         "spawn_timestamp": 500,
@@ -8782,26 +8762,26 @@
         "parent_id": 3,
         "spawned_from_spell_id": 1441,
         "hp": 0.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 255,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": false
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 500,
-        "obj_id": 5,
-        "parent_id": 3,
-        "spawned_from_spell_id": 1441,
         "x_pos": 0.6656597658861506,
         "y_pos": 0.6709034979660384,
         "x_vel": 0.0,
         "y_vel": 0.0,
-        "x_dir": 0.7629546767537968,
-        "y_dir": 0.6464519790514291,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
         "timestamp": 1460,
         "movespeed": 5.0
+      },
+      "targeting": {
+        "parent_id": 3,
+        "current_target_id": 2,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "is_combat_participant": false,
+        "is_visible": false,
+        "obj_spawn_timestamp": 500
       }
     },
     "6": {
@@ -8818,11 +8798,7 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": -127514,
-        "current_target_id": 4,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "is_combat_participant": false
+        "castbar_ticks": 3556
       },
       "health": {
         "spawn_timestamp": 500,
@@ -8830,26 +8806,26 @@
         "parent_id": 3,
         "spawned_from_spell_id": 1441,
         "hp": 0.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 255,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": false
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 500,
-        "obj_id": 6,
-        "parent_id": 3,
-        "spawned_from_spell_id": 1441,
         "x_pos": 0.48210148955037874,
         "y_pos": 0.7598360757568676,
         "x_vel": 0.0,
         "y_vel": 0.0,
-        "x_dir": 0.4070474924151493,
-        "y_dir": 0.9134069952209359,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
         "timestamp": 1380,
         "movespeed": 5.0
+      },
+      "targeting": {
+        "parent_id": 3,
+        "current_target_id": 4,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "is_combat_participant": false,
+        "is_visible": false,
+        "obj_spawn_timestamp": 500
       }
     },
     "7": {
@@ -8866,11 +8842,7 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": 72,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": false,
-        "is_combat_participant": true
+        "castbar_ticks": 72
       },
       "health": {
         "spawn_timestamp": 800,
@@ -8878,18 +8850,9 @@
         "parent_id": 2,
         "spawned_from_spell_id": 71,
         "hp": 7.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 0,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": true
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 800,
-        "obj_id": 7,
-        "parent_id": 2,
-        "spawned_from_spell_id": 71,
         "x_pos": 0.19999999999999996,
         "y_pos": 0.7999999999999999,
         "x_vel": 0.0,
@@ -8898,6 +8861,15 @@
         "y_dir": 0.0,
         "timestamp": 800,
         "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 2,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": false,
+        "is_combat_participant": true,
+        "is_visible": true,
+        "obj_spawn_timestamp": 800
       }
     },
     "8": {
@@ -8914,11 +8886,7 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": -130938,
-        "current_target_id": 3,
-        "is_enemy": false,
-        "is_boss_or_player": false,
-        "is_combat_participant": false
+        "castbar_ticks": 132
       },
       "health": {
         "spawn_timestamp": 1800,
@@ -8926,26 +8894,26 @@
         "parent_id": 3,
         "spawned_from_spell_id": 171,
         "hp": 17.0,
-        "spell_modifier": 1.0,
-        "color_red": 0,
-        "color_green": 255,
-        "color_blue": 0,
-        "icon_id": 0,
-        "is_visible": false
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 1800,
-        "obj_id": 8,
-        "parent_id": 3,
-        "spawned_from_spell_id": 171,
         "x_pos": 0.5070710678118655,
         "y_pos": 0.10707106781186543,
         "x_vel": 0.0,
         "y_vel": 0.0,
         "x_dir": 0.0,
         "y_dir": 0.0,
-        "timestamp": 1800,
+        "timestamp": 3700,
         "movespeed": 1.0
+      },
+      "targeting": {
+        "parent_id": 3,
+        "current_target_id": 3,
+        "is_enemy": false,
+        "is_boss_or_player": false,
+        "is_combat_participant": false,
+        "is_visible": false,
+        "obj_spawn_timestamp": 1800
       }
     },
     "9": {
@@ -8962,11 +8930,7 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": -127569,
-        "current_target_id": 1,
-        "is_enemy": true,
-        "is_boss_or_player": false,
-        "is_combat_participant": false
+        "castbar_ticks": 3501
       },
       "health": {
         "spawn_timestamp": 5000,
@@ -8974,26 +8938,26 @@
         "parent_id": 2,
         "spawned_from_spell_id": 1441,
         "hp": 0.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 255,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": false
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 5000,
-        "obj_id": 9,
-        "parent_id": 2,
-        "spawned_from_spell_id": 1441,
         "x_pos": 0.03132811464718868,
         "y_pos": 0.03356583712198785,
         "x_vel": 0.0,
         "y_vel": 0.0,
-        "x_dir": -0.6823182503600114,
-        "y_dir": -0.7310552682428688,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
         "timestamp": 6980,
         "movespeed": 5.0
+      },
+      "targeting": {
+        "parent_id": 2,
+        "current_target_id": 1,
+        "is_enemy": true,
+        "is_boss_or_player": false,
+        "is_combat_participant": false,
+        "is_visible": false,
+        "obj_spawn_timestamp": 5000
       }
     },
     "10": {
@@ -9010,11 +8974,7 @@
         "castbar_spell_id": 0,
         "castbar_start": -10000,
         "castbar_duration": 0,
-        "castbar_ticks": -127526,
-        "current_target_id": 3,
-        "is_enemy": true,
-        "is_boss_or_player": false,
-        "is_combat_participant": false
+        "castbar_ticks": 3544
       },
       "health": {
         "spawn_timestamp": 5000,
@@ -9022,26 +8982,26 @@
         "parent_id": 2,
         "spawned_from_spell_id": 1441,
         "hp": 0.0,
-        "spell_modifier": 1.0,
-        "color_red": 255,
-        "color_green": 255,
-        "color_blue": 255,
-        "icon_id": 0,
-        "is_visible": false
+        "spell_modifier": 1.0
       },
       "movement": {
-        "spawn_timestamp": 5000,
-        "obj_id": 10,
-        "parent_id": 2,
-        "spawned_from_spell_id": 1441,
         "x_pos": 0.6055812373099335,
         "y_pos": 0.20822813109938712,
         "x_vel": 0.0,
         "y_vel": 0.0,
-        "x_dir": -0.1642278983989454,
-        "y_dir": -0.9864224234005763,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
         "timestamp": 6120,
         "movespeed": 5.0
+      },
+      "targeting": {
+        "parent_id": 2,
+        "current_target_id": 3,
+        "is_enemy": true,
+        "is_boss_or_player": false,
+        "is_combat_participant": false,
+        "is_visible": false,
+        "obj_spawn_timestamp": 5000
       }
     }
   }

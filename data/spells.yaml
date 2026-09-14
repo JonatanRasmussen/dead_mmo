@@ -128,8 +128,9 @@
   validations:
     is_within_range: 0.1
   effects:
-    range_limit: 0.1
-    despawn_self: true
+    consume_channeling_ticks: 65535
+    turn_invisible: true
+    become_untargetable: true
     heal: 150.0
 
 
@@ -171,8 +172,9 @@
   validations:
     is_within_range: 0.1
   effects:
-    range_limit: 0.1
-    despawn_self: true
+    consume_channeling_ticks: 65535
+    turn_invisible: true
+    become_untargetable: true
     damage: 150.0
 
 
@@ -315,8 +317,9 @@
   validations:
     is_within_range: 0.05
   effects:
-    range_limit: 0.05
-    despawn_self: true
+    consume_channeling_ticks: 65535
+    turn_invisible: true
+    become_untargetable: true
     damage: 34.0
 
 8999:
@@ -334,8 +337,7 @@
     color_red: 255
     color_green: 0
     color_blue: 0
-  cosmetics:
-    sprite_name: Poro
+    icon_id: 24020
   triggers:
     timeline:
       0: [15]
