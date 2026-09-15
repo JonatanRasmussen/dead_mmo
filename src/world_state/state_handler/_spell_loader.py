@@ -6,6 +6,7 @@ from typing import Dict
 from ._casting_system import CastingEffect, CastingValidation
 from ._health_system import HealthEffect, HealthValidation
 from ._movement_system import MovementEffect, MovementValidation
+from ._display_system import DisplayEffect, DisplayValidation
 
 class TriggerType(str, Enum):
     SPAWN_CHILD = "spawn_child"
@@ -17,8 +18,8 @@ class CosmeticType(str, Enum):
     AUDIO_NAME = "audio_name"
     ANIMATION_NAME = "animation_name"
 
-VALID_EFFECT_TYPES = {e.value for e in CastingEffect} | {e.value for e in HealthEffect} | {e.value for e in MovementEffect}
-VALID_VALIDATION_TYPES = {v.value for v in CastingValidation} | {v.value for v in HealthValidation} | {v.value for v in MovementValidation}
+VALID_EFFECT_TYPES = {e.value for e in CastingEffect} | {e.value for e in HealthEffect} | {e.value for e in MovementEffect} | {e.value for e in DisplayEffect}
+VALID_VALIDATION_TYPES = {v.value for v in CastingValidation} | {v.value for v in HealthValidation} | {v.value for v in MovementValidation} | {v.value for v in DisplayValidation}
 VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
 VALID_COSMETIC_TYPES = {c.value for c in CosmeticType}
 

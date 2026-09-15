@@ -9,15 +9,16 @@ class ObjCastingData:
     obj_id: int = Consts.EMPTY_ID
     parent_id: int = Consts.EMPTY_ID
     spawned_from_spell_id: int = Consts.EMPTY_ID
-    current_target_id: int = Consts.EMPTY_ID
+    target_id: int = Consts.EMPTY_ID
+    effect_pointer: int = Consts.EMPTY_ID
     gcd_start: int = -10000
     gcd_end: int = 0
     cooldown_start: int = -10000
     cooldown_end: int = 0
-    castbar_spell_id: int = Consts.EMPTY_ID
-    castbar_start: int = -10000
-    castbar_duration: int = 0
-    castbar_ticks: int = 0
+    selected_spell_id: int = Consts.EMPTY_ID
+    casting_start: int = -10000
+    casting_duration: int = 0
+    casting_ticks: int = 0
     player_number: int = 0
     threat_score: int = 0
     is_enemy: bool = False
@@ -30,7 +31,7 @@ class ObjCastingData:
             obj_id=new_obj_id,
             parent_id=parent_id,
             spawned_from_spell_id=spell_id,
-            current_target_id=target_id,
+            target_id=target_id,
             is_enemy=is_enemy,
         )
 
@@ -44,6 +45,7 @@ class CastingEffect(str, Enum):
     TARGETSWAP_TO_TARGET = "targetswap_to_target"
     TARGETSWAP_TO_PARENT = "targetswap_to_parent"
     TARGETSWAP_TO_PARENTS_TARGET = "targetswap_to_parents_target"
+    POINT_UPCOMING_EFFECT_AT_SIBLING = "point_upcoming_effect_at_sibling"
     SWAP_TEAM = "teamswap"
     IS_UNTARGETABLE = "is_untargetable"
     APPLY_THREAT_SCORE = "threat_score"
@@ -59,6 +61,8 @@ class CastingInvalidOutcomes(str, Enum):
     TARGET_IS_UNTARGETABLE = "target_is_untargetable"
     TARGET_IS_NOT_SAME_TEAM = "target_is_not_same_team"
     TARGET_IS_NOT_OTHER_TEAM = "target_is_not_other_team"
+    SIBLING_NOT_FOUND_ON_SOURCE = "sibling_not_found_on_source"
+    SIBLING_NOT_FOUND_ON_TARGET = "sibling_not_found_on_target"
 
 class CastingValidation(str, Enum):
     ARE_TICKS_READY = "has_channeling_ticks"
@@ -70,11 +74,15 @@ class CastingValidation(str, Enum):
     IS_TARGET_TARGETABLE = "is_target_targetable"
     IS_TARGET_SAME_TEAM = "is_target_same_team"
     IS_TARGET_OTHER_TEAM = "is_target_other_team"
+    DOES_SOURCE_HAVE_SIBLING = "has_sibling"
+    DOES_TARGET_HAVE_SIBLING = "has_sibling"
 
 class CastingSystem:
 
     def __init__(self) -> None:
         self._data_dct: dict[int, ObjCastingData] = {}
+        self._children_dct: dict[int, list[ObjCastingData]] = {}
+
         self.targetable_ids_on_player_team: set[int] = set()
         self.targetable_ids_on_enemy_team: set[int] = set()
         self.player_id: int = Consts.EMPTY_ID
@@ -87,12 +95,16 @@ class CastingSystem:
         self.add_data(new_obj_id, game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjCastingData(obj_id=obj_id, current_target_id=obj_id, is_untargetable=True)
+        environment_obj = ObjCastingData(obj_id=obj_id, target_id=obj_id, is_untargetable=True)
         self.add_data(obj_id, environment_obj)
 
     def add_data(self, new_obj_id: int, new_obj: ObjCastingData) -> None:
         assert new_obj_id not in self._data_dct, "Error: Obj already exists."
         self._data_dct[new_obj_id] = new_obj
+
+        # Link to parent in children dict (creates list lazily if it doesn't exist)
+        self._children_dct.setdefault(new_obj.parent_id, []).append(new_obj)
+
         if not new_obj.is_untargetable:
             if new_obj.is_enemy:
                 self.targetable_ids_on_enemy_team.add(new_obj_id)
@@ -104,10 +116,21 @@ class CastingSystem:
         return self._data_dct[obj_id]
 
     def remove_data(self, obj_id: int) -> None:
-        self.get_data(obj_id)  # Assert that data exists
+        obj_data = self.get_data(obj_id)  # Asserts that data exists
         self._data_dct.pop(obj_id, None)
         self.targetable_ids_on_player_team.discard(obj_id)
         self.targetable_ids_on_enemy_team.discard(obj_id)
+
+        # Remove obj from its parent's children list
+        parent_children = self._children_dct.get(obj_data.parent_id)
+        if parent_children:
+            parent_children.remove(obj_data)
+            # Clean up the parent's key if the list becomes empty
+            if not parent_children:
+                del self._children_dct[obj_data.parent_id]
+
+        # Clean up this object's children entry if it had any spawned children
+        self._children_dct.pop(obj_id, None)
 
     # ---- Lookups ----
 
@@ -124,7 +147,7 @@ class CastingSystem:
         return self.get_data(parent_id)
 
     def get_current_target_for_obj(self, obj_id: int) -> int:
-        return self._data_dct.get(obj_id, ObjCastingData()).current_target_id
+        return self._data_dct.get(obj_id, ObjCastingData()).target_id
 
     def select_targets_for_aoe(self, source_id: int, hits_cross_team: bool, hits_same_team: bool) -> Iterable[int]:
         if not hits_cross_team and not hits_same_team: return
@@ -143,7 +166,7 @@ class CastingSystem:
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
         if validation_type == CastingValidation.ARE_TICKS_READY:
-            if self.get_data(source_id).castbar_ticks < round(validation_value):
+            if self.get_data(source_id).casting_ticks < round(validation_value):
                 return CastingInvalidOutcomes.TICKS_NOT_READY.value
         if validation_type == CastingValidation.IS_GCD_READY:
             if self.get_data(source_id).gcd_end > timestamp:
@@ -156,7 +179,7 @@ class CastingSystem:
             if parent_data.cooldown_end > timestamp:
                 return CastingInvalidOutcomes.PARENT_COOLDOWN_NOT_READY.value
         if validation_type == CastingValidation.IS_SPELL_SELECTED:
-            if self.get_data(source_id).castbar_spell_id != round(validation_value):
+            if self.get_data(source_id).selected_spell_id != round(validation_value):
                 return CastingInvalidOutcomes.INVALID_SPELL_SELECTED.value
         if validation_type == CastingValidation.IS_SOURCE_TARGETABLE:
             if self.get_data(source_id).is_untargetable:
@@ -170,13 +193,27 @@ class CastingSystem:
         if validation_type == CastingValidation.IS_TARGET_OTHER_TEAM:
             if self.get_data(source_id).is_enemy == self.get_data(target_id).is_enemy:
                 return CastingInvalidOutcomes.TARGET_IS_NOT_OTHER_TEAM.value
+        if validation_type == CastingValidation.DOES_SOURCE_HAVE_SIBLING:
+            source_data = self.get_data(source_id)
+            siblings = self._children_dct.get(source_data.parent_id, [])
+            for sibling in siblings:
+                if sibling.obj_id != source_id and sibling.spawned_from_spell_id == round(validation_value):
+                    return ""
+            return CastingInvalidOutcomes.SIBLING_NOT_FOUND_ON_SOURCE.value
+        if validation_type == CastingValidation.DOES_TARGET_HAVE_SIBLING:
+            target_data = self.get_data(target_id)
+            siblings = self._children_dct.get(target_data.parent_id, [])
+            for sibling in siblings:
+                if sibling.obj_id != target_id and sibling.spawned_from_spell_id == round(validation_value):
+                    return ""
+            return CastingInvalidOutcomes.SIBLING_NOT_FOUND_ON_TARGET.value
         return ""
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
         if effect_type == CastingEffect.APPLY_TICKS_ADDITION:
-            self.get_data(source_id).castbar_ticks += round(effect_value)
+            self.get_data(source_id).casting_ticks += round(effect_value)
         elif effect_type == CastingEffect.APPLY_TICKS_SUBTRACTION:
-            self.get_data(source_id).castbar_ticks -= max(0, round(effect_value))
+            self.get_data(source_id).casting_ticks -= max(0, round(effect_value))
         elif effect_type == CastingEffect.APPLY_GCD:
             other_data = self.get_data(source_id)
             other_data.gcd_start = timestamp
@@ -190,16 +227,25 @@ class CastingSystem:
             parent_data.cooldown_start = timestamp
             parent_data.cooldown_end = timestamp + round(effect_value)
         elif effect_type == CastingEffect.SELECT_SPELL_ID:
-            self.get_data(source_id).castbar_spell_id = round(effect_value)
+            self.get_data(source_id).selected_spell_id = round(effect_value)
         elif effect_type == CastingEffect.TARGETSWAP_TO_TARGET:
-            self.get_data(source_id).current_target_id = target_id
+            self.get_data(source_id).target_id = target_id
         elif effect_type == CastingEffect.TARGETSWAP_TO_PARENT:
             data = self.get_data(source_id)
-            data.current_target_id = data.parent_id
+            data.target_id = data.parent_id
         elif effect_type == CastingEffect.TARGETSWAP_TO_PARENTS_TARGET:
             data = self.get_data(source_id)
             parent_data = self.get_parent_data(source_id)
-            data.current_target_id = parent_data.current_target_id
+            data.target_id = parent_data.target_id
+        elif effect_type == CastingEffect.POINT_UPCOMING_EFFECT_AT_SIBLING:
+            source_data = self.get_data(source_id)
+            siblings = self._children_dct.get(source_data.parent_id, [])
+
+            # Direct lookup instead of relying on AoE target_id
+            for sibling in siblings:
+                if sibling.obj_id != source_id and sibling.spawned_from_spell_id == round(effect_value):
+                    source_data.effect_pointer = sibling.obj_id
+                    break
         elif effect_type == CastingEffect.APPLY_THREAT_SCORE:
             self.get_data(source_id).threat_score += int(effect_value)
         elif effect_type == CastingEffect.APPLY_PLAYER_NUMBER:

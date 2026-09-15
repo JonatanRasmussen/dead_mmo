@@ -12,11 +12,6 @@ class ObjHealthData:
     spawned_from_spell_id: int = Consts.EMPTY_ID
     hp: float = 0.0
     spell_modifier: float = 1.0
-    color_red: int = 255
-    color_green: int = 255
-    color_blue: int = 255
-    icon_id: int = Consts.EMPTY_ID
-    is_visible: bool = True
 
     @classmethod
     def create_new_obj(cls, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int) -> "ObjHealthData":
@@ -31,11 +26,6 @@ class HealthEffect(str, Enum):
     APPLY_DAMAGE = "damage"
     APPLY_HEAL = "heal"
     APPLY_HP = "hp"
-    APPLY_COLOR_RED = "color_red"
-    APPLY_COLOR_GREEN = "color_green"
-    APPLY_COLOR_BLUE = "color_blue"
-    APPLY_ICON_ID = "icon_id"
-    TURN_INVISIBLE = "turn_invisible"
 
 class HealthInvalidOutcomes(str, Enum):
     pass
@@ -53,7 +43,7 @@ class HealthSystem:
         self.add_data(new_obj_id, game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjHealthData(obj_id=obj_id, is_visible=False)
+        environment_obj = ObjHealthData(obj_id=obj_id)
         self.add_data(obj_id, environment_obj)
 
     def add_data(self, new_obj_id: int, new_obj: ObjHealthData) -> None:
@@ -77,9 +67,6 @@ class HealthSystem:
         obj_hp = self.get_data(obj_id).hp
         return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
 
-    def is_visible(self, obj_id: int) -> bool:
-        return self._data_dct.get(obj_id, ObjHealthData()).is_visible
-
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
         return ""
 
@@ -90,13 +77,3 @@ class HealthSystem:
             self.get_data(target_id).hp += effect_value * self.get_data(source_id).spell_modifier
         elif effect_type == HealthEffect.APPLY_HP:
             self.get_data(source_id).hp = effect_value
-        elif effect_type == HealthEffect.APPLY_COLOR_RED:
-            self.get_data(source_id).color_red = int(effect_value)
-        elif effect_type == HealthEffect.APPLY_COLOR_GREEN:
-            self.get_data(source_id).color_green = int(effect_value)
-        elif effect_type == HealthEffect.APPLY_COLOR_BLUE:
-            self.get_data(source_id).color_blue = int(effect_value)
-        elif effect_type == HealthEffect.APPLY_ICON_ID:
-            self.get_data(source_id).icon_id = int(effect_value)
-        elif effect_type == HealthEffect.TURN_INVISIBLE:
-            self.get_data(source_id).is_visible = False

@@ -6,6 +6,7 @@ from ._spell_loader import SpellLoader, SpellDef
 from ._casting_system import CastingSystem
 from ._health_system import HealthSystem, ObjHealthData
 from ._movement_system import MovementSystem
+from ._display_system import DisplaySystem, ObjDisplayData
 
 @dataclass(slots=True)
 class DisplayObj:
@@ -31,6 +32,7 @@ class StateHandler:
         self._casting_system = CastingSystem()
         self._health_system = HealthSystem()
         self._movement_system = MovementSystem()
+        self._display_system = DisplaySystem()
 
     @property
     def player_id(self) -> int:
@@ -41,12 +43,12 @@ class StateHandler:
         return set(self._casting_system._data_dct.keys())
 
     def create_display_obj(self, current_time: int, obj_id: int) -> DisplayObj:
-        obj_health = self.get_obj_health_data(obj_id)
+        obj_display = self.get_obj_display_data(obj_id)
         pos_xy = self.get_position(obj_id, current_time)
         return DisplayObj(
-            obj_id, pos_xy, obj_health.is_visible, self.get_size(obj_id),
-            (obj_health.color_red, obj_health.color_green, obj_health.color_blue),
-            Icons.get_icon_name(obj_health.icon_id)
+            obj_id, pos_xy, obj_display.is_visible, self.get_size(obj_id),
+            (obj_display.color_red, obj_display.color_green, obj_display.color_blue),
+            Icons.get_icon_name(obj_display.icon_id)
         )
 
     def create_display_spell(self, spell_id: int) -> DisplaySpell | None:
@@ -65,8 +67,11 @@ class StateHandler:
     def get_obj_health_data(self, obj_id: int) -> ObjHealthData:
         return self._health_system.get_data(obj_id)
 
+    def get_obj_display_data(self, obj_id: int) -> ObjDisplayData:
+        return self._display_system.get_data(obj_id)
+
     def is_visible(self, obj_id: int) -> bool:
-        return self._health_system.is_visible(obj_id)
+        return self._display_system.is_visible(obj_id)
 
     def get_position(self, obj_id: int, current_time: int) -> tuple[float, float]:
         return self._movement_system.get_position(obj_id, current_time)
@@ -102,6 +107,7 @@ class StateHandler:
             if err := self._casting_system.validate_event(validation_type, validation_value, timestamp, source_id, spell_id, target_id): return err
             if err := self._health_system.validate_event(validation_type, validation_value, timestamp, source_id, spell_id, target_id): return err
             if err := self._movement_system.validate_event(validation_type, validation_value, timestamp, source_id, target_id): return err
+            if err := self._display_system.validate_event(validation_type, validation_value, timestamp, source_id, target_id): return err
 
         return ""
 
@@ -114,6 +120,7 @@ class StateHandler:
             self._casting_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
             self._health_system.apply_effect(effect_type, effect_value, timestamp, source_id, spell_id, target_id)
             self._movement_system.apply_effect(effect_type, effect_value, timestamp, source_id, target_id)
+            self._display_system.apply_effect(effect_type, effect_value, timestamp, source_id, target_id)
 
     def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, target_id: int) -> None:
         assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."
@@ -121,11 +128,13 @@ class StateHandler:
         self._casting_system.spawn_game_obj(timestamp, parent_id, new_obj_id, spell_id, target_id)
         self._health_system.spawn_game_obj(timestamp, parent_id, new_obj_id, spell_id, target_id)
         self._movement_system.spawn_game_obj(timestamp, parent_id, new_obj_id, spell_id, target_id)
+        self._display_system.spawn_game_obj(timestamp, parent_id, new_obj_id, spell_id, target_id)
 
     def create_environment_obj(self, obj_id: int) -> None:
         self._casting_system.spawn_environment_obj(obj_id)
         self._health_system.spawn_environment_obj(obj_id)
         self._movement_system.spawn_environment_obj(obj_id)
+        self._display_system.spawn_environment_obj(obj_id)
 
     def get_spells_for_player_inputs(self, player_inputs: list[str]) -> list[int]:
         spell_ids = []

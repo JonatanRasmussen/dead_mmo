@@ -6,19 +6,6 @@ from src.settings import Consts
 from .event_handler import EventHandler, IdGen
 from .state_handler import StateHandler, DisplayObj, DisplaySpell
 
-@dataclass(slots=True)
-class FrameOutput:
-    effect_id: int
-    scale: float
-    pos_x: float
-    pos_y: float
-    is_visible: bool
-    color_red: int
-    color_green: int
-    color_blue: int
-    sprite_name: str
-    animation_name: str
-    audio_name: str
 
 class WorldState:
     def __init__(self) -> None:
