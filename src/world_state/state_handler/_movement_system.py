@@ -6,10 +6,7 @@ from src.settings import Consts
 
 @dataclass(slots=True)
 class ObjMovementData:
-    spawn_timestamp: int = 0
     obj_id: int = Consts.EMPTY_ID
-    parent_id: int = Consts.EMPTY_ID
-    spawned_from_spell_id: int = Consts.EMPTY_ID
     x_pos: float = 0.0
     y_pos: float = 0.0
     x_vel: float = 0.0
@@ -20,15 +17,11 @@ class ObjMovementData:
     movespeed: float = 1.0
 
     @classmethod
-    def create_new_obj(cls, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, parent_x: float, parent_y: float) -> "ObjMovementData":
+    def create_new_obj(cls, new_obj_id: int, parent_x: float, parent_y: float) -> "ObjMovementData":
         return cls(
-            spawn_timestamp=timestamp,
             obj_id=new_obj_id,
-            parent_id=parent_id,
-            spawned_from_spell_id=spell_id,
             x_pos=float(parent_x),
             y_pos=float(parent_y),
-            timestamp=timestamp,
         )
 
 class MovementEffect(str, Enum):
@@ -61,9 +54,9 @@ class MovementSystem:
     def __init__(self) -> None:
         self._data_dct: Dict[int, ObjMovementData] = {}
 
-    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, target_id: int = Consts.EMPTY_ID) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int) -> None:
         parent_x, parent_y = self.get_position(parent_id, timestamp) if parent_id in self._data_dct else (0.0, 0.0)
-        game_obj = ObjMovementData.create_new_obj(timestamp, parent_id, new_obj_id, spell_id, parent_x, parent_y)
+        game_obj = ObjMovementData.create_new_obj(new_obj_id, parent_x, parent_y)
         self.add_data(new_obj_id, game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:

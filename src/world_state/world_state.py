@@ -1,5 +1,3 @@
-from typing import Any
-
 from dataclasses import dataclass
 
 from src.settings import Consts
@@ -63,17 +61,26 @@ class WorldState:
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
 
     def _create_cascading_events(self, timestamp: int, source_id: int, spell_id: int) -> None:
-        timeline = self._state_handler.get_ability_timeline(spell_id)
-        if not timeline: return
+        spell = self._state_handler.get_spell_def(spell_id)
+        if not spell: return
 
-        for trigger_timestamp, timeline_spell_ids in timeline.items():
-            for t_spell in timeline_spell_ids:
-                if self._state_handler.is_area_of_effect(spell_id):
-                    timeline_targets = list(self._state_handler.select_targets_for_aoe(source_id, spell_id))
-                else:
-                    timeline_targets = [self._state_handler.get_current_target_for_obj(source_id)]
-                for t_target in timeline_targets:
-                    self._event_handler.dispatch_upcoming_event(timestamp + trigger_timestamp, source_id, t_spell, t_target)
+        if spell.timeline:
+            target_id = self._state_handler.get_current_target_for_obj(source_id)
+            for trigger_timestamp, timeline_spell_ids in spell.timeline.items():
+                for t_spell in timeline_spell_ids:
+                    self._event_handler.dispatch_upcoming_event(timestamp + trigger_timestamp, source_id, t_spell, target_id)
+
+        if spell.aoe_cross_team:
+            aoe_cross_targets = list(self._state_handler.select_targets_for_aoe(source_id, cross_team=True, same_team=False))
+            for t_spell in spell.aoe_cross_team:
+                for t_target in aoe_cross_targets:
+                    self._event_handler.dispatch_upcoming_event(timestamp, source_id, t_spell, t_target)
+
+        if spell.aoe_same_team:
+            aoe_same_targets = list(self._state_handler.select_targets_for_aoe(source_id, cross_team=False, same_team=True))
+            for t_spell in spell.aoe_same_team:
+                for t_target in aoe_same_targets:
+                    self._event_handler.dispatch_upcoming_event(timestamp, source_id, t_spell, t_target)
 
     def _create_events_from_controls(self, player_inputs: list[str], timestamp: int) -> None:
         source_id = self._state_handler.player_id

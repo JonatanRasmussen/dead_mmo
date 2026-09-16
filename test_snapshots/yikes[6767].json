@@ -6680,8 +6680,12 @@
   "game_objs": {
     "1": {
       "casting": {
+        "spawn_timestamp": 0,
         "obj_id": 1,
         "parent_id": 0,
+        "spawned_from_spell_id": 0,
+        "event_target_id": 1,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6689,15 +6693,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": 0
+        "casting_ticks": 0,
+        "player_number": 0,
+        "threat_score": 0,
+        "is_enemy": false,
+        "is_untargetable": true
       },
       "health": {
+        "spawn_timestamp": 0,
         "obj_id": 1,
+        "parent_id": 0,
+        "spawned_from_spell_id": 0,
         "hp": -424.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 0,
         "obj_id": 1,
+        "parent_id": 0,
+        "spawned_from_spell_id": 0,
         "x_pos": 0.0,
         "y_pos": 0.0,
         "x_vel": 0.0,
@@ -6710,8 +6724,12 @@
     },
     "2": {
       "casting": {
+        "spawn_timestamp": 0,
         "obj_id": 2,
         "parent_id": 1,
+        "spawned_from_spell_id": 969,
+        "event_target_id": 1,
+        "effect_pointer": 0,
         "gcd_start": 5000,
         "gcd_end": 6000,
         "cooldown_start": 5000,
@@ -6719,15 +6737,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": 0
+        "casting_ticks": 0,
+        "player_number": 0,
+        "threat_score": 9001,
+        "is_enemy": true,
+        "is_untargetable": false
       },
       "health": {
+        "spawn_timestamp": 0,
         "obj_id": 2,
+        "parent_id": 1,
+        "spawned_from_spell_id": 969,
         "hp": -51.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 0,
         "obj_id": 2,
+        "parent_id": 1,
+        "spawned_from_spell_id": 969,
         "x_pos": 0.7,
         "y_pos": 0.7,
         "x_vel": 0.0,
@@ -6740,8 +6768,12 @@
     },
     "3": {
       "casting": {
+        "spawn_timestamp": 0,
         "obj_id": 3,
         "parent_id": 1,
+        "spawned_from_spell_id": 8999,
+        "event_target_id": 1,
+        "effect_pointer": 0,
         "gcd_start": 3800,
         "gcd_end": 4300,
         "cooldown_start": 500,
@@ -6749,15 +6781,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": 0
+        "casting_ticks": 0,
+        "player_number": 1,
+        "threat_score": 0,
+        "is_enemy": false,
+        "is_untargetable": false
       },
       "health": {
+        "spawn_timestamp": 0,
         "obj_id": 3,
+        "parent_id": 1,
+        "spawned_from_spell_id": 8999,
         "hp": 249.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 0,
         "obj_id": 3,
+        "parent_id": 1,
+        "spawned_from_spell_id": 8999,
         "x_pos": 0.5984924240491749,
         "y_pos": 0.16564971157455594,
         "x_vel": 0.0,
@@ -6770,8 +6812,12 @@
     },
     "4": {
       "casting": {
+        "spawn_timestamp": 400,
         "obj_id": 4,
         "parent_id": 2,
+        "spawned_from_spell_id": 970,
+        "event_target_id": 1,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6779,15 +6825,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": 3470
+        "casting_ticks": 3470,
+        "player_number": 0,
+        "threat_score": 9001,
+        "is_enemy": true,
+        "is_untargetable": false
       },
       "health": {
+        "spawn_timestamp": 400,
         "obj_id": 4,
+        "parent_id": 2,
+        "spawned_from_spell_id": 970,
         "hp": -1.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 400,
         "obj_id": 4,
+        "parent_id": 2,
+        "spawned_from_spell_id": 970,
         "x_pos": 0.3632602734791769,
         "y_pos": 0.5812164375666822,
         "x_vel": 0.0,
@@ -6800,8 +6856,12 @@
     },
     "5": {
       "casting": {
+        "spawn_timestamp": 500,
         "obj_id": 5,
         "parent_id": 3,
+        "spawned_from_spell_id": 1441,
+        "event_target_id": 2,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6809,15 +6869,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": -127518
+        "casting_ticks": -127518,
+        "player_number": 0,
+        "threat_score": 0,
+        "is_enemy": false,
+        "is_untargetable": true
       },
       "health": {
+        "spawn_timestamp": 500,
         "obj_id": 5,
+        "parent_id": 3,
+        "spawned_from_spell_id": 1441,
         "hp": 0.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 500,
         "obj_id": 5,
+        "parent_id": 3,
+        "spawned_from_spell_id": 1441,
         "x_pos": 0.6656597658861506,
         "y_pos": 0.6709034979660384,
         "x_vel": 0.0,
@@ -6830,8 +6900,12 @@
     },
     "6": {
       "casting": {
+        "spawn_timestamp": 500,
         "obj_id": 6,
         "parent_id": 3,
+        "spawned_from_spell_id": 1441,
+        "event_target_id": 4,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6839,15 +6913,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": -127514
+        "casting_ticks": -127514,
+        "player_number": 0,
+        "threat_score": 0,
+        "is_enemy": false,
+        "is_untargetable": true
       },
       "health": {
+        "spawn_timestamp": 500,
         "obj_id": 6,
+        "parent_id": 3,
+        "spawned_from_spell_id": 1441,
         "hp": 0.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 500,
         "obj_id": 6,
+        "parent_id": 3,
+        "spawned_from_spell_id": 1441,
         "x_pos": 0.48210148955037874,
         "y_pos": 0.7598360757568676,
         "x_vel": 0.0,
@@ -6860,8 +6944,12 @@
     },
     "7": {
       "casting": {
+        "spawn_timestamp": 800,
         "obj_id": 7,
         "parent_id": 2,
+        "spawned_from_spell_id": 71,
+        "event_target_id": 1,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6869,15 +6957,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": 72
+        "casting_ticks": 72,
+        "player_number": 0,
+        "threat_score": 0,
+        "is_enemy": true,
+        "is_untargetable": false
       },
       "health": {
+        "spawn_timestamp": 800,
         "obj_id": 7,
+        "parent_id": 2,
+        "spawned_from_spell_id": 71,
         "hp": 7.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 800,
         "obj_id": 7,
+        "parent_id": 2,
+        "spawned_from_spell_id": 71,
         "x_pos": 0.19999999999999996,
         "y_pos": 0.7999999999999999,
         "x_vel": 0.0,
@@ -6890,8 +6988,12 @@
     },
     "8": {
       "casting": {
+        "spawn_timestamp": 1800,
         "obj_id": 8,
         "parent_id": 3,
+        "spawned_from_spell_id": 171,
+        "event_target_id": 3,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6899,15 +7001,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": -130938
+        "casting_ticks": -130938,
+        "player_number": 0,
+        "threat_score": 0,
+        "is_enemy": false,
+        "is_untargetable": true
       },
       "health": {
+        "spawn_timestamp": 1800,
         "obj_id": 8,
+        "parent_id": 3,
+        "spawned_from_spell_id": 171,
         "hp": 17.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 1800,
         "obj_id": 8,
+        "parent_id": 3,
+        "spawned_from_spell_id": 171,
         "x_pos": 0.5070710678118655,
         "y_pos": 0.10707106781186543,
         "x_vel": 0.0,
@@ -6920,8 +7032,12 @@
     },
     "9": {
       "casting": {
+        "spawn_timestamp": 5000,
         "obj_id": 9,
         "parent_id": 2,
+        "spawned_from_spell_id": 1441,
+        "event_target_id": 3,
+        "effect_pointer": 0,
         "gcd_start": -10000,
         "gcd_end": 0,
         "cooldown_start": -10000,
@@ -6929,15 +7045,25 @@
         "selected_spell_id": 0,
         "casting_start": -10000,
         "casting_duration": 0,
-        "casting_ticks": -127526
+        "casting_ticks": -127526,
+        "player_number": 0,
+        "threat_score": 0,
+        "is_enemy": true,
+        "is_untargetable": true
       },
       "health": {
+        "spawn_timestamp": 5000,
         "obj_id": 9,
+        "parent_id": 2,
+        "spawned_from_spell_id": 1441,
         "hp": 0.0,
         "spell_modifier": 1.0
       },
       "movement": {
+        "spawn_timestamp": 5000,
         "obj_id": 9,
+        "parent_id": 2,
+        "spawned_from_spell_id": 1441,
         "x_pos": 0.6055812373099335,
         "y_pos": 0.20822813109938712,
         "x_vel": 0.0,

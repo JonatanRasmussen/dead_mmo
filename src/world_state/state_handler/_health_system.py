@@ -6,20 +6,14 @@ from src.settings import Consts
 
 @dataclass(slots=True)
 class ObjHealthData:
-    spawn_timestamp: int = 0
     obj_id: int = Consts.EMPTY_ID
-    parent_id: int = Consts.EMPTY_ID
-    spawned_from_spell_id: int = Consts.EMPTY_ID
     hp: float = 0.0
     spell_modifier: float = 1.0
 
     @classmethod
-    def create_new_obj(cls, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int) -> "ObjHealthData":
+    def create_new_obj(cls, new_obj_id: int) -> "ObjHealthData":
         return cls(
-            spawn_timestamp=timestamp,
             obj_id=new_obj_id,
-            parent_id=parent_id,
-            spawned_from_spell_id=spell_id,
         )
 
 class HealthEffect(str, Enum):
@@ -38,12 +32,12 @@ class HealthSystem:
     def __init__(self) -> None:
         self._data_dct: Dict[int, ObjHealthData] = {}
 
-    def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, target_id: int = Consts.EMPTY_ID) -> None:
-        game_obj = ObjHealthData.create_new_obj(timestamp, parent_id, new_obj_id, spell_id)
+    def spawn_game_obj(self, new_obj_id: int) -> None:
+        game_obj = ObjHealthData.create_new_obj(new_obj_id)
         self.add_data(new_obj_id, game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjHealthData(obj_id=obj_id)
+        environment_obj = ObjHealthData.create_new_obj(obj_id)
         self.add_data(obj_id, environment_obj)
 
     def add_data(self, new_obj_id: int, new_obj: ObjHealthData) -> None:
@@ -67,10 +61,10 @@ class HealthSystem:
         obj_hp = self.get_data(obj_id).hp
         return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
+    def validate_event(self) -> str:
         return ""
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, source_id: int, target_id: int) -> None:
         if effect_type == HealthEffect.APPLY_DAMAGE:
             self.get_data(target_id).hp -= effect_value * self.get_data(source_id).spell_modifier
         elif effect_type == HealthEffect.APPLY_HEAL:

@@ -7,6 +7,8 @@ from ._casting_system import CastingEffect, CastingValidation
 from ._health_system import HealthEffect, HealthValidation
 from ._movement_system import MovementEffect, MovementValidation
 from ._display_system import DisplayEffect, DisplayValidation
+from ._aura_system import AuraEffect, AuraValidation
+from ._targeting_system import TargetingEffect, TargetingValidation
 
 class TriggerType(str, Enum):
     SPAWN_CHILD = "spawn_child"
@@ -18,8 +20,22 @@ class CosmeticType(str, Enum):
     AUDIO_NAME = "audio_name"
     ANIMATION_NAME = "animation_name"
 
-VALID_EFFECT_TYPES = {e.value for e in CastingEffect} | {e.value for e in HealthEffect} | {e.value for e in MovementEffect} | {e.value for e in DisplayEffect}
-VALID_VALIDATION_TYPES = {v.value for v in CastingValidation} | {v.value for v in HealthValidation} | {v.value for v in MovementValidation} | {v.value for v in DisplayValidation}
+VALID_EFFECT_TYPES = (
+    {e.value for e in AuraEffect} |
+    {e.value for e in CastingEffect} |
+    {e.value for e in DisplayEffect} |
+    {e.value for e in HealthEffect} |
+    {e.value for e in MovementEffect} |
+    {e.value for e in TargetingEffect}
+)
+VALID_VALIDATION_TYPES = (
+    {v.value for v in AuraValidation} |
+    {v.value for v in CastingValidation} |
+    {v.value for v in DisplayValidation} |
+    {v.value for v in HealthValidation} |
+    {v.value for v in MovementValidation} |
+    {v.value for v in TargetingValidation}
+)
 VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
 VALID_COSMETIC_TYPES = {c.value for c in CosmeticType}
 
@@ -33,10 +49,10 @@ class SpellDef:
     animation_scale: float = 1.0
     spawn_child: list[int] = field(default_factory=list)
     timeline: dict[int, list[int]] = field(default_factory=dict)
-    flag_aoe_cross_team: bool = False
-    flag_aoe_same_team: bool = False
+    aoe_cross_team: list[int] = field(default_factory=list)
+    aoe_same_team: list[int] = field(default_factory=list)
 
-class SpellLoader:
+class YamlSpellLoader:
     def __init__(self, yaml_path: str = "data/spells.yaml") -> None:
         self.spell_database: Dict[int, SpellDef] = self._load_yaml(yaml_path)
 
@@ -72,6 +88,12 @@ class SpellLoader:
 
             timeline = {int(k): [int(v) for v in (val if isinstance(val, list) else [val])] for k, val in triggers.get(TriggerType.TIMELINE, {}).items()}
 
+            aoe_cross_team = triggers.get(TriggerType.AOE_OTHER_TEAM, [])
+            aoe_cross_team = [int(c) for c in (aoe_cross_team if isinstance(aoe_cross_team, list) else [aoe_cross_team])]
+
+            aoe_same_team = triggers.get(TriggerType.AOE_SAME_TEAM, [])
+            aoe_same_team = [int(c) for c in (aoe_same_team if isinstance(aoe_same_team, list) else [aoe_same_team])]
+
             validations = self._parse_numeric_dict(s.get("validations", {}), VALID_VALIDATION_TYPES, "validation", spell_id)
             effects = self._parse_numeric_dict(s.get("effects", {}), VALID_EFFECT_TYPES, "effect", spell_id)
             cosmetics = self._parse_string_dict(s.get("cosmetics", {}), VALID_COSMETIC_TYPES, "cosmetic", spell_id)
@@ -82,9 +104,7 @@ class SpellLoader:
             if CastingEffect.APPLY_TICKS_SUBTRACTION in effects and effects[CastingEffect.APPLY_TICKS_SUBTRACTION] != 65535:
                 assert CastingValidation.ARE_TICKS_READY in validations, f"Spell {spell_id} missing tick validation."
                 assert validations[CastingValidation.ARE_TICKS_READY] == effects[CastingEffect.APPLY_TICKS_SUBTRACTION], f"Spell {spell_id} tick validation/effect mismatch."
-            if MovementEffect.PUSH_TARGET in effects or MovementEffect.TELEPORT_TO_TARGET in effects:
-                pass # Range limit checks usually apply here, but keeping your specific assertion below:
-            if "range_limit" in effects: # Kept for backward compatibility if you still use it, though you removed it from Enums
+            if "range_limit" in effects:
                 assert MovementValidation.IS_WITHIN_RANGE in validations, f"Spell {spell_id} missing range validation."
                 assert validations[MovementValidation.IS_WITHIN_RANGE] == effects["range_limit"], f"Spell {spell_id} range validation/effect mismatch."
 
@@ -97,7 +117,7 @@ class SpellLoader:
                 cosmetics=cosmetics,
                 spawn_child=spawn_child,
                 timeline=timeline,
-                flag_aoe_cross_team=bool(triggers.get(TriggerType.AOE_OTHER_TEAM, False)),
-                flag_aoe_same_team=bool(triggers.get(TriggerType.AOE_SAME_TEAM, False)),
+                aoe_cross_team=aoe_cross_team,
+                aoe_same_team=aoe_same_team,
             )
         return db
