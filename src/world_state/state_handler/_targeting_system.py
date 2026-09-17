@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, Iterable, ValuesView
-from src.settings import Consts
+from src.settings import Consts, Optimizations
 
 
 @dataclass(slots=True)
@@ -72,9 +72,22 @@ class TargetingSystem:
         self.targetable_ids_on_player_team.discard(obj_id)
         self.targetable_ids_on_enemy_team.discard(obj_id)
 
-    # ---- Lookups ----
-    def view_all_data(self) -> ValuesView[ObjTargetingData]:
-        return self._data_dct.values()
+    def get_target_ids_for_aoe(self, source_id: int, hits_cross_team: bool, hits_same_team: bool) -> Iterable[int]:
+        if Optimizations.ENABLE_FAST_TARGETABILITY_LOOKUP:
+            if not hits_cross_team and not hits_same_team: return
+            source_data = self._data_dct.get(source_id)
+            if not source_data: return
+            if hits_same_team:
+                target_set = self.targetable_ids_on_enemy_team if source_data.is_enemy else self.targetable_ids_on_player_team
+                for obj_id in target_set:
+                    yield obj_id
+            if hits_cross_team:
+                target_set = self.targetable_ids_on_player_team if source_data.is_enemy else self.targetable_ids_on_enemy_team
+                for obj_id in target_set:
+                    yield obj_id
+        else:
+            for obj_id in self._data_dct:
+                yield obj_id
 
     def get_parent_data(self, obj_id: int) -> ObjTargetingData:
         obj_data = self.get_data(obj_id)
@@ -86,21 +99,6 @@ class TargetingSystem:
 
     def get_current_target_for_obj(self, obj_id: int) -> int:
         return self._data_dct.get(obj_id, ObjTargetingData()).event_target_id
-
-    def select_targets_for_aoe(self, source_id: int, hits_cross_team: bool, hits_same_team: bool) -> Iterable[int]:
-        if not hits_cross_team and not hits_same_team: return
-        source_data = self._data_dct.get(source_id)
-        if not source_data: return
-
-        if hits_same_team:
-            target_set = self.targetable_ids_on_enemy_team if source_data.is_enemy else self.targetable_ids_on_player_team
-            for obj_id in target_set:
-                yield obj_id
-
-        if hits_cross_team:
-            target_set = self.targetable_ids_on_player_team if source_data.is_enemy else self.targetable_ids_on_enemy_team
-            for obj_id in target_set:
-                yield obj_id
 
     def validate_event(self, validation_type: str, source_id: int, target_id: int) -> str:
         if validation_type == TargetingValidation.IS_SOURCE_TARGETABLE:

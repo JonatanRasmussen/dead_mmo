@@ -1,14 +1,15 @@
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any, Iterable
 
-from src.settings import HardwareInputConsts, Icons
+from src.settings import Consts
+from src.settings import HardwareInputConsts, Icons, Optimizations
 from ._yaml_spell_loader import YamlSpellLoader, SpellDef
-from ._aura_system import AuraSystem, ObjAuraData
+from ._aura_system import AuraSystem, ObjAuraData, AuraValidation
 from ._casting_system import CastingSystem, ObjCastingData
 from ._display_system import DisplaySystem, ObjDisplayData
 from ._health_system import HealthSystem, ObjHealthData
 from ._movement_system import MovementSystem, ObjMovementData
-from ._targeting_system import TargetingSystem, ObjTargetingData
+from ._targeting_system import TargetingSystem, ObjTargetingData, TargetingValidation
 
 @dataclass(slots=True)
 class DisplayObj:
@@ -86,12 +87,38 @@ class StateHandler:
     def get_current_target_for_obj(self, obj_id: int) -> int:
         return self._targeting_system.get_current_target_for_obj(obj_id)
 
-    def select_targets_for_aoe(self, source_id: int, cross_team: bool, same_team: bool) -> Iterable[int]:
-        return self._targeting_system.select_targets_for_aoe(source_id, cross_team, same_team)
-
     def has_channel_start(self, spell_id: int) -> bool:
         spell = self.spell_database.get(spell_id)
         return spell is not None and "start_channel" in spell.effects
+
+    def get_timeline_for_spell(self, spell_id: int) -> dict[int, list[int]]:
+        spell = self.spell_database.get(spell_id)
+        return spell.timeline if spell is not None else {}
+
+    def get_aoe_spell_id(self, spell_id: int) -> int:
+        spell = self.spell_database.get(spell_id)
+        return spell.aoe_spell_id if spell is not None else Consts.EMPTY_ID
+
+
+    def get_aoe_targets(self, source_id: int, aoe_spell_id: int) -> set[int]:
+        if not Optimizations.TRY_OPTIMIZE_AOE:
+            return self.active_obj_ids
+        aoe_spell = self.spell_database.get(aoe_spell_id)
+        if not aoe_spell or aoe_spell.aoe_spell_id == Consts.EMPTY_ID:
+            return set()
+        validations = aoe_spell.validations
+        possible_targets: set[int] = set()
+        # 1. Targetability & Team Filtering
+        if TargetingValidation.IS_TARGET_TARGETABLE in validations:
+            hits_cross_team = TargetingValidation.IS_TARGET_OTHER_TEAM in validations
+            hits_same_team = TargetingValidation.IS_TARGET_SAME_TEAM in validations
+            possible_targets.intersection_update(self._targeting_system.get_target_ids_for_aoe(source_id, hits_cross_team, hits_same_team))
+        # 2. Aura Filtering
+        for aura_validation in AuraValidation:
+            if aura_validation in validations:
+                validation_value = validations[aura_validation]
+                possible_targets.intersection_update(self._aura_system.get_target_ids_for_aoe(validation_value))
+        return possible_targets
 
     # --- Core Validation Logic ---
     def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:

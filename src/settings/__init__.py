@@ -5,6 +5,7 @@ from .hardware_inputs_consts import HardwareInputConsts
 from .icons import Icons
 from .level_setup_consts import LevelSetupConsts
 from .log_config import LogConfig
+from .optimizations import Optimizations
 from .sprite_files import SpriteFiles
 
 __all__ = [
@@ -15,5 +16,6 @@ __all__ = [
     "Icons",
     "LevelSetupConsts",
     "LogConfig",
+    "Optimizations",
     "SpriteFiles",
 ]

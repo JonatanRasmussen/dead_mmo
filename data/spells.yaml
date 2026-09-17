@@ -165,6 +165,7 @@
     consume_channeling_ticks: 1
   triggers:
     timeline:
+      0: [74]
       100: [73, 74]
 
 74:
@@ -233,12 +234,15 @@
   effects:
     gcd_duration: 500
   triggers:
-    aoe_other_team: [129]
+    aoe_spell: 129
 
 129:
   name: molten_blast_trigger
   cosmetics:
     audio_name: MoltenBlastHit
+  validations:
+    is_target_targetable: true
+    is_target_other_team: true
   effects:
     damage: 13.0
 
@@ -272,10 +276,13 @@
     base_cooldown: 2000
     gcd_duration: 1000
   triggers:
-    aoe_other_team: [1441]
+    aoe_spell: 1441
 
 1441:
   name: spawn_shadowbolt
+  validations:
+    is_target_targetable: true
+    is_target_other_team: true
   triggers:
     spawn_child: [1442]
 
@@ -304,7 +311,8 @@
     walk_towards_target: true
   triggers:
     timeline:
-      20: [1443, 1444]
+      0: [1444]
+      20: [1443]
 
 1444:
   name: shadowbolt_trigger

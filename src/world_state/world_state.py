@@ -64,23 +64,18 @@ class WorldState:
         spell = self._state_handler.get_spell_def(spell_id)
         if not spell: return
 
-        if spell.timeline:
+        timeline = self._state_handler.get_timeline_for_spell(spell_id)
+        if len(timeline) > 0:
             target_id = self._state_handler.get_current_target_for_obj(source_id)
-            for trigger_timestamp, timeline_spell_ids in spell.timeline.items():
+            for trigger_timestamp, timeline_spell_ids in timeline.items():
                 for t_spell in timeline_spell_ids:
                     self._event_handler.dispatch_upcoming_event(timestamp + trigger_timestamp, source_id, t_spell, target_id)
 
-        if spell.aoe_cross_team:
-            aoe_cross_targets = list(self._state_handler.select_targets_for_aoe(source_id, cross_team=True, same_team=False))
-            for t_spell in spell.aoe_cross_team:
-                for t_target in aoe_cross_targets:
-                    self._event_handler.dispatch_upcoming_event(timestamp, source_id, t_spell, t_target)
-
-        if spell.aoe_same_team:
-            aoe_same_targets = list(self._state_handler.select_targets_for_aoe(source_id, cross_team=False, same_team=True))
-            for t_spell in spell.aoe_same_team:
-                for t_target in aoe_same_targets:
-                    self._event_handler.dispatch_upcoming_event(timestamp, source_id, t_spell, t_target)
+        aoe_spell_id = self._state_handler.get_aoe_spell_id(spell_id)
+        if aoe_spell_id != Consts.EMPTY_ID:
+            target_ids = set(self._state_handler.get_aoe_targets(source_id, aoe_spell_id))
+            for target_id in target_ids:
+                self._event_handler.dispatch_upcoming_event(timestamp, source_id, aoe_spell_id, target_id)
 
     def _create_events_from_controls(self, player_inputs: list[str], timestamp: int) -> None:
         source_id = self._state_handler.player_id

@@ -1,0 +1,6 @@
+
+
+class Optimizations:
+    TRY_OPTIMIZE_AOE = False
+    ENABLE_FAST_AURA_LOOKUP = False
+    ENABLE_FAST_TARGETABILITY_LOOKUP = False

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict
 
+from src.settings import Consts
 from ._casting_system import CastingEffect, CastingValidation
 from ._health_system import HealthEffect, HealthValidation
 from ._movement_system import MovementEffect, MovementValidation
@@ -13,8 +14,7 @@ from ._targeting_system import TargetingEffect, TargetingValidation
 class TriggerType(str, Enum):
     SPAWN_CHILD = "spawn_child"
     TIMELINE = "timeline"
-    AOE_OTHER_TEAM = "aoe_other_team"
-    AOE_SAME_TEAM = "aoe_same_team"
+    AOE_SPELL = "aoe_spell"
 
 class CosmeticType(str, Enum):
     AUDIO_NAME = "audio_name"
@@ -49,8 +49,7 @@ class SpellDef:
     animation_scale: float = 1.0
     spawn_child: list[int] = field(default_factory=list)
     timeline: dict[int, list[int]] = field(default_factory=dict)
-    aoe_cross_team: list[int] = field(default_factory=list)
-    aoe_same_team: list[int] = field(default_factory=list)
+    aoe_spell_id: int = Consts.EMPTY_ID
 
 class YamlSpellLoader:
     def __init__(self, yaml_path: str = "data/spells.yaml") -> None:
@@ -88,11 +87,11 @@ class YamlSpellLoader:
 
             timeline = {int(k): [int(v) for v in (val if isinstance(val, list) else [val])] for k, val in triggers.get(TriggerType.TIMELINE, {}).items()}
 
-            aoe_cross_team = triggers.get(TriggerType.AOE_OTHER_TEAM, [])
-            aoe_cross_team = [int(c) for c in (aoe_cross_team if isinstance(aoe_cross_team, list) else [aoe_cross_team])]
-
-            aoe_same_team = triggers.get(TriggerType.AOE_SAME_TEAM, [])
-            aoe_same_team = [int(c) for c in (aoe_same_team if isinstance(aoe_same_team, list) else [aoe_same_team])]
+            aoe_spell_id = triggers.get(TriggerType.AOE_SPELL)
+            if aoe_spell_id is None:
+                aoe_spell_id = Consts.EMPTY_ID
+            else:
+                aoe_spell_id = int(aoe_spell_id)
 
             validations = self._parse_numeric_dict(s.get("validations", {}), VALID_VALIDATION_TYPES, "validation", spell_id)
             effects = self._parse_numeric_dict(s.get("effects", {}), VALID_EFFECT_TYPES, "effect", spell_id)
@@ -117,7 +116,6 @@ class YamlSpellLoader:
                 cosmetics=cosmetics,
                 spawn_child=spawn_child,
                 timeline=timeline,
-                aoe_cross_team=aoe_cross_team,
-                aoe_same_team=aoe_same_team,
+                aoe_spell_id=aoe_spell_id,
             )
         return db
