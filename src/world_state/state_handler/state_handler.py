@@ -4,7 +4,7 @@ from typing import Any, Iterable
 from src.settings import Consts
 from src.settings import HardwareInputConsts, Icons, Optimizations
 from ._yaml_spell_loader import YamlSpellLoader, SpellDef
-from ._aura_system import AuraSystem, ObjAuraData, AuraValidation
+from ._attatchment_system import AttatchmentSystem, ObjAttatchmentData, AttatchmentValidation
 from ._casting_system import CastingSystem, ObjCastingData
 from ._display_system import DisplaySystem, ObjDisplayData
 from ._health_system import HealthSystem, ObjHealthData
@@ -32,7 +32,7 @@ class StateHandler:
         self.spell_loader = YamlSpellLoader()
         self.spell_database = self.spell_loader.spell_database
         self._active_game_objs: set = set()
-        self._aura_system = AuraSystem()
+        self._aura_system = AttatchmentSystem()
         self._casting_system = CastingSystem()
         self._display_system = DisplaySystem()
         self._health_system = HealthSystem()
@@ -45,7 +45,7 @@ class StateHandler:
 
     @property
     def active_obj_ids(self) -> set[int]:
-        return set(self._targeting_system._data_dct.keys())
+        return set(self._active_game_objs)
 
     def create_display_obj(self, current_time: int, obj_id: int) -> DisplayObj:
         obj_display = self.get_obj_display_data(obj_id)
@@ -65,9 +65,6 @@ class StateHandler:
             animation_name=spell.cosmetics.get("animation_name", ""),
             animation_scale=spell.animation_scale
         )
-
-    def get_spell_def(self, spell_id: int) -> SpellDef:
-        return self.spell_database[spell_id]
 
     def get_obj_health_data(self, obj_id: int) -> ObjHealthData:
         return self._health_system.get_data(obj_id)
@@ -91,6 +88,10 @@ class StateHandler:
         spell = self.spell_database.get(spell_id)
         return spell is not None and "start_channel" in spell.effects
 
+    def get_spawn_child_id(self, spell_id: int) -> list[int]:
+        spell = self.spell_database.get(spell_id)
+        return spell.spawn_child if spell is not None else [Consts.EMPTY_ID]
+
     def get_timeline_for_spell(self, spell_id: int) -> dict[int, list[int]]:
         spell = self.spell_database.get(spell_id)
         return spell.timeline if spell is not None else {}
@@ -99,26 +100,13 @@ class StateHandler:
         spell = self.spell_database.get(spell_id)
         return spell.aoe_spell_id if spell is not None else Consts.EMPTY_ID
 
-
-    def get_aoe_targets(self, source_id: int, aoe_spell_id: int) -> set[int]:
-        if not Optimizations.TRY_OPTIMIZE_AOE:
-            return self.active_obj_ids
-        aoe_spell = self.spell_database.get(aoe_spell_id)
-        if not aoe_spell or aoe_spell.aoe_spell_id == Consts.EMPTY_ID:
+    def get_aoe_targets(self, source_id: int, spell_id: int) -> set[int]:
+        spell = self.spell_database.get(spell_id)
+        if spell is None or spell.spell_id == Consts.EMPTY_ID:  # This should not be possible
+            print(f"Warning: spell_id {spell_id} from source_id {source_id} is not in database.")
             return set()
-        validations = aoe_spell.validations
-        possible_targets: set[int] = set()
-        # 1. Targetability & Team Filtering
-        if TargetingValidation.IS_TARGET_TARGETABLE in validations:
-            hits_cross_team = TargetingValidation.IS_TARGET_OTHER_TEAM in validations
-            hits_same_team = TargetingValidation.IS_TARGET_SAME_TEAM in validations
-            possible_targets.intersection_update(self._targeting_system.get_target_ids_for_aoe(source_id, hits_cross_team, hits_same_team))
-        # 2. Aura Filtering
-        for aura_validation in AuraValidation:
-            if aura_validation in validations:
-                validation_value = validations[aura_validation]
-                possible_targets.intersection_update(self._aura_system.get_target_ids_for_aoe(validation_value))
-        return possible_targets
+        # For now, target every other obj and let event validation fail on undesired aoe targets
+        return self._active_game_objs  # We can optimize this later on
 
     # --- Core Validation Logic ---
     def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
@@ -129,7 +117,7 @@ class StateHandler:
             if err := self._aura_system.validate_event(validation_type, validation_value, source_id, target_id): return err
             if err := self._casting_system.validate_event(validation_type, validation_value, timestamp, source_id): return err
             if err := self._display_system.validate_event(): return err
-            if err := self._health_system.validate_event(): return err
+            if err := self._health_system.validate_event(validation_type, source_id, target_id): return err
             if err := self._movement_system.validate_event(validation_type, validation_value, timestamp, source_id, target_id): return err
             if err := self._targeting_system.validate_event(validation_type, source_id, target_id): return err
         return ""
@@ -154,7 +142,7 @@ class StateHandler:
         self._casting_system.spawn_game_obj(new_obj_id, parent_id)
         self._display_system.spawn_game_obj(new_obj_id)
         self._health_system.spawn_game_obj(new_obj_id)
-        self._movement_system.spawn_game_obj(timestamp, new_obj_id, parent_id)
+        self._movement_system.spawn_game_obj(timestamp, new_obj_id, parent_id, target_id)
         self._targeting_system.spawn_game_obj(new_obj_id, parent_id, target_id)
 
     def create_environment_obj(self, obj_id: int) -> None:

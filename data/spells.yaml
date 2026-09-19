@@ -9,41 +9,57 @@
 # ==========================================
 91:
   name: start_move_up
+  validation:
+    is_targeting_self: true
   effects:
     walk_forward: true
 
 92:
   name: stop_move_up
+  validation:
+    is_targeting_self: true
   effects:
     stop_walk_forward: true
 
 181:
   name: start_move_left
+  validation:
+    is_targeting_self: true
   effects:
     walk_left: true
 
 182:
   name: stop_move_left
+  validation:
+    is_targeting_self: true
   effects:
     stop_walk_left: true
 
 271:
   name: start_move_down
+  validation:
+    is_targeting_self: true
   effects:
     walk_backward: true
 
 272:
   name: stop_move_down
+  validation:
+    is_targeting_self: true
   effects:
     stop_walk_backward: true
 
 1:
   name: start_move_right
+  validation:
+    is_targeting_self: true
   effects:
     walk_right: true
 
 2:
-  name: stop_move_right
+  name:
+  validation:
+    is_targeting_self: true
   effects:
     stop_walk_right: true
 
@@ -101,6 +117,7 @@
 172:
   name: init_healing_powerup
   effects:
+    is_unhittable: true
     add_channeling_ticks: 150
     hp: 30.0
     x_offset: 0.2
@@ -121,24 +138,42 @@
     consume_channeling_ticks: 1
   triggers:
     timeline:
-      100: [173, 174]
+      0: [174]
+      100: [173]
 
 174:
-  name: trigger_healing_powerup
+  name: try_trigger_healing_powerup
   validations:
-    is_within_range: 0.1
+    is_destination_within_range: 0.1
   effects:
     consume_channeling_ticks: 65535
     turn_invisible: true
-    is_untargetable: true
+  triggers:
+    aoe_spell: 175
+
+175:
+  name: healing_powerup_apply
+  cosmetics:
+    audio_name: Rejuvenation
+  validations:
+    is_target_the_destination: true
+  effects:
     heal: 150.0
 
 
 # ==========================================
 # Npc Landmine
 # ==========================================
+70:
+  name: aoe_landmine
+  triggers:
+    aoe_spell: 71
+
 71:
   name: spawn_landmine
+  validations:
+    is_target_hittable: true
+    is_target_other_team: true
   triggers:
     spawn_child: [72]
 
@@ -166,17 +201,27 @@
   triggers:
     timeline:
       0: [74]
-      100: [73, 74]
+      100: [73]
 
 74:
-  name: trigger_landmine
+  name: try_trigger_landmine
   validations:
-    is_within_range: 0.1
+    is_destination_within_range: 0.1
   effects:
     consume_channeling_ticks: 65535
     turn_invisible: true
-    is_untargetable: true
-    damage: 150.0
+    is_unhittable: true
+  triggers:
+    aoe_spell: 75
+
+75:
+  name: landmine_apply
+  cosmetics:
+    audio_name: MoltenBlastHit
+  validations:
+    is_target_the_destination: true
+  effects:
+    damage: 134.0
 
 
 # ==========================================
@@ -241,7 +286,7 @@
   cosmetics:
     audio_name: MoltenBlastHit
   validations:
-    is_target_targetable: true
+    is_target_hittable: true
     is_target_other_team: true
   effects:
     damage: 13.0
@@ -268,7 +313,7 @@
       300: [912]
 
 1440:
-  name: aoe_shadowbolt
+  name: shadowbolt_pressed
   validations:
     is_cooldown_ready: true
     is_gcd_ready: true
@@ -279,18 +324,19 @@
     aoe_spell: 1441
 
 1441:
-  name: spawn_shadowbolt
+  name: shadowbolt_spawn
   validations:
-    is_target_targetable: true
+    is_target_hittable: true
     is_target_other_team: true
   triggers:
     spawn_child: [1442]
 
 1442:
-  name: init_shadowbolt
+  name: shadowbolt_init
   cosmetics:
     audio_name: ShadowBoltCast
   effects:
+    is_unhittable: true
     add_channeling_ticks: 3600
     x_offset: 0.0
     y_offset: 0.05
@@ -315,15 +361,22 @@
       20: [1443]
 
 1444:
-  name: shadowbolt_trigger
-  cosmetics:
-    audio_name: ShadowBoltHit
+  name: shadowbolt_try_trigger
   validations:
-    is_within_range: 0.05
+    is_destination_within_range: 0.05
   effects:
     consume_channeling_ticks: 65535
     turn_invisible: true
-    is_untargetable: true
+  triggers:
+    aoe_spell: 1445
+
+1445:
+  name: shadowbolt_apply
+  cosmetics:
+    audio_name: ShadowBoltHit
+  validations:
+    is_target_the_destination: true
+  effects:
     damage: 34.0
 
 8999:
@@ -370,7 +423,7 @@
       0: [22]
       400: [970]
       700: [15]
-      800: [71]
+      800: [70]
       3000: [128]
       5000: [1440]
 

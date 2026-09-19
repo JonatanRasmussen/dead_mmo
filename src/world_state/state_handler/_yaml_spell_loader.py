@@ -8,7 +8,7 @@ from ._casting_system import CastingEffect, CastingValidation
 from ._health_system import HealthEffect, HealthValidation
 from ._movement_system import MovementEffect, MovementValidation
 from ._display_system import DisplayEffect, DisplayValidation
-from ._aura_system import AuraEffect, AuraValidation
+from ._attatchment_system import AttatchmentEffect, AttatchmentValidation
 from ._targeting_system import TargetingEffect, TargetingValidation
 
 class TriggerType(str, Enum):
@@ -21,7 +21,7 @@ class CosmeticType(str, Enum):
     ANIMATION_NAME = "animation_name"
 
 VALID_EFFECT_TYPES = (
-    {e.value for e in AuraEffect} |
+    {e.value for e in AttatchmentEffect} |
     {e.value for e in CastingEffect} |
     {e.value for e in DisplayEffect} |
     {e.value for e in HealthEffect} |
@@ -29,7 +29,7 @@ VALID_EFFECT_TYPES = (
     {e.value for e in TargetingEffect}
 )
 VALID_VALIDATION_TYPES = (
-    {v.value for v in AuraValidation} |
+    {v.value for v in AttatchmentValidation} |
     {v.value for v in CastingValidation} |
     {v.value for v in DisplayValidation} |
     {v.value for v in HealthValidation} |
@@ -104,8 +104,8 @@ class YamlSpellLoader:
                 assert CastingValidation.ARE_TICKS_READY in validations, f"Spell {spell_id} missing tick validation."
                 assert validations[CastingValidation.ARE_TICKS_READY] == effects[CastingEffect.APPLY_TICKS_SUBTRACTION], f"Spell {spell_id} tick validation/effect mismatch."
             if "range_limit" in effects:
-                assert MovementValidation.IS_WITHIN_RANGE in validations, f"Spell {spell_id} missing range validation."
-                assert validations[MovementValidation.IS_WITHIN_RANGE] == effects["range_limit"], f"Spell {spell_id} range validation/effect mismatch."
+                assert MovementValidation.IS_WITHIN_RANGE_OF_DEST in validations, f"Spell {spell_id} missing range validation."
+                assert validations[MovementValidation.IS_WITHIN_RANGE_OF_DEST] == effects["range_limit"], f"Spell {spell_id} range validation/effect mismatch."
 
             db[spell_id] = SpellDef(
                 spell_id=spell_id,

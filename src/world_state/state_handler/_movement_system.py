@@ -7,6 +7,7 @@ from src.settings import Consts
 @dataclass(slots=True)
 class ObjMovementData:
     obj_id: int = Consts.EMPTY_ID
+    destination_id: int = Consts.EMPTY_ID
     x_pos: float = 0.0
     y_pos: float = 0.0
     x_vel: float = 0.0
@@ -17,11 +18,12 @@ class ObjMovementData:
     movespeed: float = 1.0
 
     @classmethod
-    def create_new_obj(cls, new_obj_id: int, parent_x: float, parent_y: float) -> "ObjMovementData":
+    def create_new_obj(cls, new_obj_id: int, destination_id: int, parent_x: float, parent_y: float) -> "ObjMovementData":
         return cls(
             obj_id=new_obj_id,
             x_pos=float(parent_x),
             y_pos=float(parent_y),
+            destination_id=destination_id
         )
 
 class MovementEffect(str, Enum):
@@ -42,10 +44,12 @@ class MovementEffect(str, Enum):
     MOVESPEED = "movespeed"
 
 class MovementInvalidOutcomes(str, Enum):
+    TARGET_IS_NOT_DESTINATION = "target_is_not_destination"
     OUT_OF_RANGE = "out_of_range"
 
 class MovementValidation(str, Enum):
-    IS_WITHIN_RANGE = "is_within_range"
+    IS_TARGET_THE_DESTINATION = "is_target_the_destination"
+    IS_WITHIN_RANGE_OF_DEST = "is_destination_within_range"
 
 class MovementSystem:
     GLOBAL_MOVESPEED_TO_USE = Consts.MOVEMENT_DISTANCE_PER_SECOND
@@ -54,18 +58,18 @@ class MovementSystem:
     def __init__(self) -> None:
         self._data_dct: Dict[int, ObjMovementData] = {}
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, target_id: int) -> None:
         parent_x, parent_y = self.get_position(parent_id, timestamp) if parent_id in self._data_dct else (0.0, 0.0)
-        game_obj = ObjMovementData.create_new_obj(new_obj_id, parent_x, parent_y)
-        self.add_data(new_obj_id, game_obj)
+        game_obj = ObjMovementData.create_new_obj(new_obj_id, target_id, parent_x, parent_y)
+        self.add_data(game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:
         environment_obj = ObjMovementData(obj_id=obj_id)
-        self.add_data(obj_id, environment_obj)
+        self.add_data(environment_obj)
 
-    def add_data(self, new_obj_id: int, new_obj: ObjMovementData) -> None:
-        assert new_obj_id not in self._data_dct, "Error: Obj already exists."
-        self._data_dct[new_obj_id] = new_obj
+    def add_data(self, new_obj: ObjMovementData) -> None:
+        assert new_obj.obj_id not in self._data_dct, "Error: Obj already exists."
+        self._data_dct[new_obj.obj_id] = new_obj
 
     def get_data(self, obj_id: int) -> ObjMovementData:
         assert obj_id in self._data_dct, "Error: Obj does not exist."
@@ -116,8 +120,12 @@ class MovementSystem:
         return valid and dist <= range_limit
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> str:
-        if validation_type == MovementValidation.IS_WITHIN_RANGE:
-            if not self._is_within_range(timestamp, source_id, target_id, validation_value):
+        if validation_type == MovementValidation.IS_TARGET_THE_DESTINATION:
+            if self.get_data(source_id).destination_id != target_id:
+                return MovementInvalidOutcomes.TARGET_IS_NOT_DESTINATION.value
+        if validation_type == MovementValidation.IS_WITHIN_RANGE_OF_DEST:
+            destination_id = self.get_data(source_id).destination_id
+            if not self._is_within_range(timestamp, source_id, destination_id, validation_value):
                 return MovementInvalidOutcomes.OUT_OF_RANGE.value
         return ""
 
@@ -147,18 +155,19 @@ class MovementSystem:
             self._bake_position(source_id, timestamp)
             self.get_data(source_id).x_dir = max(-1.0, min(1.0, self.get_data(source_id).x_dir - 1.0))
         elif effect_type == MovementEffect.WALK_TOWARDS_TARGET:
-            valid, dx, dy, dist, _, _ = self._get_target_vector(source_id, target_id, timestamp)
+            data = self.get_data(source_id)
+            valid, dx, dy, dist, _, _ = self._get_target_vector(source_id, data.destination_id, timestamp)
             if valid and dist > 0.0:
                 self._bake_position(source_id, timestamp)
-                self.get_data(source_id).x_dir = dx / dist
-                self.get_data(source_id).y_dir = dy / dist
+                data.x_dir = dx / dist
+                data.y_dir = dy / dist
         elif effect_type == MovementEffect.STOP_WALK_TOWARDS_TARGET:
             self._bake_position(source_id, timestamp)
             self.get_data(source_id).x_dir, self.get_data(source_id).y_dir = 0.0, 0.0
         elif effect_type == MovementEffect.TELEPORT_TO_TARGET:
-            valid, _, _, _, tar_x, tar_y = self._get_target_vector(source_id, target_id, timestamp)
+            data = self.get_data(source_id)
+            valid, _, _, _, tar_x, tar_y = self._get_target_vector(source_id, data.destination_id, timestamp)
             if valid:
-                data = self.get_data(source_id)
                 data.x_pos, data.y_pos = tar_x, tar_y
                 data.x_vel, data.y_vel, data.x_dir, data.y_dir = 0.0, 0.0, 0.0, 0.0
                 data.timestamp = timestamp

@@ -55,25 +55,23 @@ class WorldState:
 
             if outcome_is_valid:
                 self._handle_spawn(timestamp, source_id, spell_id, target_id)
-                self._create_cascading_events(timestamp, source_id, spell_id)
                 self._apply_event(timestamp, source_id, spell_id, target_id)
+                self._create_cascading_events(timestamp, source_id, spell_id)
 
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
 
     def _create_cascading_events(self, timestamp: int, source_id: int, spell_id: int) -> None:
-        spell = self._state_handler.get_spell_def(spell_id)
-        if not spell: return
-
         timeline = self._state_handler.get_timeline_for_spell(spell_id)
         if len(timeline) > 0:
-            target_id = self._state_handler.get_current_target_for_obj(source_id)
+            #target_id = self._state_handler.get_current_target_for_obj(source_id)
             for trigger_timestamp, timeline_spell_ids in timeline.items():
                 for t_spell in timeline_spell_ids:
-                    self._event_handler.dispatch_upcoming_event(timestamp + trigger_timestamp, source_id, t_spell, target_id)
+                    self._event_handler.dispatch_upcoming_event(timestamp + trigger_timestamp, source_id, t_spell, source_id)
 
         aoe_spell_id = self._state_handler.get_aoe_spell_id(spell_id)
         if aoe_spell_id != Consts.EMPTY_ID:
-            target_ids = set(self._state_handler.get_aoe_targets(source_id, aoe_spell_id))
+            # For now, try hit everything and let event validation fail on undesired aoe targets
+            target_ids = self._state_handler.get_aoe_targets(source_id, aoe_spell_id)  # We can optimize later on
             for target_id in target_ids:
                 self._event_handler.dispatch_upcoming_event(timestamp, source_id, aoe_spell_id, target_id)
 
@@ -92,11 +90,10 @@ class WorldState:
 
     def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> list[int]:
         new_obj_ids = []
-        spell = self._state_handler.get_spell_def(spell_id)
-        if spell and spell.spawn_child:
-            for child_init_spell in spell.spawn_child:
-                new_obj_id = self._game_obj_id_gen.generate_new_id()
-                self._state_handler.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
-                self._event_handler.dispatch_upcoming_event(timestamp, new_obj_id, child_init_spell, target_id)
-                new_obj_ids.append(new_obj_id)
+        child_spell_ids = self._state_handler.get_spawn_child_id(spell_id)
+        for child_init_spell in child_spell_ids:
+            new_obj_id = self._game_obj_id_gen.generate_new_id()
+            self._state_handler.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
+            self._event_handler.dispatch_upcoming_event(timestamp, new_obj_id, child_init_spell, target_id)
+            new_obj_ids.append(new_obj_id)
         return new_obj_ids
