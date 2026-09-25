@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable
 from src.settings import Consts, Optimizations
-from .system_interface import System
+from .system_interface import System, DisplayObj
 
 
 class AttachmentValidation(str, Enum):
@@ -31,6 +31,15 @@ class AttachmentSystem(System):
     def __init__(self) -> None:
         self._data_dct: dict[int, ObjAttachmentData] = {}
         self._origin_dct: dict[int, list[ObjAttachmentData]] = {}
+
+    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        return display_obj
+
+    def get_effect_types(self) -> set[str]:
+        return {e.value for e in AttachmentEffect}
+
+    def get_validation_types(self) -> set[str]:
+        return {v.value for v in AttachmentValidation}
 
     def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         game_obj = ObjAttachmentData(obj_id=new_obj_id, parent_id=parent_id, origin_id=spell_id)

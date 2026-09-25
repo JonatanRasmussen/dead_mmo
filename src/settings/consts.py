@@ -2,9 +2,12 @@
 
 class Consts:
     EMPTY_ID: int = 0
+    EMPTY_TIMESTAMP: int = -999_999
+    EMPTY_ASSET_NAME: str = ""
+    EMPTY_ERROR_CODE: str = ""
+
     MIN_ID: int = -999_999
     MAX_ID: int = 999_999
-    EMPTY_TIMESTAMP: int = -999
 
     EVENT_HEAP_MAX_ITERATIONS: int = 100_000
 

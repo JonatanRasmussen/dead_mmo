@@ -1,8 +1,6 @@
-from dataclasses import dataclass
-from typing import Any, Iterable
-
 from src.settings import Consts
-from src.settings import HardwareInputConsts, Icons, Optimizations
+from src.settings import HardwareInputConsts
+from .display_obj import DisplayObj
 from .system_interface import System
 from ._yaml_spell_loader import YamlSpellLoader, SpellDef
 from ._attachment_system import AttachmentSystem, ObjAttachmentData, AttachmentValidation
@@ -12,42 +10,28 @@ from ._health_system import HealthSystem, ObjHealthData
 from ._identity_system import IdentitySystem
 from ._movement_system import MovementSystem, ObjMovementData
 
-@dataclass(slots=True)
-class DisplayObj:
-    obj_id: int
-    pos_xy: tuple[float, float]
-    is_visible: bool
-    size: float
-    color_rgb: tuple[int, int, int]
-    sprite_name: str
-
-@dataclass(slots=True)
-class DisplaySpell:
-    spell_id: int
-    audio_name: str
-    animation_name: str
-    animation_scale: float
 
 class StateHandler:
     def __init__(self) -> None:
         self.spell_loader = YamlSpellLoader()
         self.spell_database = self.spell_loader.spell_database
+        self._asset_id_registry = self.spell_loader.asset_id_registry
         self._active_game_objs: set = set()
 
         self._aura_system = AttachmentSystem()
         self._casting_system = CastingSystem()
         self._display_system = DisplaySystem()
         self._health_system = HealthSystem()
-        self._movement_system = MovementSystem()
         self._identity_system = IdentitySystem()
+        self._movement_system = MovementSystem()
 
         self._systems: list[System] = [
             self._aura_system,
             self._casting_system,
             self._display_system,
             self._health_system,
-            self._movement_system,
             self._identity_system,
+            self._movement_system,
         ]
 
     @property
@@ -59,45 +43,14 @@ class StateHandler:
         return set(self._active_game_objs)
 
     def create_display_obj(self, current_time: int, obj_id: int) -> DisplayObj:
-        obj_display = self.get_obj_display_data(obj_id)
-        pos_xy = self.get_position(obj_id, current_time)
-        return DisplayObj(
-            obj_id, pos_xy, obj_display.is_visible, self.get_size(obj_id),
-            (obj_display.color_red, obj_display.color_green, obj_display.color_blue),
-            Icons.get_icon_name(obj_display.icon_id)
-        )
-
-    def create_display_spell(self, spell_id: int) -> DisplaySpell | None:
-        spell = self.spell_database.get(spell_id)
-        if not spell: return None
-        return DisplaySpell(
-            spell_id=spell_id,
-            audio_name=spell.cosmetics.get("audio_name", ""),
-            animation_name=spell.cosmetics.get("animation_name", ""),
-            animation_scale=spell.animation_scale
-        )
-
-    def get_obj_health_data(self, obj_id: int) -> ObjHealthData:
-        return self._health_system.get_data(obj_id)
-
-    def get_obj_display_data(self, obj_id: int) -> ObjDisplayData:
-        return self._display_system.get_data(obj_id)
-
-    def is_visible(self, obj_id: int) -> bool:
-        return self._display_system.is_visible(obj_id)
-
-    def get_position(self, obj_id: int, current_time: int) -> tuple[float, float]:
-        return self._movement_system.get_position(obj_id, current_time)
-
-    def get_size(self, obj_id: int) -> float:
-        return self._health_system.get_size(obj_id)
+        display_obj = DisplayObj(obj_id=obj_id)
+        for system in self._systems:
+            display_obj = system.build_display_obj(current_time, obj_id, display_obj)
+        display_obj = self.spell_loader.fetch_asset_names_for_display_obj(display_obj)
+        return display_obj
 
     def get_current_target_for_obj(self, obj_id: int) -> int:
         return self._identity_system.get_current_target_for_obj(obj_id)
-
-    def has_channel_start(self, spell_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return spell is not None and "start_channel" in spell.effects
 
     def get_spawn_child_id(self, spell_id: int) -> list[int]:
         spell = self.spell_database.get(spell_id)

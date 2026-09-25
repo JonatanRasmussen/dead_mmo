@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from src.settings import Consts
-from .system_interface import System
+from .system_interface import System, DisplayObj
 
 
 class IdentityEffect(str, Enum):
@@ -34,6 +34,15 @@ class IdentitySystem(System):
         self._data_dct: dict[int, ObjIdentityData] = {}
         self.player_id: int = Consts.EMPTY_ID
         self.boss_id: int = Consts.EMPTY_ID
+
+    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        return display_obj
+
+    def get_effect_types(self) -> set[str]:
+        return {e.value for e in IdentityEffect}
+
+    def get_validation_types(self) -> set[str]:
+        return {v.value for v in IdentityValidation}
 
     def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         is_enemy = self.get_data(parent_id).is_enemy if parent_id in self._data_dct else False

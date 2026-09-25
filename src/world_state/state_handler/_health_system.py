@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 from src.settings import Consts
-from .system_interface import System
+from .system_interface import System, DisplayObj
 
 
 class HealthEffect(str, Enum):
@@ -36,6 +36,16 @@ class HealthSystem(System):
     def __init__(self) -> None:
         self._data_dct: dict[int, ObjHealthData] = {}
 
+    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        display_obj.size = self._get_size(obj_id)
+        return display_obj
+
+    def get_effect_types(self) -> set[str]:
+        return {e.value for e in HealthEffect}
+
+    def get_validation_types(self) -> set[str]:
+        return {v.value for v in HealthValidation}
+
     def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         game_obj = ObjHealthData.create_new_obj(new_obj_id)
         self.add_data(new_obj_id, game_obj)
@@ -61,7 +71,7 @@ class HealthSystem(System):
     def get_hp(self, obj_id: int) -> float:
         return self.get_data(obj_id).hp
 
-    def get_size(self, obj_id: int) -> float:
+    def _get_size(self, obj_id: int) -> float:
         obj_hp = self.get_data(obj_id).hp
         return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
 

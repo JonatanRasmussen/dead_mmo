@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple
 from src.settings import Consts
-from .system_interface import System
+from .system_interface import System, DisplayObj
 
 
 class MovementEffect(str, Enum):
@@ -55,6 +55,16 @@ class ObjMovementData:
 class MovementSystem(System):
     GLOBAL_MOVESPEED_TO_USE = Consts.MOVEMENT_DISTANCE_PER_SECOND
     MS_PER_MOVEMENT_TICK: float = 1000.0 / Consts.MOVEMENT_UPDATES_PER_SECOND
+
+    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        display_obj.pos_xy = (self.get_position(obj_id, current_time))
+        return display_obj
+
+    def get_effect_types(self) -> set[str]:
+        return {e.value for e in MovementEffect}
+
+    def get_validation_types(self) -> set[str]:
+        return {v.value for v in MovementValidation}
 
     def __init__(self) -> None:
         self._data_dct: dict[int, ObjMovementData] = {}

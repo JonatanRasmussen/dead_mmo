@@ -1,7 +1,20 @@
 from abc import ABC, abstractmethod
-
+from .display_obj import DisplayObj
 
 class System(ABC):
+
+    @abstractmethod
+    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        ...
+
+    @abstractmethod
+    def get_effect_types(self) -> set[str]:
+        ...
+
+    @abstractmethod
+    def get_validation_types(self) -> set[str]:
+        ...
+
     @abstractmethod
     def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         ...

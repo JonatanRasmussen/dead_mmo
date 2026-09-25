@@ -108,9 +108,8 @@
   validations:
     is_gcd_ready: true
   effects:
+    play_audio: Rejuvenation
     gcd_duration: 1000
-  cosmetics:
-    audio_name: Rejuvenation
   triggers:
     spawn_child: [172]
 
@@ -153,11 +152,10 @@
 
 175:
   name: healing_powerup_apply
-  cosmetics:
-    audio_name: Rejuvenation
   validations:
     is_target_the_destination: true
   effects:
+    play_audio: Rejuvenation
     heal: 150.0
 
 
@@ -166,6 +164,8 @@
 # ==========================================
 70:
   name: aoe_landmine
+  effect:
+    play_audio: MoltenBlastHit
   triggers:
     aoe_spell: 71
 
@@ -216,11 +216,10 @@
 
 75:
   name: landmine_apply
-  cosmetics:
-    audio_name: MoltenBlastHit
   validations:
     is_target_the_destination: true
   effects:
+    play_audio: MoltenBlastHit
     damage: 134.0
 
 
@@ -283,12 +282,11 @@
 
 129:
   name: molten_blast_trigger
-  cosmetics:
-    audio_name: MoltenBlastHit
   validations:
     is_target_hittable: true
     is_target_other_team: true
   effects:
+    play_audio: MoltenBlastHit
     damage: 13.0
 
 912:
@@ -304,10 +302,9 @@
 
 911:
   name: shadow_blast_apply
-  cosmetics:
-    audio_name: ShadowBoltBuild
   effects:
     add_channeling_ticks: 4
+    play_audio: ShadowBoltBuild
   triggers:
     timeline:
       300: [912]
@@ -318,6 +315,7 @@
     is_cooldown_ready: true
     is_gcd_ready: true
   effects:
+    play_audio: ShadowBoltCast
     base_cooldown: 2000
     gcd_duration: 1000
   triggers:
@@ -333,8 +331,6 @@
 
 1442:
   name: shadowbolt_init
-  cosmetics:
-    audio_name: ShadowBoltCast
   effects:
     is_unhittable: true
     add_channeling_ticks: 3600
@@ -372,11 +368,10 @@
 
 1445:
   name: shadowbolt_apply
-  cosmetics:
-    audio_name: ShadowBoltHit
   validations:
     is_target_the_destination: true
   effects:
+    play_audio: ShadowBoltHit
     damage: 34.0
 
 8999:
@@ -394,7 +389,7 @@
     color_red: 255
     color_green: 0
     color_blue: 0
-    icon_id: 24020
+    icon_id: Poro
   triggers:
     timeline:
       0: [15]

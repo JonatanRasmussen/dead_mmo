@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ValuesView
 from src.settings import Consts
-from .system_interface import System
+from .system_interface import System, DisplayObj
 
 
 class CastingEffect(str, Enum):
@@ -40,6 +40,15 @@ class CastingSystem(System):
 
     def __init__(self) -> None:
         self._data_dct: dict[int, ObjCastingData] = {}
+
+    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        return display_obj
+
+    def get_effect_types(self) -> set[str]:
+        return {e.value for e in CastingEffect}
+
+    def get_validation_types(self) -> set[str]:
+        return {v.value for v in CastingValidation}
 
     def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         game_obj = ObjCastingData(obj_id=new_obj_id, parent_id=parent_id)

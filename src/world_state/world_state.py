@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from src.settings import Consts
 from .event_handler import EventHandler, IdGen
-from .state_handler import StateHandler, DisplayObj, DisplaySpell
+from .state_handler import StateHandler, DisplayObj
 
 
 class WorldState:
@@ -20,15 +20,6 @@ class WorldState:
 
     def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
-
-    def get_spell_vfx_for_successful_events(self, timestamp: int) -> list[DisplaySpell]:
-        spell_visuals_data: list[DisplaySpell] = []
-        combat_interactions = self._event_handler.get_combat_interactions_for_frame(timestamp)
-        for _, spell_id, _ in combat_interactions:
-            display_spell = self._state_handler.create_display_spell(spell_id)
-            if display_spell:
-                spell_visuals_data.append(display_spell)
-        return spell_visuals_data
 
     def process_setup_events(self, ingame_time: int, setup_spell_ids: list[int]) -> None:
         environment_id = self._game_obj_id_gen.generate_new_id()
@@ -90,10 +81,10 @@ class WorldState:
 
     def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> list[int]:
         new_obj_ids = []
-        child_spell_ids = self._state_handler.get_spawn_child_id(spell_id)
-        for child_init_spell in child_spell_ids:
+        child_init_spell_ids = self._state_handler.get_spawn_child_id(spell_id)
+        for child_init_spell in child_init_spell_ids:
             new_obj_id = self._game_obj_id_gen.generate_new_id()
             self._state_handler.spawn_game_obj(timestamp, source_id, new_obj_id, spell_id, target_id)
-            self._event_handler.dispatch_upcoming_event(timestamp, new_obj_id, child_init_spell, target_id)
+            self._event_handler.dispatch_upcoming_event(timestamp, new_obj_id, child_init_spell, new_obj_id)
             new_obj_ids.append(new_obj_id)
         return new_obj_ids
