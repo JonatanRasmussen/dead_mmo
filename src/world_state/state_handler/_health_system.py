@@ -1,8 +1,21 @@
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict
 from src.settings import Consts
+from .system_interface import System
+
+
+class HealthEffect(str, Enum):
+    APPLY_DAMAGE = "damage"
+    APPLY_HEAL = "heal"
+    APPLY_HP = "hp"
+    IS_UNHITTABLE = "is_unhittable"
+
+
+class HealthValidation(str, Enum):
+    IS_SOURCE_HITTABLE = "is_source_hittable"
+    IS_TARGET_HITTABLE = "is_target_hittable"
+
 
 @dataclass(slots=True)
 class ObjHealthData:
@@ -17,26 +30,13 @@ class ObjHealthData:
             obj_id=new_obj_id,
         )
 
-class HealthEffect(str, Enum):
-    APPLY_DAMAGE = "damage"
-    APPLY_HEAL = "heal"
-    APPLY_HP = "hp"
-    IS_UNHITTABLE = "is_unhittable"
 
-class HealthInvalidOutcomes(str, Enum):
-    SOURCE_IS_UNHITTABLE = "source_is_unhittable"
-    TARGET_IS_UNHITTABLE = "target_is_unhittable"
-
-class HealthValidation(str, Enum):
-    IS_SOURCE_HITTABLE = "is_source_hittable"
-    IS_TARGET_HITTABLE = "is_target_hittable"
-
-class HealthSystem:
+class HealthSystem(System):
 
     def __init__(self) -> None:
-        self._data_dct: Dict[int, ObjHealthData] = {}
+        self._data_dct: dict[int, ObjHealthData] = {}
 
-    def spawn_game_obj(self, new_obj_id: int) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         game_obj = ObjHealthData.create_new_obj(new_obj_id)
         self.add_data(new_obj_id, game_obj)
 
@@ -65,16 +65,14 @@ class HealthSystem:
         obj_hp = self.get_data(obj_id).hp
         return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
 
-    def validate_event(self, validation_type: str, source_id: int, target_id: int) -> str:
+    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
         if validation_type == HealthValidation.IS_SOURCE_HITTABLE:
-            if self.get_data(source_id).is_hittable:
-                return HealthInvalidOutcomes.SOURCE_IS_UNHITTABLE.value
+            return not self.get_data(source_id).is_hittable
         if validation_type == HealthValidation.IS_TARGET_HITTABLE:
-            if self.get_data(target_id).is_hittable:
-                return HealthInvalidOutcomes.TARGET_IS_UNHITTABLE.value
-        return ""
+            return not self.get_data(target_id).is_hittable
+        return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, source_id: int, target_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
         if effect_type == HealthEffect.APPLY_DAMAGE:
             self.get_data(target_id).hp -= effect_value * self.get_data(source_id).spell_modifier
         elif effect_type == HealthEffect.APPLY_HEAL:

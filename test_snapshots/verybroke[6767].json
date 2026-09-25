@@ -1,0 +1,514 @@
+{
+  "events_by_frame": {
+    "0": [
+      {
+        "eid": 1,
+        "ts": 0,
+        "sid": 1,
+        "sp": 6767,
+        "tid": 1,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 2,
+        "ts": 0,
+        "sid": 1,
+        "sp": 969,
+        "tid": 1,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 3,
+        "ts": 0,
+        "sid": 1,
+        "sp": 8999,
+        "tid": 1,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 4,
+        "ts": 0,
+        "sid": 2,
+        "sp": 968,
+        "tid": 1,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 5,
+        "ts": 0,
+        "sid": 3,
+        "sp": 7999,
+        "tid": 1,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 6,
+        "ts": 0,
+        "sid": 2,
+        "sp": 22,
+        "tid": 2,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 12,
+        "ts": 0,
+        "sid": 3,
+        "sp": 15,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "200": [
+      {
+        "eid": 13,
+        "ts": 200,
+        "sid": 3,
+        "sp": 91,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "300": [
+      {
+        "eid": 14,
+        "ts": 300,
+        "sid": 3,
+        "sp": 1,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "400": [
+      {
+        "eid": 7,
+        "ts": 400,
+        "sid": 2,
+        "sp": 970,
+        "tid": 2,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 15,
+        "ts": 400,
+        "sid": 3,
+        "sp": 2,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 16,
+        "ts": 400,
+        "sid": 3,
+        "sp": 92,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 17,
+        "ts": 400,
+        "sid": 4,
+        "sp": 971,
+        "tid": 2,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "500": [
+      {
+        "eid": 21,
+        "ts": 500,
+        "sid": 3,
+        "sp": 271,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 22,
+        "ts": 500,
+        "sid": 3,
+        "sp": 1440,
+        "tid": 3,
+        "err": "invalid_is_cooldown_ready_1.0",
+        "sm": 1.0
+      }
+    ],
+    "600": [
+      {
+        "eid": 23,
+        "ts": 600,
+        "sid": 3,
+        "sp": 272,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 24,
+        "ts": 600,
+        "sid": 3,
+        "sp": 15,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "700": [
+      {
+        "eid": 8,
+        "ts": 700,
+        "sid": 2,
+        "sp": 15,
+        "tid": 2,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 25,
+        "ts": 700,
+        "sid": 3,
+        "sp": 1440,
+        "tid": 3,
+        "err": "invalid_is_cooldown_ready_1.0",
+        "sm": 1.0
+      }
+    ],
+    "800": [
+      {
+        "eid": 9,
+        "ts": 800,
+        "sid": 2,
+        "sp": 70,
+        "tid": 2,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 26,
+        "ts": 800,
+        "sid": 2,
+        "sp": 71,
+        "tid": 2,
+        "err": "invalid_is_target_hittable_1.0",
+        "sm": 1.0
+      },
+      {
+        "eid": 27,
+        "ts": 800,
+        "sid": 2,
+        "sp": 71,
+        "tid": 3,
+        "err": "invalid_is_target_hittable_1.0",
+        "sm": 1.0
+      },
+      {
+        "eid": 28,
+        "ts": 800,
+        "sid": 2,
+        "sp": 71,
+        "tid": 4,
+        "err": "invalid_is_target_hittable_1.0",
+        "sm": 1.0
+      }
+    ],
+    "1800": [
+      {
+        "eid": 29,
+        "ts": 1800,
+        "sid": 3,
+        "sp": 271,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 30,
+        "ts": 1800,
+        "sid": 3,
+        "sp": 1,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 31,
+        "ts": 1800,
+        "sid": 3,
+        "sp": 171,
+        "tid": 3,
+        "err": "invalid_is_gcd_ready_1.0",
+        "sm": 1.0
+      }
+    ],
+    "1900": [
+      {
+        "eid": 18,
+        "ts": 1900,
+        "sid": 4,
+        "sp": 15,
+        "tid": 4,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "2400": [
+      {
+        "eid": 19,
+        "ts": 2400,
+        "sid": 4,
+        "sp": 911,
+        "tid": 4,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "2700": [
+      {
+        "eid": 32,
+        "ts": 2700,
+        "sid": 4,
+        "sp": 912,
+        "tid": 4,
+        "err": "invalid_has_channeling_ticks_1.0",
+        "sm": 1.0
+      }
+    ],
+    "3000": [
+      {
+        "eid": 10,
+        "ts": 3000,
+        "sid": 2,
+        "sp": 128,
+        "tid": 2,
+        "err": "invalid_is_gcd_ready_1.0",
+        "sm": 1.0
+      }
+    ],
+    "3800": [
+      {
+        "eid": 33,
+        "ts": 3800,
+        "sid": 3,
+        "sp": 272,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 34,
+        "ts": 3800,
+        "sid": 3,
+        "sp": 128,
+        "tid": 3,
+        "err": "invalid_is_gcd_ready_1.0",
+        "sm": 1.0
+      }
+    ],
+    "5000": [
+      {
+        "eid": 11,
+        "ts": 5000,
+        "sid": 2,
+        "sp": 1440,
+        "tid": 2,
+        "err": "invalid_is_cooldown_ready_1.0",
+        "sm": 1.0
+      }
+    ],
+    "5300": [
+      {
+        "eid": 35,
+        "ts": 5300,
+        "sid": 3,
+        "sp": 2,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      },
+      {
+        "eid": 36,
+        "ts": 5300,
+        "sid": 3,
+        "sp": 911,
+        "tid": 3,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "5600": [
+      {
+        "eid": 37,
+        "ts": 5600,
+        "sid": 3,
+        "sp": 912,
+        "tid": 3,
+        "err": "invalid_has_channeling_ticks_1.0",
+        "sm": 1.0
+      }
+    ],
+    "7400": [
+      {
+        "eid": 20,
+        "ts": 7400,
+        "sid": 4,
+        "sp": 362,
+        "tid": 4,
+        "err": "",
+        "sm": 1.0
+      }
+    ],
+    "7420": [
+      {
+        "eid": 38,
+        "ts": 7420,
+        "sid": 4,
+        "sp": 361,
+        "tid": 4,
+        "err": "invalid_has_channeling_ticks_1.0",
+        "sm": 1.0
+      }
+    ]
+  },
+  "game_objs": {
+    "1": {
+      "casting": {
+        "obj_id": 1,
+        "parent_id": 0,
+        "gcd_start": -10000,
+        "gcd_end": 0,
+        "cooldown_start": -10000,
+        "cooldown_end": 0,
+        "selected_spell_id": 0,
+        "casting_start": -10000,
+        "casting_duration": 0,
+        "casting_ticks": 0
+      },
+      "health": {
+        "obj_id": 1,
+        "is_hittable": false,
+        "hp": 0.0,
+        "spell_modifier": 1.0
+      },
+      "movement": {
+        "obj_id": 1,
+        "destination_id": 0,
+        "x_pos": 0.0,
+        "y_pos": 0.0,
+        "x_vel": 0.0,
+        "y_vel": 0.0,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
+        "timestamp": 0,
+        "movespeed": 1.0
+      }
+    },
+    "2": {
+      "casting": {
+        "obj_id": 2,
+        "parent_id": 1,
+        "gcd_start": -10000,
+        "gcd_end": 0,
+        "cooldown_start": -10000,
+        "cooldown_end": 0,
+        "selected_spell_id": 0,
+        "casting_start": -10000,
+        "casting_duration": 0,
+        "casting_ticks": 0
+      },
+      "health": {
+        "obj_id": 2,
+        "is_hittable": false,
+        "hp": 30.0,
+        "spell_modifier": 1.0
+      },
+      "movement": {
+        "obj_id": 2,
+        "destination_id": 1,
+        "x_pos": 0.7,
+        "y_pos": 0.7,
+        "x_vel": 0.0,
+        "y_vel": 0.0,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
+        "timestamp": 0,
+        "movespeed": 1.0
+      }
+    },
+    "3": {
+      "casting": {
+        "obj_id": 3,
+        "parent_id": 1,
+        "gcd_start": -10000,
+        "gcd_end": 0,
+        "cooldown_start": -10000,
+        "cooldown_end": 0,
+        "selected_spell_id": 0,
+        "casting_start": -10000,
+        "casting_duration": 0,
+        "casting_ticks": 4
+      },
+      "health": {
+        "obj_id": 3,
+        "is_hittable": false,
+        "hp": 30.0,
+        "spell_modifier": 1.0
+      },
+      "movement": {
+        "obj_id": 3,
+        "destination_id": 1,
+        "x_pos": 0.5984924240491749,
+        "y_pos": 0.16564971157455594,
+        "x_vel": 0.0,
+        "y_vel": 0.0,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
+        "timestamp": 5300,
+        "movespeed": 1.0
+      }
+    },
+    "4": {
+      "casting": {
+        "obj_id": 4,
+        "parent_id": 2,
+        "gcd_start": -10000,
+        "gcd_end": 0,
+        "cooldown_start": -10000,
+        "cooldown_end": 0,
+        "selected_spell_id": 0,
+        "casting_start": -10000,
+        "casting_duration": 0,
+        "casting_ticks": 3604
+      },
+      "health": {
+        "obj_id": 4,
+        "is_hittable": false,
+        "hp": 80.0,
+        "spell_modifier": 1.0
+      },
+      "movement": {
+        "obj_id": 4,
+        "destination_id": 2,
+        "x_pos": 0.49999999999999994,
+        "y_pos": 0.7999999999999999,
+        "x_vel": 0.0,
+        "y_vel": 0.0,
+        "x_dir": 0.0,
+        "y_dir": 0.0,
+        "timestamp": 400,
+        "movespeed": 1.0
+      }
+    }
+  }
+}

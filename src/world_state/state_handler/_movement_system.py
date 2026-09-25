@@ -1,8 +1,33 @@
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Tuple
+from typing import Tuple
 from src.settings import Consts
+from .system_interface import System
+
+
+class MovementEffect(str, Enum):
+    WALK_FORWARD = "walk_forward"
+    STOP_WALK_FORWARD = "stop_walk_forward"
+    WALK_BACKWARD = "walk_backward"
+    STOP_WALK_BACKWARD = "stop_walk_backward"
+    WALK_LEFT = "walk_left"
+    STOP_WALK_LEFT = "stop_walk_left"
+    WALK_RIGHT = "walk_right"
+    STOP_WALK_RIGHT = "stop_walk_right"
+    WALK_TOWARDS_TARGET = "walk_towards_target"
+    STOP_WALK_TOWARDS_TARGET = "stop_walk_towards_target"
+    TELEPORT_TO_TARGET = "teleport_to_target"
+    PUSH_TARGET = "push_target"
+    X_OFFSET = "x_offset"
+    Y_OFFSET = "y_offset"
+    MOVESPEED = "movespeed"
+
+
+class MovementValidation(str, Enum):
+    IS_TARGET_THE_DESTINATION = "is_target_the_destination"
+    IS_WITHIN_RANGE_OF_DESTINATION = "is_destination_within_range"
+
 
 @dataclass(slots=True)
 class ObjMovementData:
@@ -26,39 +51,15 @@ class ObjMovementData:
             destination_id=destination_id
         )
 
-class MovementEffect(str, Enum):
-    WALK_FORWARD = "walk_forward"
-    STOP_WALK_FORWARD = "stop_walk_forward"
-    WALK_BACKWARD = "walk_backward"
-    STOP_WALK_BACKWARD = "stop_walk_backward"
-    WALK_LEFT = "walk_left"
-    STOP_WALK_LEFT = "stop_walk_left"
-    WALK_RIGHT = "walk_right"
-    STOP_WALK_RIGHT = "stop_walk_right"
-    WALK_TOWARDS_TARGET = "walk_towards_target"
-    STOP_WALK_TOWARDS_TARGET = "stop_walk_towards_target"
-    TELEPORT_TO_TARGET = "teleport_to_target"
-    PUSH_TARGET = "push_target"
-    X_OFFSET = "x_offset"
-    Y_OFFSET = "y_offset"
-    MOVESPEED = "movespeed"
 
-class MovementInvalidOutcomes(str, Enum):
-    TARGET_IS_NOT_DESTINATION = "target_is_not_destination"
-    OUT_OF_RANGE = "out_of_range"
-
-class MovementValidation(str, Enum):
-    IS_TARGET_THE_DESTINATION = "is_target_the_destination"
-    IS_WITHIN_RANGE_OF_DEST = "is_destination_within_range"
-
-class MovementSystem:
+class MovementSystem(System):
     GLOBAL_MOVESPEED_TO_USE = Consts.MOVEMENT_DISTANCE_PER_SECOND
     MS_PER_MOVEMENT_TICK: float = 1000.0 / Consts.MOVEMENT_UPDATES_PER_SECOND
 
     def __init__(self) -> None:
-        self._data_dct: Dict[int, ObjMovementData] = {}
+        self._data_dct: dict[int, ObjMovementData] = {}
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, target_id: int) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         parent_x, parent_y = self.get_position(parent_id, timestamp) if parent_id in self._data_dct else (0.0, 0.0)
         game_obj = ObjMovementData.create_new_obj(new_obj_id, target_id, parent_x, parent_y)
         self.add_data(game_obj)
@@ -119,15 +120,12 @@ class MovementSystem:
         valid, _, _, dist, _, _ = self._get_target_vector(source_id, target_id, current_time)
         return valid and dist <= range_limit
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> str:
+    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
         if validation_type == MovementValidation.IS_TARGET_THE_DESTINATION:
-            if self.get_data(source_id).destination_id != target_id:
-                return MovementInvalidOutcomes.TARGET_IS_NOT_DESTINATION.value
-        if validation_type == MovementValidation.IS_WITHIN_RANGE_OF_DEST:
-            destination_id = self.get_data(source_id).destination_id
-            if not self._is_within_range(timestamp, source_id, destination_id, validation_value):
-                return MovementInvalidOutcomes.OUT_OF_RANGE.value
-        return ""
+            return self.get_data(source_id).destination_id == target_id
+        if validation_type == MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION:
+            return self._is_within_range(timestamp, source_id, self.get_data(source_id).destination_id, validation_value)
+        return True
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
         if effect_type == MovementEffect.WALK_FORWARD:

@@ -1,8 +1,26 @@
-import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict
 from src.settings import Consts
+from .system_interface import System
+
+
+class DisplayEffect(str, Enum):
+    APPLY_COLOR_RED = "color_red"
+    APPLY_COLOR_GREEN = "color_green"
+    APPLY_COLOR_BLUE = "color_blue"
+    APPLY_ICON_ID = "icon_id"
+    TURN_INVISIBLE = "turn_invisible"
+    APPLY_AUDIO_BUILD_ID = "audio_build_id"
+    APPLY_AUDIO_CAST_ID = "audio_cast_id"
+    APPLY_AUDIO_HIT_ID = "audio_hit_id"
+    APPLY_ANIMATION_BUILD_ID = "animation_build_id"
+    APPLY_ANIMATION_CAST_ID = "animation_cast_id"
+    APPLY_ANIMATION_HIT_ID = "animation_hit_id"
+
+
+class DisplayValidation(str, Enum):
+    pass
+
 
 @dataclass(slots=True)
 class ObjDisplayData:
@@ -26,31 +44,13 @@ class ObjDisplayData:
             obj_id=new_obj_id,
         )
 
-class DisplayEffect(str, Enum):
-    APPLY_COLOR_RED = "color_red"
-    APPLY_COLOR_GREEN = "color_green"
-    APPLY_COLOR_BLUE = "color_blue"
-    APPLY_ICON_ID = "icon_id"
-    TURN_INVISIBLE = "turn_invisible"
-    APPLY_AUDIO_BUILD_ID = "audio_build_id"
-    APPLY_AUDIO_CAST_ID = "audio_cast_id"
-    APPLY_AUDIO_HIT_ID = "audio_hit_id"
-    APPLY_ANIMATION_BUILD_ID = "animation_build_id"
-    APPLY_ANIMATION_CAST_ID = "animation_cast_id"
-    APPLY_ANIMATION_HIT_ID = "animation_hit_id"
 
-class DisplayInvalidOutcomes(str, Enum):
-    pass
-
-class DisplayValidation(str, Enum):
-    pass
-
-class DisplaySystem:
+class DisplaySystem(System):
 
     def __init__(self) -> None:
-        self._data_dct: Dict[int, ObjDisplayData] = {}
+        self._data_dct: dict[int, ObjDisplayData] = {}
 
-    def spawn_game_obj(self, new_obj_id: int) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         game_obj = ObjDisplayData.create_new_obj(new_obj_id)
         self.add_data(new_obj_id, game_obj)
 
@@ -75,10 +75,10 @@ class DisplaySystem:
     def is_visible(self, obj_id: int) -> bool:
         return self._data_dct.get(obj_id, ObjDisplayData()).is_visible
 
-    def validate_event(self) -> str:
-        return ""
+    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+        return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, source_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
         if effect_type == DisplayEffect.APPLY_COLOR_RED:
             self.get_data(source_id).color_red = int(effect_value)
         elif effect_type == DisplayEffect.APPLY_COLOR_GREEN:

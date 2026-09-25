@@ -8,8 +8,8 @@ from ._casting_system import CastingEffect, CastingValidation
 from ._health_system import HealthEffect, HealthValidation
 from ._movement_system import MovementEffect, MovementValidation
 from ._display_system import DisplayEffect, DisplayValidation
-from ._attatchment_system import AttatchmentEffect, AttatchmentValidation
-from ._targeting_system import TargetingEffect, TargetingValidation
+from ._attachment_system import AttachmentEffect, AttachmentValidation
+from ._identity_system import IdentityEffect, IdentityValidation
 
 class TriggerType(str, Enum):
     SPAWN_CHILD = "spawn_child"
@@ -20,24 +20,24 @@ class CosmeticType(str, Enum):
     AUDIO_NAME = "audio_name"
     ANIMATION_NAME = "animation_name"
 
+VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
+VALID_COSMETIC_TYPES = {c.value for c in CosmeticType}
 VALID_EFFECT_TYPES = (
-    {e.value for e in AttatchmentEffect} |
+    {e.value for e in AttachmentEffect} |
     {e.value for e in CastingEffect} |
     {e.value for e in DisplayEffect} |
     {e.value for e in HealthEffect} |
     {e.value for e in MovementEffect} |
-    {e.value for e in TargetingEffect}
+    {e.value for e in IdentityEffect}
 )
 VALID_VALIDATION_TYPES = (
-    {v.value for v in AttatchmentValidation} |
+    {v.value for v in AttachmentValidation} |
     {v.value for v in CastingValidation} |
     {v.value for v in DisplayValidation} |
     {v.value for v in HealthValidation} |
     {v.value for v in MovementValidation} |
-    {v.value for v in TargetingValidation}
+    {v.value for v in IdentityValidation}
 )
-VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
-VALID_COSMETIC_TYPES = {c.value for c in CosmeticType}
 
 @dataclass(slots=True)
 class SpellDef:
@@ -104,8 +104,8 @@ class YamlSpellLoader:
                 assert CastingValidation.ARE_TICKS_READY in validations, f"Spell {spell_id} missing tick validation."
                 assert validations[CastingValidation.ARE_TICKS_READY] == effects[CastingEffect.APPLY_TICKS_SUBTRACTION], f"Spell {spell_id} tick validation/effect mismatch."
             if "range_limit" in effects:
-                assert MovementValidation.IS_WITHIN_RANGE_OF_DEST in validations, f"Spell {spell_id} missing range validation."
-                assert validations[MovementValidation.IS_WITHIN_RANGE_OF_DEST] == effects["range_limit"], f"Spell {spell_id} range validation/effect mismatch."
+                assert MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION in validations, f"Spell {spell_id} missing range validation."
+                assert validations[MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION] == effects["range_limit"], f"Spell {spell_id} range validation/effect mismatch."
 
             db[spell_id] = SpellDef(
                 spell_id=spell_id,

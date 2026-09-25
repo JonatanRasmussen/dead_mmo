@@ -313,7 +313,7 @@
       300: [912]
 
 1440:
-  name: shadowbolt_pressed
+  name: shadowbolt_keypress
   validations:
     is_cooldown_ready: true
     is_gcd_ready: true

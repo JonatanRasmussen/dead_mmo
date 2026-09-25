@@ -1,7 +1,26 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Iterable, ValuesView
+from typing import ValuesView
 from src.settings import Consts
+from .system_interface import System
+
+
+class CastingEffect(str, Enum):
+    APPLY_TICKS_ADDITION = "add_channeling_ticks"
+    APPLY_TICKS_SUBTRACTION = "consume_channeling_ticks"
+    APPLY_GCD = "gcd_duration"
+    APPLY_COOLDOWN = "base_cooldown"
+    APPLY_PARENT_CD = "apply_parent_cd"
+    SELECT_SPELL_ID = "select_spell_id"
+
+
+class CastingValidation(str, Enum):
+    ARE_TICKS_READY = "has_channeling_ticks"
+    IS_GCD_READY = "is_gcd_ready"
+    IS_COOLDOWN_READY = "is_cooldown_ready"
+    IS_PARENT_CD_READY = "is_parent_cooldown_ready"
+    IS_SPELL_SELECTED = "is_spell_selected"
+
 
 @dataclass(slots=True)
 class ObjCastingData:
@@ -16,34 +35,13 @@ class ObjCastingData:
     casting_duration: int = 0
     casting_ticks: int = 0
 
-class CastingEffect(str, Enum):
-    APPLY_TICKS_ADDITION = "add_channeling_ticks"
-    APPLY_TICKS_SUBTRACTION = "consume_channeling_ticks"
-    APPLY_GCD = "gcd_duration"
-    APPLY_COOLDOWN = "base_cooldown"
-    APPLY_PARENT_CD = "apply_parent_cd"
-    SELECT_SPELL_ID = "select_spell_id"
 
-class CastingInvalidOutcomes(str, Enum):
-    TICKS_NOT_READY = "out_of_channeling_ticks"
-    GCD_NOT_READY = "gcd_not_ready"
-    COOLDOWN_NOT_READY = "cooldown_not_ready"
-    PARENT_COOLDOWN_NOT_READY = "parent_cooldown_not_ready"
-    INVALID_SPELL_SELECTED = "invalid_spell_selected"
+class CastingSystem(System):
 
-class CastingValidation(str, Enum):
-    ARE_TICKS_READY = "has_channeling_ticks"
-    IS_GCD_READY = "is_gcd_ready"
-    IS_COOLDOWN_READY = "is_cooldown_ready"
-    IS_PARENT_CD_READY = "is_parent_cooldown_ready"
-    IS_SPELL_SELECTED = "is_spell_selected"
-
-
-class CastingSystem:
     def __init__(self) -> None:
         self._data_dct: dict[int, ObjCastingData] = {}
 
-    def spawn_game_obj(self, new_obj_id: int, parent_id: int) -> None:
+    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
         game_obj = ObjCastingData(obj_id=new_obj_id, parent_id=parent_id)
         self.add_data(new_obj_id, game_obj)
 
@@ -60,7 +58,7 @@ class CastingSystem:
         return self._data_dct[obj_id]
 
     def remove_data(self, obj_id: int) -> None:
-        self.get_data(obj_id) # assertions check
+        self.get_data(obj_id)  # assertions check
         self._data_dct.pop(obj_id, None)
 
     # ---- Lookups ----
@@ -75,26 +73,20 @@ class CastingSystem:
             return obj_data
         return self.get_data(parent_id)
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int) -> str:
+    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
         if validation_type == CastingValidation.ARE_TICKS_READY:
-            if self.get_data(source_id).casting_ticks < round(validation_value):
-                return CastingInvalidOutcomes.TICKS_NOT_READY.value
+            return self.get_data(source_id).casting_ticks >= round(validation_value)
         if validation_type == CastingValidation.IS_GCD_READY:
-            if self.get_data(source_id).gcd_end > timestamp:
-                return CastingInvalidOutcomes.GCD_NOT_READY.value
+            return self.get_data(source_id).gcd_end <= timestamp
         if validation_type == CastingValidation.IS_COOLDOWN_READY:
-            if self.get_data(source_id).cooldown_end > timestamp:
-                return CastingInvalidOutcomes.COOLDOWN_NOT_READY.value
+            return self.get_data(source_id).cooldown_end <= timestamp
         if validation_type == CastingValidation.IS_PARENT_CD_READY:
-            parent_data = self.get_parent_data(source_id)
-            if parent_data.cooldown_end > timestamp:
-                return CastingInvalidOutcomes.PARENT_COOLDOWN_NOT_READY.value
+            return self.get_parent_data(source_id).cooldown_end <= timestamp
         if validation_type == CastingValidation.IS_SPELL_SELECTED:
-            if self.get_data(source_id).selected_spell_id != round(validation_value):
-                return CastingInvalidOutcomes.INVALID_SPELL_SELECTED.value
-        return ""
+            return self.get_data(source_id).selected_spell_id == round(validation_value)
+        return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
         if effect_type == CastingEffect.APPLY_TICKS_ADDITION:
             self.get_data(source_id).casting_ticks += round(effect_value)
         elif effect_type == CastingEffect.APPLY_TICKS_SUBTRACTION:

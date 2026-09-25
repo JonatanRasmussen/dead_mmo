@@ -3,13 +3,14 @@ from typing import Any, Iterable
 
 from src.settings import Consts
 from src.settings import HardwareInputConsts, Icons, Optimizations
+from .system_interface import System
 from ._yaml_spell_loader import YamlSpellLoader, SpellDef
-from ._attatchment_system import AttatchmentSystem, ObjAttatchmentData, AttatchmentValidation
+from ._attachment_system import AttachmentSystem, ObjAttachmentData, AttachmentValidation
 from ._casting_system import CastingSystem, ObjCastingData
 from ._display_system import DisplaySystem, ObjDisplayData
 from ._health_system import HealthSystem, ObjHealthData
+from ._identity_system import IdentitySystem
 from ._movement_system import MovementSystem, ObjMovementData
-from ._targeting_system import TargetingSystem, ObjTargetingData, TargetingValidation
 
 @dataclass(slots=True)
 class DisplayObj:
@@ -32,16 +33,26 @@ class StateHandler:
         self.spell_loader = YamlSpellLoader()
         self.spell_database = self.spell_loader.spell_database
         self._active_game_objs: set = set()
-        self._aura_system = AttatchmentSystem()
+
+        self._aura_system = AttachmentSystem()
         self._casting_system = CastingSystem()
         self._display_system = DisplaySystem()
         self._health_system = HealthSystem()
         self._movement_system = MovementSystem()
-        self._targeting_system = TargetingSystem()
+        self._identity_system = IdentitySystem()
+
+        self._systems: list[System] = [
+            self._aura_system,
+            self._casting_system,
+            self._display_system,
+            self._health_system,
+            self._movement_system,
+            self._identity_system,
+        ]
 
     @property
     def player_id(self) -> int:
-        return self._targeting_system.player_id
+        return self._identity_system.player_id
 
     @property
     def active_obj_ids(self) -> set[int]:
@@ -82,7 +93,7 @@ class StateHandler:
         return self._health_system.get_size(obj_id)
 
     def get_current_target_for_obj(self, obj_id: int) -> int:
-        return self._targeting_system.get_current_target_for_obj(obj_id)
+        return self._identity_system.get_current_target_for_obj(obj_id)
 
     def has_channel_start(self, spell_id: int) -> bool:
         spell = self.spell_database.get(spell_id)
@@ -114,12 +125,10 @@ class StateHandler:
         if not spell: return "invalid_spell_id"
 
         for validation_type, validation_value in spell.validations.items():
-            if err := self._aura_system.validate_event(validation_type, validation_value, source_id, target_id): return err
-            if err := self._casting_system.validate_event(validation_type, validation_value, timestamp, source_id): return err
-            if err := self._display_system.validate_event(): return err
-            if err := self._health_system.validate_event(validation_type, source_id, target_id): return err
-            if err := self._movement_system.validate_event(validation_type, validation_value, timestamp, source_id, target_id): return err
-            if err := self._targeting_system.validate_event(validation_type, source_id, target_id): return err
+            for system in self._systems:
+                is_valid = system.validate_event(validation_type, validation_value, timestamp, source_id, target_id)
+                if not is_valid:
+                    return f"{Consts.FAILED_VALIDATION}_{validation_type}_{validation_value}"
         return ""
 
     # --- Core Event Logic ---
@@ -128,30 +137,18 @@ class StateHandler:
         if not spell: return
 
         for effect_type, effect_value in spell.effects.items():
-            self._aura_system.apply_effect(effect_type, source_id, target_id)
-            self._casting_system.apply_effect(effect_type, effect_value, timestamp, source_id)
-            self._display_system.apply_effect(effect_type, effect_value, source_id)
-            self._health_system.apply_effect(effect_type, effect_value, source_id, target_id)
-            self._movement_system.apply_effect(effect_type, effect_value, timestamp, source_id, target_id)
-            self._targeting_system.apply_effect(effect_type, effect_value, source_id, target_id)
+            for system in self._systems:
+                system.apply_effect(effect_type, effect_value, timestamp, source_id, target_id)
 
     def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, target_id: int) -> None:
         assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."
         self._active_game_objs.add(new_obj_id)
-        self._aura_system.spawn_game_obj(new_obj_id, parent_id, spell_id)
-        self._casting_system.spawn_game_obj(new_obj_id, parent_id)
-        self._display_system.spawn_game_obj(new_obj_id)
-        self._health_system.spawn_game_obj(new_obj_id)
-        self._movement_system.spawn_game_obj(timestamp, new_obj_id, parent_id, target_id)
-        self._targeting_system.spawn_game_obj(new_obj_id, parent_id, target_id)
+        for system in self._systems:
+            system.spawn_game_obj(timestamp, new_obj_id, parent_id, spell_id, target_id)
 
     def create_environment_obj(self, obj_id: int) -> None:
-        self._targeting_system.spawn_environment_obj(obj_id)
-        self._casting_system.spawn_environment_obj(obj_id)
-        self._health_system.spawn_environment_obj(obj_id)
-        self._movement_system.spawn_environment_obj(obj_id)
-        self._display_system.spawn_environment_obj(obj_id)
-        self._aura_system.spawn_environment_obj(obj_id)
+        for system in self._systems:
+            system.spawn_environment_obj(obj_id)
 
     def get_spells_for_player_inputs(self, player_inputs: list[str]) -> list[int]:
         spell_ids = []
