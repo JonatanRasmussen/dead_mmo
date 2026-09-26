@@ -46,7 +46,7 @@ class WorldState:
 
             if outcome_is_valid:
                 self._handle_spawn(timestamp, source_id, spell_id, target_id)
-                self._apply_event(timestamp, source_id, spell_id, target_id)
+                self._apply_event(timestamp, spell_id, target_id)
                 self._create_cascading_events(timestamp, source_id, spell_id)
 
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
@@ -70,14 +70,12 @@ class WorldState:
         source_id = self._state_handler.player_id
         if not player_inputs or source_id == Consts.EMPTY_ID:
             return
-
         spell_ids = self._state_handler.get_spells_for_player_inputs(player_inputs)
-        target_id = self._state_handler.get_current_target_for_obj(source_id)
         for spell_id in spell_ids:
-            self._event_handler.dispatch_upcoming_event(timestamp, source_id, spell_id, target_id)
+            self._event_handler.dispatch_upcoming_event(timestamp, source_id, spell_id, source_id)
 
-    def _apply_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        self._state_handler.apply_event(timestamp, source_id, spell_id, target_id)
+    def _apply_event(self, timestamp: int, spell_id: int, target_id: int) -> None:
+        self._state_handler.apply_event(timestamp, spell_id, target_id)
 
     def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> list[int]:
         new_obj_ids = []

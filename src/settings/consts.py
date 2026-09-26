@@ -2,6 +2,7 @@
 
 class Consts:
     EMPTY_ID: int = 0
+    TIMESTAMPS_PER_SECOND: int = 1000
     EMPTY_TIMESTAMP: int = -999_999
     EMPTY_ASSET_NAME: str = ""
     EMPTY_ERROR_CODE: str = ""
@@ -12,10 +13,12 @@ class Consts:
     EVENT_HEAP_MAX_ITERATIONS: int = 100_000
 
     BASE_GCD: int = 1000
-    MOVEMENT_DISTANCE_PER_SECOND: float = 0.1
+    GLOBAL_MOVESPEED_TO_USE: float = 0.1
     MOVEMENT_UPDATES_PER_SECOND: int = 50
 
     FAILED_VALIDATION: str = "invalid"
+
+
 
     @staticmethod
     def is_empty_id(id_num: int) -> bool:

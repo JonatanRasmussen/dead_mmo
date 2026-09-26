@@ -143,9 +143,6 @@ class YamlSpellLoader:
             # Sanity Checks
             if CastingEffect.APPLY_COOLDOWN in effects: assert CastingValidation.IS_COOLDOWN_READY in validations, f"Spell {spell_id} missing cooldown validation."
             if CastingEffect.APPLY_GCD in effects: assert CastingValidation.IS_GCD_READY in validations, f"Spell {spell_id} missing gcd validation."
-            if CastingEffect.APPLY_TICKS_SUBTRACTION in effects and effects[CastingEffect.APPLY_TICKS_SUBTRACTION] != 65535:
-                assert CastingValidation.ARE_TICKS_READY in validations, f"Spell {spell_id} missing tick validation."
-                assert validations[CastingValidation.ARE_TICKS_READY] == effects[CastingEffect.APPLY_TICKS_SUBTRACTION], f"Spell {spell_id} tick validation/effect mismatch."
             if "range_limit" in effects:
                 assert MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION in validations, f"Spell {spell_id} missing range validation."
                 assert validations[MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION] == effects["range_limit"], f"Spell {spell_id} range validation/effect mismatch."

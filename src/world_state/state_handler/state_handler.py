@@ -85,13 +85,13 @@ class StateHandler:
         return ""
 
     # --- Core Event Logic ---
-    def apply_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+    def apply_event(self, timestamp: int, spell_id: int, target_id: int) -> None:
         spell = self.spell_database.get(spell_id)
         if not spell: return
 
         for effect_type, effect_value in spell.effects.items():
             for system in self._systems:
-                system.apply_effect(effect_type, effect_value, timestamp, source_id, target_id)
+                system.apply_effect(effect_type, effect_value, timestamp, target_id)
 
     def spawn_game_obj(self, timestamp: int, parent_id: int, new_obj_id: int, spell_id: int, target_id: int) -> None:
         assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."

@@ -6,8 +6,7 @@ from .system_interface import System, DisplayObj
 
 
 class CastingEffect(str, Enum):
-    APPLY_TICKS_ADDITION = "add_channeling_ticks"
-    APPLY_TICKS_SUBTRACTION = "consume_channeling_ticks"
+    GAIN_CHANNELING_TICKS = "gain_channeling_ticks"
     APPLY_GCD = "gcd_duration"
     APPLY_COOLDOWN = "base_cooldown"
     APPLY_PARENT_CD = "apply_parent_cd"
@@ -15,7 +14,7 @@ class CastingEffect(str, Enum):
 
 
 class CastingValidation(str, Enum):
-    ARE_TICKS_READY = "has_channeling_ticks"
+    HAS_CHANNELING_TICKS = "has_channeling_ticks"
     IS_GCD_READY = "is_gcd_ready"
     IS_COOLDOWN_READY = "is_cooldown_ready"
     IS_PARENT_CD_READY = "is_parent_cooldown_ready"
@@ -26,12 +25,12 @@ class CastingValidation(str, Enum):
 class ObjCastingData:
     obj_id: int = Consts.EMPTY_ID
     parent_id: int = Consts.EMPTY_ID
-    gcd_start: int = -10000
-    gcd_end: int = 0
-    cooldown_start: int = -10000
-    cooldown_end: int = 0
+    gcd_start: int = Consts.EMPTY_TIMESTAMP
+    gcd_duration: int = 0
+    cooldown_start: int = Consts.EMPTY_TIMESTAMP
+    cooldown_duration: int = 0
     selected_spell_id: int = Consts.EMPTY_ID
-    casting_start: int = -10000
+    casting_start: int = Consts.EMPTY_TIMESTAMP
     casting_duration: int = 0
     casting_ticks: int = 0
 
@@ -83,34 +82,49 @@ class CastingSystem(System):
         return self.get_data(parent_id)
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
-        if validation_type == CastingValidation.ARE_TICKS_READY:
-            return self.get_data(source_id).casting_ticks >= round(validation_value)
-        if validation_type == CastingValidation.IS_GCD_READY:
-            return self.get_data(source_id).gcd_end <= timestamp
-        if validation_type == CastingValidation.IS_COOLDOWN_READY:
-            return self.get_data(source_id).cooldown_end <= timestamp
-        if validation_type == CastingValidation.IS_PARENT_CD_READY:
-            return self.get_parent_data(source_id).cooldown_end <= timestamp
-        if validation_type == CastingValidation.IS_SPELL_SELECTED:
-            return self.get_data(source_id).selected_spell_id == round(validation_value)
-        return True
+        match validation_type:
+            case CastingValidation.HAS_CHANNELING_TICKS:
+                return self.get_data(source_id).casting_ticks >= round(validation_value)
+            case CastingValidation.IS_GCD_READY:
+                return self._get_gcd_end_timestamp(source_id) <= timestamp
+            case CastingValidation.IS_COOLDOWN_READY:
+                return self._get_cooldown_end_timestamp(source_id) <= timestamp
+            case CastingValidation.IS_PARENT_CD_READY:
+                return self._get_cooldown_end_timestamp(self.get_parent_data(source_id).obj_id) <= timestamp
+            case CastingValidation.IS_SPELL_SELECTED:
+                return self.get_data(source_id).selected_spell_id == round(validation_value)
+            case _:
+                return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
-        if effect_type == CastingEffect.APPLY_TICKS_ADDITION:
-            self.get_data(source_id).casting_ticks += round(effect_value)
-        elif effect_type == CastingEffect.APPLY_TICKS_SUBTRACTION:
-            self.get_data(source_id).casting_ticks -= max(0, round(effect_value))
-        elif effect_type == CastingEffect.APPLY_GCD:
-            other_data = self.get_data(source_id)
-            other_data.gcd_start = timestamp
-            other_data.gcd_end = timestamp + round(effect_value)
-        elif effect_type == CastingEffect.APPLY_COOLDOWN:
-            other_data = self.get_data(source_id)
-            other_data.cooldown_start = timestamp
-            other_data.cooldown_end = timestamp + round(effect_value)
-        elif effect_type == CastingEffect.APPLY_PARENT_CD:
-            parent_data = self.get_parent_data(source_id)
-            parent_data.cooldown_start = timestamp
-            parent_data.cooldown_end = timestamp + round(effect_value)
-        elif effect_type == CastingEffect.SELECT_SPELL_ID:
-            self.get_data(source_id).selected_spell_id = round(effect_value)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+        match effect_type:
+            case CastingEffect.GAIN_CHANNELING_TICKS:
+                data = self.get_data(obj_id)
+                data.casting_ticks += round(effect_value)
+                data.casting_ticks = max(0, data.casting_ticks)
+            case CastingEffect.APPLY_GCD:
+                other_data = self.get_data(obj_id)
+                other_data.gcd_start = timestamp
+                other_data.gcd_duration = round(effect_value)
+            case CastingEffect.APPLY_COOLDOWN:
+                other_data = self.get_data(obj_id)
+                other_data.cooldown_start = timestamp
+                other_data.cooldown_duration = round(effect_value)
+            case CastingEffect.APPLY_PARENT_CD:
+                parent_data = self.get_parent_data(obj_id)
+                parent_data.cooldown_start = timestamp
+                parent_data.cooldown_duration = round(effect_value)
+            case CastingEffect.SELECT_SPELL_ID:
+                self.get_data(obj_id).selected_spell_id = round(effect_value)
+
+    def _get_cast_end_timestamp(self, obj_id: int) -> int:
+        data = self.get_data(obj_id)
+        return data.casting_start + data.casting_duration
+
+    def _get_cooldown_end_timestamp(self, obj_id: int) -> int:
+        data = self.get_data(obj_id)
+        return data.cooldown_start + data.cooldown_duration
+
+    def _get_gcd_end_timestamp(self, obj_id: int) -> int:
+        data = self.get_data(obj_id)
+        return data.gcd_start + data.gcd_duration

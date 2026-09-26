@@ -7084,7 +7084,6 @@
       },
       "movement": {
         "obj_id": 1,
-        "parent_id": 0,
         "destination_id": 0,
         "x_pos": 0.0,
         "y_pos": 0.0,
@@ -7117,7 +7116,6 @@
       },
       "movement": {
         "obj_id": 2,
-        "parent_id": 1,
         "destination_id": 1,
         "x_pos": 0.7,
         "y_pos": 0.7,
@@ -7150,7 +7148,6 @@
       },
       "movement": {
         "obj_id": 3,
-        "parent_id": 1,
         "destination_id": 1,
         "x_pos": 0.5984924240491749,
         "y_pos": 0.16564971157455594,
@@ -7183,7 +7180,6 @@
       },
       "movement": {
         "obj_id": 4,
-        "parent_id": 2,
         "destination_id": 2,
         "x_pos": 0.6985628364019808,
         "y_pos": 0.7007185817990096,
@@ -7216,7 +7212,6 @@
       },
       "movement": {
         "obj_id": 5,
-        "parent_id": 3,
         "destination_id": 2,
         "x_pos": 0.6656597658861506,
         "y_pos": 0.6709034979660384,
@@ -7249,7 +7244,6 @@
       },
       "movement": {
         "obj_id": 6,
-        "parent_id": 3,
         "destination_id": 4,
         "x_pos": 0.48210148955037874,
         "y_pos": 0.7598360757568676,
@@ -7282,7 +7276,6 @@
       },
       "movement": {
         "obj_id": 7,
-        "parent_id": 2,
         "destination_id": 3,
         "x_pos": 0.19999999999999996,
         "y_pos": 0.7999999999999999,
@@ -7315,7 +7308,6 @@
       },
       "movement": {
         "obj_id": 8,
-        "parent_id": 3,
         "destination_id": 3,
         "x_pos": 0.5070710678118655,
         "y_pos": 0.10707106781186543,
@@ -7348,7 +7340,6 @@
       },
       "movement": {
         "obj_id": 9,
-        "parent_id": 2,
         "destination_id": 3,
         "x_pos": 0.6055812373099335,
         "y_pos": 0.20822813109938712,

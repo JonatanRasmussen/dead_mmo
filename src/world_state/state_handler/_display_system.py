@@ -82,20 +82,23 @@ class DisplaySystem(System):
         return self._data_dct.get(obj_id, ObjDisplayData()).is_visible
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
-        return True
+        match validation_type:
+            case _:
+                return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
-        if effect_type == DisplayEffect.APPLY_COLOR_RED:
-            self.get_data(target_id).color_red = int(effect_value)
-        elif effect_type == DisplayEffect.APPLY_COLOR_GREEN:
-            self.get_data(target_id).color_green = int(effect_value)
-        elif effect_type == DisplayEffect.APPLY_COLOR_BLUE:
-            self.get_data(target_id).color_blue = int(effect_value)
-        elif effect_type == DisplayEffect.APPLY_ICON_ID:
-            self.get_data(target_id).icon_id = int(effect_value)
-        elif effect_type == DisplayEffect.TURN_INVISIBLE:
-            self.get_data(target_id).is_visible = False
-        elif effect_type == DisplayEffect.START_PLAY_AUDIO:
-            data = self.get_data(target_id)
-            data.audio_id = int(effect_value)
-            data.audio_start = timestamp
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+        match effect_type:
+            case DisplayEffect.APPLY_COLOR_RED:
+                self.get_data(obj_id).color_red = int(effect_value)
+            case DisplayEffect.APPLY_COLOR_GREEN:
+                self.get_data(obj_id).color_green = int(effect_value)
+            case DisplayEffect.APPLY_COLOR_BLUE:
+                self.get_data(obj_id).color_blue = int(effect_value)
+            case DisplayEffect.APPLY_ICON_ID:
+                self.get_data(obj_id).icon_id = int(effect_value)
+            case DisplayEffect.TURN_INVISIBLE:
+                self.get_data(obj_id).is_visible = False
+            case DisplayEffect.START_PLAY_AUDIO:
+                data = self.get_data(obj_id)
+                data.audio_id = int(effect_value)
+                data.audio_start = timestamp

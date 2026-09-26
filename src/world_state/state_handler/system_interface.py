@@ -28,5 +28,5 @@ class System(ABC):
         ...
 
     @abstractmethod
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
         ...

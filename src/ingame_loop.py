@@ -1,5 +1,6 @@
 from .pygame_renderer import PygameRenderer
 from .ui_manager import UiManager
+from src.settings import Consts
 from src.world_state.world_state import DisplayObj, WorldState
 
 
@@ -22,7 +23,7 @@ class IngameLoop:
         while rendering_framework.is_running():
             # Update time (and because smallest in-game timeunit is 1ms, ensure rounding error stays +/- 1ms throughout the game)
             current_irl_time = rendering_framework.get_current_time()
-            exact_irl_elapsed_time_ms = (current_irl_time - cached_irl_time) * 1000.0 + rounding_error
+            exact_irl_elapsed_time_ms = (current_irl_time - cached_irl_time) * Consts.TIMESTAMPS_PER_SECOND + rounding_error
             ingame_time_elapsed_this_frame = int(round(exact_irl_elapsed_time_ms))  # round to smallest allowed in-game time unit
             rounding_error = exact_irl_elapsed_time_ms - ingame_time_elapsed_this_frame
             if ingame_time_elapsed_this_frame < 1:

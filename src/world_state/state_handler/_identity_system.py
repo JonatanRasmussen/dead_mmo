@@ -5,9 +5,6 @@ from .system_interface import System, DisplayObj
 
 
 class IdentityEffect(str, Enum):
-    TARGETSWAP_TO_EVENT_TARGET = "targetswap_to_event_target"
-    TARGETSWAP_TO_PARENT = "targetswap_to_parent"
-    TARGETSWAP_TO_PARENTS_TARGET = "targetswap_to_parents_target"
     SWAP_TEAM = "teamswap"
     THREAT_SCORE = "threat_score"
     APPLY_PLAYER_NUMBER = "player_number"
@@ -76,26 +73,17 @@ class IdentitySystem(System):
         return self._data_dct.get(obj_id, ObjIdentityData()).event_target_id
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
-        if validation_type == IdentityValidation.IS_TARGET_OTHER_TEAM:
-            return bool(validation_value) == (self.get_data(source_id).is_enemy != self.get_data(target_id).is_enemy)
-        return True
+        match validation_type:
+            case IdentityValidation.IS_TARGET_OTHER_TEAM:
+                return bool(validation_value) == (self.get_data(source_id).is_enemy != self.get_data(target_id).is_enemy)
+            case _:
+                return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
-        if effect_type == IdentityEffect.TARGETSWAP_TO_EVENT_TARGET:
-            self.get_data(source_id).event_target_id = target_id
-        elif effect_type == IdentityEffect.TARGETSWAP_TO_PARENT:
-            data = self.get_data(source_id)
-            data.event_target_id = data.parent_id
-        elif effect_type == IdentityEffect.TARGETSWAP_TO_PARENTS_TARGET:
-            data = self.get_data(source_id)
-            parent_data = self.get_parent_data(source_id)
-            data.event_target_id = parent_data.event_target_id
-        elif effect_type == IdentityEffect.APPLY_PLAYER_NUMBER:
-            self.get_data(source_id).player_number += int(effect_value)
-            self.player_id = source_id
-        elif effect_type == IdentityEffect.APPLY_PLAYER_NUMBER:
-            self.get_data(source_id).player_number += int(effect_value)
-            self.player_id = source_id
-        elif effect_type == IdentityEffect.SWAP_TEAM:
-            data = self.get_data(source_id)
-            data.is_enemy = not data.is_enemy
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+        match effect_type:
+            case  IdentityEffect.APPLY_PLAYER_NUMBER:
+                self.get_data(obj_id).player_number += int(effect_value)
+                self.player_id = obj_id
+            case IdentityEffect.SWAP_TEAM:
+                data = self.get_data(obj_id)
+                data.is_enemy = not data.is_enemy

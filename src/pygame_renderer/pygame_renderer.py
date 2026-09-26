@@ -2,7 +2,7 @@ import pygame
 import math
 import os
 from typing import Optional, Final
-from src.settings import Colors
+from src.settings import Colors, Consts
 from ._animation_manager import AnimationManager
 from ._sprite_manager import SpriteManager
 from ._window_manager import WindowManager
@@ -46,7 +46,7 @@ class PygameRenderer:
         return self._input_handler.fetch_player_input()
 
     def get_current_time(self) -> float:
-        return pygame.time.get_ticks() / 1000.0
+        return pygame.time.get_ticks() / Consts.TIMESTAMPS_PER_SECOND
 
     # --- Frame boundary ---
 

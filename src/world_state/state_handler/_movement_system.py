@@ -8,13 +8,9 @@ from .system_interface import System, DisplayObj
 
 class MovementEffect(str, Enum):
     WALK_FORWARD = "walk_forward"
-    STOP_WALK_FORWARD = "stop_walk_forward"
     WALK_BACKWARD = "walk_backward"
-    STOP_WALK_BACKWARD = "stop_walk_backward"
     WALK_LEFT = "walk_left"
-    STOP_WALK_LEFT = "stop_walk_left"
     WALK_RIGHT = "walk_right"
-    STOP_WALK_RIGHT = "stop_walk_right"
     WALK_TOWARDS_TARGET = "walk_towards_target"
     STOP_WALK_TOWARDS_TARGET = "stop_walk_towards_target"
     TELEPORT_TO_TARGET = "teleport_to_target"
@@ -32,6 +28,7 @@ class MovementValidation(str, Enum):
 @dataclass(slots=True)
 class ObjMovementData:
     obj_id: int = Consts.EMPTY_ID
+    parent_id: int = Consts.EMPTY_ID
     destination_id: int = Consts.EMPTY_ID
     x_pos: float = 0.0
     y_pos: float = 0.0
@@ -43,18 +40,15 @@ class ObjMovementData:
     movespeed: float = 1.0
 
     @classmethod
-    def create_new_obj(cls, new_obj_id: int, destination_id: int, parent_x: float, parent_y: float) -> "ObjMovementData":
+    def create_new_obj(cls, new_obj_id: int, parent_id: int, destination_id: int) -> "ObjMovementData":
         return cls(
             obj_id=new_obj_id,
-            x_pos=float(parent_x),
-            y_pos=float(parent_y),
+            parent_id=parent_id,
             destination_id=destination_id
         )
 
 
 class MovementSystem(System):
-    GLOBAL_MOVESPEED_TO_USE = Consts.MOVEMENT_DISTANCE_PER_SECOND
-    MS_PER_MOVEMENT_TICK: float = 1000.0 / Consts.MOVEMENT_UPDATES_PER_SECOND
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
         display_obj.pos_xy = (self.get_position(obj_id, current_time))
@@ -70,8 +64,7 @@ class MovementSystem(System):
         self._data_dct: dict[int, ObjMovementData] = {}
 
     def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        parent_x, parent_y = self.get_position(parent_id, timestamp) if parent_id in self._data_dct else (0.0, 0.0)
-        game_obj = ObjMovementData.create_new_obj(new_obj_id, target_id, parent_x, parent_y)
+        game_obj = ObjMovementData.create_new_obj(new_obj_id, parent_id, target_id)
         self.add_data(game_obj)
 
     def spawn_environment_obj(self, obj_id: int) -> None:
@@ -99,7 +92,7 @@ class MovementSystem(System):
             nx, ny = data.x_dir / mag, data.y_dir / mag
         else:
             nx, ny = data.x_dir, data.y_dir
-        base_speed = data.movespeed * MovementSystem.GLOBAL_MOVESPEED_TO_USE / 1000.0
+        base_speed = data.movespeed * Consts.GLOBAL_MOVESPEED_TO_USE / 1000.0
         return (nx * base_speed) + data.x_vel, (ny * base_speed) + data.y_vel
 
     def get_position(self, obj_id: int, current_time: int) -> Tuple[float, float]:
@@ -131,68 +124,84 @@ class MovementSystem(System):
         return valid and dist <= range_limit
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
-        if validation_type == MovementValidation.IS_TARGET_THE_DESTINATION:
-            return self.get_data(source_id).destination_id == target_id
-        if validation_type == MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION:
-            return self._is_within_range(timestamp, source_id, self.get_data(source_id).destination_id, validation_value)
-        return True
+        match validation_type:
+            case MovementValidation.IS_TARGET_THE_DESTINATION:
+                return self.get_data(source_id).destination_id == target_id
+            case MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION:
+                return self._is_within_range(timestamp, source_id, self.get_data(source_id).destination_id, validation_value)
+            case _:
+                return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
-        if effect_type == MovementEffect.WALK_FORWARD:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).y_dir = max(-1.0, min(1.0, self.get_data(source_id).y_dir + 1.0))
-        elif effect_type == MovementEffect.STOP_WALK_FORWARD:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).y_dir = max(-1.0, min(1.0, self.get_data(source_id).y_dir - 1.0))
-        elif effect_type == MovementEffect.WALK_BACKWARD:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).y_dir = max(-1.0, min(1.0, self.get_data(source_id).y_dir - 1.0))
-        elif effect_type == MovementEffect.STOP_WALK_BACKWARD:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).y_dir = max(-1.0, min(1.0, self.get_data(source_id).y_dir + 1.0))
-        elif effect_type == MovementEffect.WALK_LEFT:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).x_dir = max(-1.0, min(1.0, self.get_data(source_id).x_dir - 1.0))
-        elif effect_type == MovementEffect.STOP_WALK_LEFT:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).x_dir = max(-1.0, min(1.0, self.get_data(source_id).x_dir + 1.0))
-        elif effect_type == MovementEffect.WALK_RIGHT:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).x_dir = max(-1.0, min(1.0, self.get_data(source_id).x_dir + 1.0))
-        elif effect_type == MovementEffect.STOP_WALK_RIGHT:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).x_dir = max(-1.0, min(1.0, self.get_data(source_id).x_dir - 1.0))
-        elif effect_type == MovementEffect.WALK_TOWARDS_TARGET:
-            data = self.get_data(source_id)
-            valid, dx, dy, dist, _, _ = self._get_target_vector(source_id, data.destination_id, timestamp)
-            if valid and dist > 0.0:
-                self._bake_position(source_id, timestamp)
-                data.x_dir = dx / dist
-                data.y_dir = dy / dist
-        elif effect_type == MovementEffect.STOP_WALK_TOWARDS_TARGET:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).x_dir, self.get_data(source_id).y_dir = 0.0, 0.0
-        elif effect_type == MovementEffect.TELEPORT_TO_TARGET:
-            data = self.get_data(source_id)
-            valid, _, _, _, tar_x, tar_y = self._get_target_vector(source_id, data.destination_id, timestamp)
-            if valid:
-                data.x_pos, data.y_pos = tar_x, tar_y
-                data.x_vel, data.y_vel, data.x_dir, data.y_dir = 0.0, 0.0, 0.0, 0.0
-                data.timestamp = timestamp
-        elif effect_type == MovementEffect.PUSH_TARGET:
-            valid, dx, dy, dist, _, _ = self._get_target_vector(source_id, target_id, timestamp)
-            if valid and dist > 0.0:
-                self._bake_position(target_id, timestamp)
-                target_data = self.get_data(target_id)
-                speed_per_ms = effect_value * self.GLOBAL_MOVESPEED_TO_USE / 1000.0
-                target_data.x_vel = (dx / dist) * speed_per_ms
-                target_data.y_vel = (dy / dist) * speed_per_ms
-        elif effect_type == MovementEffect.X_OFFSET:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).x_pos += effect_value
-        elif effect_type == MovementEffect.Y_OFFSET:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).y_pos += effect_value
-        elif effect_type == MovementEffect.MOVESPEED:
-            self._bake_position(source_id, timestamp)
-            self.get_data(source_id).movespeed = effect_value
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+        match effect_type:
+            case MovementEffect.WALK_FORWARD:
+                if bool(effect_value) is True:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).y_dir = max(-1.0, min(1.0, self.get_data(obj_id).y_dir + 1.0))
+                else:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).y_dir = max(-1.0, min(1.0, self.get_data(obj_id).y_dir - 1.0))
+            case MovementEffect.WALK_BACKWARD:
+                if bool(effect_value) is True:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).y_dir = max(-1.0, min(1.0, self.get_data(obj_id).y_dir - 1.0))
+                else:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).y_dir = max(-1.0, min(1.0, self.get_data(obj_id).y_dir + 1.0))
+            case MovementEffect.WALK_LEFT:
+                if bool(effect_value) is True:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).x_dir = max(-1.0, min(1.0, self.get_data(obj_id).x_dir - 1.0))
+                else:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).x_dir = max(-1.0, min(1.0, self.get_data(obj_id).x_dir + 1.0))
+            case MovementEffect.WALK_RIGHT:
+                if bool(effect_value) is True:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).x_dir = max(-1.0, min(1.0, self.get_data(obj_id).x_dir + 1.0))
+                else:
+                    self._bake_position(obj_id, timestamp)
+                    self.get_data(obj_id).x_dir = max(-1.0, min(1.0, self.get_data(obj_id).x_dir - 1.0))
+            case MovementEffect.WALK_TOWARDS_TARGET:
+                data = self.get_data(obj_id)
+                valid, dx, dy, dist, _, _ = self._get_target_vector(obj_id, data.destination_id, timestamp)
+                if valid and dist > 0.0:
+                    self._bake_position(obj_id, timestamp)
+                    data.x_dir = dx / dist
+                    data.y_dir = dy / dist
+            case MovementEffect.STOP_WALK_TOWARDS_TARGET:
+                self._bake_position(obj_id, timestamp)
+                self.get_data(obj_id).x_dir, self.get_data(obj_id).y_dir = 0.0, 0.0
+            case MovementEffect.TELEPORT_TO_TARGET:
+                data = self.get_data(obj_id)
+                valid, _, _, _, tar_x, tar_y = self._get_target_vector(obj_id, data.destination_id, timestamp)
+                if valid:
+                    data.x_pos, data.y_pos = tar_x, tar_y
+                    data.x_vel, data.y_vel, data.x_dir, data.y_dir = 0.0, 0.0, 0.0, 0.0
+                    data.timestamp = timestamp
+            case MovementEffect.PUSH_TARGET:
+                data = self.get_data(obj_id)
+                valid, dx, dy, dist, _, _ = self._get_target_vector(obj_id, data.destination_id, timestamp)
+                if valid and dist > 0.0:
+                    self._bake_position(obj_id, timestamp)
+                    target_data = self.get_data(obj_id)
+                    speed_per_ms = effect_value * Consts.GLOBAL_MOVESPEED_TO_USE / 1000.0
+                    target_data.x_vel = (dx / dist) * speed_per_ms
+                    target_data.y_vel = (dy / dist) * speed_per_ms
+            case MovementEffect.X_OFFSET:
+                self._bake_position(obj_id, timestamp)
+                data = self.get_data(obj_id)
+                if data.parent_id in self._data_dct:
+                    p_x, _ = self.get_position(data.parent_id, timestamp)
+                    data.x_pos = p_x
+                data.x_pos += effect_value
+            case MovementEffect.Y_OFFSET:
+                self._bake_position(obj_id, timestamp)
+                data = self.get_data(obj_id)
+                if data.parent_id in self._data_dct:
+                    _, p_y = self.get_position(data.parent_id, timestamp)
+                    data.y_pos = p_y
+                data.y_pos += effect_value
+            case MovementEffect.MOVESPEED:
+                self._bake_position(obj_id, timestamp)
+                self.get_data(obj_id).movespeed = effect_value

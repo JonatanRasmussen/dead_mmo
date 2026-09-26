@@ -12,7 +12,6 @@ class AttachmentValidation(str, Enum):
 
 
 class AttachmentEffect(str, Enum):
-    APPLY_ATTACHMENT_TO_PARENT = "apply_attachment_to_parent"
     APPLY_ATTACHMENT_TO_EVENT_TARGET = "apply_attachment_to_event_target"
 
 
@@ -61,24 +60,24 @@ class AttachmentSystem(System):
         self._data_dct.pop(obj_id)
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
-        if validation_type == AttachmentValidation.IS_SOURCE_HOSTING_ATTACHMENT:
-            return self._has_matching_attachment(validation_value, source_id, None)
-        if validation_type == AttachmentValidation.IS_TARGET_HOSTING_ATTACHMENT:
-            return self._has_matching_attachment(validation_value, target_id, None)
-        if validation_type == AttachmentValidation.IS_SOURCE_OWNING_ATTACHMENT_HOSTED_ON_TARGET:
-            return self._has_matching_attachment(validation_value, target_id, source_id)
-        return True
+        match validation_type:
+            case AttachmentValidation.IS_SOURCE_HOSTING_ATTACHMENT:
+                return self._has_matching_attachment(validation_value, source_id, None)
+            case AttachmentValidation.IS_TARGET_HOSTING_ATTACHMENT:
+                return self._has_matching_attachment(validation_value, target_id, None)
+            case AttachmentValidation.IS_SOURCE_OWNING_ATTACHMENT_HOSTED_ON_TARGET:
+                return self._has_matching_attachment(validation_value, target_id, source_id)
+            case _:
+                return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
-        if effect_type == AttachmentEffect.APPLY_ATTACHMENT_TO_PARENT:
-            self._set_attachment_host(source_id, source_id)
-        elif effect_type == AttachmentEffect.APPLY_ATTACHMENT_TO_EVENT_TARGET:
-            self._set_attachment_host(source_id, target_id)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+        match effect_type:
+            case AttachmentEffect.APPLY_ATTACHMENT_TO_EVENT_TARGET:
+                self._set_attachment_host(self.get_data(obj_id).parent_id, obj_id)
 
     def _find_attachments_originating_from_spell(self, spell_id: int) -> Iterable[ObjAttachmentData]:
         if Optimizations.ENABLE_FAST_ATTACHMENT_LOOKUP:
-            for data in self._origin_dct.get(spell_id, []):
-                yield data
+            yield from self._origin_dct.get(spell_id, [])
         else:
             for obj_id in self._data_dct:
                 data = self.get_data(obj_id)

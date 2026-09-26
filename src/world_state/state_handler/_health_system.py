@@ -76,19 +76,22 @@ class HealthSystem(System):
         return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
-        if validation_type == HealthValidation.IS_SOURCE_HITTABLE:
-            return not self.get_data(source_id).is_hittable
-        if validation_type == HealthValidation.IS_TARGET_HITTABLE:
-            return not self.get_data(target_id).is_hittable
-        return True
+        match validation_type:
+            case HealthValidation.IS_SOURCE_HITTABLE:
+                return not self.get_data(source_id).is_hittable
+            case HealthValidation.IS_TARGET_HITTABLE:
+                return not self.get_data(target_id).is_hittable
+            case _:
+                return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, source_id: int, target_id: int) -> None:
-        if effect_type == HealthEffect.APPLY_DAMAGE:
-            self.get_data(target_id).hp -= effect_value * self.get_data(source_id).spell_modifier
-        elif effect_type == HealthEffect.APPLY_HEAL:
-            self.get_data(target_id).hp += effect_value * self.get_data(source_id).spell_modifier
-        elif effect_type == HealthEffect.APPLY_HP:
-            self.get_data(source_id).hp = effect_value
-        elif effect_type == HealthEffect.IS_UNHITTABLE:
-            data = self.get_data(source_id)
-            data.is_hittable = bool(effect_value)
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+        match effect_type:
+            case HealthEffect.APPLY_DAMAGE:
+                self.get_data(obj_id).hp -= effect_value
+            case HealthEffect.APPLY_HEAL:
+                self.get_data(obj_id).hp += effect_value
+            case HealthEffect.APPLY_HP:
+                self.get_data(obj_id).hp = effect_value
+            case HealthEffect.IS_UNHITTABLE:
+                data = self.get_data(obj_id)
+                data.is_hittable = bool(effect_value)
