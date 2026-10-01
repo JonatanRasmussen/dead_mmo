@@ -5,12 +5,12 @@ from src.settings import Consts
 
 @dataclass(slots=True)
 class CombatEvent:
-    event_id: int = Consts.EMPTY_ID
+    event_id: int = Consts.EMPTY_EVENT_ID
 
     timestamp: int = Consts.EMPTY_TIMESTAMP
-    source_id: int = Consts.EMPTY_ID
-    spell_id: int = Consts.EMPTY_ID
-    target_id: int = Consts.EMPTY_ID
+    source_id: int = Consts.EMPTY_OBJ_ID
+    spell_id: int = Consts.EMPTY_SPELL_ID
+    target_id: int = Consts.EMPTY_OBJ_ID
 
     validation_error_msg: str = ""
 
@@ -43,3 +43,7 @@ class CombatEvent:
     @property
     def outcome_is_successful(self) -> bool:
         return self.validation_error_msg == ""
+
+    @property
+    def combat_data(self) -> tuple[int, int, int, int]:
+        return self.timestamp, self.source_id, self.spell_id, self.target_id

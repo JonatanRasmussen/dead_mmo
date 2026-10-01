@@ -19,8 +19,11 @@ class SimValidation:
     def simulate_game_in_console(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]]) -> None:
         ingame_time = 0
         world_state = WorldState()
-        world_state.process_setup_events(ingame_time, setup_spell_ids)
-
+        assert len(setup_spell_ids) == 2, f"Unsupported amount of setup_spell_ids ({len(setup_spell_ids)}), for now the game only supports 1 boss and 1 player"
+        boss1_setup_spell_id = setup_spell_ids[0]
+        player1_setup_spell_id = setup_spell_ids[1]
+        _boss1_obj_id = world_state.register_player(ingame_time, boss1_setup_spell_id)
+        player1_obj_id = world_state.register_player(ingame_time, player1_setup_spell_id)
         SIMULATION_DURATION_MS = 10000
         UPDATES_PER_SECOND = 50
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
@@ -36,7 +39,7 @@ class SimValidation:
                 if (ingame_time - FRAME_DURATION_MS) < timestamp <= ingame_time:
                     for player_input in inputs:
                         player_inputs_this_frame.append(player_input)
-            world_state.process_frame(player_inputs_this_frame, ingame_time)
+            world_state.process_frame(player1_obj_id, player_inputs_this_frame, ingame_time)
 
         SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_ids))
 

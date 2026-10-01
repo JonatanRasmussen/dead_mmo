@@ -85,19 +85,27 @@
 # ==========================================
 # Npc Healing Powerup
 # ==========================================
-171:
-  name: spawn_healing_powerup
+170:
+  name: keypress_healing_powerup
   validations:
     is_gcd_ready: true
   effects:
     play_audio: Rejuvenation
     gcd_duration: 1000
   triggers:
+    aoe_spell: 171
+
+171:
+  name: spawn_healing_powerup
+  validations:
+    is_targeting_parent: true
+  triggers:
     spawn_child: [172]
 
 172:
   name: init_healing_powerup
   effects:
+    spawn_as_child: true
     is_unhittable: true
     gain_channeling_ticks: 150
     hp: 30.0
@@ -144,7 +152,7 @@
 # Npc Landmine
 # ==========================================
 70:
-  name: aoe_landmine
+  name: keypress_landmine
   effect:
     play_audio: MoltenBlastHit
   triggers:
@@ -161,6 +169,7 @@
 72:
   name: init_landmine
   effects:
+    spawn_as_child: true
     gain_channeling_ticks: 150
     hp: 20.0
     x_offset: -0.5
@@ -214,6 +223,7 @@
 83:
   name: init_target_dummy
   effects:
+    spawn_as_child: true
     threat_score: 901
     hp: 80.0
     x_offset: -0.2
@@ -234,6 +244,7 @@
 971:
   name: init_bravo_dummy
   effects:
+    spawn_as_child: true
     threat_score: 9001
     hp: 80.0
     x_offset: -0.2
@@ -310,6 +321,7 @@
 1442:
   name: shadowbolt_init
   effects:
+    spawn_as_child: true
     is_unhittable: true
     gain_channeling_ticks: 3600
     x_offset: 0.0
@@ -350,37 +362,18 @@
     is_target_the_destination: true
   effects:
     play_audio: ShadowBoltHit
+    play_animation: explosion
     damage: 34.0
 
-8999:
-  name: spawn_player
-  triggers:
-    spawn_child: [7999]
-
-7999:
-  name: init_player
-  effects:
-    player_number: 1
-    hp: 30.0
-    x_offset: 0.3
-    y_offset: 0.3
-    color_red: 255
-    color_green: 0
-    color_blue: 0
-    icon_id: Poro
 
 # ==========================================
-# Npc Boss
+# Boss and Player
 # ==========================================
-
-969:
-  name: spawn_bravo_boss
-  triggers:
-    spawn_child: [968]
 
 968:
   name: init_bravo_boss
   effects:
+    spawn_as_child: true
     teamswap: true
     threat_score: 9001
     hp: 30.0
@@ -396,17 +389,15 @@
       3000: [128]
       5000: [1440]
 
-# ==========================================
-# Zone Test Ground
-# ==========================================
-300:
-  name: setup_test_zone
-  triggers:
-    timeline:
-      0: [69, 8999]
-
-6767:
-  name: bravo_test_zone
-  triggers:
-    timeline:
-      0: [969, 8999]
+7999:
+  name: init_player
+  effects:
+    spawn_as_child: true
+    player_number: 1
+    hp: 30.0
+    x_offset: 0.3
+    y_offset: 0.3
+    color_red: 255
+    color_green: 0
+    color_blue: 0
+    icon_id: Poro

@@ -163,9 +163,18 @@ class PygameRenderer:
 
         self._get_screen().blit(surf, (screen_pos[0] - size, screen_pos[1] - size))
 
-    def play_animation(self, pos_xy: tuple[float, float], scale: float, asset_name: Optional[str] = None) -> None:
-        if asset_name:
-            self._animation_manager.play_animation(asset_name, pos_xy[0], pos_xy[1], scale)
+    def draw_animation(self, pos_xy: tuple[float, float], scale: float, asset_name: str, elapsed_time_ms: float, ms_per_frame: Optional[float] = None, alpha: float = 1.0, loop: bool = False) -> None:
+        frame_surface = self._animation_manager.get_frame_at_time(asset_name, elapsed_time_ms, loop, ms_per_frame)
+        if not frame_surface:
+            return
+        pixel_size = self._get_circle_pixel_size(scale)
+        sprite_size = pixel_size * 2
+        scaled_frame = pygame.transform.scale(frame_surface, (sprite_size, sprite_size))
+        if alpha < 1.0:
+            scaled_frame.set_alpha(int(alpha * 255))
+        screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
+        sprite_rect = scaled_frame.get_rect(center=screen_pos)
+        self._get_screen().blit(scaled_frame, sprite_rect)
 
     def display_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: Optional[str] = None) -> None:
         if text:

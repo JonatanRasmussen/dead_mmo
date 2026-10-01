@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from enum import Enum
+
+from pygame import display
 from src.settings import Consts
-from .system_interface import System, DisplayObj
+from .system_interface import DisplayObj, GameObj, System
 
 
 class DisplayEffect(str, Enum):
@@ -11,6 +13,7 @@ class DisplayEffect(str, Enum):
     APPLY_ICON_ID = "icon_id"
     TURN_INVISIBLE = "turn_invisible"
     START_PLAY_AUDIO = "play_audio"
+    START_PLAY_ANIMATION = "play_animation"
 
 
 class DisplayValidation(str, Enum):
@@ -19,35 +22,43 @@ class DisplayValidation(str, Enum):
 
 @dataclass(slots=True)
 class ObjDisplayData:
-    obj_id: int = Consts.EMPTY_ID
+    obj_id: int = Consts.EMPTY_OBJ_ID
     color_red: int = 255
     color_green: int = 255
     color_blue: int = 255
     color_alpha: float = 1.0
-    icon_id: int = Consts.EMPTY_ID
+    icon_id: int = Consts.EMPTY_ASSET_ID
     is_visible: bool = True
-    audio_id: int = Consts.EMPTY_ID
-    audio_start: int = -1
+    audio_id: int = Consts.EMPTY_ASSET_ID
+    audio_start: int = Consts.EMPTY_TIMESTAMP
+    animation_id: int = Consts.EMPTY_ASSET_ID
+    animation_start: int = Consts.EMPTY_TIMESTAMP
+    animation_animation_ms_per_frame: int = 100
+    animation_scale: float = 0.1
 
     @classmethod
-    def create_new_obj(cls, new_obj_id: int) -> "ObjDisplayData":
-        return cls(
-            obj_id=new_obj_id,
-        )
+    def create_from_game_obj(cls, game_obj: GameObj) -> "ObjDisplayData":
+        return cls(obj_id=game_obj.obj_id)
 
 
 class DisplaySystem(System):
 
     def __init__(self) -> None:
+        self._game_objs: dict[int, GameObj] = {}
         self._data_dct: dict[int, ObjDisplayData] = {}
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
-        data = self.get_data(obj_id)
-        display_obj.is_visible = data.is_visible
-        display_obj.color_rgb = (data.color_red, data.color_green, data.color_blue)
-        display_obj.sprite_id = data.icon_id
-        display_obj.audio_id = data.audio_id
-        display_obj.audio_start = data.audio_start
+        if obj_id in self._data_dct:
+            data = self.get_data(obj_id)
+            display_obj.is_visible = data.is_visible
+            display_obj.color_rgb = (data.color_red, data.color_green, data.color_blue)
+            display_obj.sprite_id = data.icon_id
+            display_obj.audio_id = data.audio_id
+            display_obj.audio_start = data.audio_start
+            display_obj.animation_id = data.animation_id
+            display_obj.animation_start = data.animation_start
+            display_obj.animation_ms_per_frame = data.animation_animation_ms_per_frame
+            display_obj.animation_scale = data.animation_scale
         return display_obj
 
     def get_effect_types(self) -> set[str]:
@@ -56,21 +67,18 @@ class DisplaySystem(System):
     def get_validation_types(self) -> set[str]:
         return {v.value for v in DisplayValidation}
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        game_obj = ObjDisplayData.create_new_obj(new_obj_id)
-        self.add_data(new_obj_id, game_obj)
-
-    def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjDisplayData(obj_id=obj_id, is_visible=False)
-        self.add_data(obj_id, environment_obj)
-
-    def add_data(self, new_obj_id: int, new_obj: ObjDisplayData) -> None:
-        assert new_obj_id not in self._data_dct, "Error: Obj already exists."
-        self._data_dct[new_obj_id] = new_obj
+    def spawn_game_obj(self, game_obj: GameObj) -> None:
+        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
+        self._game_objs[game_obj.obj_id] = game_obj
 
     def get_data(self, obj_id: int) -> ObjDisplayData:
-        assert obj_id in self._data_dct, "Error: Obj does not exist."
-        return self._data_dct[obj_id]
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
+        game_obj = self._game_objs[obj_id]
+        data = ObjDisplayData.create_from_game_obj(game_obj)
+        self._data_dct[obj_id] = data
+        return data
 
     def remove_data(self, obj_id: int) -> None:
         self.get_data(obj_id)  # Assert that data exists
@@ -79,7 +87,9 @@ class DisplaySystem(System):
     # ---- State Lookups ----
 
     def is_visible(self, obj_id: int) -> bool:
-        return self._data_dct.get(obj_id, ObjDisplayData()).is_visible
+        if obj_id in self._game_objs or obj_id in self._data_dct:
+            return self.get_data(obj_id).is_visible
+        return ObjDisplayData().is_visible
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
@@ -102,3 +112,7 @@ class DisplaySystem(System):
                 data = self.get_data(obj_id)
                 data.audio_id = int(effect_value)
                 data.audio_start = timestamp
+            case DisplayEffect.START_PLAY_ANIMATION:
+                data = self.get_data(obj_id)
+                data.animation_id = int(effect_value)
+                data.animation_start = timestamp

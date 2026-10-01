@@ -13,32 +13,13 @@ class EventHandler:
         self._event_log_for_current_frame: EventLog = EventLog()
         self._current_event: CombatEvent | None = None
 
-    @property
-    def current_events_timestamp(self) -> int:
-        assert self._current_event, "The current event has been finalized."
-        return self._current_event.timestamp
-
-    @property
-    def current_events_source_id(self) -> int:
-        assert self._current_event, "The current event has been finalized."
-        return self._current_event.source_id
-
-    @property
-    def current_events_spell_id(self) -> int:
-        assert self._current_event, "The current event has been finalized."
-        return self._current_event.spell_id
-
-    @property
-    def current_events_target_id(self) -> int:
-        assert self._current_event, "The current event has been finalized."
-        return self._current_event.target_id
-
     def has_unprocessed_events(self, frame_end: int) -> bool:
         return self._event_heap.has_unprocessed_events(frame_end)
 
-    def fetch_next_event(self) -> None:
+    def fetch_next_event(self) -> tuple[int, int, int, int]:
         assert not self._current_event, "New event was fetched before previous event was finalized."
         self._current_event = self._event_heap.pop_next_event()
+        return self._current_event.combat_data
 
     def finalize_event(self, error_msg: str) -> bool:
         assert self._current_event, "The current event has been finalized."

@@ -1,5 +1,4 @@
 from .pygame_renderer import PygameRenderer
-from .ui_manager import UiManager
 from src.settings import Consts
 from src.world_state.world_state import DisplayObj, WorldState
 
@@ -16,9 +15,11 @@ class IngameLoop:
         rounding_error = 0.0
         cached_irl_time = rendering_framework.get_current_time()
         world_state = WorldState()
-        world_state.process_setup_events(current_ingame_time, setup_spell_ids)
-        ui_manager = UiManager()
-
+        assert len(setup_spell_ids) == 2, f"Unsupported amount of setup_spell_ids ({len(setup_spell_ids)}), for now the game only supports 1 boss and 1 player"
+        boss1_setup_spell_id = setup_spell_ids[0]
+        player1_setup_spell_id = setup_spell_ids[1]
+        _boss1_obj_id = world_state.register_player(current_ingame_time, boss1_setup_spell_id)
+        player1_obj_id = world_state.register_player(current_ingame_time, player1_setup_spell_id)
         player_inputs_this_frame: list[str] = []
         while rendering_framework.is_running():
             # Update time (and because smallest in-game timeunit is 1ms, ensure rounding error stays +/- 1ms throughout the game)
@@ -46,13 +47,12 @@ class IngameLoop:
                         player_inputs_this_frame.extend(inputs)
 
             # Simulate next frame
-            world_state.process_frame(player_inputs_this_frame, current_ingame_time)
+            world_state.process_frame(player1_obj_id, player_inputs_this_frame, current_ingame_time)
             # Render the frame we just simulated
             rendering_framework.begin_frame()
             display_objs_dct = world_state.get_display_obj_dct(current_ingame_time)
             for display_obj in display_objs_dct.values():
-                IngameLoop._render_game_obj(rendering_framework, display_obj, ingame_time_at_frame_start)
-            IngameLoop._render_frame_actions(rendering_framework, ui_manager)
+                IngameLoop._render_game_obj(rendering_framework, display_obj, ingame_time_at_frame_start, current_ingame_time)
             rendering_framework.end_frame()
 
         # Cleanup when exiting game
@@ -60,7 +60,7 @@ class IngameLoop:
 
 
     @staticmethod
-    def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, ingame_time_at_frame_start: int) -> None:
+    def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, frame_start: int, frame_end: int) -> None:
         if display_obj.is_visible:
             rendering_framework.draw_blinking_circle(
                 pos_xy=display_obj.pos_xy,
@@ -69,49 +69,14 @@ class IngameLoop:
                 time_ms=rendering_framework.get_current_time(),
                 asset_name=display_obj.sprite_name,
         )
-        if display_obj.audio_id and display_obj.audio_start > ingame_time_at_frame_start:
+        if display_obj.audio_id and display_obj.audio_start > frame_start:
             rendering_framework.play_sound(display_obj.audio_name)
-
-
-    #NOT YET IN USE
-    @staticmethod
-    def _render_frame_actions(rendering_framework: PygameRenderer, ui_manager: UiManager) -> None:
-        for rend_act in ui_manager.get_render_actions():
-            if rend_act.is_type_circle():
-                scale = rend_act.convert_scale_xy_to_scale()
-                rendering_framework.draw_circle(
-                    rend_act.pos_xy,
-                    scale,
-                    rend_act.color_rgb,
-                    rend_act.asset_name
-                )
-
-            elif rend_act.is_type_rectangle():
-                rendering_framework.draw_rectangle(
-                    rend_act.pos_xy,
-                    rend_act.scale_xy,
-                    rend_act.color_rgb,
-                    rend_act.asset_name
-                )
-
-            elif rend_act.is_type_animation():
-                scale = rend_act.convert_scale_xy_to_scale()
-                rendering_framework.play_animation(
-                    rend_act.pos_xy,
-                    scale,
-                    rend_act.asset_name
-                )
-
-            elif rend_act.is_type_text():
-                font_size = rend_act.convert_scale_xy_to_font_size()
-                rendering_framework.display_text(
-                    rend_act.pos_xy,
-                    font_size,
-                    rend_act.color_rgb,
-                    rend_act.text_to_display
-                )
-
-            elif rend_act.is_type_audio():
-                rendering_framework.play_sound(rend_act.asset_name)
-
-        ui_manager.clear_current_frame_event_cache()
+        if display_obj.animation_id:
+            elapsed_time_ms = float(frame_end - display_obj.animation_start)
+            rendering_framework.draw_animation(
+                display_obj.pos_xy,
+                display_obj.animation_scale,
+                display_obj.animation_name,
+                elapsed_time_ms,
+                display_obj.animation_ms_per_frame,
+            )

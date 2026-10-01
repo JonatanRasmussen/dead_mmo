@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Tuple
 from src.settings import Consts
-from .system_interface import System, DisplayObj
+from .system_interface import DisplayObj, GameObj, System
 
 
 class MovementEffect(str, Enum):
@@ -27,9 +27,9 @@ class MovementValidation(str, Enum):
 
 @dataclass(slots=True)
 class ObjMovementData:
-    obj_id: int = Consts.EMPTY_ID
-    parent_id: int = Consts.EMPTY_ID
-    destination_id: int = Consts.EMPTY_ID
+    obj_id: int = Consts.EMPTY_OBJ_ID
+    parent_id: int = Consts.EMPTY_OBJ_ID
+    destination_id: int = Consts.EMPTY_OBJ_ID
     x_pos: float = 0.0
     y_pos: float = 0.0
     x_vel: float = 0.0
@@ -40,18 +40,23 @@ class ObjMovementData:
     movespeed: float = 1.0
 
     @classmethod
-    def create_new_obj(cls, new_obj_id: int, parent_id: int, destination_id: int) -> "ObjMovementData":
+    def create_from_game_obj(cls, game_obj: GameObj) -> "ObjMovementData":
         return cls(
-            obj_id=new_obj_id,
-            parent_id=parent_id,
-            destination_id=destination_id
+            obj_id=game_obj.obj_id,
+            parent_id=game_obj.parent_id,
+            destination_id=game_obj.destination_id
         )
 
 
 class MovementSystem(System):
 
+    def __init__(self) -> None:
+        self._game_objs: dict[int, GameObj] = {}
+        self._data_dct: dict[int, ObjMovementData] = {}
+
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
-        display_obj.pos_xy = (self.get_position(obj_id, current_time))
+        if obj_id in self._data_dct:
+            display_obj.pos_xy = (self.get_position(obj_id, current_time))
         return display_obj
 
     def get_effect_types(self) -> set[str]:
@@ -60,24 +65,18 @@ class MovementSystem(System):
     def get_validation_types(self) -> set[str]:
         return {v.value for v in MovementValidation}
 
-    def __init__(self) -> None:
-        self._data_dct: dict[int, ObjMovementData] = {}
-
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        game_obj = ObjMovementData.create_new_obj(new_obj_id, parent_id, target_id)
-        self.add_data(game_obj)
-
-    def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjMovementData(obj_id=obj_id)
-        self.add_data(environment_obj)
-
-    def add_data(self, new_obj: ObjMovementData) -> None:
-        assert new_obj.obj_id not in self._data_dct, "Error: Obj already exists."
-        self._data_dct[new_obj.obj_id] = new_obj
+    def spawn_game_obj(self, game_obj: GameObj) -> None:
+        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
+        self._game_objs[game_obj.obj_id] = game_obj
 
     def get_data(self, obj_id: int) -> ObjMovementData:
-        assert obj_id in self._data_dct, "Error: Obj does not exist."
-        return self._data_dct[obj_id]
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
+        game_obj = self._game_objs[obj_id]
+        data = ObjMovementData.create_from_game_obj(game_obj)
+        self._data_dct[obj_id] = data
+        return data
 
     def remove_data(self, obj_id: int) -> None:
         self.get_data(obj_id)  # Assert that data exists
@@ -110,7 +109,7 @@ class MovementSystem(System):
         data.timestamp = current_time
 
     def _get_target_vector(self, source_id: int, target_id: int, timestamp: int) -> tuple[bool, float, float, float, float, float]:
-        if source_id not in self._data_dct or target_id not in self._data_dct:
+        if (source_id not in self._data_dct and source_id not in self._game_objs) or (target_id not in self._data_dct and target_id not in self._game_objs):
             return False, 0.0, 0.0, 0.0, 0.0, 0.0
         tar_x, tar_y = self.get_position(target_id, timestamp)
         src_x, src_y = self.get_position(source_id, timestamp)
@@ -191,14 +190,14 @@ class MovementSystem(System):
             case MovementEffect.X_OFFSET:
                 self._bake_position(obj_id, timestamp)
                 data = self.get_data(obj_id)
-                if data.parent_id in self._data_dct:
+                if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
                     p_x, _ = self.get_position(data.parent_id, timestamp)
                     data.x_pos = p_x
                 data.x_pos += effect_value
             case MovementEffect.Y_OFFSET:
                 self._bake_position(obj_id, timestamp)
                 data = self.get_data(obj_id)
-                if data.parent_id in self._data_dct:
+                if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
                     _, p_y = self.get_position(data.parent_id, timestamp)
                     data.y_pos = p_y
                 data.y_pos += effect_value

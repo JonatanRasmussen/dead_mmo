@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from src.settings import Consts
-from .system_interface import System, DisplayObj
+from .system_interface import DisplayObj, GameObj, System
 
 
 class IdentityEffect(str, Enum):
@@ -12,27 +12,37 @@ class IdentityEffect(str, Enum):
 
 class IdentityValidation(str, Enum):
     IS_SOURCE_TARGETING_SELF = "is_targeting_self"
+    IS_SOURCE_TARGETING_PARENT = "is_targeting_parent"
     IS_TARGET_OTHER_TEAM = "is_target_other_team"
 
 
 @dataclass(slots=True)
 class ObjIdentityData:
-    obj_id: int = Consts.EMPTY_ID
-    parent_id: int = Consts.EMPTY_ID
-    event_target_id: int = Consts.EMPTY_ID
+    obj_id: int = Consts.EMPTY_OBJ_ID
+    parent_id: int = Consts.EMPTY_OBJ_ID
+    event_target_id: int = Consts.EMPTY_OBJ_ID
     player_number: int = 0
     threat_score: int = 0
     is_enemy: bool = False
+
+    @classmethod
+    def create_from_game_obj(cls, game_obj: GameObj) -> 'ObjIdentityData':
+        return cls(
+            obj_id=game_obj.obj_id,
+            parent_id=game_obj.parent_id,
+            event_target_id=game_obj.destination_id
+        )
 
 
 class IdentitySystem(System):
 
     def __init__(self) -> None:
+        self._game_objs: dict[int, GameObj] = {}
         self._data_dct: dict[int, ObjIdentityData] = {}
-        self.player_id: int = Consts.EMPTY_ID
-        self.boss_id: int = Consts.EMPTY_ID
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        if obj_id in self._data_dct:
+            pass  # Add display obj contributions from this system's data
         return display_obj
 
     def get_effect_types(self) -> set[str]:
@@ -41,39 +51,46 @@ class IdentitySystem(System):
     def get_validation_types(self) -> set[str]:
         return {v.value for v in IdentityValidation}
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        is_enemy = self.get_data(parent_id).is_enemy if parent_id in self._data_dct else False
-        game_obj = ObjIdentityData(obj_id=new_obj_id, parent_id=parent_id, event_target_id=target_id, is_enemy=is_enemy)
-        self.add_data(new_obj_id, game_obj)
-
-    def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjIdentityData(obj_id=obj_id, event_target_id=obj_id)
-        self.add_data(obj_id, environment_obj)
-
-    def add_data(self, new_obj_id: int, new_obj: ObjIdentityData) -> None:
-        assert new_obj_id not in self._data_dct, "Error: Obj already exists."
-        self._data_dct[new_obj_id] = new_obj
+    def spawn_game_obj(self, game_obj: GameObj) -> None:
+        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
+        self._game_objs[game_obj.obj_id] = game_obj
 
     def get_data(self, obj_id: int) -> ObjIdentityData:
-        assert obj_id in self._data_dct, "Error: Obj does not exist."
-        return self._data_dct[obj_id]
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
+        game_obj = self._game_objs[obj_id]
+        data = ObjIdentityData.create_from_game_obj(game_obj)
+        self._data_dct[obj_id] = data
+
+        if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
+            data.is_enemy = self.get_data(data.parent_id).is_enemy
+
+        return data
 
     def remove_data(self, obj_id: int) -> None:
+        self.get_data(obj_id)  # assertions check
         self._data_dct.pop(obj_id, None)
 
     def get_parent_data(self, obj_id: int) -> ObjIdentityData:
         obj_data = self.get_data(obj_id)
         parent_id = obj_data.parent_id
-        if parent_id == Consts.EMPTY_ID or parent_id == obj_id:
+        if parent_id == Consts.EMPTY_OBJ_ID or parent_id == obj_id:
             print(f"Warning: Obj {obj_id}'s parent {parent_id} has unexpected configuration.")
             return obj_data
         return self.get_data(parent_id)
 
     def get_current_target_for_obj(self, obj_id: int) -> int:
-        return self._data_dct.get(obj_id, ObjIdentityData()).event_target_id
+        if obj_id in self._game_objs or obj_id in self._data_dct:
+            return self.get_data(obj_id).event_target_id
+        return ObjIdentityData().event_target_id
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
+            case IdentityValidation.IS_SOURCE_TARGETING_SELF:
+                return bool(validation_value) == (source_id == target_id)
+            case IdentityValidation.IS_SOURCE_TARGETING_PARENT:
+                return bool(validation_value) == (self.get_data(source_id).parent_id == target_id)
             case IdentityValidation.IS_TARGET_OTHER_TEAM:
                 return bool(validation_value) == (self.get_data(source_id).is_enemy != self.get_data(target_id).is_enemy)
             case _:
@@ -83,7 +100,6 @@ class IdentitySystem(System):
         match effect_type:
             case  IdentityEffect.APPLY_PLAYER_NUMBER:
                 self.get_data(obj_id).player_number += int(effect_value)
-                self.player_id = obj_id
             case IdentityEffect.SWAP_TEAM:
                 data = self.get_data(obj_id)
                 data.is_enemy = not data.is_enemy

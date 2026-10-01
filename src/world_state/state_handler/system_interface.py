@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from .display_obj import DisplayObj
+from .game_obj import GameObj
+
 
 class System(ABC):
 
@@ -16,11 +18,7 @@ class System(ABC):
         ...
 
     @abstractmethod
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        ...
-
-    @abstractmethod
-    def spawn_environment_obj(self, obj_id: int) -> None:
+    def spawn_game_obj(self, game_obj: GameObj) -> None:
         ...
 
     @abstractmethod

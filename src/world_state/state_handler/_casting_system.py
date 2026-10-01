@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ValuesView
 from src.settings import Consts
-from .system_interface import System, DisplayObj
+from .system_interface import DisplayObj, GameObj, System
 
 
 class CastingEffect(str, Enum):
@@ -23,24 +23,31 @@ class CastingValidation(str, Enum):
 
 @dataclass(slots=True)
 class ObjCastingData:
-    obj_id: int = Consts.EMPTY_ID
-    parent_id: int = Consts.EMPTY_ID
+    obj_id: int = Consts.EMPTY_OBJ_ID
+    parent_id: int = Consts.EMPTY_OBJ_ID
     gcd_start: int = Consts.EMPTY_TIMESTAMP
     gcd_duration: int = 0
     cooldown_start: int = Consts.EMPTY_TIMESTAMP
     cooldown_duration: int = 0
-    selected_spell_id: int = Consts.EMPTY_ID
+    selected_spell_id: int = Consts.EMPTY_SPELL_ID
     casting_start: int = Consts.EMPTY_TIMESTAMP
     casting_duration: int = 0
     casting_ticks: int = 0
+
+    @classmethod
+    def create_from_game_obj(cls, game_obj: GameObj) -> 'ObjCastingData':
+        return ObjCastingData(obj_id=game_obj.obj_id, parent_id=game_obj.parent_id)
 
 
 class CastingSystem(System):
 
     def __init__(self) -> None:
+        self._game_objs: dict[int, GameObj] = {}
         self._data_dct: dict[int, ObjCastingData] = {}
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
+        if obj_id in self._data_dct:
+            pass  # Add display obj contributions from this system's data
         return display_obj
 
     def get_effect_types(self) -> set[str]:
@@ -49,21 +56,18 @@ class CastingSystem(System):
     def get_validation_types(self) -> set[str]:
         return {v.value for v in CastingValidation}
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        game_obj = ObjCastingData(obj_id=new_obj_id, parent_id=parent_id)
-        self.add_data(new_obj_id, game_obj)
-
-    def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjCastingData(obj_id=obj_id)
-        self.add_data(obj_id, environment_obj)
-
-    def add_data(self, new_obj_id: int, new_obj: ObjCastingData) -> None:
-        assert new_obj_id not in self._data_dct, "Error: Obj already exists."
-        self._data_dct[new_obj_id] = new_obj
+    def spawn_game_obj(self, game_obj: GameObj) -> None:
+        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
+        self._game_objs[game_obj.obj_id] = game_obj
 
     def get_data(self, obj_id: int) -> ObjCastingData:
-        assert obj_id in self._data_dct, "Error: Obj does not exist."
-        return self._data_dct[obj_id]
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
+        game_obj = self._game_objs[obj_id]
+        data = ObjCastingData.create_from_game_obj(game_obj)
+        self._data_dct[obj_id] = data
+        return data
 
     def remove_data(self, obj_id: int) -> None:
         self.get_data(obj_id)  # assertions check
@@ -76,7 +80,7 @@ class CastingSystem(System):
     def get_parent_data(self, obj_id: int) -> ObjCastingData:
         obj_data = self.get_data(obj_id)
         parent_id = obj_data.parent_id
-        if parent_id == Consts.EMPTY_ID or parent_id == obj_id:
+        if parent_id == Consts.EMPTY_OBJ_ID or parent_id == obj_id:
             print(f"Warning: Obj {obj_id}'s parent {parent_id} has unexpected configuration.")
             return obj_data
         return self.get_data(parent_id)

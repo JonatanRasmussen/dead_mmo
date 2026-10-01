@@ -2,6 +2,7 @@ from .hardware_inputs_consts import HardwareInputConsts
 
 class LevelSetupConsts:
 
+    OMEGA_SETUP_SPELL_IDS: list[int] = [968, 7999]
     BRAVO_SETUP_SPELL_IDS: list[int] = [6767]
     TEST_SETUP_SPELL_IDS: list[int] = [300]
     SCRIPTED_PLAYER_INPUT_FOR_TESTING: dict[int, list[str]] = {

@@ -1,7 +1,11 @@
 
 
 class Consts:
-    EMPTY_ID: int = 0
+    EMPTY_ID_FOR_ID_GEN: int = 0
+    EMPTY_EVENT_ID: int = 0
+    EMPTY_OBJ_ID: int = 0
+    EMPTY_SPELL_ID: int = 0
+    EMPTY_ASSET_ID: int = 0
     TIMESTAMPS_PER_SECOND: int = 1000
     EMPTY_TIMESTAMP: int = -999_999
     EMPTY_ASSET_NAME: str = ""
@@ -17,13 +21,3 @@ class Consts:
     MOVEMENT_UPDATES_PER_SECOND: int = 50
 
     FAILED_VALIDATION: str = "invalid"
-
-
-
-    @staticmethod
-    def is_empty_id(id_num: int) -> bool:
-        return id_num == Consts.EMPTY_ID
-
-    @staticmethod
-    def is_valid_id(id_num: int) -> bool:
-        return not Consts.is_empty_id(id_num)

@@ -2,7 +2,7 @@ import math
 from dataclasses import dataclass
 from enum import Enum
 from src.settings import Consts
-from .system_interface import System, DisplayObj
+from .system_interface import DisplayObj, GameObj, System
 
 
 class HealthEffect(str, Enum):
@@ -19,25 +19,25 @@ class HealthValidation(str, Enum):
 
 @dataclass(slots=True)
 class ObjHealthData:
-    obj_id: int = Consts.EMPTY_ID
+    obj_id: int = Consts.EMPTY_OBJ_ID
     is_hittable: bool = False
     hp: float = 0.0
     spell_modifier: float = 1.0
 
     @classmethod
-    def create_new_obj(cls, new_obj_id: int) -> "ObjHealthData":
-        return cls(
-            obj_id=new_obj_id,
-        )
+    def create_from_game_obj(cls, game_obj: GameObj) -> "ObjHealthData":
+        return cls(obj_id=game_obj.obj_id)
 
 
 class HealthSystem(System):
 
     def __init__(self) -> None:
+        self._game_objs: dict[int, GameObj] = {}
         self._data_dct: dict[int, ObjHealthData] = {}
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
-        display_obj.size = self._get_size(obj_id)
+        if obj_id in self._data_dct:
+            display_obj.size = self._get_size(obj_id)
         return display_obj
 
     def get_effect_types(self) -> set[str]:
@@ -46,21 +46,18 @@ class HealthSystem(System):
     def get_validation_types(self) -> set[str]:
         return {v.value for v in HealthValidation}
 
-    def spawn_game_obj(self, timestamp: int, new_obj_id: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        game_obj = ObjHealthData.create_new_obj(new_obj_id)
-        self.add_data(new_obj_id, game_obj)
-
-    def spawn_environment_obj(self, obj_id: int) -> None:
-        environment_obj = ObjHealthData.create_new_obj(obj_id)
-        self.add_data(obj_id, environment_obj)
-
-    def add_data(self, new_obj_id: int, new_obj: ObjHealthData) -> None:
-        assert new_obj_id not in self._data_dct, "Error: Obj already exists."
-        self._data_dct[new_obj_id] = new_obj
+    def spawn_game_obj(self, game_obj: GameObj) -> None:
+        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
+        self._game_objs[game_obj.obj_id] = game_obj
 
     def get_data(self, obj_id: int) -> ObjHealthData:
-        assert obj_id in self._data_dct, "Error: Obj does not exist."
-        return self._data_dct[obj_id]
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
+        game_obj = self._game_objs[obj_id]
+        data = ObjHealthData.create_from_game_obj(game_obj)
+        self._data_dct[obj_id] = data
+        return data
 
     def remove_data(self, obj_id: int) -> None:
         self.get_data(obj_id)  # Assert that data exists

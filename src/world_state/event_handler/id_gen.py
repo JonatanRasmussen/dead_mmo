@@ -1,13 +1,16 @@
 from typing import Set, Deque
 from collections import deque
 
-from src.settings.consts import Consts
-
+from src.settings import Consts
 
 class IdGen:
     """ ID generator that provides unique IDs from a set of assigned integers. """
+    EMPTY_ID = Consts.EMPTY_ID_FOR_ID_GEN
+    MIN_ID: int = -999_999
+    MAX_ID: int = 999_999
+
     def __init__(self) -> None:
-        self._reserved_ids: Set[int] = set({Consts.EMPTY_ID})
+        self._reserved_ids: Set[int] = {IdGen.EMPTY_ID}
         self._assigned_ids: Deque[int] = deque()
 
     @classmethod
@@ -24,10 +27,10 @@ class IdGen:
     def generate_new_id(self) -> int:
         if not self._assigned_ids:
             assert self._assigned_ids, "No more IDs available."
-            return Consts.EMPTY_ID
+            return IdGen.EMPTY_ID
         new_id = self._assigned_ids.popleft()
-        assert new_id > Consts.MIN_ID, "ID is lower than Consts.MIN_ID."
-        assert new_id < Consts.MAX_ID, "ID is higher than Consts.MAX_ID."
+        assert new_id > IdGen.MIN_ID, "ID is lower than Consts.MIN_ID."
+        assert new_id < IdGen.MAX_ID, "ID is higher than Consts.MAX_ID."
         return new_id
 
     def reserve_id(self, reserved_id: int) -> None:

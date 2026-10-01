@@ -6,31 +6,41 @@ from typing import Dict
 from src.settings import Consts
 from .display_obj import DisplayObj
 from ._casting_system import CastingEffect, CastingValidation
-from ._health_system import HealthEffect, HealthValidation
-from ._movement_system import MovementEffect, MovementValidation
 from ._display_system import DisplayEffect, DisplayValidation
-from ._attachment_system import AttachmentEffect, AttachmentValidation
+from ._health_system import HealthEffect, HealthValidation
 from ._identity_system import IdentityEffect, IdentityValidation
+from ._movement_system import MovementEffect, MovementValidation
 
 
 class TriggerType(str, Enum):
     SPAWN_CHILD = "spawn_child"
     TIMELINE = "timeline"
     AOE_SPELL = "aoe_spell"
+    SIGNAL_SPELL = "on_signal"
 
 VALID_TRIGGER_TYPES = (
     {t.value for t in TriggerType}
 )
+
+class TriggerEffect(str, Enum):
+    SPAWN_AS_CHILD = "spawn_as_child"
+    SEND_AS_SIGNAL = "cast_as_signal"
+    FIRE_WITH_DELAY = "delay_event"
+
 VALID_EFFECT_TYPES = (
-    {e.value for e in AttachmentEffect} |
+    {t.value for t in TriggerEffect} |
     {e.value for e in CastingEffect} |
     {e.value for e in DisplayEffect} |
     {e.value for e in HealthEffect} |
     {e.value for e in IdentityEffect} |
     {e.value for e in MovementEffect}
 )
+
+class SelfcastValidation(str, Enum):
+    IS_SELFCAST = "is_selfcast"
+
 VALID_VALIDATION_TYPES = (
-    {v.value for v in AttachmentValidation} |
+    {s.value for s in SelfcastValidation} |
     {v.value for v in CastingValidation} |
     {v.value for v in DisplayValidation} |
     {v.value for v in HealthValidation} |
@@ -63,7 +73,7 @@ class RegistryForAssetIDs:
         return asset_id
 
     def get_asset_name(self, asset_id: float) -> str:
-        if int(asset_id) == Consts.EMPTY_ID:
+        if int(asset_id) == Consts.EMPTY_ASSET_ID:
             return ""
         result = self._asset_id_to_name.get(asset_id)
         if result is None:
@@ -73,13 +83,15 @@ class RegistryForAssetIDs:
 
 @dataclass(slots=True)
 class SpellDef:
-    spell_id: int
+    spell_id: int = Consts.EMPTY_SPELL_ID
     name: str = ""
     validations: dict[str, float] = field(default_factory=dict)
     effects: dict[str, float] = field(default_factory=dict)
+    cascade: list[int] = field(default_factory=list)
     spawn_child: list[int] = field(default_factory=list)
     timeline: dict[int, list[int]] = field(default_factory=dict)
-    aoe_spell_id: int = Consts.EMPTY_ID
+    aoe_spell_id: int = Consts.EMPTY_SPELL_ID
+    signal_spell_id: int = Consts.EMPTY_SPELL_ID
 
 
 class YamlSpellLoader:
@@ -90,6 +102,7 @@ class YamlSpellLoader:
     def fetch_asset_names_for_display_obj(self, display_obj: DisplayObj) -> DisplayObj:
         display_obj.sprite_name = self.asset_id_registry.get_asset_name(display_obj.sprite_id)
         display_obj.audio_name = self.asset_id_registry.get_asset_name(display_obj.audio_id)
+        display_obj.animation_name = self.asset_id_registry.get_asset_name(display_obj.animation_id)
         return display_obj
 
     def get_asset_name(self, asset_id: float) -> str:
@@ -126,17 +139,16 @@ class YamlSpellLoader:
             for t in triggers.keys():
                 if t not in VALID_TRIGGER_TYPES: raise ValueError(f"Unknown trigger '{t}' found in spell_id {spell_id}.")
 
+            cascade = s.get("cascade", [])
+            cascade = [int(c) for c in (cascade if isinstance(cascade, list) else [cascade])]
+
             spawn_child = triggers.get(TriggerType.SPAWN_CHILD, [])
             spawn_child = [int(c) for c in (spawn_child if isinstance(spawn_child, list) else [spawn_child])]
 
+
             timeline = {int(k): [int(v) for v in (val if isinstance(val, list) else [val])] for k, val in triggers.get(TriggerType.TIMELINE, {}).items()}
-
-            aoe_spell_id = triggers.get(TriggerType.AOE_SPELL)
-            if aoe_spell_id is None:
-                aoe_spell_id = Consts.EMPTY_ID
-            else:
-                aoe_spell_id = int(aoe_spell_id)
-
+            signal_spell_id = int(triggers.get(TriggerType.SIGNAL_SPELL) or Consts.EMPTY_SPELL_ID)
+            aoe_spell_id = int(triggers.get(TriggerType.AOE_SPELL) or Consts.EMPTY_SPELL_ID)
             validations = self._parse_numeric_dict(s.get("validations", {}), VALID_VALIDATION_TYPES, "validation", spell_id)
             effects = self._parse_numeric_dict(s.get("effects", {}), VALID_EFFECT_TYPES, "effect", spell_id)
 
@@ -155,5 +167,7 @@ class YamlSpellLoader:
                 spawn_child=spawn_child,
                 timeline=timeline,
                 aoe_spell_id=aoe_spell_id,
+                signal_spell_id=signal_spell_id,
+                cascade=cascade
             )
         return db
