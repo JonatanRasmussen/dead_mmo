@@ -1,3 +1,4 @@
+from pygame import display
 from .pygame_renderer import PygameRenderer
 from src.settings import Consts
 from src.world_state.world_state import DisplayObj, WorldState
@@ -61,22 +62,13 @@ class IngameLoop:
 
     @staticmethod
     def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, frame_start: int, frame_end: int) -> None:
-        if display_obj.is_visible:
+        if display_obj.is_visible or display_obj.has_sprite:
             rendering_framework.draw_blinking_circle(
                 pos_xy=display_obj.pos_xy,
                 scale=display_obj.size,
                 color_rgb=display_obj.color_rgb,
                 time_ms=rendering_framework.get_current_time(),
-                asset_name=display_obj.sprite_name,
-        )
+                asset_name=display_obj.sprite_asset_name,
+            )
         if display_obj.audio_id and display_obj.audio_start > frame_start:
             rendering_framework.play_sound(display_obj.audio_name)
-        if display_obj.animation_id:
-            elapsed_time_ms = float(frame_end - display_obj.animation_start)
-            rendering_framework.draw_animation(
-                display_obj.pos_xy,
-                display_obj.animation_scale,
-                display_obj.animation_name,
-                elapsed_time_ms,
-                display_obj.animation_ms_per_frame,
-            )

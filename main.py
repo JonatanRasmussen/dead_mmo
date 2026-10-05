@@ -10,7 +10,7 @@ def main() -> None:
         LevelSetupConsts.OMEGA_SETUP_SPELL_IDS,
         LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
     )
-    # Actually play the playd
+    # Actually play the playddw
     IngameLoop.play_game_in_pygame(
         LevelSetupConsts.OMEGA_SETUP_SPELL_IDS,
         #LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING

@@ -7074,7 +7074,7 @@
       "health": {
         "obj_id": 2,
         "is_hittable": false,
-        "hp": -113.0,
+        "hp": -79.0,
         "spell_modifier": 1.0
       },
       "movement": {
@@ -7154,7 +7154,7 @@
         "x_dir": 0.7629546767537968,
         "y_dir": 0.6464519790514291,
         "timestamp": 1460,
-        "movespeed": 0.0
+        "movespeed": 5.0
       }
     },
     "5": {
@@ -7187,7 +7187,7 @@
         "x_dir": 0.4070474924151493,
         "y_dir": 0.9134069952209359,
         "timestamp": 1380,
-        "movespeed": 0.0
+        "movespeed": 5.0
       }
     },
     "6": {
@@ -7286,7 +7286,7 @@
         "x_dir": -0.1642278983989454,
         "y_dir": -0.9864224234005763,
         "timestamp": 6120,
-        "movespeed": 0.0
+        "movespeed": 5.0
       }
     }
   }

@@ -7,8 +7,6 @@ from .state_handler import StateHandler, DisplayObj
 
 class WorldState:
 
-    ROOT_CONTROLLER_ID: int = 1
-
     def __init__(self) -> None:
         self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._event_handler: EventHandler = EventHandler()
@@ -25,6 +23,10 @@ class WorldState:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
 
     def register_player(self, ingame_time: int, setup_spell_id: int) -> int:
+        new_obj_id = self._handle_event(ingame_time, Consts.EMPTY_OBJ_ID, setup_spell_id, Consts.EMPTY_OBJ_ID)
+        player_inputs: list[str] = []
+        self.process_frame(new_obj_id, player_inputs, ingame_time)
+        return new_obj_id
         player_obj_id = self._game_obj_id_gen.generate_new_id()
         self._state_handler.spawn_game_obj(player_obj_id, ingame_time, player_obj_id, setup_spell_id, player_obj_id)
         self._event_handler.dispatch_upcoming_event(ingame_time, player_obj_id, setup_spell_id, player_obj_id)
@@ -42,10 +44,18 @@ class WorldState:
             validation_code = self._state_handler.validate_event(timestamp, source_id, spell_id, target_id)
             outcome_is_valid = self._event_handler.finalize_event(validation_code)
             if outcome_is_valid:
-                self._handle_spawn(timestamp, source_id, spell_id, target_id)
-                self._state_handler.apply_event(timestamp, spell_id, target_id)
-                self._create_cascading_events(timestamp, source_id, spell_id)
+                self._handle_event(timestamp, source_id, spell_id, target_id)
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
+
+    def _handle_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
+        new_obj_id = self._handle_spawn(timestamp, source_id, spell_id, target_id)
+        if new_obj_id != Consts.EMPTY_OBJ_ID:
+            self._state_handler.apply_event(timestamp, spell_id, new_obj_id)
+            self._create_cascading_events(timestamp, new_obj_id, spell_id)
+        else:
+            self._state_handler.apply_event(timestamp, spell_id, target_id)
+            self._create_cascading_events(timestamp, source_id, spell_id)
+        return new_obj_id
 
     def _create_cascading_events(self, timestamp: int, source_id: int, spell_id: int) -> None:
         """
@@ -89,9 +99,9 @@ class WorldState:
             for signalled_obj_id in signalled_obj_ids:
                 self._event_handler.dispatch_upcoming_event(timestamp, signalled_obj_id, signal_spell_id, signalled_obj_id)
 
-    def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        child_init_spell_ids = self._state_handler.get_spawn_child_id(spell_id)
-        for child_init_spell in child_init_spell_ids:
-            new_obj_id = self._game_obj_id_gen.generate_new_id()
-            self._state_handler.spawn_game_obj(new_obj_id, timestamp, source_id, spell_id, target_id)
-            self._event_handler.dispatch_upcoming_event(timestamp, new_obj_id, child_init_spell, new_obj_id)
+    def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
+        if self._state_handler.is_spell_spawning_as_child(spell_id):
+            new_source_id = self._game_obj_id_gen.generate_new_id()
+            self._state_handler.spawn_game_obj(new_source_id, timestamp, source_id, spell_id, target_id)
+            return new_source_id
+        return Consts.EMPTY_OBJ_ID

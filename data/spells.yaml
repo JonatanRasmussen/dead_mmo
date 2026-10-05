@@ -93,17 +93,12 @@
     play_audio: Rejuvenation
     gcd_duration: 1000
   triggers:
-    aoe_spell: 171
-
-171:
-  name: spawn_healing_powerup
-  validations:
-    is_targeting_parent: true
-  triggers:
-    spawn_child: [172]
+    aoe_spell: 172
 
 172:
   name: init_healing_powerup
+  validations:
+    is_targeting_parent: true
   effects:
     spawn_as_child: true
     is_unhittable: true
@@ -156,18 +151,13 @@
   effect:
     play_audio: MoltenBlastHit
   triggers:
-    aoe_spell: 71
-
-71:
-  name: spawn_landmine
-  validations:
-    is_target_hittable: true
-    is_target_other_team: true
-  triggers:
-    spawn_child: [72]
+    aoe_spell: 72
 
 72:
   name: init_landmine
+  validations:
+    is_target_hittable: true
+    is_target_other_team: true
   effects:
     spawn_as_child: true
     gain_channeling_ticks: 150
@@ -218,10 +208,13 @@
 80:
   name: spawn_target_dummy
   triggers:
-    spawn_child: [83]
+    timeline:
+      0: [83]
 
 83:
   name: init_target_dummy
+  validations:
+    is_targeting_parent: true
   effects:
     spawn_as_child: true
     threat_score: 901
@@ -239,7 +232,8 @@
 970:
   name: spawn_bravo_dummy
   triggers:
-    spawn_child: [971]
+    timeline:
+      0: [971]
 
 971:
   name: init_bravo_dummy
@@ -308,18 +302,13 @@
     base_cooldown: 2000
     gcd_duration: 1000
   triggers:
-    aoe_spell: 1441
-
-1441:
-  name: shadowbolt_spawn
-  validations:
-    is_target_hittable: true
-    is_target_other_team: true
-  triggers:
-    spawn_child: [1442]
+    aoe_spell: 1442
 
 1442:
   name: shadowbolt_init
+  validations:
+    is_target_hittable: true
+    is_target_other_team: true
   effects:
     spawn_as_child: true
     is_unhittable: true
@@ -353,6 +342,14 @@
   effects:
     gain_channeling_ticks: -65535
     turn_invisible: true
+    movespeed: 0.0
+    play_audio: ShadowBoltHit
+    animation_id: explosion
+    animation_frames: 7
+    animation_speed: 100
+    animation_loops: 2
+    animation_scale: 0.5
+    play_animation: true
   triggers:
     aoe_spell: 1445
 
@@ -361,8 +358,6 @@
   validations:
     is_target_the_destination: true
   effects:
-    play_audio: ShadowBoltHit
-    play_animation: explosion
     damage: 34.0
 
 
@@ -400,4 +395,9 @@
     color_red: 255
     color_green: 0
     color_blue: 0
-    icon_id: Poro
+    animation_id: poro
+    animation_frames: 1
+    animation_speed: 1000000
+    animation_loops: 1
+    play_animation: true
+    damage: 34.0

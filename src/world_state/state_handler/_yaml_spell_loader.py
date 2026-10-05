@@ -102,7 +102,6 @@ class YamlSpellLoader:
     def fetch_asset_names_for_display_obj(self, display_obj: DisplayObj) -> DisplayObj:
         display_obj.sprite_name = self.asset_id_registry.get_asset_name(display_obj.sprite_id)
         display_obj.audio_name = self.asset_id_registry.get_asset_name(display_obj.audio_id)
-        display_obj.animation_name = self.asset_id_registry.get_asset_name(display_obj.animation_id)
         return display_obj
 
     def get_asset_name(self, asset_id: float) -> str:
