@@ -7,7 +7,7 @@ from src.world_state.world_state import DisplayObj, WorldState
 class IngameLoop:
 
     @staticmethod
-    def play_game_in_pygame(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]] | None = None) -> None:
+    def play_game_in_pygame(setup_spell_names: list[str], scripted_player_input: dict[int, list[str]] | None = None) -> None:
 
         # Initialization
         rendering_framework = PygameRenderer()
@@ -16,11 +16,11 @@ class IngameLoop:
         rounding_error = 0.0
         cached_irl_time = rendering_framework.get_current_time()
         world_state = WorldState()
-        assert len(setup_spell_ids) == 2, f"Unsupported amount of setup_spell_ids ({len(setup_spell_ids)}), for now the game only supports 1 boss and 1 player"
-        boss1_setup_spell_id = setup_spell_ids[0]
-        player1_setup_spell_id = setup_spell_ids[1]
-        _boss1_obj_id = world_state.register_player(current_ingame_time, boss1_setup_spell_id)
-        player1_obj_id = world_state.register_player(current_ingame_time, player1_setup_spell_id)
+        assert len(setup_spell_names) == 2, f"Unsupported amount of setup_spell_names ({len(setup_spell_names)}), for now the game only supports 1 boss and 1 player"
+        boss1_setup_spell_name = setup_spell_names[0]
+        player1_setup_spell_name = setup_spell_names[1]
+        _boss1_obj_id = world_state.register_player(current_ingame_time, boss1_setup_spell_name)
+        player1_obj_id = world_state.register_player(current_ingame_time, player1_setup_spell_name)
         player_inputs_this_frame: list[str] = []
         while rendering_framework.is_running():
             # Update time (and because smallest in-game timeunit is 1ms, ensure rounding error stays +/- 1ms throughout the game)
@@ -53,7 +53,7 @@ class IngameLoop:
             rendering_framework.begin_frame()
             display_objs_dct = world_state.get_display_obj_dct(current_ingame_time)
             for display_obj in display_objs_dct.values():
-                IngameLoop._render_game_obj(rendering_framework, display_obj, ingame_time_at_frame_start, current_ingame_time)
+                IngameLoop._render_game_obj(rendering_framework, display_obj, ingame_time_at_frame_start)
             rendering_framework.end_frame()
 
         # Cleanup when exiting game
@@ -61,7 +61,7 @@ class IngameLoop:
 
 
     @staticmethod
-    def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, frame_start: int, frame_end: int) -> None:
+    def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, frame_start: int) -> None:
         if display_obj.is_visible or display_obj.has_sprite:
             rendering_framework.draw_blinking_circle(
                 pos_xy=display_obj.pos_xy,

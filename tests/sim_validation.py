@@ -17,14 +17,14 @@ class SimValidation:
     # ------------------------------------------------------------------ #
 
     @staticmethod
-    def simulate_game_in_console(setup_spell_ids: list[int], scripted_player_input: dict[int, list[str]]) -> None:
+    def simulate_game_in_console(setup_spell_names: list[str], scripted_player_input: dict[int, list[str]]) -> None:
         ingame_time = 0
         world_state = WorldState()
-        assert len(setup_spell_ids) == 2, f"Unsupported amount of setup_spell_ids ({len(setup_spell_ids)}), for now the game only supports 1 boss and 1 player"
-        boss1_setup_spell_id = setup_spell_ids[0]
-        player1_setup_spell_id = setup_spell_ids[1]
-        _boss1_obj_id = world_state.register_player(ingame_time, boss1_setup_spell_id)
-        player1_obj_id = world_state.register_player(ingame_time, player1_setup_spell_id)
+        assert len(setup_spell_names) == 2, f"Unsupported amount of setup_spell_names ({len(setup_spell_names)}), for now the game only supports 1 boss and 1 player"
+        boss1_setup_spell_name = setup_spell_names[0]
+        player1_setup_spell_name = setup_spell_names[1]
+        _boss1_obj_id = world_state.register_player(ingame_time, boss1_setup_spell_name)
+        player1_obj_id = world_state.register_player(ingame_time, player1_setup_spell_name)
         SIMULATION_DURATION_MS = 10000
         UPDATES_PER_SECOND = 50
         FRAME_DURATION_MS = 1000 // UPDATES_PER_SECOND
@@ -42,7 +42,8 @@ class SimValidation:
                         player_inputs_this_frame.append(player_input)
             world_state.process_frame(player1_obj_id, player_inputs_this_frame, ingame_time)
 
-        SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_ids))
+        # Replace invalid characters in filename if needed, but str(list) is usually fine
+        SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_names))
 
     @staticmethod
     def _run_snapshot_test(state: WorldState, snapshot_name: str = "default", checks: set[str] | None = None) -> None:
@@ -103,10 +104,18 @@ class SimValidation:
         event_logs = state._event_handler._event_log_for_each_frame
         for frame_time in sorted(event_logs.keys()):
             event_log = event_logs[frame_time]
-            serialized_events = [
-                json.loads(event.serialize())
-                for event in sorted(event_log.view_all_events, key=lambda e: e.event_id)
-            ]
+            serialized_events = []
+
+            for event in sorted(event_log.view_all_events, key=lambda e: e.event_id):
+                evt_dict = json.loads(event.serialize())
+
+                # Convert spell_id to spell_name for stable snapshot testing
+                if "spell_id" in evt_dict:
+                    spell_id = evt_dict.pop("spell_id")
+                    evt_dict["spell_name"] = state._spell_handler.get_spell_name(spell_id)
+
+                serialized_events.append(evt_dict)
+
             if serialized_events:
                 events_by_frame[str(frame_time)] = serialized_events
 
@@ -126,13 +135,17 @@ class SimValidation:
     @staticmethod
     def _serialize_ecs_entity(state: WorldState, obj_id: int) -> dict:
         """Helper to fetch and stringify all components for a specific entity."""
-        def sanitize(val):
+        def sanitize(key, val):
+            # If the key implies it's a spell ID, convert it to a string name!
+            if isinstance(key, str) and key.endswith("spell_id") and isinstance(val, int):
+                return state._spell_handler.get_spell_name(val)
+
             if isinstance(val, Enum):
                 return val.name
             elif isinstance(val, dict):
-                return {str(k): sanitize(v) for k, v in val.items()}
+                return {str(k): sanitize(k, v) for k, v in val.items()}
             elif isinstance(val, (list, tuple)):
-                return [sanitize(v) for v in val]
+                return [sanitize(key, v) for v in val]
             return val
 
         data: dict[Any, Any] = {}

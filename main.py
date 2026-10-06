@@ -7,12 +7,12 @@ import cProfile
 def main() -> None:
     # Run tests
     SimValidation.simulate_game_in_console(
-        LevelSetupConsts.OMEGA_SETUP_SPELL_IDS,
+        LevelSetupConsts.OMEGA_SETUP_SPELL_NAMES,
         LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
     )
     # Actually play the game
     IngameLoop.play_game_in_pygame(
-        LevelSetupConsts.OMEGA_SETUP_SPELL_IDS,
+        LevelSetupConsts.OMEGA_SETUP_SPELL_NAMES,
         #LevelSetupConsts.SCRIPTED_PLAYER_INPUT_FOR_TESTING
     )
 

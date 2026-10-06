@@ -16,6 +16,13 @@ class SpellHandler:
         spell_loader.validate_types(valid_effect_types, valid_validation_types)
         return SpellHandler(spell_loader)
 
+    def get_spell_id(self, spell_name: str) -> int:
+        return self.spell_loader.get_spell_id(spell_name)
+
+    def get_spell_name(self, spell_id: int) -> str:
+        spell = self.spell_database.get(spell_id)
+        return spell.name if spell else "unknown_spell"
+
     def get_asset_name(self, asset_id: float) -> str:
         return self.spell_loader.get_asset_name(asset_id)
 

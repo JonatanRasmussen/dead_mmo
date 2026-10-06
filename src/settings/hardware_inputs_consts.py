@@ -22,22 +22,22 @@ class HardwareInputConsts:
     KEYBOARD_KEYUP_ARROW_RIGHT  = "BUILTIN_KEYBOARD_KEYUP_ARROW_RIGHT"
 
     @staticmethod
-    def get_spells_for_player_inputs(player_id: int, player_inputs: list[str]) -> list[int]:
-        spell_ids = []
+    def get_spell_names_for_player_inputs(player_id: int, player_inputs: list[str]) -> list[str]:
+        spell_names = []
         if player_id != Consts.EMPTY_OBJ_ID:
             for player_input in player_inputs:
                 match player_input:
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_1: spell_ids.append(128)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_2: spell_ids.append(911)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_3: spell_ids.append(170)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_4: spell_ids.append(1440)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_TAB: spell_ids.append(15)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_UP: spell_ids.append(91)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_UP: spell_ids.append(92)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_LEFT: spell_ids.append(181)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_LEFT: spell_ids.append(182)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_DOWN: spell_ids.append(271)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_DOWN: spell_ids.append(272)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_RIGHT: spell_ids.append(1)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_RIGHT: spell_ids.append(2)
-        return spell_ids
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_1: spell_names.append("molten_blast_aoe")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_2: spell_names.append("shadow_blast_buttonpress")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_3: spell_names.append("keypress_healing_powerup")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_4: spell_names.append("shadowbolt_keypress")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_TAB: spell_names.append("tab_target_spell")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_UP: spell_names.append("start_move_up")
+                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_UP: spell_names.append("stop_move_up")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_LEFT: spell_names.append("start_move_left")
+                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_LEFT: spell_names.append("stop_move_left")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_DOWN: spell_names.append("start_move_down")
+                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_DOWN: spell_names.append("stop_move_down")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_RIGHT: spell_names.append("start_move_right")
+                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_RIGHT: spell_names.append("stop_move_right")
+        return spell_names

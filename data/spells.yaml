@@ -1,70 +1,60 @@
 # ==========================================
 # Start of configs (spells.yaml)
 # ==========================================
-0:
-  name: empty_spell
+empty_spell:
 
 # ==========================================
 # Basic Movement
 # ==========================================
-91:
-  name: start_move_up
+start_move_up:
   validation:
     is_targeting_self: true
   effects:
     walk_forward: true
 
-92:
-  name: stop_move_up
+stop_move_up:
   validation:
     is_targeting_self: true
   effects:
     walk_forward: false
 
-181:
-  name: start_move_left
+start_move_left:
   validation:
     is_targeting_self: true
   effects:
     walk_left: true
 
-182:
-  name: stop_move_left
+stop_move_left:
   validation:
     is_targeting_self: true
   effects:
     walk_left: false
 
-271:
-  name: start_move_down
+start_move_down:
   validation:
     is_targeting_self: true
   effects:
     walk_backward: true
 
-272:
-  name: stop_move_down
+stop_move_down:
   validation:
     is_targeting_self: true
   effects:
     walk_backward: false
 
-1:
-  name: start_move_right
+start_move_right:
   validation:
     is_targeting_self: true
   effects:
     walk_right: true
 
-2:
-  name:
+stop_move_right:
   validation:
     is_targeting_self: true
   effects:
     walk_right: false
 
-361:
-  name: step_towards_target
+step_towards_target:
   validations:
     is_targeting_self: true
     has_channeling_ticks: 1
@@ -73,23 +63,21 @@
     walk_towards_target: true
   triggers:
     timeline:
-      20: [361]
+      20: [step_towards_target]
 
-362:
-  name: start_move_towards_target
+start_move_towards_target:
   validations:
     is_targeting_self: true
   effects:
     gain_channeling_ticks: 3600
   triggers:
     timeline:
-      20: [361]
+      20: [step_towards_target]
 
 # ==========================================
 # Npc Healing Powerup
 # ==========================================
-170:
-  name: keypress_healing_powerup
+keypress_healing_powerup:
   validations:
     is_targeting_self: true
     is_gcd_ready: true
@@ -98,10 +86,9 @@
     gcd_duration: 1000
   triggers:
     timeline:
-      0: [172]
+      0: [init_healing_powerup]
 
-172:
-  name: init_healing_powerup
+init_healing_powerup:
   validations:
     is_targeting_self: true
   effects:
@@ -116,10 +103,9 @@
     color_blue: 0
   triggers:
     timeline:
-      200: [173]
+      200: [tick_healing_powerup]
 
-173:
-  name: tick_healing_powerup
+tick_healing_powerup:
   validations:
     is_targeting_self: true
     has_channeling_ticks: 1
@@ -127,11 +113,10 @@
     gain_channeling_ticks: -1
   triggers:
     timeline:
-      0: [174]
-      100: [173]
+      0: [try_trigger_healing_powerup]
+      100: [tick_healing_powerup]
 
-174:
-  name: try_trigger_healing_powerup
+try_trigger_healing_powerup:
   validations:
     is_targeting_self: true
     is_destination_within_range: 0.1
@@ -140,32 +125,28 @@
     turn_invisible: true
   triggers:
     timeline:
-      0: [175]
+      0: [healing_powerup_apply]
 
-175:
-  name: healing_powerup_apply
+healing_powerup_apply:
   validations:
     is_target_the_destination: true
   effects:
     play_audio: Rejuvenation
     heal: 150.0
 
-
 # ==========================================
 # Npc Landmine
 # ==========================================
-70:
-  name: keypress_landmine
+keypress_landmine:
   validations:
     is_targeting_self: true
   effect:
     play_audio: MoltenBlastHit
   triggers:
     timeline:
-      0: [72]
+      0: [init_landmine]
 
-72:
-  name: init_landmine
+init_landmine:
   validations:
     is_target_hittable: true
     is_target_other_team: true
@@ -180,10 +161,9 @@
     color_blue: 255
   triggers:
     timeline:
-      1500: [73]
+      1500: [tick_landmine]
 
-73:
-  name: tick_landmine
+tick_landmine:
   validations:
     is_targeting_self: true
     has_channeling_ticks: 1
@@ -191,11 +171,10 @@
     gain_channeling_ticks: -1
   triggers:
     timeline:
-      0: [74]
-      100: [73]
+      0: [try_trigger_landmine]
+      100: [tick_landmine]
 
-74:
-  name: try_trigger_landmine
+try_trigger_landmine:
   validations:
     is_targeting_self: true
     is_destination_within_range: 0.1
@@ -205,30 +184,26 @@
     is_unhittable: true
   triggers:
     timeline:
-      0: [75]
+      0: [landmine_apply]
 
-75:
-  name: landmine_apply
+landmine_apply:
   validations:
     is_target_the_destination: true
   effects:
     play_audio: MoltenBlastHit
     damage: 134.0
 
-
 # ==========================================
 # Npc Target Dummy
 # ==========================================
-80:
-  name: spawn_target_dummy
+spawn_target_dummy:
   validations:
     is_targeting_self: true
   triggers:
     timeline:
-      0: [83]
+      0: [init_target_dummy]
 
-83:
-  name: init_target_dummy
+init_target_dummy:
   validations:
     is_targeting_self: true
   effects:
@@ -242,19 +217,17 @@
     color_blue: 255
   triggers:
     timeline:
-      4000: [128]
-      7000: [362]
+      4000: [molten_blast_aoe]
+      7000: [start_move_towards_target]
 
-970:
-  name: spawn_bravo_dummy
+spawn_bravo_dummy:
   validations:
     is_targeting_self: true
   triggers:
     timeline:
-      0: [971]
+      0: [init_bravo_dummy]
 
-971:
-  name: init_bravo_dummy
+init_bravo_dummy:
   validations:
     is_targeting_self: true
   effects:
@@ -268,14 +241,13 @@
     color_blue: 255
   triggers:
     timeline:
-      2000: [911]
-      7000: [362]
+      2000: [shadow_blast_apply]
+      7000: [start_move_towards_target]
 
 # ==========================================
 # Spec Warlock
 # ==========================================
-128:
-  name: molten_blast_aoe
+molten_blast_aoe:
   validations:
     is_targeting_self: true
     is_gcd_ready: true
@@ -283,10 +255,9 @@
     gcd_duration: 500
   triggers:
     timeline:
-      0: [129]
+      0: [molten_blast_trigger]
 
-129:
-  name: molten_blast_trigger
+molten_blast_trigger:
   validations:
     is_target_hittable: true
     is_target_other_team: true
@@ -294,8 +265,7 @@
     play_audio: MoltenBlastHit
     damage: 13.0
 
-910:
-  name: shadow_blast_buttonpress
+shadow_blast_buttonpress:
   validations:
     is_targeting_self: true
     is_gcd_ready: true
@@ -304,10 +274,9 @@
     gain_channeling_ticks: 4
   triggers:
     timeline:
-      0: [912]
+      0: [shadow_blast_tick]
 
-911:
-  name: shadow_blast_apply
+shadow_blast_apply:
   validations:
     is_target_hittable: true
     is_target_other_team: true
@@ -315,8 +284,7 @@
     damage: 53.0
     play_audio: MoltenBlastHit
 
-912:
-  name: shadow_blast_tick
+shadow_blast_tick:
   validations:
     is_targeting_self: true
     has_channeling_ticks: 1
@@ -324,12 +292,10 @@
     gain_channeling_ticks: -1
   triggers:
     timeline:
-      0: [911]
-      300: [912]
+      0: [shadow_blast_apply]
+      300: [shadow_blast_tick]
 
-
-1440:
-  name: shadowbolt_keypress
+shadowbolt_keypress:
   validations:
     is_targeting_self: true
     is_cooldown_ready: true
@@ -340,10 +306,9 @@
     gcd_duration: 1000
   triggers:
     timeline:
-      0: [1442]
+      0: [shadowbolt_init]
 
-1442:
-  name: shadowbolt_init
+shadowbolt_init:
   validations:
     is_target_hittable: true
     is_target_other_team: true
@@ -359,10 +324,9 @@
     color_blue: 255
   triggers:
     timeline:
-      20: [1443]
+      20: [shadowbolt_tick]
 
-1443:
-  name: shadowbolt_tick
+shadowbolt_tick:
   validations:
     is_targeting_self: true
     has_channeling_ticks: 1
@@ -371,11 +335,10 @@
     walk_towards_target: true
   triggers:
     timeline:
-      0: [1444]
-      20: [1443]
+      0: [shadowbolt_try_trigger]
+      20: [shadowbolt_tick]
 
-1444:
-  name: shadowbolt_try_trigger
+shadowbolt_try_trigger:
   validations:
     is_targeting_self: true
     is_destination_within_range: 0.05
@@ -392,22 +355,18 @@
     play_animation: true
   triggers:
     timeline:
-      0: [1445]
+      0: [shadowbolt_apply]
 
-1445:
-  name: shadowbolt_apply
+shadowbolt_apply:
   validations:
     is_target_the_destination: true
   effects:
     damage: 34.0
 
-
 # ==========================================
 # Boss and Player
 # ==========================================
-
-968:
-  name: init_bravo_boss
+init_bravo_boss:
   validations:
     is_targeting_self: true
   effects:
@@ -422,13 +381,12 @@
     color_blue: 0
   triggers:
     timeline:
-      400: [970]
-      800: [70]
-      3000: [128]
-      5000: [1440]
+      400: [spawn_bravo_dummy]
+      800: [keypress_landmine]
+      3000: [molten_blast_aoe]
+      5000: [shadowbolt_keypress]
 
-7999:
-  name: init_player
+init_player:
   validations:
     is_targeting_self: true
   effects:

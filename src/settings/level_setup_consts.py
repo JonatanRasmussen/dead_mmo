@@ -2,9 +2,10 @@ from .hardware_inputs_consts import HardwareInputConsts
 
 class LevelSetupConsts:
 
-    OMEGA_SETUP_SPELL_IDS: list[int] = [968, 7999]
-    BRAVO_SETUP_SPELL_IDS: list[int] = [6767]
-    TEST_SETUP_SPELL_IDS: list[int] = [300]
+    OMEGA_SETUP_SPELL_NAMES: list[str] = ["init_bravo_boss", "init_player"]
+    BRAVO_SETUP_SPELL_NAMES: list[str] = ["bravo_setup"]  # Previously 6767
+    TEST_SETUP_SPELL_NAMES: list[str] = ["test_setup"]    # Previously 300
+
     SCRIPTED_PLAYER_INPUT_FOR_TESTING: dict[int, list[str]] = {
         200: [HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_UP],
         300: [HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_RIGHT ],

@@ -46,26 +46,37 @@ class RegistryForAssetIDs:
 class YamlSpellLoader:
     def __init__(self, yaml_path: str = "data/spells.yaml") -> None:
         self.asset_id_registry = RegistryForAssetIDs()
+
+        # Map empty_spell to 0 (Consts.EMPTY_SPELL_ID) by default
+        self.spell_name_to_id: dict[str, int] = {"empty_spell": Consts.EMPTY_SPELL_ID}
+        self._next_spell_id: int = 1
+
         self.spell_database: dict[int, SpellDef] = self._load_yaml(yaml_path)
+
+    def get_spell_id(self, spell_name: str) -> int:
+        """Returns the integer ID for a spell name, generating one if it doesn't exist."""
+        if spell_name not in self.spell_name_to_id:
+            self.spell_name_to_id[spell_name] = self._next_spell_id
+            self._next_spell_id += 1
+        return self.spell_name_to_id[spell_name]
 
     def validate_types(self, valid_effect_types: set[str], valid_validation_types: set[str]) -> None:
         """Called externally after loading to ensure all parsed keys are valid."""
-        for spell_id, spell in self.spell_database.items():
+        for _spell_id, spell in self.spell_database.items():
             for effect in spell.effects.keys():
                 if effect not in valid_effect_types:
-                    raise ValueError(f"Unknown effect '{effect}' found in spell_id {spell_id}.")
+                    raise ValueError(f"Unknown effect '{effect}' found in spell '{spell.name}'.")
             for validation in spell.validations.keys():
                 if validation not in valid_validation_types:
-                    raise ValueError(f"Unknown validation '{validation}' found in spell_id {spell_id}.")
+                    raise ValueError(f"Unknown validation '{validation}' found in spell '{spell.name}'.")
 
     def get_asset_name(self, asset_id: float) -> str:
         return self.asset_id_registry.get_asset_name(asset_id)
 
-    def _parse_numeric_dict(self, data: dict, name: str, spell_id: int) -> dict[str, float]:
-        if not isinstance(data, dict): raise ValueError(f"Expected '{name}' to be a mapping in spell_id {spell_id}.")
+    def _parse_numeric_dict(self, data: dict, name: str, spell_name: str) -> dict[str, float]:
+        if not isinstance(data, dict): raise ValueError(f"Expected '{name}' to be a mapping in spell '{spell_name}'.")
         res = {}
         for k, v in data.items():
-            # Validation removed from here; it now happens in validate_types()
             if isinstance(v, str):
                 res[k] = self.asset_id_registry.register_asset_name(v)
             else:
@@ -76,26 +87,36 @@ class YamlSpellLoader:
         with open(path, "r") as f:
             raw_data = yaml.safe_load(f) or {}
 
+        # First pass: register all spell names to ensure they have IDs
+        for spell_name in raw_data.keys():
+            self.get_spell_id(spell_name)
+
         db = {}
-        for spell_id, s in {int(k): v for k, v in raw_data.items()}.items():
-            name = s.get("name")
+        for spell_name, s in raw_data.items():
+            if s is None: s = {}
+            spell_id = self.get_spell_id(spell_name)
+
             triggers = s.get("triggers", {})
-            if not isinstance(triggers, dict): raise ValueError(f"Expected 'triggers' to be a mapping in spell_id {spell_id}.")
+            if not isinstance(triggers, dict): raise ValueError(f"Expected 'triggers' to be a mapping in spell '{spell_name}'.")
             for t in triggers.keys():
-                if t not in VALID_TRIGGER_TYPES: raise ValueError(f"Unknown trigger '{t}' found in spell_id {spell_id}.")
+                if t not in VALID_TRIGGER_TYPES: raise ValueError(f"Unknown trigger '{t}' found in spell '{spell_name}'.")
 
-            cascade = s.get("cascade", [])
-            cascade = [int(c) for c in (cascade if isinstance(cascade, list) else [cascade])]
+            # Convert string spell names in timeline to integer IDs
+            timeline = {}
+            for k, val in triggers.get(TriggerType.TIMELINE, {}).items():
+                val_list = val if isinstance(val, list) else [val]
+                timeline[int(k)] = [self.get_spell_id(v) for v in val_list]
 
-            timeline = {int(k): [int(v) for v in (val if isinstance(val, list) else [val])] for k, val in triggers.get(TriggerType.TIMELINE, {}).items()}
+            # Handle both singular and plural keys gracefully (validation/validations, effect/effects)
+            raw_validations = s.get("validations", s.get("validation", {}))
+            raw_effects = s.get("effects", s.get("effect", {}))
 
-            # Parse blindly first
-            validations = self._parse_numeric_dict(s.get("validations", {}), "validation", spell_id)
-            effects = self._parse_numeric_dict(s.get("effects", {}), "effect", spell_id)
+            validations = self._parse_numeric_dict(raw_validations, "validation", spell_name)
+            effects = self._parse_numeric_dict(raw_effects, "effect", spell_name)
 
             db[spell_id] = SpellDef(
                 spell_id=spell_id,
-                name=name,
+                name=spell_name,
                 validations=validations,
                 effects=effects,
                 timeline=timeline,

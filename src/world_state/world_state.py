@@ -27,16 +27,19 @@ class WorldState:
     def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
 
-    def register_player(self, ingame_time: int, setup_spell_id: int) -> int:
+    def register_player(self, ingame_time: int, setup_spell_name: str) -> int:
+        setup_spell_id = self._spell_handler.get_spell_id(setup_spell_name)
         new_obj_id = self._handle_event(ingame_time, Consts.EMPTY_OBJ_ID, setup_spell_id, Consts.EMPTY_OBJ_ID)
         player_inputs: list[str] = []
         self.process_frame(new_obj_id, player_inputs, ingame_time)
         return new_obj_id
 
     def process_frame(self, player_obj_id: int, player_inputs: list[str], frame_end: int) -> None:
-        spell_ids = HardwareInputConsts.get_spells_for_player_inputs(player_obj_id, player_inputs)
-        for spell_id in spell_ids:
+        spell_names = HardwareInputConsts.get_spell_names_for_player_inputs(player_obj_id, player_inputs)
+        for spell_name in spell_names:
+            spell_id = self._spell_handler.get_spell_id(spell_name)
             self._event_handler.dispatch_upcoming_event(frame_end, player_obj_id, spell_id, player_obj_id)
+
         while self._event_handler.has_unprocessed_events(frame_end):
             timestamp, source_id, spell_id, target_id = self._event_handler.fetch_next_event()
             assert timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {timestamp}."
