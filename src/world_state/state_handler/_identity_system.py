@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 from src.settings import Consts
-from .system_interface import DisplayObj, GameObj, System
+from .base_system import BaseSystem, DisplayObj, GameObj
 
 
 class IdentityEffect(str, Enum):
@@ -34,43 +34,25 @@ class ObjIdentityData:
         )
 
 
-class IdentitySystem(System):
+class IdentitySystem(BaseSystem):
 
-    def __init__(self) -> None:
-        self._game_objs: dict[int, GameObj] = {}
-        self._data_dct: dict[int, ObjIdentityData] = {}
+    def __init__(self, game_objs: dict[int, GameObj]) -> None:
+        super().__init__(game_objs, ObjIdentityData, IdentityEffect, IdentityValidation)
+
+    def get_data(self, obj_id: int) -> ObjIdentityData:
+        # IdentitySystem has custom logic on creation to inherit enemy status
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+
+        data: ObjIdentityData = super().get_data(obj_id)
+        if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
+            data.is_enemy = self.get_data(data.parent_id).is_enemy
+        return data
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
         if obj_id in self._data_dct:
             pass  # Add display obj contributions from this system's data
         return display_obj
-
-    def get_effect_types(self) -> set[str]:
-        return {e.value for e in IdentityEffect}
-
-    def get_validation_types(self) -> set[str]:
-        return {v.value for v in IdentityValidation}
-
-    def spawn_game_obj(self, game_obj: GameObj) -> None:
-        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
-        self._game_objs[game_obj.obj_id] = game_obj
-
-    def get_data(self, obj_id: int) -> ObjIdentityData:
-        if obj_id in self._data_dct:
-            return self._data_dct[obj_id]
-        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
-        game_obj = self._game_objs[obj_id]
-        data = ObjIdentityData.create_from_game_obj(game_obj)
-        self._data_dct[obj_id] = data
-
-        if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
-            data.is_enemy = self.get_data(data.parent_id).is_enemy
-
-        return data
-
-    def remove_data(self, obj_id: int) -> None:
-        self.get_data(obj_id)  # assertions check
-        self._data_dct.pop(obj_id, None)
 
     def get_parent_data(self, obj_id: int) -> ObjIdentityData:
         obj_data = self.get_data(obj_id)
@@ -98,7 +80,7 @@ class IdentitySystem(System):
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
         match effect_type:
-            case  IdentityEffect.APPLY_PLAYER_NUMBER:
+            case IdentityEffect.APPLY_PLAYER_NUMBER:
                 self.get_data(obj_id).player_number += int(effect_value)
                 return Consts.EMPTY_SPELL_ID
             case IdentityEffect.SWAP_TEAM:

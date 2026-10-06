@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from typing import Iterable
 
-from src.settings import Consts
+from src.settings import Consts, HardwareInputConsts
 from src.world_state.spell_handler.spell_handler import SpellHandler
 from .event_handler import EventHandler, IdGen
 from .state_handler import StateHandler, DisplayObj
@@ -34,7 +34,7 @@ class WorldState:
         return new_obj_id
 
     def process_frame(self, player_obj_id: int, player_inputs: list[str], frame_end: int) -> None:
-        spell_ids = self._state_handler.get_spells_for_player_inputs(player_obj_id, player_inputs)
+        spell_ids = HardwareInputConsts.get_spells_for_player_inputs(player_obj_id, player_inputs)
         for spell_id in spell_ids:
             self._event_handler.dispatch_upcoming_event(frame_end, player_obj_id, spell_id, player_obj_id)
         while self._event_handler.has_unprocessed_events(frame_end):
@@ -59,8 +59,7 @@ class WorldState:
 
     def _create_triggered_events(self, timestamp: int, triggered_obj_id: int, triggered_spell_ids: list[int]) -> None:
         for t_spell in triggered_spell_ids:
-            target_ids = self._state_handler.get_aoe_targets(triggered_obj_id, t_spell)  # We can optimize later on
-            for target_id in target_ids:
+            for target_id in self._get_targets(triggered_obj_id, t_spell):
                 self._event_handler.dispatch_upcoming_event(timestamp, triggered_obj_id, t_spell, target_id)
 
     def _create_cascading_events(self, timestamp: int, source_id: int, spell_id: int) -> None:
@@ -70,9 +69,16 @@ class WorldState:
             for trigger_timestamp, timeline_spell_ids in timeline.items():
                 for t_spell in timeline_spell_ids:
                     timestamp_to_use = timestamp + trigger_timestamp
-                    target_ids = self._state_handler.get_aoe_targets(source_id, t_spell)  # We can optimize later on
-                    for target_id in target_ids:
+                    for target_id in self._get_targets(source_id, t_spell):
                         self._event_handler.dispatch_upcoming_event(timestamp_to_use, source_id, t_spell, target_id)
+
+    def _get_targets(self, source_id: int, spell_id: int) -> Iterable[int]:
+        if self._spell_handler.is_spell_targeting_self(spell_id):
+            yield source_id
+        elif self._spell_handler.is_spell_targeting_destination(spell_id):
+            yield self._state_handler.get_destination_for_obj(source_id)
+        else:
+            yield from self._state_handler.active_obj_ids
 
     def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
         if self._spell_handler.is_spell_spawning_as_child(spell_id):

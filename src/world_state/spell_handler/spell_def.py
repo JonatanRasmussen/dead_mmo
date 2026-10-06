@@ -8,7 +8,4 @@ class SpellDef:
     name: str = ""
     validations: dict[str, float] = field(default_factory=dict)
     effects: dict[str, float] = field(default_factory=dict)
-    cascade: list[int] = field(default_factory=list)
     timeline: dict[int, list[int]] = field(default_factory=dict)
-    aoe_spell_id: int = Consts.EMPTY_SPELL_ID
-    signal_spell_id: int = Consts.EMPTY_SPELL_ID

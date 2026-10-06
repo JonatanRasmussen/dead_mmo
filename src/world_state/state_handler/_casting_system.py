@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ValuesView
 from src.settings import Consts
-from .system_interface import DisplayObj, GameObj, System
+from .base_system import BaseSystem, DisplayObj, GameObj
 
 
 class CastingEffect(str, Enum):
@@ -39,43 +39,18 @@ class ObjCastingData:
         return ObjCastingData(obj_id=game_obj.obj_id, parent_id=game_obj.parent_id)
 
 
-class CastingSystem(System):
+class CastingSystem(BaseSystem):
 
-    def __init__(self) -> None:
-        self._game_objs: dict[int, GameObj] = {}
-        self._data_dct: dict[int, ObjCastingData] = {}
+    def __init__(self, game_objs: dict[int, GameObj]) -> None:
+        super().__init__(game_objs, ObjCastingData, CastingEffect, CastingValidation)
+
+    def get_data(self, obj_id: int) -> ObjCastingData:
+        return super().get_data(obj_id)
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
         if obj_id in self._data_dct:
             pass  # Add display obj contributions from this system's data
         return display_obj
-
-    def get_effect_types(self) -> set[str]:
-        return {e.value for e in CastingEffect}
-
-    def get_validation_types(self) -> set[str]:
-        return {v.value for v in CastingValidation}
-
-    def spawn_game_obj(self, game_obj: GameObj) -> None:
-        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
-        self._game_objs[game_obj.obj_id] = game_obj
-
-    def get_data(self, obj_id: int) -> ObjCastingData:
-        if obj_id in self._data_dct:
-            return self._data_dct[obj_id]
-        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
-        game_obj = self._game_objs[obj_id]
-        data = ObjCastingData.create_from_game_obj(game_obj)
-        self._data_dct[obj_id] = data
-        return data
-
-    def remove_data(self, obj_id: int) -> None:
-        self.get_data(obj_id)  # assertions check
-        self._data_dct.pop(obj_id, None)
-
-    # ---- Lookups ----
-    def view_all_data(self) -> ValuesView[ObjCastingData]:
-        return self._data_dct.values()
 
     def get_parent_data(self, obj_id: int) -> ObjCastingData:
         obj_data = self.get_data(obj_id)

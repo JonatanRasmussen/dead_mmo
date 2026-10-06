@@ -4,11 +4,12 @@ from src.settings import Consts
 from src.settings import HardwareInputConsts
 from .display_obj import DisplayObj
 from .game_obj import GameObj
-from .system_interface import System
+from .base_system import BaseSystem
 from ._casting_system import CastingSystem, ObjCastingData
 from ._health_system import HealthSystem, ObjHealthData
 from ._identity_system import IdentitySystem
 from ._movement_system import MovementSystem, ObjMovementData
+from ._periodic_system import PeriodicSystem
 from ._sfx_system import SfxSystem
 from ._vfx_system import VfxSystem, ObjVfxData
 from ._visibility_system import VisibilitySystem
@@ -29,12 +30,14 @@ class TriggerEffect(str, Enum):
 
 class SelfcastValidation(str, Enum):
     IS_SELFCAST = "is_selfcast"
+    IS_SOURCE_TARGETING_SELF = "is_targeting_self"
+    IS_TARGET_THE_DESTINATION = "is_target_the_destination"
 
 
 class StateHandler:
     def __init__(self) -> None:
         self._active_game_objs: dict[int, GameObj] = {}
-        self._systems: list[System] = self.initialize_list_of_systems()
+        self._systems: list[BaseSystem] = self.initialize_list_of_systems()
 
     @property
     def active_obj_ids(self) -> Iterable[int]:
@@ -52,15 +55,15 @@ class StateHandler:
             valid_validations.update(system.get_validation_types())
         return valid_validations
 
-    def initialize_list_of_systems(self) -> list[System]:
+    def initialize_list_of_systems(self) -> list[BaseSystem]:
         return [
-            CastingSystem(),
-            HealthSystem(),
-            IdentitySystem(),
-            MovementSystem(),
-            SfxSystem(),
-            VfxSystem(),
-            VisibilitySystem(),
+            CastingSystem(self._active_game_objs),
+            HealthSystem(self._active_game_objs),
+            IdentitySystem(self._active_game_objs),
+            MovementSystem(self._active_game_objs),
+            SfxSystem(self._active_game_objs),
+            VfxSystem(self._active_game_objs),
+            VisibilitySystem(self._active_game_objs),
         ]
 
     def create_display_obj(self, current_time: int, obj_id: int) -> DisplayObj:
@@ -69,13 +72,8 @@ class StateHandler:
             display_obj = system.build_display_obj(current_time, obj_id, display_obj)
         return display_obj
 
-    def get_signalled_objs(self, _source_id: int, _signal_spell_id: int) -> Iterable[int]:
-        # For now, target every other obj and let event validation fail on undesired aoe targets
-        return self.active_obj_ids  # We can optimize this later on
-
-    def get_aoe_targets(self, _source_id: int, _aoe_spell_id: int) -> Iterable[int]:
-        # For now, target every other obj and let event validation fail on undesired aoe targets
-        return self.active_obj_ids  # We can optimize this later on
+    def get_destination_for_obj(self, obj_id: int) -> int:
+        return self._active_game_objs[obj_id].destination_id
 
     # --- Core Validation Logic ---
     def validate_event(self, timestamp: int, source_id: int, spell_validations: dict[str, float], target_id: int) -> str:
@@ -100,25 +98,3 @@ class StateHandler:
         assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."
         game_obj = GameObj.create_new(new_obj_id, timestamp, parent_id, spell_id, target_id)
         self._active_game_objs[new_obj_id] = game_obj
-        for system in self._systems:
-            system.spawn_game_obj(game_obj)
-
-    def get_spells_for_player_inputs(self, player_id, player_inputs: list[str]) -> list[int]:
-        spell_ids = []
-        if player_id != Consts.EMPTY_OBJ_ID:
-            for player_input in player_inputs:
-                match player_input:
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_1: spell_ids.append(128)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_2: spell_ids.append(910)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_3: spell_ids.append(170)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_4: spell_ids.append(1440)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_TAB: spell_ids.append(15)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_UP: spell_ids.append(91)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_UP: spell_ids.append(92)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_LEFT: spell_ids.append(181)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_LEFT: spell_ids.append(182)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_DOWN: spell_ids.append(271)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_DOWN: spell_ids.append(272)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ARROW_RIGHT: spell_ids.append(1)
-                    case HardwareInputConsts.KEYBOARD_KEYUP_ARROW_RIGHT: spell_ids.append(2)
-        return spell_ids

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from src.settings import Consts
-from .system_interface import DisplayObj, GameObj, System
+from .base_system import BaseSystem, DisplayObj, GameObj
 
 class VfxEffect(str, Enum):
     APPLY_ANIMATION_ID = "animation_id"
@@ -30,11 +30,13 @@ class ObjVfxData:
         return cls(obj_id=game_obj.obj_id)
 
 
-class VfxSystem(System):
+class VfxSystem(BaseSystem):
 
-    def __init__(self) -> None:
-        self._game_objs: dict[int, GameObj] = {}
-        self._data_dct: dict[int, ObjVfxData] = {}
+    def __init__(self, game_objs: dict[int, GameObj]) -> None:
+        super().__init__(game_objs, ObjVfxData, VfxEffect, VfxValidation)
+
+    def get_data(self, obj_id: int) -> ObjVfxData:
+        return super().get_data(obj_id)
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
         if obj_id in self._data_dct:
@@ -58,29 +60,6 @@ class VfxSystem(System):
         frame_index = int(elapsed_ms / data.animation_ms_per_frame)
         current_frame = (frame_index % data.animation_frames) + 1
         return current_frame
-
-    def get_effect_types(self) -> set[str]:
-        return {e.value for e in VfxEffect}
-
-    def get_validation_types(self) -> set[str]:
-        return {v.value for v in VfxValidation}
-
-    def spawn_game_obj(self, game_obj: GameObj) -> None:
-        assert game_obj.obj_id not in self._game_objs, f"Error: GameObj {game_obj.obj_id} already exist."
-        self._game_objs[game_obj.obj_id] = game_obj
-
-    def get_data(self, obj_id: int) -> ObjVfxData:
-        if obj_id in self._data_dct:
-            return self._data_dct[obj_id]
-        assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
-        game_obj = self._game_objs[obj_id]
-        data = ObjVfxData.create_from_game_obj(game_obj)
-        self._data_dct[obj_id] = data
-        return data
-
-    def remove_data(self, obj_id: int) -> None:
-        self.get_data(obj_id)  # Assert that data exists
-        self._data_dct.pop(obj_id, None)
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:

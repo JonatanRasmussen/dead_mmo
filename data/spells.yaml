@@ -103,7 +103,7 @@
 172:
   name: init_healing_powerup
   validations:
-    is_targeting_parent: true
+    is_targeting_self: true
   effects:
     spawn_as_child: true
     is_unhittable: true
@@ -230,7 +230,7 @@
 83:
   name: init_target_dummy
   validations:
-    is_targeting_parent: true
+    is_targeting_self: true
   effects:
     spawn_as_child: true
     threat_score: 901

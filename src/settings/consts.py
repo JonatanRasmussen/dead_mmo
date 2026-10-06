@@ -11,6 +11,9 @@ class Consts:
     EMPTY_ASSET_NAME: str = ""
     EMPTY_ERROR_CODE: str = ""
 
+    IS_TARGETING_SELF = "is_targeting_self"
+    IS_TARGETING_DESTINATION = "is_targeting_destination"
+
     MIN_ID: int = -999_999
     MAX_ID: int = 999_999
 

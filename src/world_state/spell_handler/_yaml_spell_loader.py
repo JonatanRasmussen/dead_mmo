@@ -8,20 +8,15 @@ from .spell_def import SpellDef
 
 class TriggerType(str, Enum):
     TIMELINE = "timeline"
-    AOE_SPELL = "aoe_spell"
-    SIGNAL_SPELL = "on_signal"
 
 VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
 
 class TriggerEffect(str, Enum):
     SPAWN_AS_CHILD = "spawn_as_child"
-    SEND_AS_SIGNAL = "cast_as_signal"
-    FIRE_WITH_DELAY = "delay_event"
 
 class SelfcastValidation(str, Enum):
-    IS_SELFCAST = "is_selfcast"
-    FULL_AOE = "full_aoe"
-
+    IS_SOURCE_TARGETING_SELF = Consts.IS_TARGETING_SELF
+    IS_TARGET_THE_DESTINATION = Consts.IS_TARGETING_DESTINATION
 
 class RegistryForAssetIDs:
     def __init__(self) -> None:
@@ -93,8 +88,6 @@ class YamlSpellLoader:
             cascade = [int(c) for c in (cascade if isinstance(cascade, list) else [cascade])]
 
             timeline = {int(k): [int(v) for v in (val if isinstance(val, list) else [val])] for k, val in triggers.get(TriggerType.TIMELINE, {}).items()}
-            signal_spell_id = int(triggers.get(TriggerType.SIGNAL_SPELL) or Consts.EMPTY_SPELL_ID)
-            aoe_spell_id = int(triggers.get(TriggerType.AOE_SPELL) or Consts.EMPTY_SPELL_ID)
 
             # Parse blindly first
             validations = self._parse_numeric_dict(s.get("validations", {}), "validation", spell_id)
@@ -106,8 +99,5 @@ class YamlSpellLoader:
                 validations=validations,
                 effects=effects,
                 timeline=timeline,
-                aoe_spell_id=aoe_spell_id,
-                signal_spell_id=signal_spell_id,
-                cascade=cascade
             )
         return db
