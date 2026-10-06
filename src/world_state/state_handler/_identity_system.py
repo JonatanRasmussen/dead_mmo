@@ -96,10 +96,14 @@ class IdentitySystem(System):
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
         match effect_type:
             case  IdentityEffect.APPLY_PLAYER_NUMBER:
                 self.get_data(obj_id).player_number += int(effect_value)
+                return Consts.EMPTY_SPELL_ID
             case IdentityEffect.SWAP_TEAM:
                 data = self.get_data(obj_id)
                 data.is_enemy = not data.is_enemy
+                return Consts.EMPTY_SPELL_ID
+            case _:
+                return Consts.EMPTY_SPELL_ID

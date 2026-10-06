@@ -2,6 +2,7 @@ import json
 import os
 import dataclasses
 from enum import Enum
+from typing import Any
 
 from src.world_state.world_state import WorldState
 
@@ -111,9 +112,6 @@ class SimValidation:
 
         # Gather all unique object IDs across all ECS systems
         all_obj_ids: set[int] = set()
-        all_obj_ids.update(state._state_handler._casting_system._data_dct.keys())
-        all_obj_ids.update(state._state_handler._health_system._data_dct.keys())
-        all_obj_ids.update(state._state_handler._movement_system._data_dct.keys())
 
         game_objs: dict[str, dict] = {
             str(obj_id): SimValidation._serialize_ecs_entity(state, obj_id)
@@ -137,23 +135,7 @@ class SimValidation:
                 return [sanitize(v) for v in val]
             return val
 
-        data = {}
-
-        # 0. Casting Component
-        casting = state._state_handler._casting_system._data_dct.get(obj_id)
-        if casting:
-            data['casting'] = sanitize(dataclasses.asdict(casting))
-
-        # 1. Health Component
-        health = state._state_handler._health_system._data_dct.get(obj_id)
-        if health:
-            data['health'] = sanitize(dataclasses.asdict(health))
-
-        # 2. Movement Component
-        movement = state._state_handler._movement_system._data_dct.get(obj_id)
-        if movement:
-            data['movement'] = sanitize(dataclasses.asdict(movement))
-
+        data: dict[Any, Any] = {}
         return data
 
     # ------------------------------------------------------------------ #

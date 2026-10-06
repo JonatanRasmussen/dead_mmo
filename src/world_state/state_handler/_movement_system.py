@@ -131,7 +131,7 @@ class MovementSystem(System):
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
         match effect_type:
             case MovementEffect.WALK_FORWARD:
                 if bool(effect_value) is True:
@@ -140,6 +140,7 @@ class MovementSystem(System):
                 else:
                     self._bake_position(obj_id, timestamp)
                     self.get_data(obj_id).y_dir = max(-1.0, min(1.0, self.get_data(obj_id).y_dir - 1.0))
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.WALK_BACKWARD:
                 if bool(effect_value) is True:
                     self._bake_position(obj_id, timestamp)
@@ -147,6 +148,7 @@ class MovementSystem(System):
                 else:
                     self._bake_position(obj_id, timestamp)
                     self.get_data(obj_id).y_dir = max(-1.0, min(1.0, self.get_data(obj_id).y_dir + 1.0))
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.WALK_LEFT:
                 if bool(effect_value) is True:
                     self._bake_position(obj_id, timestamp)
@@ -154,6 +156,7 @@ class MovementSystem(System):
                 else:
                     self._bake_position(obj_id, timestamp)
                     self.get_data(obj_id).x_dir = max(-1.0, min(1.0, self.get_data(obj_id).x_dir + 1.0))
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.WALK_RIGHT:
                 if bool(effect_value) is True:
                     self._bake_position(obj_id, timestamp)
@@ -161,6 +164,7 @@ class MovementSystem(System):
                 else:
                     self._bake_position(obj_id, timestamp)
                     self.get_data(obj_id).x_dir = max(-1.0, min(1.0, self.get_data(obj_id).x_dir - 1.0))
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.WALK_TOWARDS_TARGET:
                 data = self.get_data(obj_id)
                 valid, dx, dy, dist, _, _ = self._get_target_vector(obj_id, data.destination_id, timestamp)
@@ -168,9 +172,11 @@ class MovementSystem(System):
                     self._bake_position(obj_id, timestamp)
                     data.x_dir = dx / dist
                     data.y_dir = dy / dist
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.STOP_WALK_TOWARDS_TARGET:
                 self._bake_position(obj_id, timestamp)
                 self.get_data(obj_id).x_dir, self.get_data(obj_id).y_dir = 0.0, 0.0
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.TELEPORT_TO_TARGET:
                 data = self.get_data(obj_id)
                 valid, _, _, _, tar_x, tar_y = self._get_target_vector(obj_id, data.destination_id, timestamp)
@@ -178,6 +184,7 @@ class MovementSystem(System):
                     data.x_pos, data.y_pos = tar_x, tar_y
                     data.x_vel, data.y_vel, data.x_dir, data.y_dir = 0.0, 0.0, 0.0, 0.0
                     data.timestamp = timestamp
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.PUSH_TARGET:
                 data = self.get_data(obj_id)
                 valid, dx, dy, dist, _, _ = self._get_target_vector(obj_id, data.destination_id, timestamp)
@@ -187,6 +194,7 @@ class MovementSystem(System):
                     speed_per_ms = effect_value * Consts.GLOBAL_MOVESPEED_TO_USE / 1000.0
                     target_data.x_vel = (dx / dist) * speed_per_ms
                     target_data.y_vel = (dy / dist) * speed_per_ms
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.X_OFFSET:
                 self._bake_position(obj_id, timestamp)
                 data = self.get_data(obj_id)
@@ -194,6 +202,7 @@ class MovementSystem(System):
                     p_x, _ = self.get_position(data.parent_id, timestamp)
                     data.x_pos = p_x
                 data.x_pos += effect_value
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.Y_OFFSET:
                 self._bake_position(obj_id, timestamp)
                 data = self.get_data(obj_id)
@@ -201,6 +210,10 @@ class MovementSystem(System):
                     _, p_y = self.get_position(data.parent_id, timestamp)
                     data.y_pos = p_y
                 data.y_pos += effect_value
+                return Consts.EMPTY_SPELL_ID
             case MovementEffect.MOVESPEED:
                 self._bake_position(obj_id, timestamp)
                 self.get_data(obj_id).movespeed = effect_value
+                return Consts.EMPTY_SPELL_ID
+            case _:
+                return Consts.EMPTY_SPELL_ID

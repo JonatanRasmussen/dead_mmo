@@ -1,115 +1,85 @@
+from typing import Iterable
+from enum import Enum
 from src.settings import Consts
 from src.settings import HardwareInputConsts
 from .display_obj import DisplayObj
 from .game_obj import GameObj
 from .system_interface import System
-from ._yaml_spell_loader import YamlSpellLoader, SelfcastValidation, TriggerEffect
 from ._casting_system import CastingSystem, ObjCastingData
-from ._display_system import DisplaySystem, ObjDisplayData
 from ._health_system import HealthSystem, ObjHealthData
 from ._identity_system import IdentitySystem
 from ._movement_system import MovementSystem, ObjMovementData
+from ._sfx_system import SfxSystem
+from ._vfx_system import VfxSystem, ObjVfxData
+from ._visibility_system import VisibilitySystem
+
+
+class TriggerType(str, Enum):
+    TIMELINE = "timeline"
+    AOE_SPELL = "aoe_spell"
+    SIGNAL_SPELL = "on_signal"
+
+VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
+
+class TriggerEffect(str, Enum):
+    SPAWN_AS_CHILD = "spawn_as_child"
+    SEND_AS_SIGNAL = "cast_as_signal"
+    FIRE_WITH_DELAY = "delay_event"
+    CAST_AS_AOE = "cast_as_aoe"
+
+class SelfcastValidation(str, Enum):
+    IS_SELFCAST = "is_selfcast"
 
 
 class StateHandler:
-
     def __init__(self) -> None:
-        self.spell_loader = YamlSpellLoader()
-        self.spell_database = self.spell_loader.spell_database
-        self._asset_id_registry = self.spell_loader.asset_id_registry
-        self._active_game_objs: set[int] = set()
-
-        self._casting_system = CastingSystem()
-        self._display_system = DisplaySystem()
-        self._health_system = HealthSystem()
-        self._identity_system = IdentitySystem()
-        self._movement_system = MovementSystem()
-
-        self._systems: list[System] = [
-            self._casting_system,
-            self._display_system,
-            self._health_system,
-            self._identity_system,
-            self._movement_system,
-        ]
+        self._active_game_objs: dict[int, GameObj] = {}
+        self._systems: list[System] = self.initialize_list_of_systems()
 
     @property
-    def active_obj_ids(self) -> set[int]:
-        return set(self._active_game_objs)
+    def active_obj_ids(self) -> Iterable[int]:
+        yield from self._active_game_objs
+
+    def get_valid_effects(self) -> set[str]:
+        valid_effects = {t.value for t in TriggerEffect}
+        for system in self._systems:
+            valid_effects.update(system.get_effect_types())
+        return valid_effects
+
+    def get_valid_validations(self) -> set[str]:
+        valid_validations = {s.value for s in SelfcastValidation}
+        for system in self._systems:
+            valid_validations.update(system.get_validation_types())
+        return valid_validations
+
+    def initialize_list_of_systems(self) -> list[System]:
+        return [
+            CastingSystem(),
+            HealthSystem(),
+            IdentitySystem(),
+            MovementSystem(),
+            SfxSystem(),
+            VfxSystem(),
+            VisibilitySystem(),
+        ]
 
     def create_display_obj(self, current_time: int, obj_id: int) -> DisplayObj:
         display_obj = DisplayObj(obj_id=obj_id)
         for system in self._systems:
             display_obj = system.build_display_obj(current_time, obj_id, display_obj)
-        display_obj = self.spell_loader.fetch_asset_names_for_display_obj(display_obj)
         return display_obj
 
-    def get_current_target_for_obj(self, obj_id: int) -> int:
-        return self._identity_system.get_current_target_for_obj(obj_id)
-
-    def get_cascades(self, spell_id: int) -> list[int]:
-        spell = self.spell_database.get(spell_id)
-        return spell.cascade if spell is not None else []
-
-    def is_spell_spawning_as_child(self, spell_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return spell is not None and TriggerEffect.SPAWN_AS_CHILD in spell.effects
-
-    def is_spell_sent_as_signal(self, spell_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return spell is not None and TriggerEffect.SEND_AS_SIGNAL in spell.effects
-
-    def get_spell_delay(self, spell_id: int) -> int:
-        delay = 0
-        spell = self.spell_database.get(spell_id)
-        if spell is not None and TriggerEffect.FIRE_WITH_DELAY in spell.effects:
-            delay += round(spell.effects[TriggerEffect.FIRE_WITH_DELAY])
-        return delay
-
-    def is_spell_selfcast(self, spell_id: int) -> bool:
-        spell = self.spell_database.get(spell_id)
-        return spell is not None and SelfcastValidation.IS_SELFCAST in spell.validations
-
-    def get_spawn_child_id(self, spell_id: int) -> list[int]:
-        spell = self.spell_database.get(spell_id)
-        return spell.spawn_child if spell is not None else [Consts.EMPTY_SPELL_ID]
-
-    def get_timeline_for_spell(self, spell_id: int) -> dict[int, list[int]]:
-        spell = self.spell_database.get(spell_id)
-        return spell.timeline if spell is not None else {}
-
-    def get_signal_spell_id(self, spell_id: int) -> int:
-        spell = self.spell_database.get(spell_id)
-        return spell.signal_spell_id if spell is not None else Consts.EMPTY_SPELL_ID
-
-    def get_signalled_objs(self, source_id: int, signal_spell_id: int) -> set[int]:
-        spell = self.spell_database.get(signal_spell_id)
-        if spell is None or spell.spell_id == Consts.EMPTY_SPELL_ID:  # This should not be possible
-            print(f"Warning: signal_spell_id {signal_spell_id} from source_id {source_id} is not in database.")
-            return set()
+    def get_signalled_objs(self, _source_id: int, _signal_spell_id: int) -> Iterable[int]:
         # For now, target every other obj and let event validation fail on undesired aoe targets
-        return self._active_game_objs  # We can optimize this later on
+        return self.active_obj_ids  # We can optimize this later on
 
-    def get_aoe_spell_id(self, spell_id: int) -> int:
-        spell = self.spell_database.get(spell_id)
-        return spell.aoe_spell_id if spell is not None else Consts.EMPTY_SPELL_ID
-
-    def get_aoe_targets(self, source_id: int, aoe_spell_id: int) -> set[int]:
-        spell = self.spell_database.get(aoe_spell_id)
-        if spell is None or spell.spell_id == Consts.EMPTY_SPELL_ID:  # This should not be possible
-            print(f"Warning: aoe_spell_id {aoe_spell_id} from source_id {source_id} is not in database.")
-            return set()
-        if self.is_spell_selfcast(aoe_spell_id):
-            return {source_id}
+    def get_aoe_targets(self, _source_id: int, _aoe_spell_id: int) -> Iterable[int]:
         # For now, target every other obj and let event validation fail on undesired aoe targets
-        return self._active_game_objs  # We can optimize this later on
+        return self.active_obj_ids  # We can optimize this later on
 
     # --- Core Validation Logic ---
-    def validate_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> str:
-        spell = self.spell_database.get(spell_id)
-        if not spell: return "invalid_spell_id"
-
-        for validation_type, validation_value in spell.validations.items():
+    def validate_event(self, timestamp: int, source_id: int, spell_validations: dict[str, float], target_id: int) -> str:
+        for validation_type, validation_value in spell_validations.items():
             for system in self._systems:
                 is_valid = system.validate_event(validation_type, validation_value, timestamp, source_id, target_id)
                 if not is_valid:
@@ -117,18 +87,19 @@ class StateHandler:
         return ""
 
     # --- Core Event Logic ---
-    def apply_event(self, timestamp: int, spell_id: int, target_id: int) -> None:
-        spell = self.spell_database.get(spell_id)
-        if not spell:
-            return
-        for effect_type, effect_value in spell.effects.items():
+    def apply_event(self, timestamp: int, spell_effects: dict[str, float], target_id: int) -> list[int]:
+        triggered_spell_ids: list[int] = []
+        for effect_type, effect_value in spell_effects.items():
             for system in self._systems:
-                system.apply_effect(effect_type, effect_value, timestamp, target_id)
+                triggered_spell_id = system.apply_effect(effect_type, effect_value, timestamp, target_id)
+                if triggered_spell_id != Consts.EMPTY_SPELL_ID:
+                    triggered_spell_ids.append(triggered_spell_id)
+        return triggered_spell_ids
 
     def spawn_game_obj(self, new_obj_id: int, timestamp: int, parent_id: int, spell_id: int, target_id: int) -> None:
         assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."
-        self._active_game_objs.add(new_obj_id)
         game_obj = GameObj.create_new(new_obj_id, timestamp, parent_id, spell_id, target_id)
+        self._active_game_objs[new_obj_id] = game_obj
         for system in self._systems:
             system.spawn_game_obj(game_obj)
 
@@ -138,7 +109,7 @@ class StateHandler:
             for player_input in player_inputs:
                 match player_input:
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_1: spell_ids.append(128)
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_2: spell_ids.append(911)
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_2: spell_ids.append(910)
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_3: spell_ids.append(170)
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_4: spell_ids.append(1440)
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_TAB: spell_ids.append(15)

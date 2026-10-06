@@ -100,26 +100,33 @@ class CastingSystem(System):
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> None:
+    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
         match effect_type:
             case CastingEffect.GAIN_CHANNELING_TICKS:
                 data = self.get_data(obj_id)
                 data.casting_ticks += round(effect_value)
                 data.casting_ticks = max(0, data.casting_ticks)
+                return Consts.EMPTY_SPELL_ID
             case CastingEffect.APPLY_GCD:
                 other_data = self.get_data(obj_id)
                 other_data.gcd_start = timestamp
                 other_data.gcd_duration = round(effect_value)
+                return Consts.EMPTY_SPELL_ID
             case CastingEffect.APPLY_COOLDOWN:
                 other_data = self.get_data(obj_id)
                 other_data.cooldown_start = timestamp
                 other_data.cooldown_duration = round(effect_value)
+                return Consts.EMPTY_SPELL_ID
             case CastingEffect.APPLY_PARENT_CD:
                 parent_data = self.get_parent_data(obj_id)
                 parent_data.cooldown_start = timestamp
                 parent_data.cooldown_duration = round(effect_value)
+                return Consts.EMPTY_SPELL_ID
             case CastingEffect.SELECT_SPELL_ID:
                 self.get_data(obj_id).selected_spell_id = round(effect_value)
+                return Consts.EMPTY_SPELL_ID
+            case _:
+                return Consts.EMPTY_SPELL_ID
 
     def _get_cast_end_timestamp(self, obj_id: int) -> int:
         data = self.get_data(obj_id)
