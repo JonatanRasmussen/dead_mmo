@@ -61,19 +61,15 @@ class HealthSystem(BaseSystem):
                 return True
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+        triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case HealthEffect.APPLY_DAMAGE:
                 self.get_data(obj_id).hp -= effect_value
-                return Consts.EMPTY_SPELL_ID
             case HealthEffect.APPLY_HEAL:
                 self.get_data(obj_id).hp += effect_value
-                return Consts.EMPTY_SPELL_ID
             case HealthEffect.APPLY_HP:
                 self.get_data(obj_id).hp = effect_value
-                return Consts.EMPTY_SPELL_ID
             case HealthEffect.IS_UNHITTABLE:
                 data = self.get_data(obj_id)
                 data.is_hittable = bool(effect_value)
-                return Consts.EMPTY_SPELL_ID
-            case _:
-                return Consts.EMPTY_SPELL_ID
+        return triggered_spell_id

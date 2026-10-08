@@ -112,7 +112,7 @@ class SimValidation:
                 # Convert spell_id to spell_name for stable snapshot testing
                 if "spell_id" in evt_dict:
                     spell_id = evt_dict.pop("spell_id")
-                    evt_dict["spell_name"] = state._spell_handler.get_spell_name(spell_id)
+                    evt_dict["spell_name"] = state._spell_registry.get_spell_name(spell_id)
 
                 serialized_events.append(evt_dict)
 
@@ -138,7 +138,7 @@ class SimValidation:
         def sanitize(key, val):
             # If the key implies it's a spell ID, convert it to a string name!
             if isinstance(key, str) and key.endswith("spell_id") and isinstance(val, int):
-                return state._spell_handler.get_spell_name(val)
+                return state._spell_registry.get_spell_name(val)
 
             if isinstance(val, Enum):
                 return val.name

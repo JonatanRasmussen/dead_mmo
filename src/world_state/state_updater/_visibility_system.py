@@ -55,18 +55,14 @@ class VisibilitySystem(BaseSystem):
                 return True
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+        triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case VisibilityEffect.APPLY_COLOR_RED:
                 self.get_data(obj_id).color_red = int(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VisibilityEffect.APPLY_COLOR_GREEN:
                 self.get_data(obj_id).color_green = int(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VisibilityEffect.APPLY_COLOR_BLUE:
                 self.get_data(obj_id).color_blue = int(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VisibilityEffect.TURN_INVISIBLE:
                 self.get_data(obj_id).is_visible = False
-                return Consts.EMPTY_SPELL_ID
-            case _:
-                return Consts.EMPTY_SPELL_ID
+        return triggered_spell_id

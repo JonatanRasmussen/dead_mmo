@@ -42,11 +42,10 @@ class SfxSystem(BaseSystem):
                 return True
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+        triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case SfxEffect.START_PLAY_AUDIO:
                 data = self.get_data(obj_id)
                 data.audio_id = int(effect_value)
                 data.audio_start = timestamp
-                return Consts.EMPTY_SPELL_ID
-            case _:
-                return Consts.EMPTY_SPELL_ID
+        return triggered_spell_id

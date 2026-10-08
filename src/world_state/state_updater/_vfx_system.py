@@ -67,25 +67,19 @@ class VfxSystem(BaseSystem):
                 return True
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+        triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case VfxEffect.APPLY_ANIMATION_ID:
                 self.get_data(obj_id).animation_id = int(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VfxEffect.ANIMATION_FRAMES:
                 self.get_data(obj_id).animation_frames = int(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VfxEffect.ANIMATION_MS_PER_FRAME:
                 self.get_data(obj_id).animation_ms_per_frame = int(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VfxEffect.ANIMATION_LOOPS:
                 self.get_data(obj_id).animation_loops = bool(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case VfxEffect.ANIMATION_SCALE:
                 self.get_data(obj_id).animation_scale = effect_value
-                return Consts.EMPTY_SPELL_ID
             case VfxEffect.START_PLAY_ANIMATION:
                 data = self.get_data(obj_id)
                 data.animation_start = timestamp if effect_value != 0 else Consts.EMPTY_TIMESTAMP
-                return Consts.EMPTY_SPELL_ID
-            case _:
-                return Consts.EMPTY_SPELL_ID
+        return triggered_spell_id

@@ -1,7 +1,6 @@
 from typing import Iterable
 from enum import Enum
 from src.settings import Consts
-from src.settings import HardwareInputConsts
 from .display_obj import DisplayObj
 from .game_obj import GameObj
 from .base_system import BaseSystem
@@ -34,9 +33,9 @@ class SelfcastValidation(str, Enum):
     IS_TARGET_THE_DESTINATION = "is_target_the_destination"
 
 
-class StateHandler:
+class StateUpdater:
     def __init__(self) -> None:
-        self._active_game_objs: dict[int, GameObj] = {}
+        self._active_game_objs: dict[int, GameObj] = {Consts.EMPTY_SPELL_ID: GameObj()}
         self._systems: list[BaseSystem] = self.initialize_list_of_systems()
 
     @property
@@ -61,6 +60,7 @@ class StateHandler:
             HealthSystem(self._active_game_objs),
             IdentitySystem(self._active_game_objs),
             MovementSystem(self._active_game_objs),
+            PeriodicSystem(self._active_game_objs),
             SfxSystem(self._active_game_objs),
             VfxSystem(self._active_game_objs),
             VisibilitySystem(self._active_game_objs),

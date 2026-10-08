@@ -42,13 +42,13 @@ class InputHandler:
         elif event.key == pygame.K_TAB:
             inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_TAB)
         elif event.key == pygame.K_1:
-            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_1)
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_1)
         elif event.key == pygame.K_2:
-            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_2)
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_2)
         elif event.key == pygame.K_3:
-            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_3)
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_3)
         elif event.key == pygame.K_4:
-            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_4)
+            inputs.append(HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_4)
 
     def is_running(self) -> bool:
         return self.running

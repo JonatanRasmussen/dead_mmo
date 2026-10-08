@@ -4,8 +4,27 @@
 empty_spell:
 
 # ==========================================
+# Inits commonly used
+# ==========================================
+
+init_spellslot:
+  validations:
+    is_targeting_self: true
+  effects:
+    attach_to_destination: true
+    is_unhittable: true
+    turn_invisible: true
+
+gcd_caster:
+  validation:
+    is_targeting_destination: true
+  effects:
+    add_cooldown: 1000
+
+# ==========================================
 # Basic Movement
 # ==========================================
+
 start_move_up:
   validation:
     is_targeting_self: true
@@ -61,36 +80,39 @@ step_towards_target:
   effects:
     gain_channeling_ticks: -1
     walk_towards_target: true
-  triggers:
-    timeline:
-      20: [step_towards_target]
+  timeline:
+    20: [step_towards_target]
 
 start_move_towards_target:
   validations:
     is_targeting_self: true
   effects:
     gain_channeling_ticks: 3600
-  triggers:
-    timeline:
-      20: [step_towards_target]
+  timeline:
+    20: [step_towards_target]
 
 # ==========================================
 # Npc Healing Powerup
 # ==========================================
 keypress_healing_powerup:
   validations:
-    is_targeting_self: true
+    is_targeting_destination: true
     is_gcd_ready: true
+    is_cd_ready: true
   effects:
     play_audio: Rejuvenation
-    gcd_duration: 1000
-  triggers:
-    timeline:
-      0: [init_healing_powerup]
+  timeline:
+    0: [init_healing_powerup, gcd_caster, cd_healing_powerup]
+
+cd_healing_powerup:
+  validations:
+    is_targeting_self: true
+  effects:
+    add_cooldown: 2000
 
 init_healing_powerup:
   validations:
-    is_targeting_self: true
+    is_targeting_destination: true
   effects:
     spawn_as_child: true
     is_unhittable: true
@@ -101,9 +123,9 @@ init_healing_powerup:
     color_red: 0
     color_green: 255
     color_blue: 0
-  triggers:
-    timeline:
-      200: [tick_healing_powerup]
+  timeline:
+    200: [tick_healing_powerup]
+    500: [start_move_towards_target]
 
 tick_healing_powerup:
   validations:
@@ -111,10 +133,9 @@ tick_healing_powerup:
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-  triggers:
-    timeline:
-      0: [try_trigger_healing_powerup]
-      100: [tick_healing_powerup]
+  timeline:
+    0: [try_trigger_healing_powerup]
+    100: [tick_healing_powerup]
 
 try_trigger_healing_powerup:
   validations:
@@ -123,13 +144,12 @@ try_trigger_healing_powerup:
   effects:
     gain_channeling_ticks: -65535
     turn_invisible: true
-  triggers:
-    timeline:
-      0: [healing_powerup_apply]
+  timeline:
+    0: [healing_powerup_apply]
 
 healing_powerup_apply:
   validations:
-    is_target_the_destination: true
+    is_targeting_destination: true
   effects:
     play_audio: Rejuvenation
     heal: 150.0
@@ -142,9 +162,8 @@ keypress_landmine:
     is_targeting_self: true
   effect:
     play_audio: MoltenBlastHit
-  triggers:
-    timeline:
-      0: [init_landmine]
+  timeline:
+    0: [init_landmine]
 
 init_landmine:
   validations:
@@ -159,9 +178,8 @@ init_landmine:
     color_red: 255
     color_green: 0
     color_blue: 255
-  triggers:
-    timeline:
-      1500: [tick_landmine]
+  timeline:
+    1500: [tick_landmine]
 
 tick_landmine:
   validations:
@@ -169,10 +187,9 @@ tick_landmine:
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-  triggers:
-    timeline:
-      0: [try_trigger_landmine]
-      100: [tick_landmine]
+  timeline:
+    0: [try_trigger_landmine]
+    100: [tick_landmine]
 
 try_trigger_landmine:
   validations:
@@ -182,13 +199,12 @@ try_trigger_landmine:
     gain_channeling_ticks: -65535
     turn_invisible: true
     is_unhittable: true
-  triggers:
-    timeline:
-      0: [landmine_apply]
+  timeline:
+    0: [landmine_apply]
 
 landmine_apply:
   validations:
-    is_target_the_destination: true
+    is_targeting_destination: true
   effects:
     play_audio: MoltenBlastHit
     damage: 134.0
@@ -199,9 +215,8 @@ landmine_apply:
 spawn_target_dummy:
   validations:
     is_targeting_self: true
-  triggers:
-    timeline:
-      0: [init_target_dummy]
+  timeline:
+    0: [init_target_dummy]
 
 init_target_dummy:
   validations:
@@ -215,17 +230,15 @@ init_target_dummy:
     color_red: 0
     color_green: 0
     color_blue: 255
-  triggers:
-    timeline:
-      4000: [molten_blast_aoe]
-      7000: [start_move_towards_target]
+  timeline:
+    4000: [molten_blast_aoe]
+    7000: [start_move_towards_target]
 
 spawn_bravo_dummy:
   validations:
     is_targeting_self: true
-  triggers:
-    timeline:
-      0: [init_bravo_dummy]
+  timeline:
+    0: [init_bravo_dummy]
 
 init_bravo_dummy:
   validations:
@@ -239,10 +252,9 @@ init_bravo_dummy:
     color_red: 0
     color_green: 0
     color_blue: 255
-  triggers:
-    timeline:
-      2000: [shadow_blast_apply]
-      7000: [start_move_towards_target]
+  timeline:
+    2000: [shadow_blast_apply]
+    7000: [start_move_towards_target]
 
 # ==========================================
 # Spec Warlock
@@ -252,10 +264,9 @@ molten_blast_aoe:
     is_targeting_self: true
     is_gcd_ready: true
   effects:
-    gcd_duration: 500
-  triggers:
-    timeline:
-      0: [molten_blast_trigger]
+    add_cooldown: 500
+  timeline:
+    0: [molten_blast_trigger]
 
 molten_blast_trigger:
   validations:
@@ -268,13 +279,12 @@ molten_blast_trigger:
 shadow_blast_buttonpress:
   validations:
     is_targeting_self: true
-    is_gcd_ready: true
+    is_cd_ready: true
   effects:
-    gcd_duration: 500
+    add_cooldown: 500
     gain_channeling_ticks: 4
-  triggers:
-    timeline:
-      0: [shadow_blast_tick]
+  timeline:
+    0: [shadow_blast_tick]
 
 shadow_blast_apply:
   validations:
@@ -290,23 +300,26 @@ shadow_blast_tick:
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-  triggers:
-    timeline:
-      0: [shadow_blast_apply]
-      300: [shadow_blast_tick]
+  timeline:
+    0: [shadow_blast_apply]
+    300: [shadow_blast_tick]
 
 shadowbolt_keypress:
   validations:
-    is_targeting_self: true
-    is_cooldown_ready: true
+    is_targeting_destination: true
+    is_cd_ready: true
     is_gcd_ready: true
   effects:
     play_audio: ShadowBoltCast
-    base_cooldown: 2000
-    gcd_duration: 1000
-  triggers:
-    timeline:
-      0: [shadowbolt_init]
+    add_cooldown: 1000
+  timeline:
+    0: [shadowbolt_init, gcd_caster, cd_shadowbolt]
+
+cd_shadowbolt:
+  validations:
+    is_targeting_self: true
+  effects:
+    add_cooldown: 4000
 
 shadowbolt_init:
   validations:
@@ -322,9 +335,8 @@ shadowbolt_init:
     color_red: 255
     color_green: 255
     color_blue: 255
-  triggers:
-    timeline:
-      20: [shadowbolt_tick]
+  timeline:
+    20: [shadowbolt_tick]
 
 shadowbolt_tick:
   validations:
@@ -333,10 +345,9 @@ shadowbolt_tick:
   effects:
     gain_channeling_ticks: -1
     walk_towards_target: true
-  triggers:
-    timeline:
-      0: [shadowbolt_try_trigger]
-      20: [shadowbolt_tick]
+  timeline:
+    0: [shadowbolt_try_trigger]
+    20: [shadowbolt_tick]
 
 shadowbolt_try_trigger:
   validations:
@@ -353,13 +364,12 @@ shadowbolt_try_trigger:
     animation_loops: 2
     animation_scale: 0.5
     play_animation: true
-  triggers:
-    timeline:
-      0: [shadowbolt_apply]
+  timeline:
+    0: [shadowbolt_apply]
 
 shadowbolt_apply:
   validations:
-    is_target_the_destination: true
+    is_targeting_destination: true
   effects:
     damage: 34.0
 
@@ -379,12 +389,11 @@ init_bravo_boss:
     color_red: 0
     color_green: 255
     color_blue: 0
-  triggers:
-    timeline:
-      400: [spawn_bravo_dummy]
-      800: [keypress_landmine]
-      3000: [molten_blast_aoe]
-      5000: [shadowbolt_keypress]
+  timeline:
+    400: [spawn_bravo_dummy]
+    800: [keypress_landmine]
+    3000: [molten_blast_aoe]
+    5000: [shadowbolt_keypress]
 
 init_player:
   validations:
@@ -404,3 +413,25 @@ init_player:
     animation_loops: 1
     play_animation: true
     damage: 34.0
+  timeline:
+    0: [healpowerup_listener, shadowbolt_listener]
+
+healpowerup_listener:
+  validations:
+    is_targeting_self: true
+  effects:
+    spawn_as_child: true
+    select_spell_id: keypress_healing_powerup
+    bind_to_input_id: -3
+  timeline:
+    0: [init_spellslot]
+
+shadowbolt_listener:
+  validations:
+    is_targeting_self: true
+  effects:
+    spawn_as_child: true
+    select_spell_id: shadowbolt_keypress
+    bind_to_input_id: -4
+  timeline:
+    0: [init_spellslot]

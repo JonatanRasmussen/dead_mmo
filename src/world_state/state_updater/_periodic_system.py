@@ -57,14 +57,12 @@ class PeriodicSystem(BaseSystem):
                 return True
 
     def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+        triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case PeriodicEffect.SET_PERIODIC_SPELL:
                 self.get_data(obj_id).periodic_spell_id = round(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case PeriodicEffect.SCHEDULE_PERIODIC_SPELL:
                 self.get_data(obj_id).delay_between_ticks = round(effect_value)
-                return Consts.EMPTY_SPELL_ID
             case PeriodicEffect.TRIGGER_PERIODIC_SPELL:
-                return self.get_data(obj_id).periodic_spell_id
-            case _:
-                return Consts.EMPTY_SPELL_ID
+                triggered_spell_id = Consts.EMPTY_SPELL_ID = self.get_data(obj_id).periodic_spell_id
+        return triggered_spell_id
