@@ -26,13 +26,8 @@ class SpellDef:
 class SpellRegistry:
     def __init__(self) -> None:
         # Unified ID Registry Data (Shared for both Spells and Assets)
-        self._name_to_id: dict[str, int] = {
-            "": 0,
-            Consts.EMPTY_SPELL_NAME: 0
-        }
-        self._id_to_name: dict[int, str] = {
-            0: ""
-        }
+        self._name_to_id: dict[str, int] = {"": 0, Consts.EMPTY_SPELL_NAME: 0}  # Fix later
+        self._id_to_name: dict[int, str] = {0: ""}
         self._next_id: int = 1
 
         # Separated Spell Data Stores
@@ -41,10 +36,10 @@ class SpellRegistry:
         self.spell_timelines: dict[int, dict[int, list[int]]] = {}
 
     @classmethod
-    def initialize_with_loaded_spells(cls, system_effect_types: set[str], system_validation_types: set[str]) -> "SpellRegistry":
+    def initialize_with_loaded_spells(cls, known_effect_types: set[str], known_validation_types: set[str]) -> "SpellRegistry":
         spell_registry = cls()
-        valid_validation_types = system_validation_types | {s.value for s in SelfcastValidation}
-        valid_effect_types = system_effect_types | {t.value for t in TriggerEffect}
+        valid_validation_types = known_validation_types | {s.value for s in SelfcastValidation}
+        valid_effect_types = known_effect_types | {t.value for t in TriggerEffect}
         raw_spells = cls._load_yaml()  # Load raw dicts and load them into the spell registry
         spell_registry._parse_and_load(raw_spells, valid_effect_types, valid_validation_types)
         spell_registry._initialize_input_spells()

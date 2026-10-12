@@ -48,7 +48,8 @@ class IngameLoop:
                         player_inputs_this_frame.extend(inputs)
 
             # Simulate next frame
-            world_state.process_frame(player1_obj_id, player_inputs_this_frame, current_ingame_time)
+            world_state.insert_player_inputs(player1_obj_id, player_inputs_this_frame, current_ingame_time)
+            world_state.process_frame(current_ingame_time)
             # Render the frame we just simulated
             rendering_framework.begin_frame()
             display_objs_dct = world_state.get_display_obj_dct(current_ingame_time)

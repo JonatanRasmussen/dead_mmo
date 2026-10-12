@@ -40,7 +40,8 @@ class SimValidation:
                 if (ingame_time - FRAME_DURATION_MS) < timestamp <= ingame_time:
                     for player_input in inputs:
                         player_inputs_this_frame.append(player_input)
-            world_state.process_frame(player1_obj_id, player_inputs_this_frame, ingame_time)
+            world_state.insert_player_inputs(player1_obj_id, player_inputs_this_frame, ingame_time)
+            world_state.process_frame(ingame_time)
 
         # Replace invalid characters in filename if needed, but str(list) is usually fine
         SimValidation._run_snapshot_test(world_state, snapshot_name=str(setup_spell_names))

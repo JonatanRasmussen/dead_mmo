@@ -2,13 +2,13 @@ from src.settings import Consts
 from ._combat_event import CombatEvent
 from ._event_log import EventLog
 from ._frame_heap import FrameHeap
-from .id_gen import IdGen
 
 
 class EventHandler:
+
     def __init__(self) -> None:
         self._event_heap: FrameHeap = FrameHeap()
-        self._event_id_gen: IdGen = IdGen.create_preassigned_range(1, 100_000)
+        self._next_event_id: int = Consts.EMPTY_EVENT_ID + 1
         self._event_log_for_each_frame: dict[int, EventLog] = {}
         self._event_log_for_current_frame: EventLog = EventLog()
         self._current_event: CombatEvent | None = None
@@ -19,6 +19,8 @@ class EventHandler:
     def fetch_next_event(self) -> tuple[int, int, int, int]:
         assert not self._current_event, "New event was fetched before previous event was finalized."
         self._current_event = self._event_heap.pop_next_event()
+        EVENT_ID_LIMIT = 99_999  # Implemented to stop infinite loops (should be impossible to reach)
+        assert self._current_event.event_id <= EVENT_ID_LIMIT, f"Warning: event_id limit reached. ({self._current_event.serialize()})"
         return self._current_event.combat_data
 
     def finalize_event(self, error_msg: str) -> bool:
@@ -49,6 +51,7 @@ class EventHandler:
         return combat_interactions
 
     def dispatch_upcoming_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
-        event_id=self._event_id_gen.generate_new_id()
+        event_id= self._next_event_id
+        self._next_event_id += 1
         setup_event = CombatEvent(event_id, timestamp, source_id, spell_id, target_id)
         self._event_heap.insert_event(setup_event)

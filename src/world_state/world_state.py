@@ -2,14 +2,13 @@ from typing import Iterable
 
 from src.settings import Consts, HardwareInputConsts
 from src.world_state.spell_registry.spell_registry import SpellRegistry
-from .event_handler import EventHandler, IdGen
+from .event_handler import EventHandler
 from .state_updater import StateUpdater, DisplayObj
 
 
 class WorldState:
 
     def __init__(self) -> None:
-        self._game_obj_id_gen: IdGen = IdGen.create_preassigned_range(1, 10_000)
         self._event_handler: EventHandler = EventHandler()
         self._state_updater: StateUpdater = StateUpdater()
         self._spell_registry: SpellRegistry = WorldState._initialize_spells(self._state_updater)
@@ -27,19 +26,21 @@ class WorldState:
     def get_combat_interactions_for_frame(self, current_frame_time: int) -> list[tuple[int, int, int]]:
         return self._event_handler.get_combat_interactions_for_frame(current_frame_time)
 
-    def register_player(self, ingame_time: int, setup_spell_name: str) -> int:
-        setup_spell_id = self._spell_registry.get_spell_id(setup_spell_name)
-        player_obj_id = self._handle_event(ingame_time, Consts.EMPTY_OBJ_ID, setup_spell_id, Consts.EMPTY_OBJ_ID)
-        player_inputs: list[str] = []
-        self.process_frame(player_obj_id, player_inputs, ingame_time)
+    def register_player(self, timestamp: int, setup_spell_name: str) -> int:
+        source_id = Consts.EMPTY_OBJ_ID
+        spell_id = self._spell_registry.get_spell_id(setup_spell_name)
+        target_id = Consts.EMPTY_OBJ_ID
+        player_obj_id = self._handle_event(timestamp, source_id, spell_id, target_id)
         return player_obj_id
 
-    def process_frame(self, player_obj_id: int, player_inputs: list[str], frame_end: int) -> None:
+    def insert_player_inputs(self, player_obj_id: int, player_inputs: list[str], timestamp: int) -> None:
         spell_names = HardwareInputConsts.get_spell_names_for_player_inputs(player_obj_id, player_inputs)
         for spell_name in spell_names:
             spell_id = self._spell_registry.get_spell_id(spell_name)
             for target_id in self._get_targets(player_obj_id, spell_id):
-                self._event_handler.dispatch_upcoming_event(frame_end, player_obj_id, spell_id, target_id)
+                self._event_handler.dispatch_upcoming_event(timestamp, player_obj_id, spell_id, target_id)
+
+    def process_frame(self, frame_end: int) -> None:
         while self._event_handler.has_unprocessed_events(frame_end):
             timestamp, source_id, spell_id, target_id = self._event_handler.fetch_next_event()
             assert timestamp <= frame_end, f"frame ends at {frame_end}, but event has timestamp {timestamp}."
@@ -51,13 +52,18 @@ class WorldState:
         self._event_handler.finalize_event_log_for_current_frame(frame_end)
 
     def _handle_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
-        new_obj_id = self._handle_spawn(timestamp, source_id, spell_id, target_id)
-        source_to_use = new_obj_id if new_obj_id != Consts.EMPTY_OBJ_ID else source_id
-        target_to_use = new_obj_id if new_obj_id != Consts.EMPTY_OBJ_ID else target_id
+        if self._spell_registry.is_spell_spawning_as_child(spell_id):
+            new_obj_id = self._state_updater.spawn_game_obj(timestamp, source_id, spell_id, target_id)
+            new_source_id = new_obj_id
+            new_target_id = new_obj_id
+        else:
+            new_obj_id = Consts.EMPTY_OBJ_ID
+            new_source_id = source_id
+            new_target_id = target_id
         spell_effects = self._spell_registry.get_effects(spell_id)
-        triggered_spell_ids = self._state_updater.apply_event(timestamp, spell_effects, target_to_use)
-        self._create_triggered_events(timestamp, target_to_use, triggered_spell_ids)
-        self._create_cascading_events(timestamp, source_to_use, spell_id)
+        triggered_spell_ids = self._state_updater.apply_event(timestamp, spell_effects, new_target_id)
+        self._create_triggered_events(timestamp, new_target_id, triggered_spell_ids)
+        self._create_cascading_events(timestamp, new_source_id, spell_id)
         return new_obj_id
 
     def _create_triggered_events(self, timestamp: int, triggered_obj_id: int, triggered_spell_ids: list[int]) -> None:
@@ -82,15 +88,8 @@ class WorldState:
         else:
             yield from self._state_updater.active_obj_ids
 
-    def _handle_spawn(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> int:
-        if self._spell_registry.is_spell_spawning_as_child(spell_id):
-            new_source_id = self._game_obj_id_gen.generate_new_id()
-            self._state_updater.spawn_game_obj(new_source_id, timestamp, source_id, spell_id, target_id)
-            return new_source_id
-        return Consts.EMPTY_OBJ_ID
-
     @staticmethod
     def _initialize_spells(state_updater: StateUpdater) -> SpellRegistry:
-        system_effect_types = state_updater.get_valid_effects()
-        system_validation_types = state_updater.get_valid_validations()
-        return SpellRegistry.initialize_with_loaded_spells(system_effect_types, system_validation_types)
+        known_effect_types = state_updater.get_effects_known_to_systems()
+        known_validation_types = state_updater.get_validations_known_to_systems()
+        return SpellRegistry.initialize_with_loaded_spells(known_effect_types, known_validation_types)

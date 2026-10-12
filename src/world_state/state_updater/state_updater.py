@@ -14,18 +14,8 @@ from ._vfx_system import VfxSystem, ObjVfxData
 from ._visibility_system import VisibilitySystem
 
 
-class TriggerType(str, Enum):
-    TIMELINE = "timeline"
-    AOE_SPELL = "aoe_spell"
-    SIGNAL_SPELL = "on_signal"
-
-VALID_TRIGGER_TYPES = {t.value for t in TriggerType}
-
 class TriggerEffect(str, Enum):
     SPAWN_AS_CHILD = "spawn_as_child"
-    SEND_AS_SIGNAL = "cast_as_signal"
-    FIRE_WITH_DELAY = "delay_event"
-    CAST_AS_AOE = "cast_as_aoe"
 
 class SelfcastValidation(str, Enum):
     IS_SELFCAST = "is_selfcast"
@@ -35,36 +25,38 @@ class SelfcastValidation(str, Enum):
 
 class StateUpdater:
     def __init__(self) -> None:
-        self._active_game_objs: dict[int, GameObj] = {Consts.EMPTY_SPELL_ID: GameObj()}
-        self._systems: list[BaseSystem] = self.initialize_list_of_systems()
+        self._next_obj_id: int = Consts.EMPTY_OBJ_ID + 1
+        self._active_game_objs: dict[int, GameObj] = {Consts.EMPTY_OBJ_ID: GameObj()}
+        self._systems: list[BaseSystem] = StateUpdater._initialize_list_of_systems(self._active_game_objs)
 
     @property
     def active_obj_ids(self) -> Iterable[int]:
         yield from self._active_game_objs
 
-    def get_valid_effects(self) -> set[str]:
-        valid_effects = {t.value for t in TriggerEffect}
+    @staticmethod
+    def _initialize_list_of_systems(game_objs: dict[int, GameObj]) -> list[BaseSystem]:
+        return [
+            CastingSystem(game_objs),
+            HealthSystem(game_objs),
+            IdentitySystem(game_objs),
+            MovementSystem(game_objs),
+            PeriodicSystem(game_objs),
+            SfxSystem(game_objs),
+            VfxSystem(game_objs),
+            VisibilitySystem(game_objs),
+        ]
+
+    def get_effects_known_to_systems(self) -> set[str]:
+        valid_effects: set[str] = {t.value for t in TriggerEffect}
         for system in self._systems:
             valid_effects.update(system.get_effect_types())
         return valid_effects
 
-    def get_valid_validations(self) -> set[str]:
-        valid_validations = {s.value for s in SelfcastValidation}
+    def get_validations_known_to_systems(self) -> set[str]:
+        valid_validations: set[str] = {s.value for s in SelfcastValidation}
         for system in self._systems:
             valid_validations.update(system.get_validation_types())
         return valid_validations
-
-    def initialize_list_of_systems(self) -> list[BaseSystem]:
-        return [
-            CastingSystem(self._active_game_objs),
-            HealthSystem(self._active_game_objs),
-            IdentitySystem(self._active_game_objs),
-            MovementSystem(self._active_game_objs),
-            PeriodicSystem(self._active_game_objs),
-            SfxSystem(self._active_game_objs),
-            VfxSystem(self._active_game_objs),
-            VisibilitySystem(self._active_game_objs),
-        ]
 
     def create_display_obj(self, current_time: int, obj_id: int) -> DisplayObj:
         display_obj = DisplayObj(obj_id=obj_id)
@@ -75,7 +67,6 @@ class StateUpdater:
     def get_destination_for_obj(self, obj_id: int) -> int:
         return self._active_game_objs[obj_id].destination_id
 
-    # --- Core Validation Logic ---
     def validate_event(self, timestamp: int, source_id: int, spell_validations: dict[str, float], target_id: int) -> str:
         for validation_type, validation_value in spell_validations.items():
             for system in self._systems:
@@ -84,7 +75,6 @@ class StateUpdater:
                     return f"{Consts.FAILED_VALIDATION}_{validation_type}_{validation_value}"
         return ""
 
-    # --- Core Event Logic ---
     def apply_event(self, timestamp: int, spell_effects: dict[str, float], target_id: int) -> list[int]:
         triggered_spell_ids: list[int] = []
         for effect_type, effect_value in spell_effects.items():
@@ -94,7 +84,9 @@ class StateUpdater:
                     triggered_spell_ids.append(triggered_spell_id)
         return triggered_spell_ids
 
-    def spawn_game_obj(self, new_obj_id: int, timestamp: int, parent_id: int, spell_id: int, target_id: int) -> None:
-        assert new_obj_id not in self._active_game_objs, "Error: Obj already exists."
+    def spawn_game_obj(self, timestamp: int, parent_id: int, spell_id: int, target_id: int) -> int:
+        new_obj_id = self._next_obj_id
+        self._next_obj_id += 1
         game_obj = GameObj.create_new(new_obj_id, timestamp, parent_id, spell_id, target_id)
         self._active_game_objs[new_obj_id] = game_obj
+        return new_obj_id
