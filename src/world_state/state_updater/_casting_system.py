@@ -19,7 +19,7 @@ class CastingValidation(str, Enum):
     IS_COOLDOWN_READY = "is_cd_ready"
     IS_PARENT_CD_READY = "is_parent_cooldown_ready"
     IS_SPELL_SELECTED = "is_spell_selected"
-    IS_BOUND_TO_INPUT_ID = Consts.IS_BOUND_TO_INPUT_ID
+    IS_BOUND_TO_INPUT_ID = "is_bound_to_input_id"
 
 
 @dataclass(slots=True)

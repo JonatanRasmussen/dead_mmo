@@ -32,7 +32,6 @@ class EventHandler:
             spell_id=self._current_event.spell_id,
             target_id=self._current_event.target_id,
             validation_error_msg=error_msg,
-            spell_modifier=self._current_event.spell_modifier,
         )
         self._event_log_for_current_frame.log_event(finalized_event)
         self._current_event = None

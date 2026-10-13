@@ -13,7 +13,7 @@ class IdentityEffect(str, Enum):
 class IdentityValidation(str, Enum):
     IS_SOURCE_TARGETING_SELF = Consts.IS_TARGETING_SELF
     IS_SOURCE_TARGETING_PARENT = "is_targeting_parent"
-    IS_SOURCE_DESTINATION_OF_TARGET = Consts.IS_SOURCE_DESTINATION_OF_TARGET
+    IS_SOURCE_DESTINATION_OF_TARGET = "is_source_destination_of_target"
     IS_TARGET_OTHER_TEAM = "is_target_other_team"
 
 

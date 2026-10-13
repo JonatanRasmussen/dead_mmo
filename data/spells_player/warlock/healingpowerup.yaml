@@ -1,0 +1,75 @@
+learn_healing_powerup:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_healing_powerup
+    bind_to_input_id: input_ability_3
+  timeline:
+    0: [init_spellslot]
+
+keypress_healing_powerup:
+  validations:
+    is_targeting_destination: true
+    is_cd_ready: true
+    is_gcd_ready: true
+  effects:
+    play_audio: Rejuvenation
+  timeline:
+    0: [gcd_healing_powerup, cd_healing_powerup, spawn_healing_powerup]
+
+gcd_healing_powerup:
+  validation:
+    is_targeting_destination: true
+  effects:
+    add_cooldown: 1000
+
+cd_healing_powerup:
+  validations:
+    is_targeting_self: true
+  effects:
+    add_cooldown: 2000
+
+spawn_healing_powerup:
+  validations:
+    is_targeting_destination: true
+  spawn_as_child: true
+  effects:
+    is_unhittable: true
+    gain_channeling_ticks: 150
+    hp: 30.0
+    x_offset: 0.2
+    y_offset: -0.2
+    color_red: 0
+    color_green: 255
+    color_blue: 255
+  timeline:
+    200: [tick_healing_powerup]
+    500: [start_move_towards_target]
+
+tick_healing_powerup:
+  validations:
+    is_targeting_self: true
+    has_channeling_ticks: 1
+  effects:
+    gain_channeling_ticks: -1
+  timeline:
+    0: [trigger_healing_powerup]
+    100: [tick_healing_powerup]
+
+trigger_healing_powerup:
+  validations:
+    is_targeting_self: true
+    is_destination_within_range: 0.1
+  effects:
+    gain_channeling_ticks: -65535
+    turn_invisible: true
+  timeline:
+    0: [apply_healing_powerup]
+
+apply_healing_powerup:
+  validations:
+    is_targeting_destination: true
+  effects:
+    play_audio: Rejuvenation
+    heal: 150.0

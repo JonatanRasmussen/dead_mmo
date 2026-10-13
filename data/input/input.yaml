@@ -1,0 +1,83 @@
+input_startmove_up:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_startmove_up
+  effects:
+    try_cast_selected_spell: true
+
+input_stopmove_up:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_stopmove_up
+  effects:
+    try_cast_selected_spell: true
+
+input_startmove_left:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_startmove_left
+  effects:
+    try_cast_selected_spell: true
+
+input_stopmove_left:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_stopmove_left
+  effects:
+    try_cast_selected_spell: true
+
+input_startmove_down:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_startmove_down
+  effects:
+    try_cast_selected_spell: true
+
+input_stopmove_down:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_stopmove_down
+  effects:
+    try_cast_selected_spell: true
+
+input_startmove_right:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_startmove_right
+  effects:
+    try_cast_selected_spell: true
+
+input_stopmove_right:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_stopmove_right
+  effects:
+    try_cast_selected_spell: true
+
+input_ability_1:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_ability_1
+  effects:
+    try_cast_selected_spell: true
+
+input_ability_2:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_ability_2
+  effects:
+    try_cast_selected_spell: true
+
+input_ability_3:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_ability_3
+  effects:
+    try_cast_selected_spell: true
+
+input_ability_4:
+  validations:
+    is_source_destination_of_target: true
+    is_bound_to_input_id: input_ability_4
+  effects:
+    try_cast_selected_spell: true

@@ -17,8 +17,7 @@ class Consts:
 
     IS_TARGETING_SELF = "is_targeting_self"
     IS_TARGETING_DESTINATION = "is_targeting_destination"
-    IS_BOUND_TO_INPUT_ID = "is_bound_to_input_id"
-    IS_SOURCE_DESTINATION_OF_TARGET = "is_destination_of_target"
+    IS_SOURCE_DESTINATION_OF_TARGET = "is_source_destination_of_target"
     TRY_CAST_SELECTED_SPELL = "try_cast_selected_spell"
 
     MIN_ID: int = -999_999

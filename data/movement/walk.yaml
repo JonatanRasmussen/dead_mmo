@@ -1,0 +1,149 @@
+learn_walk:
+  validations:
+    is_targeting_self: true
+  timeline:
+    0:
+      - learn_startwalkforward
+      - learn_stopwalkforward
+      - learn_startwalkleft
+      - learn_stopwalkleft
+      - learn_startwalkbackward
+      - learn_stopwalkbackward
+      - learn_startwalkright
+      - learn_stopwalkright
+
+# Walk forward
+
+learn_startwalkforward:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_startwalkforward
+    bind_to_input_id: input_startmove_up
+  timeline:
+    0: [init_spellslot]
+
+keypress_startwalkforward:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_forward: true
+
+learn_stopwalkforward:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_stopwalkforward
+    bind_to_input_id: input_stopmove_up
+  timeline:
+    0: [init_spellslot]
+
+keypress_stopwalkforward:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_forward: false
+
+# Walk left
+
+learn_startwalkleft:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_startwalkleft
+    bind_to_input_id: input_startmove_left
+  timeline:
+    0: [init_spellslot]
+
+keypress_startwalkleft:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_left: true
+
+learn_stopwalkleft:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_stopwalkleft
+    bind_to_input_id: input_stopmove_left
+  timeline:
+    0: [init_spellslot]
+
+keypress_stopwalkleft:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_left: false
+
+# Walk backward
+
+learn_startwalkbackward:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_startwalkbackward
+    bind_to_input_id: input_startmove_down
+  timeline:
+    0: [init_spellslot]
+
+keypress_startwalkbackward:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_backward: true
+
+learn_stopwalkbackward:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_stopwalkbackward
+    bind_to_input_id: input_stopmove_down
+  timeline:
+    0: [init_spellslot]
+
+keypress_stopwalkbackward:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_backward: false
+
+# Walk right
+
+learn_startwalkright:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_startwalkright
+    bind_to_input_id: input_startmove_right
+  timeline:
+    0: [init_spellslot]
+
+keypress_startwalkright:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_right: true
+
+learn_stopwalkright:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_stopwalkright
+    bind_to_input_id: input_stopmove_right
+  timeline:
+    0: [init_spellslot]
+
+keypress_stopwalkright:
+  validations:
+    is_targeting_destination: true
+  effects:
+    walk_right: false

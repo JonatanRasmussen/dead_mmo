@@ -1,0 +1,84 @@
+learn_shadowbolt:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_shadowbolt
+    bind_to_input_id: input_ability_4
+  timeline:
+    0: [init_spellslot]
+
+keypress_shadowbolt:
+  validations:
+    is_targeting_destination: true
+    is_cd_ready: true
+    is_gcd_ready: true
+  effects:
+    play_audio: ShadowBoltCast
+    add_cooldown: 1000
+  timeline:
+    0: [gcd_shadowbolt, cd_shadowbolt, spawn_shadowbolt]
+
+gcd_shadowbolt:
+  validation:
+    is_targeting_destination: true
+  effects:
+    add_cooldown: 1000
+
+cd_shadowbolt:
+  validations:
+    is_targeting_self: true
+  effects:
+    add_cooldown: 4000
+
+spawn_shadowbolt:
+  validations:
+    is_target_hittable: true
+    is_target_other_team: true
+  spawn_as_child: true
+  effects:
+    is_unhittable: true
+    gain_channeling_ticks: 3600
+    x_offset: 0.0
+    y_offset: 0.05
+    movespeed: 5.0
+    color_red: 255
+    color_green: 255
+    color_blue: 0
+  timeline:
+    20: [tick_shadowbolt]
+
+tick_shadowbolt:
+  validations:
+    is_targeting_self: true
+    has_channeling_ticks: 1
+  effects:
+    gain_channeling_ticks: -1
+    walk_towards_target: true
+  timeline:
+    0: [trigger_shadowbolt]
+    20: [tick_shadowbolt]
+
+trigger_shadowbolt:
+  validations:
+    is_targeting_self: true
+    is_destination_within_range: 0.05
+  effects:
+    gain_channeling_ticks: -65535
+    turn_invisible: true
+    movespeed: 0.0
+    play_audio: ShadowBoltHit
+    sprite_id: explosion
+    sprite_frames: 7
+    animation_speed: 100
+    animation_loops: 2
+    animation_scale: 0.5
+    play_animation: true
+  timeline:
+    0: [apply_shadowbolt]
+
+apply_shadowbolt:
+  validations:
+    is_targeting_destination: true
+  effects:
+    damage: 34.0

@@ -115,6 +115,13 @@ class SimValidation:
                     spell_id = evt_dict.pop("spell_id")
                     evt_dict["spell_name"] = state._spell_registry.get_spell_name(spell_id)
 
+                # Convert spell_id to spell_name for stable snapshot testing
+                if "error_msg" in evt_dict and "invalid_is_bound_to_input_id_" in evt_dict["error_msg"]:
+                    error_msg = evt_dict.pop("error_msg")
+                    bound_spell_id = int(float(error_msg[len("invalid_is_bound_to_input_id_"):]))
+                    spell_name = state._spell_registry.get_spell_name(bound_spell_id)
+                    evt_dict["error_msg"] = "invalid_is_bound_to_input_id_" + spell_name
+
                 serialized_events.append(evt_dict)
 
             if serialized_events:

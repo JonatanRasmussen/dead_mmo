@@ -25,54 +25,6 @@ gcd_caster:
 # Basic Movement
 # ==========================================
 
-start_move_up:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_forward: true
-
-stop_move_up:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_forward: false
-
-start_move_left:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_left: true
-
-stop_move_left:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_left: false
-
-start_move_down:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_backward: true
-
-stop_move_down:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_backward: false
-
-start_move_right:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_right: true
-
-stop_move_right:
-  validation:
-    is_targeting_self: true
-  effects:
-    walk_right: false
-
 step_towards_target:
   validations:
     is_targeting_self: true
@@ -92,69 +44,6 @@ start_move_towards_target:
     20: [step_towards_target]
 
 # ==========================================
-# Npc Healing Powerup
-# ==========================================
-keypress_healing_powerup:
-  validations:
-    is_targeting_destination: true
-    is_gcd_ready: true
-    is_cd_ready: true
-  effects:
-    play_audio: Rejuvenation
-  timeline:
-    0: [init_healing_powerup, gcd_caster, cd_healing_powerup]
-
-cd_healing_powerup:
-  validations:
-    is_targeting_self: true
-  effects:
-    add_cooldown: 2000
-
-init_healing_powerup:
-  validations:
-    is_targeting_destination: true
-  effects:
-    spawn_as_child: true
-    is_unhittable: true
-    gain_channeling_ticks: 150
-    hp: 30.0
-    x_offset: 0.2
-    y_offset: -0.2
-    color_red: 0
-    color_green: 255
-    color_blue: 0
-  timeline:
-    200: [tick_healing_powerup]
-    500: [start_move_towards_target]
-
-tick_healing_powerup:
-  validations:
-    is_targeting_self: true
-    has_channeling_ticks: 1
-  effects:
-    gain_channeling_ticks: -1
-  timeline:
-    0: [try_trigger_healing_powerup]
-    100: [tick_healing_powerup]
-
-try_trigger_healing_powerup:
-  validations:
-    is_targeting_self: true
-    is_destination_within_range: 0.1
-  effects:
-    gain_channeling_ticks: -65535
-    turn_invisible: true
-  timeline:
-    0: [healing_powerup_apply]
-
-healing_powerup_apply:
-  validations:
-    is_targeting_destination: true
-  effects:
-    play_audio: Rejuvenation
-    heal: 150.0
-
-# ==========================================
 # Npc Landmine
 # ==========================================
 keypress_landmine:
@@ -166,11 +55,11 @@ keypress_landmine:
     0: [init_landmine]
 
 init_landmine:
+  spawn_as_child: true
   validations:
     is_target_hittable: true
     is_target_other_team: true
   effects:
-    spawn_as_child: true
     gain_channeling_ticks: 150
     hp: 20.0
     x_offset: -0.5
@@ -219,10 +108,10 @@ spawn_target_dummy:
     0: [init_target_dummy]
 
 init_target_dummy:
+  spawn_as_child: true
   validations:
     is_targeting_self: true
   effects:
-    spawn_as_child: true
     threat_score: 901
     hp: 80.0
     x_offset: -0.2
@@ -241,10 +130,10 @@ spawn_bravo_dummy:
     0: [init_bravo_dummy]
 
 init_bravo_dummy:
+  spawn_as_child: true
   validations:
     is_targeting_self: true
   effects:
-    spawn_as_child: true
     threat_score: 9001
     hp: 80.0
     x_offset: -0.2
@@ -304,83 +193,15 @@ shadow_blast_tick:
     0: [shadow_blast_apply]
     300: [shadow_blast_tick]
 
-shadowbolt_keypress:
-  validations:
-    is_targeting_destination: true
-    is_cd_ready: true
-    is_gcd_ready: true
-  effects:
-    play_audio: ShadowBoltCast
-    add_cooldown: 1000
-  timeline:
-    0: [shadowbolt_init, gcd_caster, cd_shadowbolt]
-
-cd_shadowbolt:
-  validations:
-    is_targeting_self: true
-  effects:
-    add_cooldown: 4000
-
-shadowbolt_init:
-  validations:
-    is_target_hittable: true
-    is_target_other_team: true
-  effects:
-    spawn_as_child: true
-    is_unhittable: true
-    gain_channeling_ticks: 3600
-    x_offset: 0.0
-    y_offset: 0.05
-    movespeed: 5.0
-    color_red: 255
-    color_green: 255
-    color_blue: 255
-  timeline:
-    20: [shadowbolt_tick]
-
-shadowbolt_tick:
-  validations:
-    is_targeting_self: true
-    has_channeling_ticks: 1
-  effects:
-    gain_channeling_ticks: -1
-    walk_towards_target: true
-  timeline:
-    0: [shadowbolt_try_trigger]
-    20: [shadowbolt_tick]
-
-shadowbolt_try_trigger:
-  validations:
-    is_targeting_self: true
-    is_destination_within_range: 0.05
-  effects:
-    gain_channeling_ticks: -65535
-    turn_invisible: true
-    movespeed: 0.0
-    play_audio: ShadowBoltHit
-    animation_id: explosion
-    animation_frames: 7
-    animation_speed: 100
-    animation_loops: 2
-    animation_scale: 0.5
-    play_animation: true
-  timeline:
-    0: [shadowbolt_apply]
-
-shadowbolt_apply:
-  validations:
-    is_targeting_destination: true
-  effects:
-    damage: 34.0
 
 # ==========================================
 # Boss and Player
 # ==========================================
 init_bravo_boss:
+  spawn_as_child: true
   validations:
     is_targeting_self: true
   effects:
-    spawn_as_child: true
     teamswap: true
     threat_score: 9001
     hp: 30.0
@@ -396,10 +217,10 @@ init_bravo_boss:
     5000: [shadowbolt_keypress]
 
 init_player:
+  spawn_as_child: true
   validations:
     is_targeting_self: true
   effects:
-    spawn_as_child: true
     player_number: 1
     hp: 30.0
     x_offset: 0.3
@@ -407,31 +228,8 @@ init_player:
     color_red: 255
     color_green: 0
     color_blue: 0
-    animation_id: poro
-    animation_frames: 1
-    animation_speed: 1000000
-    animation_loops: 1
-    play_animation: true
+    sprite_id: poro
+    sprite_frames: 1
     damage: 34.0
   timeline:
-    0: [healpowerup_listener, shadowbolt_listener]
-
-healpowerup_listener:
-  validations:
-    is_targeting_self: true
-  effects:
-    spawn_as_child: true
-    select_spell_id: keypress_healing_powerup
-    bind_to_input_id: -3
-  timeline:
-    0: [init_spellslot]
-
-shadowbolt_listener:
-  validations:
-    is_targeting_self: true
-  effects:
-    spawn_as_child: true
-    select_spell_id: shadowbolt_keypress
-    bind_to_input_id: -4
-  timeline:
-    0: [init_spellslot]
+    0: [learn_healing_powerup, learn_shadowbolt, learn_walk]
