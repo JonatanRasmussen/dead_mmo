@@ -14,20 +14,15 @@ keypress_healing_powerup:
     is_cd_ready: true
     is_gcd_ready: true
   effects:
-    play_audio: Rejuvenation
-  timeline:
-    0: [gcd_healing_powerup, cd_healing_powerup, spawn_healing_powerup]
-
-gcd_healing_powerup:
-  validation:
-    is_targeting_destination: true
-  effects:
     add_cooldown: 1000
+  timeline:
+    0: [cd_healing_powerup, spawn_healing_powerup]
 
 cd_healing_powerup:
   validations:
     is_targeting_self: true
   effects:
+    play_audio: Rejuvenation
     add_cooldown: 2000
 
 spawn_healing_powerup:

@@ -71,5 +71,12 @@ class IngameLoop:
                 time_ms=rendering_framework.get_current_time(),
                 asset_name=display_obj.sprite_asset_name,
             )
-        if display_obj.audio_id and display_obj.audio_start > frame_start:
-            rendering_framework.play_sound(display_obj.audio_name)
+
+        # Pass the audio state to the renderer to handle starting/stopping
+        rendering_framework.update_audio(
+            obj_id=display_obj.obj_id,
+            audio_name=display_obj.audio_name,
+            audio_start=display_obj.audio_start,
+            audio_loop=display_obj.audio_loop,
+            frame_start=frame_start
+        )

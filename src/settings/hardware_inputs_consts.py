@@ -27,7 +27,7 @@ class HardwareInputConsts:
         if player_id != Consts.EMPTY_OBJ_ID:
             for player_input in player_inputs:
                 match player_input:
-                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_1: spell_names.append("molten_blast_aoe")
+                    case HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_1: spell_names.append("input_ability_1")
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_2: spell_names.append("shadow_blast_buttonpress")
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_3: spell_names.append("input_ability_3")
                     case HardwareInputConsts.KEYBOARD_KEYDOWN_ABILITY_4: spell_names.append("input_ability_4")

@@ -6,6 +6,8 @@ from .base_system import BaseSystem, DisplayObj, GameObj
 
 class SfxEffect(str, Enum):
     START_PLAY_AUDIO = "play_audio"
+    STOP_PLAY_AUDIO = "stop_audio"
+    LOOP_AUDIO = "loop_audio"
 
 class SfxValidation(str, Enum):
     pass
@@ -15,6 +17,7 @@ class ObjSfxData:
     obj_id: int = Consts.EMPTY_OBJ_ID
     audio_id: int = Consts.EMPTY_ASSET_ID
     audio_start: int = Consts.EMPTY_TIMESTAMP
+    loop_audio: bool = False
 
     @classmethod
     def create_from_game_obj(cls, game_obj: GameObj) -> "ObjSfxData":
@@ -34,6 +37,7 @@ class SfxSystem(BaseSystem):
             data = self.get_data(obj_id)
             display_obj.audio_id = float(data.audio_id)
             display_obj.audio_start = data.audio_start
+            display_obj.audio_loop = data.loop_audio
         return display_obj
 
     def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
@@ -48,4 +52,10 @@ class SfxSystem(BaseSystem):
                 data = self.get_data(obj_id)
                 data.audio_id = int(effect_value)
                 data.audio_start = timestamp
+            case SfxEffect.STOP_PLAY_AUDIO:
+                data = self.get_data(obj_id)
+                data.audio_start = Consts.EMPTY_TIMESTAMP
+            case SfxEffect.LOOP_AUDIO:
+                data = self.get_data(obj_id)
+                data.loop_audio = bool(effect_value)
         return triggered_spell_id

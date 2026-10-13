@@ -1,49 +1,4 @@
 # ==========================================
-# Start of configs (spells.yaml)
-# ==========================================
-empty_spell:
-
-# ==========================================
-# Inits commonly used
-# ==========================================
-
-init_spellslot:
-  validations:
-    is_targeting_self: true
-  effects:
-    attach_to_destination: true
-    is_unhittable: true
-    turn_invisible: true
-
-gcd_caster:
-  validation:
-    is_targeting_destination: true
-  effects:
-    add_cooldown: 1000
-
-# ==========================================
-# Basic Movement
-# ==========================================
-
-step_towards_target:
-  validations:
-    is_targeting_self: true
-    has_channeling_ticks: 1
-  effects:
-    gain_channeling_ticks: -1
-    walk_towards_target: true
-  timeline:
-    20: [step_towards_target]
-
-start_move_towards_target:
-  validations:
-    is_targeting_self: true
-  effects:
-    gain_channeling_ticks: 3600
-  timeline:
-    20: [step_towards_target]
-
-# ==========================================
 # Npc Landmine
 # ==========================================
 keypress_landmine:
@@ -207,29 +162,14 @@ init_bravo_boss:
     hp: 30.0
     x_offset: 0.7
     y_offset: 0.7
-    color_red: 0
-    color_green: 255
-    color_blue: 0
+    sprite_id: baddie
+    sprite_frames: 4
+    animation_speed: 900
+    animation_loops: 200
+    animation_scale: 1.0
+    play_animation: true
   timeline:
     400: [spawn_bravo_dummy]
     800: [keypress_landmine]
     3000: [molten_blast_aoe]
     5000: [shadowbolt_keypress]
-
-init_player:
-  spawn_as_child: true
-  validations:
-    is_targeting_self: true
-  effects:
-    player_number: 1
-    hp: 30.0
-    x_offset: 0.3
-    y_offset: 0.3
-    color_red: 255
-    color_green: 0
-    color_blue: 0
-    sprite_id: poro
-    sprite_frames: 1
-    damage: 34.0
-  timeline:
-    0: [learn_healing_powerup, learn_shadowbolt, learn_walk]

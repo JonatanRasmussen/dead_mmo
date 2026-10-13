@@ -184,6 +184,9 @@ class PygameRenderer:
         if asset_name:
             self._audio_manager.play_sound(asset_name)
 
+    def update_audio(self, obj_id: int, audio_name: str, audio_start: int, audio_loop: bool, frame_start: int) -> None:
+        self._audio_manager.update_audio(obj_id, audio_name, audio_start, audio_loop, frame_start)
+
     # --- Private helpers ---
 
     def _draw_game_background(self) -> None:

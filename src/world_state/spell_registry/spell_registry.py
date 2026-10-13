@@ -130,7 +130,14 @@ class SpellRegistry:
         raw_spell_dct: dict = {}
         # Recursively find all .yaml files in data/ and its subdirectories
         for file_path in Path("data").rglob("*.yaml"):
-            raw_spell_dct.update(SpellRegistry._load_yaml(str(file_path)))
+            loaded_spells = SpellRegistry._load_yaml(str(file_path))
+
+            # Replaced `.update()` with an explicit loop to catch duplicate spell names
+            for spell_name, spell_data in loaded_spells.items():
+                if spell_name in raw_spell_dct:
+                    raise ValueError(f"Duplicate spell name detected: '{spell_name}' found in {file_path}, but it was already loaded from another file.")
+                raw_spell_dct[spell_name] = spell_data
+
         return raw_spell_dct
 
     @staticmethod
@@ -139,6 +146,7 @@ class SpellRegistry:
         Does not maintain any state or handle game logic/IDs. """
         with open(path, "r") as f:
             raw_data = yaml.safe_load(f) or {}
+
         normalized_data = {}
         for spell_name, s in raw_data.items():
             if s is None:

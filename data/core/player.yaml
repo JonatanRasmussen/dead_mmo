@@ -1,0 +1,16 @@
+init_player:
+  spawn_as_child: true
+  validations:
+    is_targeting_self: true
+  effects:
+    player_number: 1
+    hp: 30.0
+    x_offset: 0.3
+    y_offset: 0.3
+    color_red: 255
+    color_green: 0
+    color_blue: 0
+    sprite_id: poro
+    sprite_frames: 1
+  timeline:
+    0: [become_warlock]

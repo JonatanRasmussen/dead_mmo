@@ -15,6 +15,7 @@ class DisplayObj:
     audio_id: float = float(Consts.EMPTY_ASSET_ID)
     audio_name: str = Consts.EMPTY_ASSET_NAME
     audio_start: int = Consts.EMPTY_TIMESTAMP
+    audio_loop: bool = False
 
     @property
     def has_sprite(self) -> bool:

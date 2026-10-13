@@ -21,7 +21,7 @@ class ObjVfxData:
     sprite_id: int = Consts.EMPTY_ASSET_ID
     sprite_frames: int = 1
     animation_ms_per_frame: int = 100
-    animation_loops: bool = False
+    animation_loops: int = 0  # Number of loops to run, NOT boolean
     animation_scale: float = 0.0
     animation_start: int = Consts.EMPTY_TIMESTAMP
 
@@ -79,7 +79,7 @@ class VfxSystem(BaseSystem):
             case VfxEffect.ANIMATION_MS_PER_FRAME:
                 self.get_data(obj_id).animation_ms_per_frame = int(effect_value)
             case VfxEffect.ANIMATION_LOOPS:
-                self.get_data(obj_id).animation_loops = bool(effect_value)
+                self.get_data(obj_id).animation_loops = int(effect_value)
             case VfxEffect.ANIMATION_SCALE:
                 self.get_data(obj_id).animation_scale = effect_value
             case VfxEffect.START_PLAY_ANIMATION:

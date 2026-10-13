@@ -6,16 +6,44 @@ from pathlib import Path
 class AudioManager:
     def __init__(self, assets_path: str = "assets/audio"):
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(32)  # Increased to allow more simultaneous sounds
         self.assets_path = Path(assets_path)
         self.sounds: dict[str, pygame.mixer.Sound] = {}
-        self.music_volume = 0.7
         self.sound_volume = 0.7
 
+        # Track active channels by obj_id: { obj_id: (audio_name, audio_start, channel) }
+        self._active_channels: dict[int, tuple[str, int, pygame.mixer.Channel]] = {}
+
     def play_sound(self, audio_name: str) -> None:
-        """Play a sound effect"""
+        """Play a sound effect immediately (fire-and-forget)."""
         sound = self.load_sound(audio_name)
         if sound:
             sound.play()
+
+    def update_audio(self, obj_id: int, audio_name: str, audio_start: int, audio_loop: bool, frame_start: int) -> None:
+        """State-driven audio update. Stops old sounds if state changes, starts new sounds if triggered."""
+
+        # 1. Check if we need to stop a currently tracked looping audio for this obj_id
+        if obj_id in self._active_channels:
+            active_audio_name, active_audio_start, channel = self._active_channels[obj_id]
+
+            # If the audio_name or audio_start has changed, stop the current tracked sound
+            if active_audio_name != audio_name or active_audio_start != audio_start:
+                channel.stop()
+                del self._active_channels[obj_id]
+
+        # 2. Check if we need to start new audio
+        # We only start if audio_name is not empty and audio_start triggered this frame
+        if audio_name and audio_start > frame_start:
+            sound = self.load_sound(audio_name)
+            if sound:
+                loops = -1 if audio_loop else 0
+                channel = sound.play(loops=loops)
+
+                # Only track the channel if it's a looping sound.
+                # One-off sounds (audio_loop=False) will be fire-and-forget and can overlap!
+                if channel and audio_loop:
+                    self._active_channels[obj_id] = (audio_name, audio_start, channel)
 
     def load_sound(self, audio_name: str) -> Optional[pygame.mixer.Sound]:
         """Load a sound from file or return cached version"""
@@ -35,33 +63,8 @@ class AudioManager:
         print(f"Warning: Sound '{audio_name}' not found in {self.assets_path}")
         return None
 
-    def play_music(self, audio_name: str, loops: int = -1) -> None:
-        """Play background music"""
-        for ext in ['.wav', '.ogg', '.mp3']:
-            audio_path = self.assets_path / f"{audio_name}{ext}"
-            if audio_path.exists():
-                try:
-                    pygame.mixer.music.load(str(audio_path))
-                    pygame.mixer.music.set_volume(self.music_volume)
-                    pygame.mixer.music.play(loops)
-                    return
-                except pygame.error as e:
-                    print(f"Error loading music '{audio_name}': {e}")
-                    continue
-
-        print(f"Warning: Music '{audio_name}' not found in {self.assets_path}")
-
-    def stop_music(self) -> None:
-        """Stop background music"""
-        pygame.mixer.music.stop()
-
     def set_sound_volume(self, volume: float) -> None:
         """Set volume for sound effects (0.0 to 1.0)"""
         self.sound_volume = max(0.0, min(1.0, volume))
         for sound in self.sounds.values():
             sound.set_volume(self.sound_volume)
-
-    def set_music_volume(self, volume: float) -> None:
-        """Set volume for background music (0.0 to 1.0)"""
-        self.music_volume = max(0.0, min(1.0, volume))
-        pygame.mixer.music.set_volume(self.music_volume)

@@ -12,7 +12,7 @@ class Consts:
     EMPTY_ASSET_NAME: str = ""
     EMPTY_ERROR_CODE: str = ""
 
-    EMPTY_SPELL_NAME: str = "empty_spell"
+    EMPTY_SPELL_NAME: str = ""
     INPUT_SPELL_NAME: str = "input_spell"
 
     IS_TARGETING_SELF = "is_targeting_self"

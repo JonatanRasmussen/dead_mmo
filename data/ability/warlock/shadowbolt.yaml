@@ -14,21 +14,15 @@ keypress_shadowbolt:
     is_cd_ready: true
     is_gcd_ready: true
   effects:
-    play_audio: ShadowBoltCast
     add_cooldown: 1000
   timeline:
-    0: [gcd_shadowbolt, cd_shadowbolt, spawn_shadowbolt]
-
-gcd_shadowbolt:
-  validation:
-    is_targeting_destination: true
-  effects:
-    add_cooldown: 1000
+    0: [cd_shadowbolt, spawn_shadowbolt]
 
 cd_shadowbolt:
   validations:
     is_targeting_self: true
   effects:
+    play_audio: ShadowBoltCast
     add_cooldown: 4000
 
 spawn_shadowbolt:
