@@ -1,17 +1,17 @@
-step_towards_target:
+step_towards_destination:
   validations:
     is_targeting_self: true
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-    walk_towards_target: true
+    walk_towards_destination: true
   timeline:
-    20: [step_towards_target]
+    20: [step_towards_destination]
 
-start_move_towards_target:
+start_move_towards_destination:
   validations:
     is_targeting_self: true
   effects:
     gain_channeling_ticks: 3600
   timeline:
-    20: [step_towards_target]
+    20: [step_towards_destination]

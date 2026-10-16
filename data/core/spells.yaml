@@ -1,83 +1,6 @@
 # ==========================================
-# Npc Landmine
-# ==========================================
-keypress_landmine:
-  validations:
-    is_targeting_self: true
-  effect:
-    play_audio: MoltenBlastHit
-  timeline:
-    0: [init_landmine]
-
-init_landmine:
-  spawn_as_child: true
-  validations:
-    is_target_hittable: true
-    is_target_other_team: true
-  effects:
-    gain_channeling_ticks: 150
-    hp: 20.0
-    x_offset: -0.5
-    y_offset: 0.1
-    color_red: 255
-    color_green: 0
-    color_blue: 255
-  timeline:
-    1500: [tick_landmine]
-
-tick_landmine:
-  validations:
-    is_targeting_self: true
-    has_channeling_ticks: 1
-  effects:
-    gain_channeling_ticks: -1
-  timeline:
-    0: [try_trigger_landmine]
-    100: [tick_landmine]
-
-try_trigger_landmine:
-  validations:
-    is_targeting_self: true
-    is_destination_within_range: 0.1
-  effects:
-    gain_channeling_ticks: -65535
-    turn_invisible: true
-    is_unhittable: true
-  timeline:
-    0: [landmine_apply]
-
-landmine_apply:
-  validations:
-    is_targeting_destination: true
-  effects:
-    play_audio: MoltenBlastHit
-    damage: 134.0
-
-# ==========================================
 # Npc Target Dummy
 # ==========================================
-spawn_target_dummy:
-  validations:
-    is_targeting_self: true
-  timeline:
-    0: [init_target_dummy]
-
-init_target_dummy:
-  spawn_as_child: true
-  validations:
-    is_targeting_self: true
-  effects:
-    threat_score: 901
-    hp: 80.0
-    x_offset: -0.2
-    y_offset: 0.1
-    color_red: 0
-    color_green: 0
-    color_blue: 255
-  timeline:
-    4000: [molten_blast_aoe]
-    7000: [start_move_towards_target]
-
 spawn_bravo_dummy:
   validations:
     is_targeting_self: true
@@ -90,15 +13,13 @@ init_bravo_dummy:
     is_targeting_self: true
   effects:
     threat_score: 9001
-    hp: 80.0
-    x_offset: -0.2
-    y_offset: 0.1
+    hp: 80
+    x_offset: -200
+    y_offset: 100
+    draw_as_square: true
     color_red: 0
     color_green: 0
     color_blue: 255
-  timeline:
-    2000: [shadow_blast_apply]
-    7000: [start_move_towards_target]
 
 # ==========================================
 # Spec Warlock
@@ -118,7 +39,7 @@ molten_blast_trigger:
     is_target_other_team: true
   effects:
     play_audio: MoltenBlastHit
-    damage: 13.0
+    damage: 13
 
 shadow_blast_buttonpress:
   validations:
@@ -135,7 +56,7 @@ shadow_blast_apply:
     is_target_hittable: true
     is_target_other_team: true
   effects:
-    damage: 53.0
+    damage: 53
     play_audio: MoltenBlastHit
 
 shadow_blast_tick:
@@ -148,7 +69,6 @@ shadow_blast_tick:
     0: [shadow_blast_apply]
     300: [shadow_blast_tick]
 
-
 # ==========================================
 # Boss and Player
 # ==========================================
@@ -159,14 +79,14 @@ init_bravo_boss:
   effects:
     teamswap: true
     threat_score: 9001
-    hp: 30.0
-    x_offset: 0.7
-    y_offset: 0.7
+    hp: 30
+    x_offset: 700
+    y_offset: 700
     sprite_id: baddie
     sprite_frames: 4
     animation_speed: 900
     animation_loops: 200
-    animation_scale: 1.0
+    animation_scale: 100
     play_animation: true
   timeline:
     400: [spawn_bravo_dummy]

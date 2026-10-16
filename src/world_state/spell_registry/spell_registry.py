@@ -17,8 +17,8 @@ class SpellRegistry:
         self._next_id: int = 1
 
         # Separated Spell Data Stores
-        self.spell_validations: dict[int, dict[str, float]] = {}
-        self.spell_effects: dict[int, dict[str, float]] = {}
+        self.spell_validations: dict[int, dict[str, int]] = {}
+        self.spell_effects: dict[int, dict[str, int]] = {}
         self.spell_timelines: dict[int, dict[int, list[int]]] = {}
         self.spell_spawn_as_child: set[int] = set()
 
@@ -58,10 +58,10 @@ class SpellRegistry:
     def get_spell_name(self, spell_id: int) -> str:
         return self._id_to_name.get(spell_id, "unknown_spell")
 
-    def get_effects(self, spell_id: int) -> dict[str, float]:
+    def get_effects(self, spell_id: int) -> dict[str, int]:
         return self.spell_effects.get(spell_id, {})
 
-    def get_validations(self, spell_id: int) -> dict[str, float]:
+    def get_validations(self, spell_id: int) -> dict[str, int]:
         return self.spell_validations.get(spell_id, {})
 
     def is_spell_spawning_as_child(self, spell_id: int) -> bool:
@@ -76,19 +76,19 @@ class SpellRegistry:
     def get_timeline_for_spell(self, spell_id: int) -> dict[int, list[int]]:
         return self.spell_timelines.get(spell_id, {})
 
-    def _parse_numeric_dict(self, data: dict[Any, Any], dict_type: str, spell_name: str, known_spells: set[str]) -> dict[str, float]:
+    def _parse_numeric_dict(self, data: dict[Any, Any], dict_type: str, spell_name: str, known_spells: set[str]) -> dict[str, int]:
         """Parses effects and validations maps strings to floats or handles floats/bools directly."""
         if not isinstance(data, dict):
             raise ValueError(f"Expected '{dict_type}' to be a mapping in spell '{spell_name}'.")
-        res = {}
+        res: dict[str, int] = {}
         for k, v in data.items():
             if isinstance(v, str):
                 # Enforce that string values must be known spells, unless they are specific asset keys
                 if k not in ("play_audio", "sprite_id") and v not in known_spells:
                     raise ValueError(f"String value '{v}' for key '{k}' in '{dict_type}' of spell '{spell_name}' must be a known spell name.")
-                res[k] = float(self.get_id(v))
+                res[k] = self.get_id(v)
             else:
-                res[k] = float(v) if not isinstance(v, bool) else (1.0 if v else 0.0)
+                res[k] = int(v) if not isinstance(v, bool) else (1 if v else 0)
         return res
 
     def _parse_and_load(self, raw_spells: dict[Any, Any], valid_effects: set[str], valid_validations: set[str]) -> None:

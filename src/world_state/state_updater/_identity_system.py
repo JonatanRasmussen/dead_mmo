@@ -68,7 +68,7 @@ class IdentitySystem(BaseSystem):
             return self.get_data(obj_id).destination_id
         return ObjIdentityData().destination_id
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case IdentityValidation.IS_SOURCE_TARGETING_SELF:
                 return bool(validation_value) == (source_id == target_id)
@@ -81,11 +81,11 @@ class IdentitySystem(BaseSystem):
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+    def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case IdentityEffect.APPLY_PLAYER_NUMBER:
-                self.get_data(obj_id).player_number += int(effect_value)
+                self.get_data(obj_id).player_number += effect_value
             case IdentityEffect.SWAP_TEAM:
                 data = self.get_data(obj_id)
                 data.is_enemy = not data.is_enemy

@@ -50,9 +50,16 @@ class IngameLoop:
             # Simulate next frame
             world_state.insert_player_inputs(player1_obj_id, player_inputs_this_frame, current_ingame_time)
             world_state.process_frame(current_ingame_time)
+
             # Render the frame we just simulated
             rendering_framework.begin_frame()
             display_objs_dct = world_state.get_display_obj_dct(current_ingame_time)
+
+            # Update Camera Position to follow the player
+            if player1_obj_id in display_objs_dct:
+                player_display_obj = display_objs_dct[player1_obj_id]
+                rendering_framework.set_camera_position(player_display_obj.pos_xy)
+
             for display_obj in display_objs_dct.values():
                 IngameLoop._render_game_obj(rendering_framework, display_obj, ingame_time_at_frame_start)
             rendering_framework.end_frame()
@@ -64,13 +71,22 @@ class IngameLoop:
     @staticmethod
     def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, frame_start: int) -> None:
         if display_obj.is_visible or display_obj.has_sprite:
-            rendering_framework.draw_blinking_circle(
-                pos_xy=display_obj.pos_xy,
-                scale=display_obj.size,
-                color_rgb=display_obj.color_rgb,
-                time_ms=rendering_framework.get_current_time(),
-                asset_name=display_obj.sprite_asset_name,
-            )
+            if display_obj.draw_as_square:
+                rendering_framework.draw_square(
+                    pos_xy=display_obj.pos_xy,
+                    scale=display_obj.size,
+                    color_rgb=display_obj.color_rgb,
+                    asset_name=display_obj.sprite_asset_name,
+                    progress=display_obj.progress
+                )
+            else:
+                rendering_framework.draw_blinking_circle(
+                    pos_xy=display_obj.pos_xy,
+                    scale=display_obj.size,
+                    color_rgb=display_obj.color_rgb,
+                    time_ms=rendering_framework.get_current_time(),
+                    asset_name=display_obj.sprite_asset_name,
+                )
 
         # Pass the audio state to the renderer to handle starting/stopping
         rendering_framework.update_audio(

@@ -6,4 +6,9 @@ become_warlock:
     color_green: 0
     color_blue: 0
   timeline:
-    0: [learn_walk, learn_fighterkick, learn_healing_powerup, learn_shadowbolt]
+    0:
+      - learn_walk
+      - learn_fighterkick
+      - learn_voidblast
+      - learn_healingpowerup
+      - learn_shadowbolt

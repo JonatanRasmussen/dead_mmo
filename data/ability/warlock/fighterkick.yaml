@@ -30,4 +30,4 @@ apply_fighterkick:
     is_target_hittable: true
     is_target_other_team: true
   effects:
-    damage: 8.0
+    damage: 8

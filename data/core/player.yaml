@@ -4,12 +4,13 @@ init_player:
     is_targeting_self: true
   effects:
     player_number: 1
-    hp: 30.0
-    x_offset: 0.3
-    y_offset: 0.3
+    hp: 30
+    x_offset: 300
+    y_offset: 300
     color_red: 255
     color_green: 0
     color_blue: 0
+    draw_as_square: true
     sprite_id: poro
     sprite_frames: 1
   timeline:

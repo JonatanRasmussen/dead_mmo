@@ -5,6 +5,7 @@ from src.settings import Consts
 from .base_system import BaseSystem, DisplayObj, GameObj
 
 class VfxEffect(str, Enum):
+    DRAW_AS_SQUARE = "draw_as_square"
     APPLY_SPRITE_ID = "sprite_id"
     SPRITE_FRAMES = "sprite_frames"
     ANIMATION_MS_PER_FRAME = "animation_speed"
@@ -18,6 +19,7 @@ class VfxValidation(str, Enum):
 @dataclass(slots=True)
 class ObjVfxData:
     obj_id: int = Consts.EMPTY_OBJ_ID
+    draw_as_square: bool = False
     sprite_id: int = Consts.EMPTY_ASSET_ID
     sprite_frames: int = 1
     animation_ms_per_frame: int = 100
@@ -41,6 +43,7 @@ class VfxSystem(BaseSystem):
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
         if obj_id in self._data_dct:
             data = self.get_data(obj_id)
+            display_obj.draw_as_square = data.draw_as_square
             display_obj.sprite_id = float(data.sprite_id)
             display_obj.sprite_index = self._get_sprite_index(current_time, obj_id)
             display_obj.sprite_scale = data.animation_scale
@@ -64,24 +67,26 @@ class VfxSystem(BaseSystem):
         current_frame = (frame_index % data.sprite_frames) + 1
         return current_frame
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+    def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
+            case VfxEffect.DRAW_AS_SQUARE:
+                self.get_data(obj_id).draw_as_square = bool(effect_value)
             case VfxEffect.APPLY_SPRITE_ID:
-                self.get_data(obj_id).sprite_id = int(effect_value)
+                self.get_data(obj_id).sprite_id = effect_value
             case VfxEffect.SPRITE_FRAMES:
-                self.get_data(obj_id).sprite_frames = int(effect_value)
+                self.get_data(obj_id).sprite_frames = effect_value
             case VfxEffect.ANIMATION_MS_PER_FRAME:
-                self.get_data(obj_id).animation_ms_per_frame = int(effect_value)
+                self.get_data(obj_id).animation_ms_per_frame = effect_value
             case VfxEffect.ANIMATION_LOOPS:
-                self.get_data(obj_id).animation_loops = int(effect_value)
+                self.get_data(obj_id).animation_loops = effect_value
             case VfxEffect.ANIMATION_SCALE:
-                self.get_data(obj_id).animation_scale = effect_value
+                self.get_data(obj_id).animation_scale = effect_value / 100.0
             case VfxEffect.START_PLAY_ANIMATION:
                 data = self.get_data(obj_id)
                 data.animation_start = timestamp if effect_value != 0 else Consts.EMPTY_TIMESTAMP

@@ -51,7 +51,7 @@ class HealthSystem(BaseSystem):
         obj_hp = self.get_data(obj_id).hp
         return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case HealthValidation.IS_SOURCE_HITTABLE:
                 return not self.get_data(source_id).is_hittable
@@ -60,15 +60,15 @@ class HealthSystem(BaseSystem):
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+    def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case HealthEffect.APPLY_DAMAGE:
-                self.get_data(obj_id).hp -= effect_value
+                self.get_data(obj_id).hp -= float(effect_value)
             case HealthEffect.APPLY_HEAL:
-                self.get_data(obj_id).hp += effect_value
+                self.get_data(obj_id).hp += float(effect_value)
             case HealthEffect.APPLY_HP:
-                self.get_data(obj_id).hp = effect_value
+                self.get_data(obj_id).hp = float(effect_value)
             case HealthEffect.IS_UNHITTABLE:
                 data = self.get_data(obj_id)
                 data.is_hittable = bool(effect_value)

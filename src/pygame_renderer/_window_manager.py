@@ -18,6 +18,8 @@ class WindowManager:
         self.screen: pygame.Surface = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         pygame.display.set_caption("Dead MMO")
 
+        self.camera_pos_xy: tuple[float, float] = (0.5, 0.5)
+
         self.calculate_play_area()
 
     def set_window_resolution(self, window_width: int, window_height) -> None:
@@ -25,6 +27,9 @@ class WindowManager:
         self.WINDOW_HEIGHT = window_height
         pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         pygame.display.set_caption("Dead MMO")
+
+    def set_camera_position(self, pos_xy: tuple[float, float]) -> None:
+        self.camera_pos_xy = pos_xy
 
     def get_border_rectangles(self) -> list[tuple[int, int, int, int]]:
         """Returns list of (x, y, width, height) tuples for border rectangles"""
@@ -74,9 +79,27 @@ class WindowManager:
             self.movement_adjustment_y = aspect_ratio
 
     def world_to_screen_coords(self, x: float, y: float) -> tuple[int, int]:
-        """Convert from unit coordinates (0-1) to screen coordinates"""
+        """Convert from world coordinates to screen coordinates, relative to the camera"""
+        # Find the exact pixel center of the play area
+        play_center_x = self.BORDER_SIDES * self.WINDOW_WIDTH + self.PLAY_WIDTH / 2
+        play_center_y = self.BORDER_TOP * self.WINDOW_HEIGHT + self.PLAY_HEIGHT / 2
+
+        cam_x, cam_y = self.camera_pos_xy
+
+        # Calculate pixel offsets based on how far the object is from the camera
+        offset_x = (x - cam_x) * self.PLAY_WIDTH
+        offset_y = (y - cam_y) * self.PLAY_HEIGHT
+
+        # Apply offset to screen center (Y is inverted because screen Y goes down, but world Y goes up)
+        screen_x = play_center_x + offset_x
+        screen_y = play_center_y - offset_y
+
+        return (int(screen_x), int(screen_y))
+
+    def ui_to_screen_coords(self, x: float, y: float) -> tuple[int, int]:
+        """Convert from normalized UI coordinates (0-1) to fixed screen coordinates"""
         screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + x * self.PLAY_WIDTH
-        screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - y) * self.PLAY_HEIGHT  # (1 - y) fixes offset bug
+        screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - y) * self.PLAY_HEIGHT
         return (int(screen_x), int(screen_y))
 
     def get_play_area_width(self) -> float:

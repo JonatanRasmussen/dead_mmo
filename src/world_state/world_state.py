@@ -34,8 +34,7 @@ class WorldState:
         return player_obj_id
 
     def insert_player_inputs(self, player_obj_id: int, player_inputs: list[str], timestamp: int) -> None:
-        spell_names = HardwareInputConsts.get_spell_names_for_player_inputs(player_obj_id, player_inputs)
-        for spell_name in spell_names:
+        for spell_name in player_inputs:
             spell_id = self._spell_registry.get_spell_id(spell_name)
             for target_id in self._get_targets(player_obj_id, spell_id):
                 self._event_handler.dispatch_upcoming_event(timestamp, player_obj_id, spell_id, target_id)

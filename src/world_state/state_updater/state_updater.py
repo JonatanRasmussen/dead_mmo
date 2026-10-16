@@ -67,7 +67,7 @@ class StateUpdater:
     def get_destination_for_obj(self, obj_id: int) -> int:
         return self._active_game_objs[obj_id].destination_id
 
-    def validate_event(self, timestamp: int, source_id: int, spell_validations: dict[str, float], target_id: int) -> str:
+    def validate_event(self, timestamp: int, source_id: int, spell_validations: dict[str, int], target_id: int) -> str:
         for validation_type, validation_value in spell_validations.items():
             for system in self._systems:
                 is_valid = system.validate_event(validation_type, validation_value, timestamp, source_id, target_id)
@@ -75,7 +75,7 @@ class StateUpdater:
                     return f"{Consts.FAILED_VALIDATION}_{validation_type}_{validation_value}"
         return ""
 
-    def apply_event(self, timestamp: int, spell_effects: dict[str, float], target_id: int) -> list[int]:
+    def apply_event(self, timestamp: int, spell_effects: dict[str, int], target_id: int) -> list[int]:
         triggered_spell_ids: list[int] = []
         for effect_type, effect_value in spell_effects.items():
             for system in self._systems:

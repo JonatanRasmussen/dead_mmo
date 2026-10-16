@@ -49,20 +49,20 @@ class VisibilitySystem(BaseSystem):
             return self.get_data(obj_id).is_visible
         return ObjVisibilityData().is_visible
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+    def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case VisibilityEffect.APPLY_COLOR_RED:
-                self.get_data(obj_id).color_red = int(effect_value)
+                self.get_data(obj_id).color_red = effect_value
             case VisibilityEffect.APPLY_COLOR_GREEN:
-                self.get_data(obj_id).color_green = int(effect_value)
+                self.get_data(obj_id).color_green = effect_value
             case VisibilityEffect.APPLY_COLOR_BLUE:
-                self.get_data(obj_id).color_blue = int(effect_value)
+                self.get_data(obj_id).color_blue = effect_value
             case VisibilityEffect.TURN_INVISIBLE:
                 self.get_data(obj_id).is_visible = False
         return triggered_spell_id

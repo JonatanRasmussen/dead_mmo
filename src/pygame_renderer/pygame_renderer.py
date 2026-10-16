@@ -48,15 +48,21 @@ class PygameRenderer:
     def get_current_time(self) -> float:
         return pygame.time.get_ticks() / Consts.TIMESTAMPS_PER_SECOND
 
+    def set_camera_position(self, pos_xy: tuple[float, float]) -> None:
+        self._window_manager.set_camera_position(pos_xy)
+
     # --- Frame boundary ---
 
     def begin_frame(self) -> None:
         self._frame_started = True
-        self._draw_game_background()
+        self._get_screen().fill(Colors.BLACK)
+        #self._draw_game_background()
 
     def end_frame(self) -> None:
         if not self._frame_started:
             raise RuntimeError("end_frame() called without begin_frame()")
+        for rect in self._window_manager.get_border_rectangles():
+            pygame.draw.rect(self._get_screen(), Colors.GREY, rect)
         self._draw_fps_counter()
         pygame.display.flip()
         self._frame_started = False
@@ -73,6 +79,41 @@ class PygameRenderer:
         else:
             screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
             pygame.draw.circle(self._get_screen(), color_rgb, screen_pos, pixel_size)
+
+    def draw_square(self, pos_xy: tuple[float, float], scale: float, color_rgb: tuple[int, int, int], asset_name: Optional[str] = None, progress: float = 0.0) -> None:
+        """Draw a solid square at normalized coordinates (matches circle bounding box)"""
+        # Multiply by 2 so the square's width/height matches the circle's diameter
+        size_px = self._get_circle_pixel_size(scale) * 2
+        screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
+        rect = pygame.Rect(0, 0, size_px, size_px)
+        rect.center = screen_pos
+
+        if asset_name:
+            self._draw_sprite(pos_xy, (size_px, size_px), asset_name)
+        else:
+            pygame.draw.rect(self._get_screen(), color_rgb, rect)
+
+        # Draw vertical progress bar if applicable
+        if progress > 0.0:
+            clamped_progress = max(0.0, min(1.0, progress))
+
+            # Calculate frame thickness (e.g., 8% of the size, minimum 2 pixels)
+            frame_thickness = max(2, int(size_px * 0.08))
+            inner_width = size_px - (frame_thickness * 2)
+            inner_max_height = size_px - (frame_thickness * 2)
+
+            if inner_width > 0 and inner_max_height > 0:
+                actual_height = int(inner_max_height * clamped_progress)
+                if actual_height > 0:
+                    # Position the inner rect so it fills from the bottom up
+                    inner_rect = pygame.Rect(
+                        rect.left + frame_thickness,
+                        rect.bottom - frame_thickness - actual_height,
+                        inner_width,
+                        actual_height
+                    )
+                    # Draw the grey progress fill
+                    pygame.draw.rect(self._get_screen(), (128, 128, 128), inner_rect)
 
     def draw_blinking_circle(self, pos_xy: tuple[float, float], scale: float, color_rgb: tuple[int, int, int], time_ms: float, asset_name: Optional[str] = None) -> None:
         """Draw a circle with blinking/glowing effect"""
@@ -176,9 +217,9 @@ class PygameRenderer:
         sprite_rect = scaled_frame.get_rect(center=screen_pos)
         self._get_screen().blit(scaled_frame, sprite_rect)
 
-    def display_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: Optional[str] = None) -> None:
+    def display_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: Optional[str] = None, is_ui: bool = False) -> None:
         if text:
-            self._draw_text(pos_xy, font_size, color_rgb, text)
+            self._draw_text(pos_xy, font_size, color_rgb, text, is_ui)
 
     def play_sound(self, asset_name: Optional[str]) -> None:
         if asset_name:
@@ -195,13 +236,18 @@ class PygameRenderer:
             pygame.draw.rect(self._get_screen(), Colors.GREY, rect)
 
     def _draw_fps_counter(self) -> None:
-        self._draw_text(pos_xy=(0.01, 0.98), font_size=24, color_rgb=(255, 255, 255), text=f"FPS: {self._fps}")
+        self._draw_text(pos_xy=(0.01, 0.98), font_size=24, color_rgb=(255, 255, 255), text=f"FPS: {self._fps}", is_ui=True)
 
-    def _draw_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: str) -> None:
+    def _draw_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: str, is_ui: bool = False) -> None:
         """Draw text at normalized coordinates"""
         font = self._get_font(font_size)
         text_surface = font.render(text, True, color_rgb)
-        screen_x, screen_y = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
+
+        if is_ui:
+            screen_x, screen_y = self._window_manager.ui_to_screen_coords(pos_xy[0], pos_xy[1])
+        else:
+            screen_x, screen_y = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
+
         self._get_screen().blit(text_surface, (screen_x, screen_y))
 
     def _draw_sprite(self, pos_xy: tuple[float, float], size: tuple[int, int], asset_name: str) -> None:

@@ -1,0 +1,43 @@
+learn_voidblast:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    select_spell_id: keypress_voidblast
+    bind_to_input_id: input_ability_2
+  timeline:
+    0: [init_spellslot]
+
+keypress_voidblast:
+  validations:
+    is_targeting_self: true
+    is_cd_ready: true
+  effects:
+    add_cooldown: 1000
+    gain_channeling_ticks: 4
+  timeline:
+    0: [cd_voidblast, tick_voidblast]
+
+cd_voidblast:
+  validations:
+    is_targeting_self: true
+  effects:
+    add_cooldown: 5000
+
+apply_voidblast:
+  validations:
+    is_target_hittable: true
+    is_target_other_team: true
+  effects:
+    damage: 53
+    play_audio: MoltenBlastHit
+
+tick_voidblast:
+  validations:
+    is_targeting_self: true
+    has_channeling_ticks: 1
+  effects:
+    gain_channeling_ticks: -1
+  timeline:
+    0: [apply_voidblast]
+    300: [tick_voidblast]

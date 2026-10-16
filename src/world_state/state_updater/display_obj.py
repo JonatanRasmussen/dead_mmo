@@ -6,6 +6,8 @@ class DisplayObj:
     obj_id: int = Consts.EMPTY_OBJ_ID
     pos_xy: tuple[float, float] = (0.0, 0.0)
     is_visible: bool = False
+    draw_as_square: bool = False
+    progress: float = 0.0
     size: float = 0.0
     color_rgb: tuple[int, int, int] = (0, 0, 0)
     sprite_id: float = float(Consts.EMPTY_ASSET_ID)

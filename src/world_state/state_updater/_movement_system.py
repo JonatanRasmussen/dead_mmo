@@ -11,9 +11,9 @@ class MovementEffect(str, Enum):
     WALK_BACKWARD = "walk_backward"
     WALK_LEFT = "walk_left"
     WALK_RIGHT = "walk_right"
-    WALK_TOWARDS_TARGET = "walk_towards_target"
-    STOP_WALK_TOWARDS_TARGET = "stop_walk_towards_target"
-    TELEPORT_TO_TARGET = "teleport_to_target"
+    WALK_TOWARDS_DESTINATION = "walk_towards_destination"
+    STOP_WALK_TOWARDS_DESTINATION = "stop_walk_towards_destination"
+    TELEPORT_TO_DESTINATION = "teleport_to_destination"
     PUSH_TARGET = "push_target"
     X_OFFSET = "x_offset"
     Y_OFFSET = "y_offset"
@@ -23,7 +23,7 @@ class MovementEffect(str, Enum):
 
 class MovementValidation(str, Enum):
     IS_TARGET_THE_DESTINATION = Consts.IS_TARGETING_DESTINATION
-    IS_WITHIN_RANGE_OF_DESTINATION = "is_destination_within_range"
+    IS_WITHIN_RANGE_OF_TARGET = "is_target_within_range"
     IS_SOURCE_ATTACHED = "is_source_attached"
     IS_TARGET_ATTACHED = "is_target_attached"
 
@@ -65,12 +65,12 @@ class MovementSystem(BaseSystem):
             display_obj.pos_xy = (self._get_position(obj_id, current_time))
         return display_obj
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case MovementValidation.IS_TARGET_THE_DESTINATION:
                 return self.get_data(source_id).destination_id == target_id
-            case MovementValidation.IS_WITHIN_RANGE_OF_DESTINATION:
-                return self._is_within_range(timestamp, source_id, self.get_data(source_id).destination_id, validation_value)
+            case MovementValidation.IS_WITHIN_RANGE_OF_TARGET:
+                return self._is_within_range(timestamp, source_id, target_id, validation_value / 1000.0)
             case MovementValidation.IS_SOURCE_ATTACHED:
                 return self.get_data(source_id).attached_to_id != Consts.EMPTY_OBJ_ID
             case MovementValidation.IS_TARGET_ATTACHED:
@@ -80,7 +80,7 @@ class MovementSystem(BaseSystem):
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+    def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case MovementEffect.WALK_FORWARD:
@@ -111,18 +111,18 @@ class MovementSystem(BaseSystem):
                     data.x_dir = max(-1.0, min(1.0, data.x_dir + 1.0))
                 else:
                     data.x_dir = max(-1.0, min(1.0, data.x_dir - 1.0))
-            case MovementEffect.WALK_TOWARDS_TARGET:
+            case MovementEffect.WALK_TOWARDS_DESTINATION:
                 data = self.get_data(obj_id)
                 valid, dx, dy, dist, _, _ = self._get_target_vector(obj_id, data.destination_id, timestamp)
                 if valid and dist > 0.0:
                     self._bake_position(obj_id, timestamp)
                     data.x_dir = dx / dist
                     data.y_dir = dy / dist
-            case MovementEffect.STOP_WALK_TOWARDS_TARGET:
+            case MovementEffect.STOP_WALK_TOWARDS_DESTINATION:
                 data = self.get_data(obj_id)
                 self._bake_position(obj_id, timestamp)
                 data.x_dir, data.y_dir = 0.0, 0.0
-            case MovementEffect.TELEPORT_TO_TARGET:
+            case MovementEffect.TELEPORT_TO_DESTINATION:
                 data = self.get_data(obj_id)
                 valid, _, _, _, tar_x, tar_y = self._get_target_vector(obj_id, data.destination_id, timestamp)
                 if valid:
@@ -134,7 +134,7 @@ class MovementSystem(BaseSystem):
                 valid, dx, dy, dist, _, _ = self._get_target_vector(obj_id, data.destination_id, timestamp)
                 if valid and dist > 0.0:
                     self._bake_position(obj_id, timestamp)
-                    speed_per_ms = effect_value * Consts.GLOBAL_MOVESPEED_TO_USE / 1000.0
+                    speed_per_ms = (effect_value / 100.0) * Consts.GLOBAL_MOVESPEED_TO_USE / 1000.0
                     data.x_vel = (dx / dist) * speed_per_ms
                     data.y_vel = (dy / dist) * speed_per_ms
             case MovementEffect.X_OFFSET:
@@ -143,18 +143,18 @@ class MovementSystem(BaseSystem):
                 if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
                     p_x, _ = self._get_position(data.parent_id, timestamp)
                     data.x_pos = p_x
-                data.x_pos += effect_value
+                data.x_pos += (effect_value / 1000.0)
             case MovementEffect.Y_OFFSET:
                 data = self.get_data(obj_id)
                 self._bake_position(obj_id, timestamp)
                 if data.parent_id in self._game_objs or data.parent_id in self._data_dct:
                     _, p_y = self._get_position(data.parent_id, timestamp)
                     data.y_pos = p_y
-                data.y_pos += effect_value
+                data.y_pos += (effect_value / 1000.0)
             case MovementEffect.MOVESPEED:
                 data = self.get_data(obj_id)
                 self._bake_position(obj_id, timestamp)
-                data.movespeed = effect_value
+                data.movespeed = (effect_value / 100.0)
             case MovementEffect.ATTACH_TO_DESTINATION:
                 data = self.get_data(obj_id)
                 if self._is_attachment_allowed(data):

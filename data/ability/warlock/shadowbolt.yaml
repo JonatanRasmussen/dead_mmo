@@ -33,9 +33,9 @@ spawn_shadowbolt:
   effects:
     is_unhittable: true
     gain_channeling_ticks: 3600
-    x_offset: 0.0
-    y_offset: 0.05
-    movespeed: 5.0
+    x_offset: 0
+    y_offset: 50
+    movespeed: 500
     color_red: 255
     color_green: 255
     color_blue: 0
@@ -48,31 +48,31 @@ tick_shadowbolt:
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-    walk_towards_target: true
+    walk_towards_destination: true
   timeline:
-    0: [trigger_shadowbolt]
+    0: [tryapply_shadowbolt]
     20: [tick_shadowbolt]
 
-trigger_shadowbolt:
+tryapply_shadowbolt:
+  validations:
+    is_targeting_destination: true
+    is_target_within_range: 50
+  effects:
+    damage: 34
+  timeline:
+    0: [end_shadowbolt]
+
+end_shadowbolt:
   validations:
     is_targeting_self: true
-    is_destination_within_range: 0.05
   effects:
     gain_channeling_ticks: -65535
     turn_invisible: true
-    movespeed: 0.0
+    movespeed: 0
     play_audio: ShadowBoltHit
     sprite_id: explosion
     sprite_frames: 7
     animation_speed: 100
     animation_loops: 2
-    animation_scale: 0.5
+    animation_scale: 50
     play_animation: true
-  timeline:
-    0: [apply_shadowbolt]
-
-apply_shadowbolt:
-  validations:
-    is_targeting_destination: true
-  effects:
-    damage: 34.0

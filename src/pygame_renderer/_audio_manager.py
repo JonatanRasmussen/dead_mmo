@@ -9,7 +9,7 @@ class AudioManager:
         pygame.mixer.set_num_channels(32)  # Increased to allow more simultaneous sounds
         self.assets_path = Path(assets_path)
         self.sounds: dict[str, pygame.mixer.Sound] = {}
-        self.sound_volume = 0.7
+        self.sound_volume = 0.1
 
         # Track active channels by obj_id: { obj_id: (audio_name, audio_start, channel) }
         self._active_channels: dict[int, tuple[str, int, pygame.mixer.Channel]] = {}

@@ -40,17 +40,17 @@ class SfxSystem(BaseSystem):
             display_obj.audio_loop = data.loop_audio
         return display_obj
 
-    def validate_event(self, validation_type: str, validation_value: float, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case _:
                 return True
 
-    def apply_effect(self, effect_type: str, effect_value: float, timestamp: int, obj_id: int) -> int:
+    def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
             case SfxEffect.START_PLAY_AUDIO:
                 data = self.get_data(obj_id)
-                data.audio_id = int(effect_value)
+                data.audio_id = effect_value
                 data.audio_start = timestamp
             case SfxEffect.STOP_PLAY_AUDIO:
                 data = self.get_data(obj_id)
