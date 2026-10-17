@@ -3,10 +3,11 @@ learn_healingpowerup:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_healingpowerup
     bind_to_input_id: input_ability_3
-  timeline:
-    0: [init_spellslot]
+    offset_x: -100
+    offset_y: -150
 
 keypress_healingpowerup:
   validations:
@@ -30,11 +31,10 @@ spawn_healingpowerup:
     is_targeting_destination: true
   spawn_as_child: true
   effects:
-    is_unhittable: true
     gain_channeling_ticks: 150
     hp: 30
-    x_offset: 200
-    y_offset: -200
+    x_displacement: 200
+    y_displacement: -200
     color_red: 0
     color_green: 255
     color_blue: 255

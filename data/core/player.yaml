@@ -3,10 +3,11 @@ init_player:
   validations:
     is_targeting_self: true
   effects:
+    is_hittable: true
     player_number: 1
     hp: 30
-    x_offset: 300
-    y_offset: 300
+    x_displacement: 300
+    y_displacement: 300
     color_red: 255
     color_green: 0
     color_blue: 0

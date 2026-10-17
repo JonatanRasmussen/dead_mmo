@@ -8,6 +8,7 @@ from ._casting_system import CastingSystem, ObjCastingData
 from ._health_system import HealthSystem, ObjHealthData
 from ._identity_system import IdentitySystem
 from ._movement_system import MovementSystem, ObjMovementData
+from ._offset_system import OffsetSystem
 from ._periodic_system import PeriodicSystem
 from ._sfx_system import SfxSystem
 from ._vfx_system import VfxSystem, ObjVfxData
@@ -40,6 +41,7 @@ class StateUpdater:
             HealthSystem(game_objs),
             IdentitySystem(game_objs),
             MovementSystem(game_objs),
+            OffsetSystem(game_objs),
             PeriodicSystem(game_objs),
             SfxSystem(game_objs),
             VfxSystem(game_objs),

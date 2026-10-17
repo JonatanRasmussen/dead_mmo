@@ -3,10 +3,11 @@ learn_voidblast:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_voidblast
     bind_to_input_id: input_ability_2
-  timeline:
-    0: [init_spellslot]
+    offset_x: 300
+    offset_y: -150
 
 keypress_voidblast:
   validations:

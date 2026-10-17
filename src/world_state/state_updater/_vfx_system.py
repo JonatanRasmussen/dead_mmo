@@ -24,7 +24,7 @@ class ObjVfxData:
     sprite_frames: int = 1
     animation_ms_per_frame: int = 100
     animation_loops: int = 0  # Number of loops to run, NOT boolean
-    animation_scale: float = 0.0
+    animation_scale: float = 1.0
     animation_start: int = Consts.EMPTY_TIMESTAMP
 
     @classmethod

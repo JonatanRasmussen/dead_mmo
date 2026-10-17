@@ -3,10 +3,11 @@ learn_fighterkick:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_fighterkick
     bind_to_input_id: input_ability_1
-  timeline:
-    0: [init_spellslot]
+    offset_x: -300
+    offset_y: -150
 
 keypress_fighterkick:
   validations:

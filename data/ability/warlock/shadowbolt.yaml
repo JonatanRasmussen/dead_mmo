@@ -3,10 +3,11 @@ learn_shadowbolt:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_shadowbolt
     bind_to_input_id: input_ability_4
-  timeline:
-    0: [init_spellslot]
+    offset_x: 100
+    offset_y: -150
 
 keypress_shadowbolt:
   validations:
@@ -31,10 +32,10 @@ spawn_shadowbolt:
     is_target_other_team: true
   spawn_as_child: true
   effects:
-    is_unhittable: true
     gain_channeling_ticks: 3600
-    x_offset: 0
-    y_offset: 50
+    x_displacement: 0
+    y_displacement: 50
+    hp: 1
     movespeed: 500
     color_red: 255
     color_green: 255

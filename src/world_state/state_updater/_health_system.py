@@ -9,7 +9,7 @@ class HealthEffect(str, Enum):
     APPLY_DAMAGE = "damage"
     APPLY_HEAL = "heal"
     APPLY_HP = "hp"
-    IS_UNHITTABLE = "is_unhittable"
+    IS_HITTABLE = "is_hittable"
 
 
 class HealthValidation(str, Enum):
@@ -49,14 +49,14 @@ class HealthSystem(BaseSystem):
 
     def _get_size(self, obj_id: int) -> float:
         obj_hp = self.get_data(obj_id).hp
-        return 0.01 + math.sqrt(0.0001 * abs(obj_hp))
+        return 1 + 0.1 * math.sqrt(abs(obj_hp))
 
     def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
         match validation_type:
             case HealthValidation.IS_SOURCE_HITTABLE:
-                return not self.get_data(source_id).is_hittable
+                return self.get_data(source_id).is_hittable
             case HealthValidation.IS_TARGET_HITTABLE:
-                return not self.get_data(target_id).is_hittable
+                return self.get_data(target_id).is_hittable
             case _:
                 return True
 
@@ -69,7 +69,7 @@ class HealthSystem(BaseSystem):
                 self.get_data(obj_id).hp += float(effect_value)
             case HealthEffect.APPLY_HP:
                 self.get_data(obj_id).hp = float(effect_value)
-            case HealthEffect.IS_UNHITTABLE:
+            case HealthEffect.IS_HITTABLE:
                 data = self.get_data(obj_id)
                 data.is_hittable = bool(effect_value)
         return triggered_spell_id

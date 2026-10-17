@@ -118,6 +118,9 @@ class SpellRegistry:
 
             timeline = {}  # Resolve references to other spells inside timelines
             for time_key, spell_names in data["timeline"].items():
+                for s in spell_names:
+                    if s not in raw_spells:
+                        raise ValueError(f"Unknown spell name '{s}' found in timeline for '{spell_name}'.")
                 timeline[time_key] = [self.get_id(s) for s in spell_names]
 
             # Store in separated internal dictionaries

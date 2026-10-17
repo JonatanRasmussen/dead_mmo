@@ -15,8 +15,8 @@ class MovementEffect(str, Enum):
     STOP_WALK_TOWARDS_DESTINATION = "stop_walk_towards_destination"
     TELEPORT_TO_DESTINATION = "teleport_to_destination"
     PUSH_TARGET = "push_target"
-    X_OFFSET = "x_offset"
-    Y_OFFSET = "y_offset"
+    X_OFFSET = "x_displacement"
+    Y_OFFSET = "y_displacement"
     MOVESPEED = "movespeed"
     ATTACH_TO_DESTINATION = "attach_to_destination"
 
@@ -62,7 +62,7 @@ class MovementSystem(BaseSystem):
 
     def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
         if obj_id in self._data_dct:
-            display_obj.pos_xy = (self._get_position(obj_id, current_time))
+            display_obj.hitbox_xy = (self._get_position(obj_id, current_time))
         return display_obj
 
     def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:

@@ -1,0 +1,5399 @@
+{
+  "events_by_frame": {
+    "20": [
+      {
+        "event_id": 8,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "become_warlock"
+      },
+      {
+        "event_id": 9,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_walk"
+      },
+      {
+        "event_id": 10,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_fighterkick"
+      },
+      {
+        "event_id": 11,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_voidblast"
+      },
+      {
+        "event_id": 12,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_healingpowerup"
+      },
+      {
+        "event_id": 13,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_shadowbolt"
+      },
+      {
+        "event_id": 14,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_startwalkforward"
+      },
+      {
+        "event_id": 15,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_stopwalkforward"
+      },
+      {
+        "event_id": 16,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_startwalkleft"
+      },
+      {
+        "event_id": 17,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_stopwalkleft"
+      },
+      {
+        "event_id": 18,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_startwalkbackward"
+      },
+      {
+        "event_id": 19,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_stopwalkbackward"
+      },
+      {
+        "event_id": 20,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_startwalkright"
+      },
+      {
+        "event_id": 21,
+        "timestamp": 0,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "learn_stopwalkright"
+      },
+      {
+        "event_id": 22,
+        "timestamp": 0,
+        "source_id": 3,
+        "target_id": 3,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 23,
+        "timestamp": 0,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 24,
+        "timestamp": 0,
+        "source_id": 5,
+        "target_id": 5,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 25,
+        "timestamp": 0,
+        "source_id": 6,
+        "target_id": 6,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 26,
+        "timestamp": 0,
+        "source_id": 7,
+        "target_id": 7,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 27,
+        "timestamp": 0,
+        "source_id": 8,
+        "target_id": 8,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 28,
+        "timestamp": 0,
+        "source_id": 9,
+        "target_id": 9,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 29,
+        "timestamp": 0,
+        "source_id": 10,
+        "target_id": 10,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 30,
+        "timestamp": 0,
+        "source_id": 11,
+        "target_id": 11,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 31,
+        "timestamp": 0,
+        "source_id": 12,
+        "target_id": 12,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 32,
+        "timestamp": 0,
+        "source_id": 13,
+        "target_id": 13,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      },
+      {
+        "event_id": 33,
+        "timestamp": 0,
+        "source_id": 14,
+        "target_id": 14,
+        "error_msg": "",
+        "spell_name": "init_spellslot"
+      }
+    ],
+    "200": [
+      {
+        "event_id": 34,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_up"
+      },
+      {
+        "event_id": 35,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_up"
+      },
+      {
+        "event_id": 36,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_up"
+      },
+      {
+        "event_id": 37,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 38,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 39,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 40,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 41,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 7,
+        "error_msg": "",
+        "spell_name": "input_startmove_up"
+      },
+      {
+        "event_id": 42,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 43,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 44,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 45,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 46,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 47,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 48,
+        "timestamp": 200,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_startmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_up"
+      },
+      {
+        "event_id": 49,
+        "timestamp": 200,
+        "source_id": 7,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_startwalkforward"
+      }
+    ],
+    "300": [
+      {
+        "event_id": 50,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 51,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 52,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 53,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 54,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 55,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 56,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 57,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 58,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 59,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 60,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 61,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 62,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 63,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 13,
+        "error_msg": "",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 64,
+        "timestamp": 300,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 65,
+        "timestamp": 300,
+        "source_id": 13,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_startwalkright"
+      }
+    ],
+    "400": [
+      {
+        "event_id": 1,
+        "timestamp": 400,
+        "source_id": 1,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "spawn_bravo_dummy"
+      },
+      {
+        "event_id": 66,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 67,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 68,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 69,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 70,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 71,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 72,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 73,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 74,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 75,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 76,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 77,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 78,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 79,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 80,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 14,
+        "error_msg": "",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 81,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_up"
+      },
+      {
+        "event_id": 82,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_up"
+      },
+      {
+        "event_id": 83,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_up"
+      },
+      {
+        "event_id": 84,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 85,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 86,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 87,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 88,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 89,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 8,
+        "error_msg": "",
+        "spell_name": "input_stopmove_up"
+      },
+      {
+        "event_id": 90,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 91,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 92,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 93,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 94,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 95,
+        "timestamp": 400,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_stopmove_up",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_up"
+      },
+      {
+        "event_id": 96,
+        "timestamp": 400,
+        "source_id": 1,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "init_bravo_dummy"
+      },
+      {
+        "event_id": 97,
+        "timestamp": 400,
+        "source_id": 14,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_stopwalkright"
+      },
+      {
+        "event_id": 98,
+        "timestamp": 400,
+        "source_id": 8,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_stopwalkforward"
+      }
+    ],
+    "500": [
+      {
+        "event_id": 99,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 100,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 101,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 102,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 103,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 104,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 105,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 106,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 107,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 108,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 109,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 110,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 11,
+        "error_msg": "",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 111,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 112,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 113,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 114,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 115,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 116,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 117,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 118,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 119,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 120,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 121,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 6,
+        "error_msg": "",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 122,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 123,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 124,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 125,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 126,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 127,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 128,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 129,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 130,
+        "timestamp": 500,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 131,
+        "timestamp": 500,
+        "source_id": 11,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_startwalkbackward"
+      },
+      {
+        "event_id": 132,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_shadowbolt"
+      },
+      {
+        "event_id": 133,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 6,
+        "error_msg": "",
+        "spell_name": "cd_shadowbolt"
+      },
+      {
+        "event_id": 134,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 0,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 135,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 136,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 137,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 3,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 138,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 4,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 139,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 5,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 140,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 6,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 141,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 7,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 142,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 8,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 143,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 9,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 144,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 10,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 145,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 11,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 146,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 12,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 147,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 13,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 148,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 14,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "spawn_shadowbolt"
+      },
+      {
+        "event_id": 149,
+        "timestamp": 500,
+        "source_id": 6,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "spawn_shadowbolt"
+      }
+    ],
+    "520": [
+      {
+        "event_id": 150,
+        "timestamp": 520,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 151,
+        "timestamp": 520,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 152,
+        "timestamp": 520,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 154,
+        "timestamp": 520,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "540": [
+      {
+        "event_id": 153,
+        "timestamp": 540,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 155,
+        "timestamp": 540,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 156,
+        "timestamp": 540,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 158,
+        "timestamp": 540,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "560": [
+      {
+        "event_id": 157,
+        "timestamp": 560,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 159,
+        "timestamp": 560,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 160,
+        "timestamp": 560,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 162,
+        "timestamp": 560,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "580": [
+      {
+        "event_id": 161,
+        "timestamp": 580,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 163,
+        "timestamp": 580,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 164,
+        "timestamp": 580,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 166,
+        "timestamp": 580,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "600": [
+      {
+        "event_id": 165,
+        "timestamp": 600,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 167,
+        "timestamp": 600,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 168,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 169,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 170,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 171,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 172,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 173,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 174,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 175,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 176,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 177,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 178,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 179,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 180,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 12,
+        "error_msg": "",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 181,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 182,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 183,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 184,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 185,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 186,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 187,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 188,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 189,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 3,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 190,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 191,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 5,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 192,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 6,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 193,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 7,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 194,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 8,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 195,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 9,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 196,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 10,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 197,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 11,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 198,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 12,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 199,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 13,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 200,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 14,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 201,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 202,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 203,
+        "timestamp": 600,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "BUILTIN_KEYBOARD_KEYDOWN_TAB"
+      },
+      {
+        "event_id": 204,
+        "timestamp": 600,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 206,
+        "timestamp": 600,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 208,
+        "timestamp": 600,
+        "source_id": 12,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_stopwalkbackward"
+      }
+    ],
+    "620": [
+      {
+        "event_id": 205,
+        "timestamp": 620,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 207,
+        "timestamp": 620,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 209,
+        "timestamp": 620,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 211,
+        "timestamp": 620,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "640": [
+      {
+        "event_id": 210,
+        "timestamp": 640,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 212,
+        "timestamp": 640,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 213,
+        "timestamp": 640,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 215,
+        "timestamp": 640,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "660": [
+      {
+        "event_id": 214,
+        "timestamp": 660,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 216,
+        "timestamp": 660,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 217,
+        "timestamp": 660,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 219,
+        "timestamp": 660,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "680": [
+      {
+        "event_id": 218,
+        "timestamp": 680,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 220,
+        "timestamp": 680,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 221,
+        "timestamp": 680,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 223,
+        "timestamp": 680,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "700": [
+      {
+        "event_id": 222,
+        "timestamp": 700,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 224,
+        "timestamp": 700,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 225,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 226,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 227,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 228,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 229,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 230,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 231,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 6,
+        "error_msg": "",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 232,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 233,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 234,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 235,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 236,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 237,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 238,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 239,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_ability_4",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_4"
+      },
+      {
+        "event_id": 240,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 241,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 242,
+        "timestamp": 700,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_4"
+      },
+      {
+        "event_id": 243,
+        "timestamp": 700,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 245,
+        "timestamp": 700,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 247,
+        "timestamp": 700,
+        "source_id": 6,
+        "target_id": 2,
+        "error_msg": "invalid_is_cd_ready_1",
+        "spell_name": "keypress_shadowbolt"
+      }
+    ],
+    "720": [
+      {
+        "event_id": 244,
+        "timestamp": 720,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 246,
+        "timestamp": 720,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 248,
+        "timestamp": 720,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 250,
+        "timestamp": 720,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "740": [
+      {
+        "event_id": 249,
+        "timestamp": 740,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 251,
+        "timestamp": 740,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 252,
+        "timestamp": 740,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 254,
+        "timestamp": 740,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "760": [
+      {
+        "event_id": 253,
+        "timestamp": 760,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 255,
+        "timestamp": 760,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 256,
+        "timestamp": 760,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 258,
+        "timestamp": 760,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "780": [
+      {
+        "event_id": 257,
+        "timestamp": 780,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 259,
+        "timestamp": 780,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 260,
+        "timestamp": 780,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 262,
+        "timestamp": 780,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "800": [
+      {
+        "event_id": 2,
+        "timestamp": 800,
+        "source_id": 1,
+        "target_id": 0,
+        "error_msg": "",
+        "spell_name": "keypress_landmine"
+      },
+      {
+        "event_id": 3,
+        "timestamp": 800,
+        "source_id": 1,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "keypress_landmine"
+      },
+      {
+        "event_id": 261,
+        "timestamp": 800,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 263,
+        "timestamp": 800,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 264,
+        "timestamp": 800,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 266,
+        "timestamp": 800,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "820": [
+      {
+        "event_id": 265,
+        "timestamp": 820,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 267,
+        "timestamp": 820,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 268,
+        "timestamp": 820,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 270,
+        "timestamp": 820,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "840": [
+      {
+        "event_id": 269,
+        "timestamp": 840,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 271,
+        "timestamp": 840,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 272,
+        "timestamp": 840,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 274,
+        "timestamp": 840,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "860": [
+      {
+        "event_id": 273,
+        "timestamp": 860,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 275,
+        "timestamp": 860,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 276,
+        "timestamp": 860,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 278,
+        "timestamp": 860,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "880": [
+      {
+        "event_id": 277,
+        "timestamp": 880,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 279,
+        "timestamp": 880,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 280,
+        "timestamp": 880,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 282,
+        "timestamp": 880,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "900": [
+      {
+        "event_id": 281,
+        "timestamp": 900,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 283,
+        "timestamp": 900,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 284,
+        "timestamp": 900,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 286,
+        "timestamp": 900,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "920": [
+      {
+        "event_id": 285,
+        "timestamp": 920,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 287,
+        "timestamp": 920,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 288,
+        "timestamp": 920,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 290,
+        "timestamp": 920,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "940": [
+      {
+        "event_id": 289,
+        "timestamp": 940,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 291,
+        "timestamp": 940,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 292,
+        "timestamp": 940,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 294,
+        "timestamp": 940,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "960": [
+      {
+        "event_id": 293,
+        "timestamp": 960,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 295,
+        "timestamp": 960,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 296,
+        "timestamp": 960,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 298,
+        "timestamp": 960,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "980": [
+      {
+        "event_id": 297,
+        "timestamp": 980,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 299,
+        "timestamp": 980,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 300,
+        "timestamp": 980,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 302,
+        "timestamp": 980,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1000": [
+      {
+        "event_id": 301,
+        "timestamp": 1000,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 303,
+        "timestamp": 1000,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 304,
+        "timestamp": 1000,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 306,
+        "timestamp": 1000,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1020": [
+      {
+        "event_id": 305,
+        "timestamp": 1020,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 307,
+        "timestamp": 1020,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 308,
+        "timestamp": 1020,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 310,
+        "timestamp": 1020,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1040": [
+      {
+        "event_id": 309,
+        "timestamp": 1040,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 311,
+        "timestamp": 1040,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 312,
+        "timestamp": 1040,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 314,
+        "timestamp": 1040,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1060": [
+      {
+        "event_id": 313,
+        "timestamp": 1060,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 315,
+        "timestamp": 1060,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 316,
+        "timestamp": 1060,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 318,
+        "timestamp": 1060,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1080": [
+      {
+        "event_id": 317,
+        "timestamp": 1080,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 319,
+        "timestamp": 1080,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 320,
+        "timestamp": 1080,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 322,
+        "timestamp": 1080,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1100": [
+      {
+        "event_id": 321,
+        "timestamp": 1100,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 323,
+        "timestamp": 1100,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 324,
+        "timestamp": 1100,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 326,
+        "timestamp": 1100,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1120": [
+      {
+        "event_id": 325,
+        "timestamp": 1120,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 327,
+        "timestamp": 1120,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 328,
+        "timestamp": 1120,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 330,
+        "timestamp": 1120,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1140": [
+      {
+        "event_id": 329,
+        "timestamp": 1140,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 331,
+        "timestamp": 1140,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 332,
+        "timestamp": 1140,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 334,
+        "timestamp": 1140,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1160": [
+      {
+        "event_id": 333,
+        "timestamp": 1160,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 335,
+        "timestamp": 1160,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 336,
+        "timestamp": 1160,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 338,
+        "timestamp": 1160,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1180": [
+      {
+        "event_id": 337,
+        "timestamp": 1180,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 339,
+        "timestamp": 1180,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 340,
+        "timestamp": 1180,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 342,
+        "timestamp": 1180,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1200": [
+      {
+        "event_id": 341,
+        "timestamp": 1200,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 343,
+        "timestamp": 1200,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 344,
+        "timestamp": 1200,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 346,
+        "timestamp": 1200,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1220": [
+      {
+        "event_id": 345,
+        "timestamp": 1220,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 347,
+        "timestamp": 1220,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 348,
+        "timestamp": 1220,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 350,
+        "timestamp": 1220,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1240": [
+      {
+        "event_id": 349,
+        "timestamp": 1240,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 351,
+        "timestamp": 1240,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 352,
+        "timestamp": 1240,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 354,
+        "timestamp": 1240,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1260": [
+      {
+        "event_id": 353,
+        "timestamp": 1260,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 355,
+        "timestamp": 1260,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 356,
+        "timestamp": 1260,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 358,
+        "timestamp": 1260,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1280": [
+      {
+        "event_id": 357,
+        "timestamp": 1280,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 359,
+        "timestamp": 1280,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 360,
+        "timestamp": 1280,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 362,
+        "timestamp": 1280,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1300": [
+      {
+        "event_id": 361,
+        "timestamp": 1300,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 363,
+        "timestamp": 1300,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 364,
+        "timestamp": 1300,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 366,
+        "timestamp": 1300,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1320": [
+      {
+        "event_id": 365,
+        "timestamp": 1320,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 367,
+        "timestamp": 1320,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 368,
+        "timestamp": 1320,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 370,
+        "timestamp": 1320,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1340": [
+      {
+        "event_id": 369,
+        "timestamp": 1340,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 371,
+        "timestamp": 1340,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 372,
+        "timestamp": 1340,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 374,
+        "timestamp": 1340,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1360": [
+      {
+        "event_id": 373,
+        "timestamp": 1360,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 375,
+        "timestamp": 1360,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 376,
+        "timestamp": 1360,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 378,
+        "timestamp": 1360,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1380": [
+      {
+        "event_id": 377,
+        "timestamp": 1380,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 379,
+        "timestamp": 1380,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 380,
+        "timestamp": 1380,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 382,
+        "timestamp": 1380,
+        "source_id": 17,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 384,
+        "timestamp": 1380,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "",
+        "spell_name": "end_shadowbolt"
+      }
+    ],
+    "1400": [
+      {
+        "event_id": 381,
+        "timestamp": 1400,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 383,
+        "timestamp": 1400,
+        "source_id": 17,
+        "target_id": 17,
+        "error_msg": "invalid_has_channeling_ticks_1",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 385,
+        "timestamp": 1400,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1420": [
+      {
+        "event_id": 386,
+        "timestamp": 1420,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 387,
+        "timestamp": 1420,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1440": [
+      {
+        "event_id": 388,
+        "timestamp": 1440,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 389,
+        "timestamp": 1440,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "invalid_is_target_within_range_50",
+        "spell_name": "tryapply_shadowbolt"
+      }
+    ],
+    "1460": [
+      {
+        "event_id": 390,
+        "timestamp": 1460,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "tick_shadowbolt"
+      },
+      {
+        "event_id": 391,
+        "timestamp": 1460,
+        "source_id": 16,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "tryapply_shadowbolt"
+      },
+      {
+        "event_id": 393,
+        "timestamp": 1460,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "",
+        "spell_name": "end_shadowbolt"
+      }
+    ],
+    "1480": [
+      {
+        "event_id": 392,
+        "timestamp": 1480,
+        "source_id": 16,
+        "target_id": 16,
+        "error_msg": "invalid_has_channeling_ticks_1",
+        "spell_name": "tick_shadowbolt"
+      }
+    ],
+    "1800": [
+      {
+        "event_id": 394,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 395,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 396,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 397,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 398,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 399,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 400,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 401,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 402,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 403,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 404,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 405,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 11,
+        "error_msg": "",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 406,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 407,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 408,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_startmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_down"
+      },
+      {
+        "event_id": 409,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 410,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 411,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_down"
+      },
+      {
+        "event_id": 412,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 413,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 414,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 415,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 416,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 417,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 418,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 419,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 420,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 421,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 422,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 423,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 424,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 425,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 13,
+        "error_msg": "",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 426,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_startmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_startmove_right"
+      },
+      {
+        "event_id": 427,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 428,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 429,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_startmove_right"
+      },
+      {
+        "event_id": 430,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 431,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 432,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 433,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 434,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 435,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 5,
+        "error_msg": "",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 436,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 437,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 438,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 439,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 440,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 441,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 442,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 443,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 444,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_ability_3",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_3"
+      },
+      {
+        "event_id": 445,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 446,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 447,
+        "timestamp": 1800,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_3"
+      },
+      {
+        "event_id": 448,
+        "timestamp": 1800,
+        "source_id": 11,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_startwalkbackward"
+      },
+      {
+        "event_id": 449,
+        "timestamp": 1800,
+        "source_id": 13,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_startwalkright"
+      },
+      {
+        "event_id": 450,
+        "timestamp": 1800,
+        "source_id": 5,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_healingpowerup"
+      },
+      {
+        "event_id": 451,
+        "timestamp": 1800,
+        "source_id": 5,
+        "target_id": 5,
+        "error_msg": "",
+        "spell_name": "cd_healingpowerup"
+      },
+      {
+        "event_id": 452,
+        "timestamp": 1800,
+        "source_id": 5,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "spawn_healingpowerup"
+      }
+    ],
+    "2000": [
+      {
+        "event_id": 453,
+        "timestamp": 2000,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 454,
+        "timestamp": 2000,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2100": [
+      {
+        "event_id": 455,
+        "timestamp": 2100,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 456,
+        "timestamp": 2100,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2200": [
+      {
+        "event_id": 457,
+        "timestamp": 2200,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 458,
+        "timestamp": 2200,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2300": [
+      {
+        "event_id": 459,
+        "timestamp": 2300,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 460,
+        "timestamp": 2300,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2400": [
+      {
+        "event_id": 461,
+        "timestamp": 2400,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 462,
+        "timestamp": 2400,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2500": [
+      {
+        "event_id": 463,
+        "timestamp": 2500,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 464,
+        "timestamp": 2500,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2600": [
+      {
+        "event_id": 465,
+        "timestamp": 2600,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 466,
+        "timestamp": 2600,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2700": [
+      {
+        "event_id": 467,
+        "timestamp": 2700,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 468,
+        "timestamp": 2700,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2800": [
+      {
+        "event_id": 469,
+        "timestamp": 2800,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 470,
+        "timestamp": 2800,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_within_range_100",
+        "spell_name": "tryapply_healingpowerup"
+      }
+    ],
+    "2900": [
+      {
+        "event_id": 471,
+        "timestamp": 2900,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "tick_healingpowerup"
+      },
+      {
+        "event_id": 472,
+        "timestamp": 2900,
+        "source_id": 18,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "tryapply_healingpowerup"
+      },
+      {
+        "event_id": 474,
+        "timestamp": 2900,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "",
+        "spell_name": "end_healingpowerup"
+      }
+    ],
+    "3000": [
+      {
+        "event_id": 4,
+        "timestamp": 3000,
+        "source_id": 1,
+        "target_id": 0,
+        "error_msg": "",
+        "spell_name": "molten_blast_aoe"
+      },
+      {
+        "event_id": 5,
+        "timestamp": 3000,
+        "source_id": 1,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "molten_blast_aoe"
+      },
+      {
+        "event_id": 473,
+        "timestamp": 3000,
+        "source_id": 18,
+        "target_id": 18,
+        "error_msg": "invalid_has_channeling_ticks_1",
+        "spell_name": "tick_healingpowerup"
+      }
+    ],
+    "3800": [
+      {
+        "event_id": 475,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 476,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 477,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 478,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 479,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 480,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 481,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 482,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 483,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 484,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 485,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 486,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 487,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 12,
+        "error_msg": "",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 488,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 489,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 490,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 491,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 492,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_down"
+      },
+      {
+        "event_id": 493,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 18,
+        "spell_name": "input_stopmove_down",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_down"
+      },
+      {
+        "event_id": 494,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 495,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 496,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 497,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 3,
+        "error_msg": "",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 498,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 499,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 500,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 501,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 502,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 503,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 504,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 505,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 506,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 507,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 508,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 509,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 510,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 511,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_1"
+      },
+      {
+        "event_id": 512,
+        "timestamp": 3800,
+        "source_id": 2,
+        "target_id": 18,
+        "spell_name": "input_ability_1",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_1"
+      },
+      {
+        "event_id": 513,
+        "timestamp": 3800,
+        "source_id": 12,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_stopwalkbackward"
+      },
+      {
+        "event_id": 514,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_fighterkick"
+      },
+      {
+        "event_id": 515,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 3,
+        "error_msg": "",
+        "spell_name": "cd_fighterkick"
+      },
+      {
+        "event_id": 516,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 0,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 517,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 518,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 519,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 3,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 520,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 4,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 521,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 5,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 522,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 6,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 523,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 7,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 524,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 8,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 525,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 9,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 526,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 10,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 527,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 11,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 528,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 12,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 529,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 13,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 530,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 14,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 531,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 532,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 16,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 533,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 17,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      },
+      {
+        "event_id": 534,
+        "timestamp": 3800,
+        "source_id": 3,
+        "target_id": 18,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_fighterkick"
+      }
+    ],
+    "5000": [
+      {
+        "event_id": 6,
+        "timestamp": 5000,
+        "source_id": 1,
+        "target_id": 0,
+        "error_msg": "",
+        "spell_name": "shadowbolt_keypress"
+      },
+      {
+        "event_id": 7,
+        "timestamp": 5000,
+        "source_id": 1,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "shadowbolt_keypress"
+      }
+    ],
+    "5300": [
+      {
+        "event_id": 535,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 536,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 537,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 538,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 539,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 4,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 540,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 541,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 542,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 543,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 544,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 545,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 546,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 547,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 548,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 549,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 14,
+        "error_msg": "",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 550,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 551,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 552,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_stopmove_right"
+      },
+      {
+        "event_id": 553,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 18,
+        "spell_name": "input_stopmove_right",
+        "error_msg": "invalid_is_bound_to_input_id_input_stopmove_right"
+      },
+      {
+        "event_id": 554,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 0,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 555,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 1,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 556,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 2,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 557,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 3,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 558,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 559,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 5,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 560,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 6,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 561,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 7,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 562,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 8,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 563,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 9,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 564,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 10,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 565,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 11,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 566,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 12,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 567,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 13,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 568,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 14,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 569,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 15,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 570,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 16,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 571,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 17,
+        "error_msg": "invalid_is_source_destination_of_target_1",
+        "spell_name": "input_ability_2"
+      },
+      {
+        "event_id": 572,
+        "timestamp": 5300,
+        "source_id": 2,
+        "target_id": 18,
+        "spell_name": "input_ability_2",
+        "error_msg": "invalid_is_bound_to_input_id_input_ability_2"
+      },
+      {
+        "event_id": 573,
+        "timestamp": 5300,
+        "source_id": 14,
+        "target_id": 2,
+        "error_msg": "",
+        "spell_name": "keypress_stopwalkright"
+      },
+      {
+        "event_id": 574,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "keypress_voidblast"
+      },
+      {
+        "event_id": 575,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "cd_voidblast"
+      },
+      {
+        "event_id": 576,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "tick_voidblast"
+      },
+      {
+        "event_id": 577,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 0,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 578,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 579,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 580,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 3,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 581,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 582,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 5,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 583,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 6,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 584,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 7,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 585,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 8,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 586,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 9,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 587,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 10,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 588,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 11,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 589,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 12,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 590,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 13,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 591,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 14,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 592,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 593,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 16,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 594,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 17,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 595,
+        "timestamp": 5300,
+        "source_id": 4,
+        "target_id": 18,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      }
+    ],
+    "5600": [
+      {
+        "event_id": 596,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "tick_voidblast"
+      },
+      {
+        "event_id": 597,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 0,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 598,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 599,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 600,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 3,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 601,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 602,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 5,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 603,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 6,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 604,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 7,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 605,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 8,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 606,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 9,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 607,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 10,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 608,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 11,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 609,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 12,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 610,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 13,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 611,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 14,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 612,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 613,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 16,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 614,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 17,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 615,
+        "timestamp": 5600,
+        "source_id": 4,
+        "target_id": 18,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      }
+    ],
+    "5900": [
+      {
+        "event_id": 616,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "tick_voidblast"
+      },
+      {
+        "event_id": 617,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 0,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 618,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 619,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 620,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 3,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 621,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 622,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 5,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 623,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 6,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 624,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 7,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 625,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 8,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 626,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 9,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 627,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 10,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 628,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 11,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 629,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 12,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 630,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 13,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 631,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 14,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 632,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 633,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 16,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 634,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 17,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 635,
+        "timestamp": 5900,
+        "source_id": 4,
+        "target_id": 18,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      }
+    ],
+    "6200": [
+      {
+        "event_id": 636,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "",
+        "spell_name": "tick_voidblast"
+      },
+      {
+        "event_id": 637,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 0,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 638,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 1,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 639,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 2,
+        "error_msg": "invalid_is_target_other_team_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 640,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 3,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 641,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 642,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 5,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 643,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 6,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 644,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 7,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 645,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 8,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 646,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 9,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 647,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 10,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 648,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 11,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 649,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 12,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 650,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 13,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 651,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 14,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 652,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 15,
+        "error_msg": "",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 653,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 16,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 654,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 17,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      },
+      {
+        "event_id": 655,
+        "timestamp": 6200,
+        "source_id": 4,
+        "target_id": 18,
+        "error_msg": "invalid_is_target_hittable_1",
+        "spell_name": "apply_voidblast"
+      }
+    ],
+    "6500": [
+      {
+        "event_id": 656,
+        "timestamp": 6500,
+        "source_id": 4,
+        "target_id": 4,
+        "error_msg": "invalid_has_channeling_ticks_1",
+        "spell_name": "tick_voidblast"
+      }
+    ]
+  },
+  "game_objs": {}
+}

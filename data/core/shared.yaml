@@ -1,9 +1,1 @@
 empty_spell:
-
-init_spellslot:
-  validations:
-    is_targeting_self: true
-  effects:
-    attach_to_destination: true
-    is_unhittable: true
-    turn_invisible: true

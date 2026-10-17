@@ -1,0 +1,49 @@
+# ==========================================
+# Npc Target Dummy
+# ==========================================
+spawn_bravo_dummy:
+  validations:
+    is_targeting_self: true
+  timeline:
+    0: [init_bravo_dummy]
+
+init_bravo_dummy:
+  spawn_as_child: true
+  validations:
+    is_targeting_self: true
+  effects:
+    is_hittable: true
+    threat_score: 9001
+    hp: 80
+    x_displacement: -200
+    y_displacement: 100
+    draw_as_square: true
+    color_red: 0
+    color_green: 0
+    color_blue: 255
+  timeline:
+    2000: [keypress_healingpowerup]
+    5000: [keypress_shadowbolt]
+
+# ==========================================
+# Boss and Player
+# ==========================================
+init_bravo_boss:
+  spawn_as_child: true
+  validations:
+    is_targeting_self: true
+  effects:
+    is_hittable: true
+    teamswap: true
+    threat_score: 9001
+    hp: 30
+    x_displacement: 700
+    y_displacement: 700
+    sprite_id: baddie
+    sprite_frames: 4
+    animation_speed: 900
+    animation_loops: 200
+    animation_scale: 100
+    play_animation: true
+  timeline:
+    400: [spawn_bravo_dummy]

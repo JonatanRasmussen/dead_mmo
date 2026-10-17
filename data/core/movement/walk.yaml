@@ -19,10 +19,9 @@ learn_startwalkforward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_startwalkforward
     bind_to_input_id: input_startmove_up
-  timeline:
-    0: [init_spellslot]
 
 keypress_startwalkforward:
   validations:
@@ -35,10 +34,9 @@ learn_stopwalkforward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_stopwalkforward
     bind_to_input_id: input_stopmove_up
-  timeline:
-    0: [init_spellslot]
 
 keypress_stopwalkforward:
   validations:
@@ -53,10 +51,9 @@ learn_startwalkleft:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_startwalkleft
     bind_to_input_id: input_startmove_left
-  timeline:
-    0: [init_spellslot]
 
 keypress_startwalkleft:
   validations:
@@ -69,10 +66,9 @@ learn_stopwalkleft:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_stopwalkleft
     bind_to_input_id: input_stopmove_left
-  timeline:
-    0: [init_spellslot]
 
 keypress_stopwalkleft:
   validations:
@@ -87,10 +83,9 @@ learn_startwalkbackward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_startwalkbackward
     bind_to_input_id: input_startmove_down
-  timeline:
-    0: [init_spellslot]
 
 keypress_startwalkbackward:
   validations:
@@ -103,10 +98,9 @@ learn_stopwalkbackward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_stopwalkbackward
     bind_to_input_id: input_stopmove_down
-  timeline:
-    0: [init_spellslot]
 
 keypress_stopwalkbackward:
   validations:
@@ -121,10 +115,9 @@ learn_startwalkright:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_startwalkright
     bind_to_input_id: input_startmove_right
-  timeline:
-    0: [init_spellslot]
 
 keypress_startwalkright:
   validations:
@@ -137,10 +130,9 @@ learn_stopwalkright:
     is_targeting_self: true
   spawn_as_child: true
   effects:
+    attach_to_destination: true
     select_spell_id: keypress_stopwalkright
     bind_to_input_id: input_stopmove_right
-  timeline:
-    0: [init_spellslot]
 
 keypress_stopwalkright:
   validations:

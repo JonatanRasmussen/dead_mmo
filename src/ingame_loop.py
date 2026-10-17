@@ -74,7 +74,7 @@ class IngameLoop:
             if display_obj.draw_as_square:
                 rendering_framework.draw_square(
                     pos_xy=display_obj.pos_xy,
-                    scale=display_obj.size,
+                    scale=display_obj.obj_scale,
                     color_rgb=display_obj.color_rgb,
                     asset_name=display_obj.sprite_asset_name,
                     progress=display_obj.progress
@@ -82,7 +82,7 @@ class IngameLoop:
             else:
                 rendering_framework.draw_blinking_circle(
                     pos_xy=display_obj.pos_xy,
-                    scale=display_obj.size,
+                    scale=display_obj.obj_scale,
                     color_rgb=display_obj.color_rgb,
                     time_ms=rendering_framework.get_current_time(),
                     asset_name=display_obj.sprite_asset_name,
