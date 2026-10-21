@@ -8,6 +8,8 @@ from ._sprite_manager import SpriteManager
 from ._window_manager import WindowManager
 from ._audio_manager import AudioManager
 from ._input_handler import InputHandler
+from ._glow_manager import GlowManager
+from ._text_manager import TextManager
 
 
 class PygameRenderer:
@@ -19,8 +21,9 @@ class PygameRenderer:
         self._animation_manager = AnimationManager()
         self._sprite_manager = SpriteManager()
         self._window_manager = WindowManager()
-        self._fonts: dict[int, pygame.font.Font] = {}
-        self._glow_img: Optional[pygame.Surface] = None  # Lazy init, requires pygame to be running
+        self._glow_manager = GlowManager()
+        self._text_manager = TextManager(self._window_manager)
+
         self._target_fps = 165
         self._fps = 0
         self._clock: Optional[pygame.time.Clock] = None  # Lazy init, requires pygame to be running
@@ -74,109 +77,87 @@ class PygameRenderer:
         """Draw a circle or sprite at normalized coordinates"""
         pixel_size = self._get_circle_pixel_size(scale)
         if asset_name:
-            sprite_size = pixel_size * 2
-            self._draw_sprite(pos_xy, (sprite_size, sprite_size), asset_name)
+            self._draw_sprite(pos_xy, (pixel_size, pixel_size), asset_name)
         else:
             screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
-            pygame.draw.circle(self._get_screen(), color_rgb, screen_pos, pixel_size)
+            pygame.draw.circle(self._get_screen(), color_rgb, screen_pos, int(pixel_size / 2))
 
-    def draw_square(self, pos_xy: tuple[float, float], scale: float, color_rgb: tuple[int, int, int], asset_name: Optional[str] = None, progress: float = 0.0) -> None:
-        """Draw a solid square at normalized coordinates (matches circle bounding box)"""
-        # Multiply by 2 so the square's width/height matches the circle's diameter
-        size_px = self._get_circle_pixel_size(scale) * 2
+    def draw_rectangle(self, pos_xy: tuple[float, float], scale_xy: tuple[float, float], color_rgb: tuple[int, int, int], asset_name: Optional[str] = None) -> None:
+        """Draw a solid rectangle at normalized coordinates"""
+        width_px = self._get_circle_pixel_size(scale_xy[0])
+        height_px = self._get_circle_pixel_size(scale_xy[1])
         screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
-        rect = pygame.Rect(0, 0, size_px, size_px)
+        rect = pygame.Rect(0, 0, width_px, height_px)
         rect.center = screen_pos
 
         if asset_name:
-            self._draw_sprite(pos_xy, (size_px, size_px), asset_name)
+            self._draw_sprite(pos_xy, (width_px, height_px), asset_name)
         else:
             pygame.draw.rect(self._get_screen(), color_rgb, rect)
 
-        # Draw vertical progress bar if applicable
-        if progress > 0.0:
-            clamped_progress = max(0.0, min(1.0, progress))
-
-            # Calculate frame thickness (e.g., 8% of the size, minimum 2 pixels)
-            frame_thickness = max(2, int(size_px * 0.08))
-            inner_width = size_px - (frame_thickness * 2)
-            inner_max_height = size_px - (frame_thickness * 2)
-
-            if inner_width > 0 and inner_max_height > 0:
-                actual_height = int(inner_max_height * clamped_progress)
-                if actual_height > 0:
-                    # Position the inner rect so it fills from the bottom up
-                    inner_rect = pygame.Rect(
-                        rect.left + frame_thickness,
-                        rect.bottom - frame_thickness - actual_height,
-                        inner_width,
-                        actual_height
-                    )
-                    # Draw the grey progress fill
-                    pygame.draw.rect(self._get_screen(), (128, 128, 128), inner_rect)
-
-    def draw_blinking_circle(self, pos_xy: tuple[float, float], scale: float, color_rgb: tuple[int, int, int], time_ms: float, asset_name: Optional[str] = None) -> None:
-        """Draw a circle with blinking/glowing effect"""
+    def draw_blinking_circle(self, pos_xy: tuple[float, float], scale: float, color_rgb: tuple[int, int, int], time_ms: float, asset_name: Optional[str] = None, glow_radius_multiplier: float = 4.0) -> None:
+        """Draw a circle with a glowing/blinking effect (supports both old SVG and new Neon)"""
         if asset_name:
             pixel_size = self._get_circle_pixel_size(scale)
-            sprite_size = pixel_size * 2
-            self._draw_sprite(pos_xy, (sprite_size, sprite_size), asset_name)
+            self._draw_sprite(pos_xy, (pixel_size, pixel_size), asset_name)
+            return
+
+        screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
+        base_size = self._get_circle_pixel_size(scale)
+        if base_size <= 0:
+            return
+
+        flicker_speed = 6.0
+        phase = ((pos_xy[0] / 1000.0) * 7 + (pos_xy[1] / 1000.0) * 13) % (2 * math.pi)
+        flicker = 0.5 + 0.5 * math.sin(time_ms * flicker_speed + phase)
+
+        bob_amplitude = 0.08 * base_size
+        bob_offset_x = bob_amplitude * math.sin(time_ms * 2.0 + phase)
+        bob_offset_y = bob_amplitude * 0.7 * math.sin(time_ms * 1.5 + phase + math.pi / 2)
+        display_pos = (int(screen_pos[0] + bob_offset_x), int(screen_pos[1] + bob_offset_y))
+
+        # --- NEON LOGIC (Optimized with Scaled Cache) ---
+        glow_radius = int((base_size / 2) * glow_radius_multiplier * (0.95 + 0.1 * flicker))
+        glow_diameter = max(2, glow_radius * 2)
+
+        # Pass 1: Blit the wide soft halo with additive blending
+        scaled_glow = self._glow_manager.get_scaled_neon_glow(color_rgb, glow_diameter)
+        glow_rect = scaled_glow.get_rect(center=display_pos)
+        self._get_screen().blit(scaled_glow, glow_rect, special_flags=pygame.BLEND_ADD)
+
+        # Pass 2: Blit a smaller, concentrated version at the center for a super-bright core
+        inner_diameter = max(2, int(base_size * 1.1))
+        inner_glow = self._glow_manager.get_scaled_neon_glow(color_rgb, inner_diameter)
+        inner_rect = inner_glow.get_rect(center=display_pos)
+        self._get_screen().blit(inner_glow, inner_rect, special_flags=pygame.BLEND_ADD)
+
+    def draw_neon_circle(self, pos_xy: tuple[float, float], scale: float, color_rgb: tuple[int, int, int], asset_name: Optional[str] = None, glow_radius_multiplier: float = 4.0) -> None:
+        """Draws a static neon circle with a hot core and additive glowing halo."""
+        if asset_name:
+            pixel_size = self._get_circle_pixel_size(scale)
+            self._draw_sprite(pos_xy, (pixel_size, pixel_size), asset_name)
             return
 
         screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
         base_size = self._get_circle_pixel_size(scale)
 
-        # Flicker animation
-        flicker_speed = 6.0
-        phase = (pos_xy[0] * 7 + pos_xy[1] * 13) % (2 * math.pi)
-        flicker = 0.5 + 0.5 * math.sin(time_ms * flicker_speed + phase)
-        brightness = 0.7 + 0.3 * flicker
-        size = int(base_size * (1.0 + 0.05 * flicker))
+        if base_size <= 0:
+            return
 
-        # Adjusted color
-        r, g, b = color_rgb
-        color = (min(int(r * brightness), 255), min(int(g * brightness), 255), min(int(b * brightness), 255))
+        # Size of the total glow aura
+        glow_radius = int((base_size / 2) * glow_radius_multiplier)
+        glow_diameter = max(2, glow_radius * 2)
 
-        # Bobbing animation
-        bob_amplitude = 0.08 * base_size
-        bob_offset_x = bob_amplitude * math.sin(time_ms * 2.0 + phase)
-        bob_offset_y = bob_amplitude * 0.7 * math.sin(time_ms * 1.5 + phase + math.pi / 2)
-        display_pos = (screen_pos[0] + bob_offset_x, screen_pos[1] + bob_offset_y)
+        # Pass 1: Blit the wide soft halo with additive blending
+        scaled_glow = self._glow_manager.get_scaled_neon_glow(color_rgb, glow_diameter)
+        glow_rect = scaled_glow.get_rect(center=screen_pos)
+        self._get_screen().blit(scaled_glow, glow_rect, special_flags=pygame.BLEND_ADD)
 
-        # Draw glow
-        glow_size = int(base_size * 3.2 * (1.0 + 0.05 * flicker))
-        if glow_size % 2 != 0:
-            glow_size += 1
-
-        glow_img = self._get_glow_img()
-        glow = pygame.transform.smoothscale(glow_img, (glow_size, glow_size))
-        glow_tinted = glow.copy()
-        glow_tinted.fill(color + (0,), special_flags=pygame.BLEND_RGBA_ADD)
-
-        SVG_OFFSET_X = -1
-        SVG_OFFSET_Y = -1
-        scaled_offset_x = int(SVG_OFFSET_X * (glow_size / glow_img.get_width()))
-        scaled_offset_y = int(SVG_OFFSET_Y * (glow_size / glow_img.get_height()))
-        top_left = (
-            int(display_pos[0] - glow_size // 2) + scaled_offset_x,
-            int(display_pos[1] - glow_size // 2) + scaled_offset_y
-        )
-        self._get_screen().blit(glow_tinted, top_left)
-
-        # Draw main orb
-        pygame.draw.circle(self._get_screen(), color, display_pos, size)
-
-    def draw_rectangle(self, pos_xy: tuple[float, float], scale_xy: tuple[float, float], color_rgb: tuple[int, int, int], asset_name: Optional[str] = None) -> None:
-        """Draw a rectangle at normalized coordinates"""
-        width = int(scale_xy[0] * self._window_manager.get_play_area_width())
-        height = int(scale_xy[1] * self._window_manager.get_play_area_width())
-        if asset_name:
-            self._draw_sprite(pos_xy, (width, height), asset_name)
-        else:
-            screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
-            rect = pygame.Rect(0, 0, width, height)
-            rect.center = screen_pos
-            pygame.draw.rect(self._get_screen(), color_rgb, rect)
+        # Pass 2: Blit a smaller, concentrated version at the center for a super-bright core
+        inner_diameter = max(2, int(base_size * 1.1))
+        inner_glow = self._glow_manager.get_scaled_neon_glow(color_rgb, inner_diameter)
+        inner_rect = inner_glow.get_rect(center=screen_pos)
+        self._get_screen().blit(inner_glow, inner_rect, special_flags=pygame.BLEND_ADD)
 
     def draw_cooldown_overlay(self, pos_xy: tuple[float, float], scale: float, progress: float) -> None:
         """Draw radial cooldown indicator"""
@@ -185,10 +166,11 @@ class PygameRenderer:
 
         screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
         size = self._get_circle_pixel_size(scale)
+        radius = int(size / 2)
 
         angle = progress * 360
-        surf = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
-        pygame.draw.circle(surf, (0, 0, 0, 128), (size, size), size)
+        surf = pygame.Surface((size, size), pygame.SRCALPHA)
+        pygame.draw.circle(surf, (0, 0, 0, 128), (radius, radius), radius)
 
         if angle > 0:
             start_angle = -270
@@ -196,21 +178,20 @@ class PygameRenderer:
             pygame.draw.arc(
                 surf,
                 (0, 0, 0, 0),
-                (0, 0, size * 2, size * 2),
+                (0, 0, size, size),
                 math.radians(start_angle),
                 math.radians(end_angle),
-                size
+                radius
             )
 
-        self._get_screen().blit(surf, (screen_pos[0] - size, screen_pos[1] - size))
+        self._get_screen().blit(surf, (screen_pos[0] - radius, screen_pos[1] - radius))
 
     def draw_animation(self, pos_xy: tuple[float, float], scale: float, asset_name: str, elapsed_time_ms: float, ms_per_frame: Optional[float] = None, alpha: float = 1.0, loop: bool = False) -> None:
         frame_surface = self._animation_manager.get_frame_at_time(asset_name, elapsed_time_ms, loop, ms_per_frame)
         if not frame_surface:
             return
         pixel_size = self._get_circle_pixel_size(scale)
-        sprite_size = pixel_size * 2
-        scaled_frame = pygame.transform.scale(frame_surface, (sprite_size, sprite_size))
+        scaled_frame = pygame.transform.scale(frame_surface, (pixel_size, pixel_size))
         if alpha < 1.0:
             scaled_frame.set_alpha(int(alpha * 255))
         screen_pos = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
@@ -219,7 +200,7 @@ class PygameRenderer:
 
     def display_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: Optional[str] = None, is_ui: bool = False) -> None:
         if text:
-            self._draw_text(pos_xy, font_size, color_rgb, text, is_ui)
+            self._text_manager.draw_text(self._get_screen(), pos_xy, font_size, color_rgb, text, is_ui)
 
     def play_sound(self, asset_name: Optional[str]) -> None:
         if asset_name:
@@ -236,19 +217,7 @@ class PygameRenderer:
             pygame.draw.rect(self._get_screen(), Colors.GREY, rect)
 
     def _draw_fps_counter(self) -> None:
-        self._draw_text(pos_xy=(0.01, 0.98), font_size=24, color_rgb=(255, 255, 255), text=f"FPS: {self._fps}", is_ui=True)
-
-    def _draw_text(self, pos_xy: tuple[float, float], font_size: int, color_rgb: tuple[int, int, int], text: str, is_ui: bool = False) -> None:
-        """Draw text at normalized coordinates"""
-        font = self._get_font(font_size)
-        text_surface = font.render(text, True, color_rgb)
-
-        if is_ui:
-            screen_x, screen_y = self._window_manager.ui_to_screen_coords(pos_xy[0], pos_xy[1])
-        else:
-            screen_x, screen_y = self._window_manager.world_to_screen_coords(pos_xy[0], pos_xy[1])
-
-        self._get_screen().blit(text_surface, (screen_x, screen_y))
+        self._text_manager.draw_text(self._get_screen(), pos_xy=(0.01, 0.98), font_size=24, color_rgb=(255, 255, 255), text=f"FPS: {self._fps}", is_ui=True)
 
     def _draw_sprite(self, pos_xy: tuple[float, float], size: tuple[int, int], asset_name: str) -> None:
         """Draw a sprite at normalized coordinates with given pixel size"""
@@ -267,30 +236,6 @@ class PygameRenderer:
     def _get_screen(self) -> pygame.Surface:
         return pygame.display.get_surface()
 
-    def _get_font(self, size: int) -> pygame.font.Font:
-        if size not in self._fonts:
-            self._fonts[size] = pygame.font.SysFont('Arial', size)
-        return self._fonts[size]
-
     def _get_circle_pixel_size(self, scale: float) -> int:
-        return int(scale * min(self._window_manager.get_play_area_width(), self._window_manager.get_play_area_height()))
-
-    def _get_glow_img(self) -> pygame.Surface:
-        """Lazy init glow image, requires pygame to be running"""
-        if self._glow_img is None:
-            self._glow_img = self._load_glow_effect()
-        return self._glow_img
-
-    @staticmethod
-    def _load_glow_effect() -> pygame.Surface:
-        try:
-            glow_img = pygame.image.load("assets/images/Food.svg").convert_alpha()
-            PADDING = 2
-            w, h = glow_img.get_size()
-            padded = pygame.Surface((w + PADDING * 2, h + PADDING * 2), pygame.SRCALPHA)
-            padded.blit(glow_img, (PADDING, PADDING))
-            return padded
-        except FileNotFoundError:
-            surf = pygame.Surface((64, 64), pygame.SRCALPHA)
-            pygame.draw.circle(surf, (255, 255, 255, 100), (32, 32), 32)
-            return surf
+        pixel_scale = self._window_manager.get_play_area_width() / self._window_manager.get_logical_width()
+        return int(scale * pixel_scale)

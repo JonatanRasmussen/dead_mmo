@@ -3,15 +3,22 @@ learn_fighterkick:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_fighterkick
     bind_to_input_id: input_ability_1
-    offset_x: -300
+    assign_to_faction: 1
+    is_visible: true
+    draw_as_square: true
+    draw_as_cd_bar: true
+    color_red: 255
+    color_green: 255
+    color_blue: 0
+    offset_x: -198
     offset_y: -150
 
 keypress_fighterkick:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
     is_cd_ready: true
     is_gcd_ready: true
   effects:
@@ -28,7 +35,7 @@ cd_fighterkick:
 
 apply_fighterkick:
   validations:
-    is_target_hittable: true
-    is_target_other_team: true
+    is_dest_hittable: true
+    is_dest_other_faction: true
   effects:
     damage: 8

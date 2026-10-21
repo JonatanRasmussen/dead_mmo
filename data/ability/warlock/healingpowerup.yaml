@@ -3,15 +3,22 @@ learn_healingpowerup:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_healingpowerup
     bind_to_input_id: input_ability_3
-    offset_x: -100
+    assign_to_faction: 1
+    is_visible: true
+    draw_as_square: true
+    draw_as_cd_bar: true
+    color_red: 0
+    color_green: 255
+    color_blue: 255
+    offset_x: 66
     offset_y: -150
 
 keypress_healingpowerup:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
     is_cd_ready: true
     is_gcd_ready: true
   effects:
@@ -28,13 +35,14 @@ cd_healingpowerup:
 
 spawn_healingpowerup:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   spawn_as_child: true
   effects:
     gain_channeling_ticks: 150
     hp: 30
     x_displacement: 200
     y_displacement: -200
+    is_visible: true
     color_red: 0
     color_green: 255
     color_blue: 255
@@ -47,15 +55,15 @@ tick_healingpowerup:
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-    walk_towards_destination: true
+    walk_towards_target: true
   timeline:
     0: [tryapply_healingpowerup]
     100: [tick_healingpowerup]
 
 tryapply_healingpowerup:
   validations:
-    is_targeting_destination: true
-    is_target_within_range: 100
+    is_targeting_target: true
+    is_dest_within_range: 20
   effects:
     heal: 150
   timeline:
@@ -67,4 +75,4 @@ end_healingpowerup:
   effects:
     play_audio: Rejuvenation
     gain_channeling_ticks: -65535
-    turn_invisible: true
+    is_visible: false

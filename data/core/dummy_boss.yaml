@@ -13,14 +13,16 @@ init_bravo_dummy:
     is_targeting_self: true
   effects:
     is_hittable: true
-    threat_score: 9001
+    assign_to_faction: 2
     hp: 80
+    is_visible: true
     x_displacement: -200
     y_displacement: 100
-    draw_as_square: true
     color_red: 0
     color_green: 0
     color_blue: 255
+    height: 128
+    width: 32
   timeline:
     2000: [keypress_healingpowerup]
     5000: [keypress_shadowbolt]
@@ -34,16 +36,38 @@ init_bravo_boss:
     is_targeting_self: true
   effects:
     is_hittable: true
-    teamswap: true
-    threat_score: 9001
+    assign_to_faction: 2
     hp: 30
     x_displacement: 700
     y_displacement: 700
+    is_visible: true
     sprite_id: baddie
     sprite_frames: 4
+    height: 48
+    width: 80
     animation_speed: 900
     animation_loops: 200
     animation_scale: 100
     play_animation: true
   timeline:
+    0: [spawn_brickpath]
     400: [spawn_bravo_dummy]
+
+spawn_brickpath:
+  validations:
+    is_targeting_self: true
+  timeline:
+    0: [init_brickpath]
+
+init_brickpath:
+  spawn_as_child: true
+  validations:
+    is_targeting_self: true
+  effects:
+    x_displacement: 500
+    y_displacement: -200
+    is_visible: true
+    height: 1140
+    width: 245
+    sprite_id: brickpath
+    sprite_frames: 1

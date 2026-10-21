@@ -22,29 +22,34 @@ class BaseSystem(ABC):
         return {v.value for v in self._validation_enum}
 
     def get_data(self, obj_id: int) -> Any:
+        """Gets the data for an object, lazy-initializing it if it doesn't exist."""
         if obj_id in self._data_dct:
             return self._data_dct[obj_id]
-
         assert obj_id in self._game_objs, f"Error: GameObj {obj_id} does not exist."
-
-        # Lazy-load the data using the classmethod you already have on all your dataclasses
         data = self._data_class.create_from_game_obj(self._game_objs[obj_id])
         self._data_dct[obj_id] = data
         return data
 
+    def get_read_only_data(self, obj_id: int) -> Any:
+        """
+        Returns the data for the object if it exists.
+        If not, returns a temporary default instance WITHOUT saving it to the dictionary.
+        Use this for rendering and read-only queries to prevent lazy-init side effects.
+        """
+        if obj_id in self._data_dct:
+            return self._data_dct[obj_id]
+        if obj_id in self._game_objs:
+            return self._data_class.create_from_game_obj(self._game_objs[obj_id])
+        print(f"Error: {obj_id} does not exist. This should be impossible.")
+        return self._data_class()
+
     def remove_data(self, obj_id: int) -> None:
-        # We only pop from our specific data dictionary.
-        # StateHandler is responsible for removing the base GameObj from self._game_objs!
         self._data_dct.pop(obj_id, None)
 
     # --- Abstract Methods that individual systems MUST implement ---
 
     @abstractmethod
-    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
-        ...
-
-    @abstractmethod
-    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         ...
 
     @abstractmethod

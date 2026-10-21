@@ -5,101 +5,79 @@ class WindowManager:
         self.WINDOW_WIDTH = width
         self.WINDOW_HEIGHT = height
 
+        self.LOGICAL_WIDTH: float = 1920.0
+        self.LOGICAL_HEIGHT: float = 1080.0
+
         self.PLAY_WIDTH: float = 0.0
         self.PLAY_HEIGHT: float = 0.0
-        self.movement_adjustment_x: float = 0.0
-        self.movement_adjustment_y: float = 0.0
-
-        self.BORDER_TOP: float = 0.1
-        self.BORDER_BOT: float = 0.2
-        self.BORDER_SIDES: float = 0.05
-        self.PLAY_RATIO: float = 1 / 1
+        self.OFFSET_X: float = 0.0
+        self.OFFSET_Y: float = 0.0
 
         self.screen: pygame.Surface = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         pygame.display.set_caption("Dead MMO")
 
-        self.camera_pos_xy: tuple[float, float] = (0.5, 0.5)
+        self.camera_pos_xy: tuple[float, float] = (0.0, 0.0)
 
         self.calculate_play_area()
 
-    def set_window_resolution(self, window_width: int, window_height) -> None:
+    def set_window_resolution(self, window_width: int, window_height: int) -> None:
         self.WINDOW_WIDTH = window_width
         self.WINDOW_HEIGHT = window_height
         pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        pygame.display.set_caption("Dead MMO")
+        self.calculate_play_area()
 
     def set_camera_position(self, pos_xy: tuple[float, float]) -> None:
         self.camera_pos_xy = pos_xy
 
     def get_border_rectangles(self) -> list[tuple[int, int, int, int]]:
         """Returns list of (x, y, width, height) tuples for border rectangles"""
-        top = int(self.WINDOW_HEIGHT * self.BORDER_TOP)
-        bot = int(self.WINDOW_HEIGHT * self.BORDER_BOT)
-        sides = int(self.WINDOW_WIDTH * self.BORDER_SIDES)
-
-        return [
-            (0, 0, self.WINDOW_WIDTH, top),  # Top border
-            (0, self.WINDOW_HEIGHT - bot, self.WINDOW_WIDTH, bot),  # Bottom border
-            (0, 0, sides, self.WINDOW_HEIGHT),  # Left border
-            (self.WINDOW_WIDTH - sides, 0, sides, self.WINDOW_HEIGHT)  # Right border
-        ]
+        rects = []
+        if self.OFFSET_Y > 0:
+            rects.append((0, 0, self.WINDOW_WIDTH, int(self.OFFSET_Y)))
+            rects.append((0, int(self.WINDOW_HEIGHT - self.OFFSET_Y), self.WINDOW_WIDTH, int(self.OFFSET_Y)))
+        if self.OFFSET_X > 0:
+            rects.append((0, 0, int(self.OFFSET_X), self.WINDOW_HEIGHT))
+            rects.append((int(self.WINDOW_WIDTH - self.OFFSET_X), 0, int(self.OFFSET_X), self.WINDOW_HEIGHT))
+        return rects
 
     def calculate_play_area(self) -> None:
-        # Calculate maximum possible play area dimensions considering minimum borders
-        max_play_width = self.WINDOW_WIDTH * (1 - 2 * self.BORDER_SIDES)
-        max_play_height = self.WINDOW_HEIGHT * (1 - self.BORDER_TOP - self.BORDER_BOT)
+        logical_ratio = self.LOGICAL_WIDTH / self.LOGICAL_HEIGHT
+        window_ratio = self.WINDOW_WIDTH / self.WINDOW_HEIGHT
 
-        # Calculate actual play area dimensions maintaining ratio
-        if max_play_width / max_play_height > self.PLAY_RATIO:
-            # Too wide, adjust width
-            self.PLAY_HEIGHT = max_play_height
-            self.PLAY_WIDTH = self.PLAY_HEIGHT * self.PLAY_RATIO
-            # Center horizontally with extra border
-            extra_width = max_play_width - self.PLAY_WIDTH
-            self.BORDER_SIDES += extra_width / (2 * self.WINDOW_WIDTH)
+        if window_ratio > logical_ratio:
+            self.PLAY_HEIGHT = self.WINDOW_HEIGHT
+            self.PLAY_WIDTH = self.PLAY_HEIGHT * logical_ratio
+            self.OFFSET_X = (self.WINDOW_WIDTH - self.PLAY_WIDTH) / 2
+            self.OFFSET_Y = 0
         else:
-            # Too tall, adjust height
-            self.PLAY_WIDTH = max_play_width
-            self.PLAY_HEIGHT = self.PLAY_WIDTH / self.PLAY_RATIO
-            # Center vertically with extra border
-            extra_height = max_play_height - self.PLAY_HEIGHT
-            extra_top = extra_height / 2
-            self.BORDER_TOP += extra_top / self.WINDOW_HEIGHT
-            self.BORDER_BOT += extra_top / self.WINDOW_HEIGHT
-
-        # Calculate movement speed adjustment factors
-        aspect_ratio = self.PLAY_WIDTH / self.PLAY_HEIGHT
-        if aspect_ratio > 1:
-            # Wider than tall - adjust horizontal movement
-            self.movement_adjustment_x = 1.0 / aspect_ratio
-            self.movement_adjustment_y = 1.0
-        else:
-            # Taller than wide - adjust vertical movement
-            self.movement_adjustment_x = 1.0
-            self.movement_adjustment_y = aspect_ratio
+            self.PLAY_WIDTH = self.WINDOW_WIDTH
+            self.PLAY_HEIGHT = self.PLAY_WIDTH / logical_ratio
+            self.OFFSET_X = 0
+            self.OFFSET_Y = (self.WINDOW_HEIGHT - self.PLAY_HEIGHT) / 2
 
     def world_to_screen_coords(self, x: float, y: float) -> tuple[int, int]:
         """Convert from world coordinates to screen coordinates, relative to the camera"""
-        # Find the exact pixel center of the play area
-        play_center_x = self.BORDER_SIDES * self.WINDOW_WIDTH + self.PLAY_WIDTH / 2
-        play_center_y = self.BORDER_TOP * self.WINDOW_HEIGHT + self.PLAY_HEIGHT / 2
-
         cam_x, cam_y = self.camera_pos_xy
 
-        # Calculate pixel offsets based on how far the object is from the camera
-        offset_x = (x - cam_x) * self.PLAY_WIDTH
-        offset_y = (y - cam_y) * self.PLAY_HEIGHT
+        dist_x = x - cam_x
+        dist_y = y - cam_y
 
-        # Apply offset to screen center (Y is inverted because screen Y goes down, but world Y goes up)
-        screen_x = play_center_x + offset_x
-        screen_y = play_center_y - offset_y
+        scale = self.PLAY_WIDTH / self.LOGICAL_WIDTH
+        screen_dist_x = dist_x * scale
+        screen_dist_y = dist_y * scale
+
+        screen_center_x = self.OFFSET_X + self.PLAY_WIDTH / 2
+        screen_center_y = self.OFFSET_Y + self.PLAY_HEIGHT / 2
+
+        screen_x = screen_center_x + screen_dist_x
+        screen_y = screen_center_y - screen_dist_y
 
         return (int(screen_x), int(screen_y))
 
     def ui_to_screen_coords(self, x: float, y: float) -> tuple[int, int]:
         """Convert from normalized UI coordinates (0-1) to fixed screen coordinates"""
-        screen_x = self.BORDER_SIDES * self.WINDOW_WIDTH + x * self.PLAY_WIDTH
-        screen_y = self.BORDER_TOP * self.WINDOW_HEIGHT + (1 - y) * self.PLAY_HEIGHT
+        screen_x = self.OFFSET_X + x * self.PLAY_WIDTH
+        screen_y = self.OFFSET_Y + (1 - y) * self.PLAY_HEIGHT
         return (int(screen_x), int(screen_y))
 
     def get_play_area_width(self) -> float:
@@ -107,3 +85,6 @@ class WindowManager:
 
     def get_play_area_height(self) -> float:
         return self.PLAY_HEIGHT
+
+    def get_logical_width(self) -> float:
+        return self.LOGICAL_WIDTH

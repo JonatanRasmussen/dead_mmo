@@ -30,7 +30,7 @@ class EventHandler:
             timestamp=self._current_event.timestamp,
             source_id=self._current_event.source_id,
             spell_id=self._current_event.spell_id,
-            target_id=self._current_event.target_id,
+            dest_id=self._current_event.dest_id,
             validation_error_msg=error_msg,
         )
         self._event_log_for_current_frame.log_event(finalized_event)
@@ -45,12 +45,12 @@ class EventHandler:
         combat_interactions: list[tuple[int, int, int]] = []
         for evt in self._event_log_for_each_frame[current_frame_timestamp].view_all_events:
             if evt.outcome_is_successful:
-                interaction = (evt.source_id, evt.spell_id, evt.target_id)
+                interaction = (evt.source_id, evt.spell_id, evt.dest_id)
                 combat_interactions.append(interaction)
         return combat_interactions
 
-    def dispatch_upcoming_event(self, timestamp: int, source_id: int, spell_id: int, target_id: int) -> None:
+    def dispatch_upcoming_event(self, timestamp: int, source_id: int, spell_id: int, dest_id: int) -> None:
         event_id= self._next_event_id
         self._next_event_id += 1
-        setup_event = CombatEvent(event_id, timestamp, source_id, spell_id, target_id)
+        setup_event = CombatEvent(event_id, timestamp, source_id, spell_id, dest_id)
         self._event_heap.insert_event(setup_event)

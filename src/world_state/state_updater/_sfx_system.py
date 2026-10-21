@@ -32,15 +32,7 @@ class SfxSystem(BaseSystem):
     def get_data(self, obj_id: int) -> ObjSfxData:
         return super().get_data(obj_id)
 
-    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
-        if obj_id in self._data_dct:
-            data = self.get_data(obj_id)
-            display_obj.audio_id = float(data.audio_id)
-            display_obj.audio_start = data.audio_start
-            display_obj.audio_loop = data.loop_audio
-        return display_obj
-
-    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         match validation_type:
             case _:
                 return True

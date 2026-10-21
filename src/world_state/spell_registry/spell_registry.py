@@ -6,7 +6,7 @@ from src.settings import Consts
 
 class SelfcastValidation(str, Enum):
     IS_SOURCE_TARGETING_SELF = Consts.IS_TARGETING_SELF
-    IS_TARGET_THE_DESTINATION = Consts.IS_TARGETING_DESTINATION
+    IS_DEST_THE_TARGET = Consts.IS_TARGETING_TARGET
 
 
 class SpellRegistry:
@@ -70,8 +70,8 @@ class SpellRegistry:
     def is_spell_targeting_self(self, spell_id: int) -> bool:
         return bool(self.get_validations(spell_id).get(Consts.IS_TARGETING_SELF, False))
 
-    def is_spell_targeting_destination(self, spell_id: int) -> bool:
-        return bool(self.get_validations(spell_id).get(Consts.IS_TARGETING_DESTINATION, False))
+    def is_spell_targeting_target(self, spell_id: int) -> bool:
+        return bool(self.get_validations(spell_id).get(Consts.IS_TARGETING_TARGET, False))
 
     def get_timeline_for_spell(self, spell_id: int) -> dict[int, list[int]]:
         return self.spell_timelines.get(spell_id, {})

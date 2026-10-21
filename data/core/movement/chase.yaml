@@ -4,7 +4,7 @@ step_towards_destination:
     has_channeling_ticks: 1
   effects:
     gain_channeling_ticks: -1
-    walk_towards_destination: true
+    walk_towards_target: true
   timeline:
     20: [step_towards_destination]
 

@@ -10,7 +10,7 @@ class CombatEvent:
     timestamp: int = Consts.EMPTY_TIMESTAMP
     source_id: int = Consts.EMPTY_OBJ_ID
     spell_id: int = Consts.EMPTY_SPELL_ID
-    target_id: int = Consts.EMPTY_OBJ_ID
+    dest_id: int = Consts.EMPTY_OBJ_ID
 
     validation_error_msg: str = ""
 
@@ -22,7 +22,7 @@ class CombatEvent:
             timestamp=d["timestamp"],
             source_id=d["source_id"],
             spell_id=d["spell_id"],
-            target_id=d["target_id"],
+            dest_id=d["dest_id"],
             validation_error_msg=d.get("error_msg"),
         )
 
@@ -32,7 +32,7 @@ class CombatEvent:
             "timestamp": self.timestamp,
             "source_id": self.source_id,
             "spell_id": self.spell_id,
-            "target_id": self.target_id,
+            "dest_id": self.dest_id,
             "error_msg": self.validation_error_msg,
         })
 
@@ -42,4 +42,4 @@ class CombatEvent:
 
     @property
     def combat_data(self) -> tuple[int, int, int, int]:
-        return self.timestamp, self.source_id, self.spell_id, self.target_id
+        return self.timestamp, self.source_id, self.spell_id, self.dest_id

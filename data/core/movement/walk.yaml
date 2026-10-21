@@ -19,13 +19,13 @@ learn_startwalkforward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_startwalkforward
     bind_to_input_id: input_startmove_up
 
 keypress_startwalkforward:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_forward: true
 
@@ -34,13 +34,13 @@ learn_stopwalkforward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_stopwalkforward
     bind_to_input_id: input_stopmove_up
 
 keypress_stopwalkforward:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_forward: false
 
@@ -51,13 +51,13 @@ learn_startwalkleft:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_startwalkleft
     bind_to_input_id: input_startmove_left
 
 keypress_startwalkleft:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_left: true
 
@@ -66,13 +66,13 @@ learn_stopwalkleft:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_stopwalkleft
     bind_to_input_id: input_stopmove_left
 
 keypress_stopwalkleft:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_left: false
 
@@ -83,13 +83,13 @@ learn_startwalkbackward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_startwalkbackward
     bind_to_input_id: input_startmove_down
 
 keypress_startwalkbackward:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_backward: true
 
@@ -98,13 +98,13 @@ learn_stopwalkbackward:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_stopwalkbackward
     bind_to_input_id: input_stopmove_down
 
 keypress_stopwalkbackward:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_backward: false
 
@@ -115,13 +115,13 @@ learn_startwalkright:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_startwalkright
     bind_to_input_id: input_startmove_right
 
 keypress_startwalkright:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_right: true
 
@@ -130,12 +130,12 @@ learn_stopwalkright:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_stopwalkright
     bind_to_input_id: input_stopmove_right
 
 keypress_stopwalkright:
   validations:
-    is_targeting_destination: true
+    is_targeting_target: true
   effects:
     walk_right: false

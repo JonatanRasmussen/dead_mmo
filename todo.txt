@@ -1,0 +1,9 @@
+add functionality to progress bar: (rendering, system, effect, etc. - make all the needed changes.)
+
+- Implement a bool that makes progress bar horizontal instead of vertical
+- Implement a bool that makes progress bar visible (by default, progress bar should now be invisible unless explicitly configured to be visible)
+- Implement a bool that makes progress bar use the progress of the obj's target, rather than the obj's own progress.
+
+Implement the above as a new system, _progress_system
+In the future, this progress system will be able to show health bars, cast bars, cds, etc.
+But for now, just get the actual progress amount from casting system (unchanged behavior)

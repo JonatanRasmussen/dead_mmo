@@ -3,19 +3,26 @@ learn_voidblast:
     is_targeting_self: true
   spawn_as_child: true
   effects:
-    attach_to_destination: true
+    attach_to_target: true
     select_spell_id: keypress_voidblast
     bind_to_input_id: input_ability_2
-    offset_x: 300
+    assign_to_faction: 1
+    is_visible: true
+    draw_as_square: true
+    draw_as_cd_bar: true
+    color_red: 255
+    color_green: 0
+    color_blue: 0
+    offset_x: -66
     offset_y: -150
 
 keypress_voidblast:
   validations:
-    is_targeting_self: true
+    is_targeting_target: true
     is_cd_ready: true
+    is_gcd_ready: true
   effects:
     add_cooldown: 1000
-    gain_channeling_ticks: 4
   timeline:
     0: [cd_voidblast, tick_voidblast]
 
@@ -24,11 +31,12 @@ cd_voidblast:
     is_targeting_self: true
   effects:
     add_cooldown: 5000
+    gain_channeling_ticks: 4
 
 apply_voidblast:
   validations:
-    is_target_hittable: true
-    is_target_other_team: true
+    is_dest_hittable: true
+    is_dest_other_faction: true
   effects:
     damage: 53
     play_audio: MoltenBlastHit

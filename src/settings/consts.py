@@ -16,7 +16,7 @@ class Consts:
     INPUT_SPELL_NAME: str = "input_spell"
 
     IS_TARGETING_SELF = "is_targeting_self"
-    IS_TARGETING_DESTINATION = "is_targeting_destination"
+    IS_TARGETING_TARGET = "is_targeting_target"
     IS_SOURCE_DESTINATION_OF_TARGET = "is_source_destination_of_target"
     TRY_CAST_SELECTED_SPELL = "try_cast_selected_spell"
 

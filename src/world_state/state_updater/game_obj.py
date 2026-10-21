@@ -8,7 +8,7 @@ class GameObj:
     spawn_timestamp: int = Consts.EMPTY_TIMESTAMP
     _parent_id: int = Consts.EMPTY_OBJ_ID
     origin_id: int = Consts.EMPTY_SPELL_ID
-    destination_id: int = Consts.EMPTY_OBJ_ID
+    target_id: int = Consts.EMPTY_OBJ_ID
 
     @property
     def parent_id(self) -> int:
@@ -17,5 +17,5 @@ class GameObj:
         return self._parent_id
 
     @classmethod
-    def create_new(cls, obj_id: int, spawn_timestamp: int, parent_id: int, origin_id: int, destination_id: int) -> 'GameObj':
-        return GameObj(obj_id=obj_id, spawn_timestamp=spawn_timestamp, _parent_id=parent_id, origin_id=origin_id, destination_id=destination_id)
+    def create_new(cls, obj_id: int, spawn_timestamp: int, parent_id: int, origin_id: int, target_id: int) -> 'GameObj':
+        return GameObj(obj_id=obj_id, spawn_timestamp=spawn_timestamp, _parent_id=parent_id, origin_id=origin_id, target_id=target_id)

@@ -5,6 +5,8 @@ from src.world_state.world_state import DisplayObj, WorldState
 
 
 class IngameLoop:
+    # --- QUICK TWEAK FLAGS FOR GLOW EFFECT ---
+    NEON_GLOW_RADIUS_MULTIPLIER = 1.1  # 4.0 is huge, 2.0-2.5 is much tighter to the object
 
     @staticmethod
     def play_game_in_pygame(setup_spell_names: list[str], scripted_player_input: dict[int, list[str]] | None = None) -> None:
@@ -71,21 +73,20 @@ class IngameLoop:
     @staticmethod
     def _render_game_obj(rendering_framework: PygameRenderer, display_obj: DisplayObj, frame_start: int) -> None:
         if display_obj.is_visible or display_obj.has_sprite:
-            if display_obj.draw_as_square:
-                rendering_framework.draw_square(
+            if display_obj.draw_as_square or display_obj.has_sprite:
+                rendering_framework.draw_rectangle(
                     pos_xy=display_obj.pos_xy,
-                    scale=display_obj.obj_scale,
+                    scale_xy=display_obj.obj_scale_xy,
                     color_rgb=display_obj.color_rgb,
-                    asset_name=display_obj.sprite_asset_name,
-                    progress=display_obj.progress
+                    asset_name=display_obj.sprite_asset_name if display_obj.has_sprite else None
                 )
             else:
                 rendering_framework.draw_blinking_circle(
                     pos_xy=display_obj.pos_xy,
-                    scale=display_obj.obj_scale,
+                    scale=display_obj.obj_diameter,
                     color_rgb=display_obj.color_rgb,
                     time_ms=rendering_framework.get_current_time(),
-                    asset_name=display_obj.sprite_asset_name,
+                    glow_radius_multiplier=IngameLoop.NEON_GLOW_RADIUS_MULTIPLIER
                 )
 
         # Pass the audio state to the renderer to handle starting/stopping

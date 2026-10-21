@@ -14,7 +14,7 @@ class HealthEffect(str, Enum):
 
 class HealthValidation(str, Enum):
     IS_SOURCE_HITTABLE = "is_source_hittable"
-    IS_TARGET_HITTABLE = "is_target_hittable"
+    IS_DEST_HITTABLE = "is_dest_hittable"
 
 
 @dataclass(slots=True)
@@ -28,6 +28,10 @@ class ObjHealthData:
     def create_from_game_obj(cls, game_obj: GameObj) -> "ObjHealthData":
         return cls(obj_id=game_obj.obj_id)
 
+    @property
+    def size(self) -> float:
+        return 64.0
+
 
 class HealthSystem(BaseSystem):
 
@@ -37,26 +41,15 @@ class HealthSystem(BaseSystem):
     def get_data(self, obj_id: int) -> ObjHealthData:
         return super().get_data(obj_id)
 
-    def build_display_obj(self, current_time: int, obj_id: int, display_obj: DisplayObj) -> DisplayObj:
-        if obj_id in self._data_dct:
-            display_obj.size = self._get_size(obj_id)
-        return display_obj
-
-    # ---- State Lookups ----
-
     def get_hp(self, obj_id: int) -> float:
         return self.get_data(obj_id).hp
 
-    def _get_size(self, obj_id: int) -> float:
-        obj_hp = self.get_data(obj_id).hp
-        return 1 + 0.1 * math.sqrt(abs(obj_hp))
-
-    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, target_id: int) -> bool:
+    def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         match validation_type:
             case HealthValidation.IS_SOURCE_HITTABLE:
                 return self.get_data(source_id).is_hittable
-            case HealthValidation.IS_TARGET_HITTABLE:
-                return self.get_data(target_id).is_hittable
+            case HealthValidation.IS_DEST_HITTABLE:
+                return self.get_data(dest_id).is_hittable
             case _:
                 return True
 

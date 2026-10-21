@@ -5,13 +5,17 @@ init_player:
   effects:
     is_hittable: true
     player_number: 1
+    assign_to_faction: 1
     hp: 30
+    is_visible: true
     x_displacement: 300
     y_displacement: 300
-    color_red: 255
+    color_red: 0
     color_green: 0
     color_blue: 0
     draw_as_square: true
+    draw_as_cd_bar: true
+    draw_vertical_progress_bar: true
     sprite_id: poro
     sprite_frames: 1
   timeline:
