@@ -69,13 +69,16 @@ class StateUpdater:
 
         # --- Progress Calculation ---
         progress_amount = 1.0
-        if vfx_data.draw_as_cd_bar:
-            casting_data = self.casting_system.get_read_only_data(obj_id)
-            if casting_data.show_cd_of_parent:
-                progress_amount = casting_data.get_cooldown_progress(current_time)
-            else:
-                parent_casting_data = self.casting_system.get_read_only_data(obj_id)
-                progress_amount = parent_casting_data.get_cooldown_progress(current_time)
+        if vfx_data.draw_as_parent_cd:
+            parent_id = self._active_game_objs[obj_id].parent_id
+            parent_id = obj_id  # TEMPORARY SOLUTION, REMOVE THIS LATER
+            parent_casting_data = self.casting_system.get_read_only_data(parent_id)
+            progress_amount = parent_casting_data.get_cooldown_progress(current_time)
+        elif vfx_data.draw_as_parent_castbar:
+            parent_id = self._active_game_objs[obj_id].parent_id
+            parent_casting_data = self.casting_system.get_read_only_data(parent_id)
+            progress_amount = parent_casting_data.get_castbar_progress(current_time)
+
 
         actual_width, actual_height, prog_offset_x, prog_offset_y = vfx_data.get_progress_dimensions(progress_amount)
         base_offset_x, base_offset_y = self.vfx_system.get_total_offset(obj_id)
@@ -85,7 +88,7 @@ class StateUpdater:
 
         display_obj.is_visible = vfx_data.is_visible
         display_obj.color_rgb = (vfx_data.color_red, vfx_data.color_green, vfx_data.color_blue)
-        display_obj.draw_as_square = vfx_data.draw_as_square or vfx_data.draw_as_cd_bar or vfx_data.draw_as_hp_bar
+        display_obj.draw_as_square = vfx_data.draw_as_square or vfx_data.draw_as_parent_cd or vfx_data.draw_as_parent_hp
         display_obj.sprite_id = vfx_data.sprite_id
         display_obj.sprite_scale = vfx_data.sprite_scale
         display_obj.sprite_index = vfx_data.get_sprite_index(current_time)

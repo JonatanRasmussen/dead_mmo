@@ -9,7 +9,7 @@ learn_fighterkick:
     assign_to_faction: 1
     is_visible: true
     draw_as_square: true
-    draw_as_cd_bar: true
+    draw_as_parent_cd: true
     color_red: 255
     color_green: 255
     color_blue: 0
@@ -21,6 +21,7 @@ keypress_fighterkick:
     is_targeting_target: true
     is_cd_ready: true
     is_gcd_ready: true
+    is_shared_castbar_available: true
   effects:
     add_cooldown: 1000
   timeline:

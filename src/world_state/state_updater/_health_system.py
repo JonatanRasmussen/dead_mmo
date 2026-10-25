@@ -33,13 +33,10 @@ class ObjHealthData:
         return 64.0
 
 
-class HealthSystem(BaseSystem):
+class HealthSystem(BaseSystem[ObjHealthData]):
 
     def __init__(self, game_objs: dict[int, GameObj]) -> None:
         super().__init__(game_objs, ObjHealthData, HealthEffect, HealthValidation)
-
-    def get_data(self, obj_id: int) -> ObjHealthData:
-        return super().get_data(obj_id)
 
     def get_hp(self, obj_id: int) -> float:
         return self.get_data(obj_id).hp

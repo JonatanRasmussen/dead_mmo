@@ -9,7 +9,7 @@ learn_shadowbolt:
     assign_to_faction: 1
     is_visible: true
     draw_as_square: true
-    draw_as_cd_bar: true
+    draw_as_parent_cd: true
     color_red: 0
     color_green: 255
     color_blue: 0
@@ -39,7 +39,7 @@ spawn_shadowbolt:
     is_dest_other_faction: true
   spawn_as_child: true
   effects:
-    gain_channeling_ticks: 3600
+    begin_cast: 72000
     x_displacement: 0
     y_displacement: 50
     hp: 1
@@ -54,9 +54,8 @@ spawn_shadowbolt:
 tick_shadowbolt:
   validations:
     is_targeting_self: true
-    has_channeling_ticks: 1
+    is_cast_in_progress: true
   effects:
-    gain_channeling_ticks: -1
     walk_towards_target: true
   timeline:
     0: [tryapply_shadowbolt]
@@ -75,7 +74,7 @@ end_shadowbolt:
   validations:
     is_targeting_self: true
   effects:
-    gain_channeling_ticks: -65535
+    begin_cast: 0
     is_visible: false
     movespeed: 0
     play_audio: ShadowBoltHit

@@ -14,9 +14,9 @@ init_player:
     color_green: 0
     color_blue: 0
     draw_as_square: true
-    draw_as_cd_bar: true
+    draw_as_parent_cd: true
     draw_vertical_progress_bar: true
     sprite_id: poro
     sprite_frames: 1
   timeline:
-    0: [become_warlock]
+    0: [become_warlock, init_castbar]

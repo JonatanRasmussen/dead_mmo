@@ -1,9 +1,8 @@
 step_towards_destination:
   validations:
     is_targeting_self: true
-    has_channeling_ticks: 1
+    is_cast_in_progress: true
   effects:
-    gain_channeling_ticks: -1
     walk_towards_target: true
   timeline:
     20: [step_towards_destination]
@@ -12,6 +11,6 @@ start_move_towards_destination:
   validations:
     is_targeting_self: true
   effects:
-    gain_channeling_ticks: 3600
+    begin_cast: 72000
   timeline:
     20: [step_towards_destination]

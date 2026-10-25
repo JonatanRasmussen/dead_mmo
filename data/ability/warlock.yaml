@@ -11,4 +11,4 @@ become_warlock:
       - learn_fighterkick
       - learn_voidblast
       - learn_healingpowerup
-      - learn_shadowbolt
+      - learn_darkarrow

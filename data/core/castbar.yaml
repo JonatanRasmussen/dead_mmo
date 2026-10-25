@@ -1,0 +1,36 @@
+init_castbar:
+  timeline:
+    0: [background_castbar, progress_castbar]
+
+background_castbar:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    attach_to_target: true
+    is_visible: true
+    draw_as_square: true
+    height: 40
+    width: 264
+    color_red: 128
+    color_green: 128
+    color_blue: 128
+    offset_x: 0
+    offset_y: -70
+
+progress_castbar:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    attach_to_target: true
+    is_visible: true
+    draw_as_square: true
+    draw_as_parent_castbar: true
+    height: 32
+    width: 256
+    color_red: 64
+    color_green: 64
+    color_blue: 64
+    offset_x: 0
+    offset_y: -70

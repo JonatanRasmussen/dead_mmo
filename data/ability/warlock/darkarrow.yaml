@@ -1,0 +1,105 @@
+learn_darkarrow:
+  validations:
+    is_targeting_self: true
+  spawn_as_child: true
+  effects:
+    attach_to_target: true
+    select_spell_id: keypress_darkarrow
+    bind_to_input_id: input_ability_4
+    assign_to_faction: 1
+    is_visible: true
+    draw_as_square: true
+    draw_as_parent_cd: true
+    color_red: 0
+    color_green: 255
+    color_blue: 0
+    offset_x: 198
+    offset_y: -150
+
+keypress_darkarrow:
+  validations:
+    is_targeting_target: true
+    is_cd_ready: true
+    is_gcd_ready: true
+    is_shared_castbar_available: true
+  effects:
+    add_cooldown: 1000
+    begin_cast: 1500
+    select_spell_id: channel_darkarrow
+  timeline:
+    0: [channel_darkarrow]
+    1500: [release_darkarrow]
+
+channel_darkarrow:
+  validations:
+    is_targeting_self: true
+  effects:
+    play_audio: ShadowBoltBuild
+
+release_darkarrow:
+  validations:
+    is_targeting_target: true
+    is_spell_selected: channel_darkarrow
+  effects:
+    stop_cast: true
+  timeline:
+    0: [cd_darkarrow, spawn_darkarrow]
+
+cd_darkarrow:
+  validations:
+    is_targeting_self: true
+  effects:
+    play_audio: ShadowBoltCast
+    add_cooldown: 4000
+
+spawn_darkarrow:
+  validations:
+    is_dest_hittable: true
+    is_dest_other_faction: true
+  spawn_as_child: true
+  effects:
+    begin_cast: 72000
+    x_displacement: 0
+    y_displacement: 50
+    hp: 1
+    movespeed: 500
+    is_visible: true
+    color_red: 255
+    color_green: 255
+    color_blue: 0
+  timeline:
+    20: [tick_darkarrow]
+
+tick_darkarrow:
+  validations:
+    is_targeting_self: true
+    is_cast_in_progress: true
+  effects:
+    walk_towards_target: true
+  timeline:
+    0: [tryapply_darkarrow]
+    20: [tick_darkarrow]
+
+tryapply_darkarrow:
+  validations:
+    is_targeting_target: true
+    is_dest_within_range: 20
+  effects:
+    damage: 34
+  timeline:
+    0: [end_darkarrow]
+
+end_darkarrow:
+  validations:
+    is_targeting_self: true
+  effects:
+    begin_cast: 0
+    is_visible: false
+    movespeed: 0
+    play_audio: ShadowBoltHit
+    sprite_id: explosion
+    sprite_frames: 7
+    animation_speed: 100
+    animation_loops: 2
+    animation_scale: 50
+    play_animation: true

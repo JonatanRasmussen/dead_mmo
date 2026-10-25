@@ -33,7 +33,7 @@ class ObjIdentityData:
         )
 
 
-class IdentitySystem(BaseSystem):
+class IdentitySystem(BaseSystem[ObjIdentityData]):
 
     def __init__(self, game_objs: dict[int, GameObj]) -> None:
         super().__init__(game_objs, ObjIdentityData, IdentityEffect, IdentityValidation)

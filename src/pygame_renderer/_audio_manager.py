@@ -23,26 +23,36 @@ class AudioManager:
     def update_audio(self, obj_id: int, audio_name: str, audio_start: int, audio_loop: bool, frame_start: int) -> None:
         """State-driven audio update. Stops old sounds if state changes, starts new sounds if triggered."""
 
-        # 1. Check if we need to stop a currently tracked looping audio for this obj_id
+        # 1. Check if we need to stop a currently tracked audio for this obj_id
         if obj_id in self._active_channels:
             active_audio_name, active_audio_start, channel = self._active_channels[obj_id]
 
-            # If the audio_name or audio_start has changed, stop the current tracked sound
-            if active_audio_name != audio_name or active_audio_start != audio_start:
+            expected_sound = self.sounds.get(active_audio_name)
+
+            # If the channel is idle, or Pygame reused it for a different sound, it's a stale reference.
+            if not channel.get_busy() or channel.get_sound() != expected_sound:
+                del self._active_channels[obj_id]
+
+            # Otherwise, if the game state says this audio should change/stop, stop it.
+            elif active_audio_name != audio_name or active_audio_start != audio_start:
                 channel.stop()
                 del self._active_channels[obj_id]
 
         # 2. Check if we need to start new audio
         # We only start if audio_name is not empty and audio_start triggered this frame
-        if audio_name and audio_start > frame_start:
+        if audio_name and audio_start >= frame_start:
+
+            # Prevent double-playing if it was already started this exact frame
+            if obj_id in self._active_channels and self._active_channels[obj_id][1] == audio_start:
+                return
+
             sound = self.load_sound(audio_name)
             if sound:
                 loops = -1 if audio_loop else 0
                 channel = sound.play(loops=loops)
 
-                # Only track the channel if it's a looping sound.
-                # One-off sounds (audio_loop=False) will be fire-and-forget and can overlap!
-                if channel and audio_loop:
+                # Track the channel so it can be interrupted if the state changes!
+                if channel:
                     self._active_channels[obj_id] = (audio_name, audio_start, channel)
 
     def load_sound(self, audio_name: str) -> Optional[pygame.mixer.Sound]:

@@ -9,7 +9,7 @@ learn_healingpowerup:
     assign_to_faction: 1
     is_visible: true
     draw_as_square: true
-    draw_as_cd_bar: true
+    draw_as_parent_cd: true
     color_red: 0
     color_green: 255
     color_blue: 255
@@ -21,6 +21,7 @@ keypress_healingpowerup:
     is_targeting_target: true
     is_cd_ready: true
     is_gcd_ready: true
+    is_shared_castbar_available: true
   effects:
     add_cooldown: 1000
   timeline:
@@ -38,10 +39,10 @@ spawn_healingpowerup:
     is_targeting_target: true
   spawn_as_child: true
   effects:
-    gain_channeling_ticks: 150
+    begin_cast: 15000
     hp: 30
     x_displacement: 200
-    y_displacement: -200
+    y_displacement: 300
     is_visible: true
     color_red: 0
     color_green: 255
@@ -52,9 +53,8 @@ spawn_healingpowerup:
 tick_healingpowerup:
   validations:
     is_targeting_self: true
-    has_channeling_ticks: 1
+    is_cast_in_progress: true
   effects:
-    gain_channeling_ticks: -1
     walk_towards_target: true
   timeline:
     0: [tryapply_healingpowerup]
@@ -73,6 +73,6 @@ end_healingpowerup:
   validations:
     is_targeting_self: true
   effects:
-    play_audio: Rejuvenation
-    gain_channeling_ticks: -65535
+    play_audio: WildGrowthHit
+    begin_cast: 0
     is_visible: false

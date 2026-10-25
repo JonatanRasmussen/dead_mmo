@@ -67,13 +67,10 @@ class ObjMovementData:
         return self.x_pos + (vx * dt), self.y_pos + (vy * dt)
 
 
-class MovementSystem(BaseSystem):
+class MovementSystem(BaseSystem[ObjMovementData]):
 
     def __init__(self, game_objs: dict[int, GameObj]) -> None:
         super().__init__(game_objs, ObjMovementData, MovementEffect, MovementValidation)
-
-    def get_data(self, obj_id: int) -> ObjMovementData:
-        return super().get_data(obj_id)
 
     def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         match validation_type:

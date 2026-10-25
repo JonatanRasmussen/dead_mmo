@@ -6,16 +6,20 @@ from .base_system import BaseSystem, DisplayObj, GameObj
 
 
 class CastingEffect(str, Enum):
-    GAIN_CHANNELING_TICKS = "gain_channeling_ticks"
+    GAIN_CASTING_TICKS = "gain_casting_ticks"
+    BEGIN_CAST = "begin_cast"
     APPLY_COOLDOWN = "add_cooldown"
     SELECT_SPELL_ID = "select_spell_id"
     BIND_TO_INPUT_ID = "bind_to_input_id"
     TRY_CAST_SELECTED_SPELL = "try_cast_selected_spell"
     DISPLAY_PARENTS_CD = "display_parents_cd"
+    STOP_CAST = "stop_cast"
 
 
 class CastingValidation(str, Enum):
-    HAS_CHANNELING_TICKS = "has_channeling_ticks"
+    HAS_CASTING_TICKS = "has_casting_ticks"
+    IS_CAST_IN_PROGRESS = "is_cast_in_progress"
+    IS_SHARED_CASTBAR_AVAILABLE = "is_shared_castbar_available"
     IS_GCD_READY = "is_gcd_ready"
     IS_COOLDOWN_READY = "is_cd_ready"
     IS_PARENT_CD_READY = "is_parent_cooldown_ready"
@@ -27,7 +31,6 @@ class CastingValidation(str, Enum):
 class ObjCastingData:
     obj_id: int = Consts.EMPTY_OBJ_ID
     parent_id: int = Consts.EMPTY_OBJ_ID
-    show_cd_of_parent: bool = False
     cooldown_start: int = Consts.EMPTY_TIMESTAMP
     cooldown_duration: int = 0
     selected_spell_id: int = Consts.EMPTY_SPELL_ID
@@ -55,32 +58,32 @@ class ObjCastingData:
         progress = elapsed_time / self.cooldown_duration
         return max(0.0, min(1.0, progress))
 
+    def get_castbar_progress(self, current_time: int) -> float:
+        if self.casting_duration <= 0:
+            return 0.0
+        elapsed_time = current_time - self.casting_start
+        progress = elapsed_time / self.casting_duration
+        return max(0.0, min(1.0, progress))
 
-class CastingSystem(BaseSystem):
+class CastingSystem(BaseSystem[ObjCastingData]):
 
     def __init__(self, game_objs: dict[int, GameObj]) -> None:
         super().__init__(game_objs, ObjCastingData, CastingEffect, CastingValidation)
 
-    def get_data(self, obj_id: int) -> ObjCastingData:
-        return super().get_data(obj_id)
-
-    def get_parent_data(self, obj_id: int) -> ObjCastingData:
-        obj_data = self.get_read_only_data(obj_id)
-        parent_id = obj_data.parent_id
-        if parent_id == Consts.EMPTY_OBJ_ID or parent_id == obj_id:
-            return obj_data
-        return self.get_read_only_data(parent_id)
-
     def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         match validation_type:
-            case CastingValidation.HAS_CHANNELING_TICKS:
+            case CastingValidation.HAS_CASTING_TICKS:
                 return self.get_data(source_id).casting_ticks >= validation_value
+            case CastingValidation.IS_CAST_IN_PROGRESS:
+                return (self.get_data(source_id).casting_end >= timestamp) == bool(validation_value)
+            case CastingValidation.IS_SHARED_CASTBAR_AVAILABLE:
+                return (self.get_data(dest_id).casting_end <= timestamp) == bool(validation_value)
             case CastingValidation.IS_GCD_READY:
-                return self.get_data(dest_id).cooldown_end <= timestamp
+                return (self.get_data(dest_id).cooldown_end <= timestamp) == bool(validation_value)
             case CastingValidation.IS_COOLDOWN_READY:
-                return self.get_data(source_id).cooldown_end <= timestamp
+                return (self.get_data(source_id).cooldown_end <= timestamp) == bool(validation_value)
             case CastingValidation.IS_PARENT_CD_READY:
-                return self.get_data(self.get_data(source_id).parent_id).cooldown_end <= timestamp
+                return (self.get_data(self.get_data(source_id).parent_id).cooldown_end <= timestamp) == bool(validation_value)
             case CastingValidation.IS_SPELL_SELECTED:
                 return self.get_data(dest_id).selected_spell_id == validation_value
             case CastingValidation.IS_BOUND_TO_INPUT_ID:
@@ -91,13 +94,14 @@ class CastingSystem(BaseSystem):
     def apply_effect(self, effect_type: str, effect_value: int, timestamp: int, obj_id: int) -> int:
         triggered_spell_id = Consts.EMPTY_SPELL_ID
         match effect_type:
-            case CastingEffect.DISPLAY_PARENTS_CD:
-                data = self.get_data(obj_id)
-                data.show_cd_of_parent = bool(effect_value)
-            case CastingEffect.GAIN_CHANNELING_TICKS:
+            case CastingEffect.GAIN_CASTING_TICKS:
                 data = self.get_data(obj_id)
                 data.casting_ticks += effect_value
                 data.casting_ticks = max(0, data.casting_ticks)
+            case CastingEffect.BEGIN_CAST:
+                data = self.get_data(obj_id)
+                data.casting_start = timestamp
+                data.casting_duration = effect_value
             case CastingEffect.APPLY_COOLDOWN:
                 data = self.get_data(obj_id)
                 data.cooldown_start = timestamp
@@ -106,6 +110,8 @@ class CastingSystem(BaseSystem):
                 self.get_data(obj_id).selected_spell_id = effect_value
             case CastingEffect.BIND_TO_INPUT_ID:
                 self.get_data(obj_id).bound_input_id = effect_value
+            case CastingEffect.STOP_CAST:
+                self.get_data(obj_id).selected_spell_id = Consts.EMPTY_SPELL_ID
             case CastingEffect.TRY_CAST_SELECTED_SPELL:
                 data = self.get_data(obj_id)
                 if bool(effect_value):
@@ -113,5 +119,5 @@ class CastingSystem(BaseSystem):
                 else:  # Stop the cast that is currently in progress
                     data.casting_start = Consts.EMPTY_TIMESTAMP
                     data.casting_duration = 0
-                    data.casting_ticks = 0
+                    data.casting_ticks = 1
         return triggered_spell_id

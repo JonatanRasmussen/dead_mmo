@@ -24,13 +24,10 @@ class ObjSfxData:
         return cls(obj_id=game_obj.obj_id)
 
 
-class SfxSystem(BaseSystem):
+class SfxSystem(BaseSystem[ObjSfxData]):
 
     def __init__(self, game_objs: dict[int, GameObj]) -> None:
         super().__init__(game_objs, ObjSfxData, SfxEffect, SfxValidation)
-
-    def get_data(self, obj_id: int) -> ObjSfxData:
-        return super().get_data(obj_id)
 
     def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         match validation_type:

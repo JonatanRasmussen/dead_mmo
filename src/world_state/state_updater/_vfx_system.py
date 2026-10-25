@@ -9,7 +9,6 @@ class VfxEffect(str, Enum):
     COLOR_RED = "color_red"
     COLOR_GREEN = "color_green"
     COLOR_BLUE = "color_blue"
-    DRAW_AS_SQUARE = "draw_as_square"
     SPRITE_ID = "sprite_id"
     SPRITE_FRAMES = "sprite_frames"
     ANIMATION_SPEED = "animation_speed"
@@ -25,8 +24,10 @@ class VfxEffect(str, Enum):
     ANCHOR_TO_TARGET = "anchor_to_target"
 
     # Progress Effects
-    DRAW_AS_CD_BAR = "draw_as_cd_bar"
-    DRAW_AS_HP_BAR = "draw_as_hp_bar"
+    DRAW_AS_SQUARE = "draw_as_square"
+    DRAW_AS_CD_BAR = "draw_as_parent_cd"
+    DRAW_AS_CASTBAR = "draw_as_parent_castbar"
+    DRAW_AS_HP_BAR = "draw_as_parent_hp"
     SET_VETICAL_PROGRESS_BAR = "draw_vertical_progress_bar"
 
 
@@ -42,7 +43,6 @@ class ObjVfxData:
     color_red: int = 0
     color_green: int = 0
     color_blue: int = 0
-    draw_as_square: bool = False
     sprite_id: int = Consts.EMPTY_ASSET_ID
     sprite_frames: int = 1
     animation_speed: int = 100
@@ -59,13 +59,22 @@ class ObjVfxData:
     is_anchored: bool = False
 
     # Progress
-    draw_as_cd_bar: bool = False
-    draw_as_hp_bar: bool = False
+    draw_as_square: bool = False
+    draw_as_parent_cd: bool = False
+    draw_as_parent_castbar: bool = False
+    draw_as_parent_hp: bool = False
     is_vertical: bool = False
 
     @classmethod
     def create_from_game_obj(cls, game_obj: GameObj) -> "ObjVfxData":
         return cls(obj_id=game_obj.obj_id, target_id=game_obj.target_id)
+
+    def reset_draw_booleans(self, effect_value: int) -> None:
+        if bool(effect_value) is True:
+            self.draw_as_square = True
+            self.draw_as_parent_cd = False
+            self.draw_as_parent_castbar = False
+            self.draw_as_parent_hp = False
 
     def get_sprite_index(self, current_time: int) -> int:
         """ Sprites are 1-indexed, LLM's keep breaking it / do not delete these comments. """
@@ -99,13 +108,10 @@ class ObjVfxData:
         return actual_width, actual_height, offset_x, offset_y
 
 
-class VfxSystem(BaseSystem):
+class VfxSystem(BaseSystem[ObjVfxData]):
 
     def __init__(self, game_objs: dict[int, GameObj]) -> None:
         super().__init__(game_objs, ObjVfxData, VfxEffect, VfxValidation)
-
-    def get_data(self, obj_id: int) -> ObjVfxData:
-        return super().get_data(obj_id)
 
     def validate_event(self, validation_type: str, validation_value: int, timestamp: int, source_id: int, dest_id: int) -> bool:
         return True
@@ -121,11 +127,6 @@ class VfxSystem(BaseSystem):
                 data.color_green = effect_value
             case VfxEffect.COLOR_BLUE:
                 data.color_blue = effect_value
-            case VfxEffect.DRAW_AS_SQUARE:
-                data.draw_as_square = bool(effect_value)
-                if data.draw_as_square:
-                    data.draw_as_cd_bar = False
-                    data.draw_as_hp_bar = False
             case VfxEffect.SPRITE_ID:
                 data.sprite_id = effect_value
             case VfxEffect.SPRITE_FRAMES:
@@ -156,19 +157,20 @@ class VfxSystem(BaseSystem):
                         print(f"Warning, anchoring from {data.obj_id} to {data.target_id} failed.")
                 else:
                     data.is_anchored = False
+            case VfxEffect.DRAW_AS_SQUARE:
+                data.reset_draw_booleans(effect_value)
+                data.draw_as_square = bool(effect_value)
             case VfxEffect.DRAW_AS_CD_BAR:
-                data.draw_as_cd_bar = bool(effect_value)
-                if data.draw_as_cd_bar:
-                    data.draw_as_hp_bar = False
-                    data.draw_as_square = False
+                data.reset_draw_booleans(effect_value)
+                data.draw_as_parent_cd = bool(effect_value)
+            case VfxEffect.DRAW_AS_CASTBAR:
+                data.reset_draw_booleans(effect_value)
+                data.draw_as_parent_castbar = bool(effect_value)
             case VfxEffect.DRAW_AS_HP_BAR:
-                data.draw_as_hp_bar = bool(effect_value)
-                if data.draw_as_hp_bar:
-                    data.draw_as_cd_bar = False
-                    data.draw_as_square = False
+                data.reset_draw_booleans(effect_value)
+                data.draw_as_parent_hp = bool(effect_value)
             case VfxEffect.SET_VETICAL_PROGRESS_BAR:
                 data.is_vertical = bool(effect_value)
-
         return Consts.EMPTY_SPELL_ID
 
     def _is_anchor_allowed(self, target_id: int) -> bool:
